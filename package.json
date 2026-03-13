@@ -1,0 +1,41 @@
+{
+  "name": "shofy-ecommerce",
+  "version": "1.0.0",
+  "description": "Full-stack e-commerce application with Node.js backend and Next.js frontend",
+  "private": true,
+  "scripts": {
+    "setup": "bash setup.sh",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run start-dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm start",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "seed": "cd backend && npm run data:import",
+    "kill-ports": "npx kill-port 3000 7000",
+    "clean-start": "npm run kill-ports && npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "kill-port": "^2.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git", 
+    "url": "git+https://github.com/ShuvoProgram/shofy-electronics-ecommerce.git"
+  },
+  "keywords": ["ecommerce", "nextjs", "nodejs", "mongodb", "stripe"],
+  "author": "Shofy Team",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ShuvoProgram/shofy-electronics-ecommerce/issues"
+  },
+  "homepage": "https://github.com/ShuvoProgram/shofy-electronics-ecommerce#readme"
+}
