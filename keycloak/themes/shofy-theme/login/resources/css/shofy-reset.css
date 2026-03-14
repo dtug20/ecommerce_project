@@ -1,0 +1,16 @@
+/* ================================================
+   Shofy Theme — Reset & Update Password Pages
+   (Additional styles beyond shofy-login.css)
+   ================================================ */
+
+/* Centered layout adjustments for reset pages */
+.shofy-reset-card .shofy-form-subtitle {
+  max-width: 340px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Update password field spacing */
+.shofy-reset-card .shofy-field + .shofy-field {
+  margin-top: 18px;
+}

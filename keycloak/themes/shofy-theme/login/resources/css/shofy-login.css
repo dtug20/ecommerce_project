@@ -1,0 +1,487 @@
+/* ================================================
+   Shofy Theme — Login & Register Pages
+   Colors: #0989FF (primary blue), #010F1C (black),
+           #821F40 (secondary), #55585B (text)
+   ================================================ */
+
+/* ── Page Wrapper ── */
+.shofy-page-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #f8faff 0%, #eef4ff 50%, #f0f0ff 100%);
+  padding: 40px 20px;
+  overflow: hidden;
+}
+
+/* ── Background Shapes ── */
+.shofy-bg-shapes { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+
+.shofy-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.08;
+}
+.shofy-shape-1 {
+  width: 400px; height: 400px;
+  background: #0989FF;
+  top: -100px; left: -100px;
+}
+.shofy-shape-2 {
+  width: 300px; height: 300px;
+  background: #821F40;
+  bottom: -80px; right: -60px;
+}
+.shofy-shape-3 {
+  width: 200px; height: 200px;
+  background: #0989FF;
+  top: 30%; right: 5%;
+}
+.shofy-shape-4 {
+  width: 150px; height: 150px;
+  background: #FFB342;
+  bottom: 20%; left: 8%;
+}
+
+/* ── Card ── */
+.shofy-login-card {
+  position: relative;
+  z-index: 1;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(1, 15, 28, 0.08), 0 1px 3px rgba(1, 15, 28, 0.04);
+  padding: 48px 52px 56px;
+  width: 100%;
+  max-width: 480px;
+  animation: shofy-fade-up 0.4s ease;
+}
+
+.shofy-register-card {
+  max-width: 540px;
+}
+
+@keyframes shofy-fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Logo ── */
+.shofy-logo {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+/* ── Title & Subtitle ── */
+.shofy-form-title {
+  font-size: 26px;
+  font-weight: 600;
+  color: #010F1C;
+  text-align: center;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.shofy-form-subtitle {
+  font-size: 15px;
+  color: #55585B;
+  text-align: center;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.shofy-form-subtitle a {
+  color: #0989FF;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.shofy-form-subtitle a:hover {
+  color: #0770d6;
+}
+
+.shofy-form-subtitle a::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -1px;
+  width: 0; height: 1px;
+  background: #0989FF;
+  transition: width 0.25s;
+}
+
+.shofy-form-subtitle a:hover::after { width: 100%; }
+
+/* ── Social Login ── */
+.shofy-social-login {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.shofy-social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 48px;
+  border: 1px solid #E0E2E3;
+  border-radius: 8px;
+  font-family: 'Jost', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #010F1C;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.shofy-social-btn:hover {
+  border-color: #010F1C;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Divider ── */
+.shofy-divider {
+  position: relative;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.shofy-divider::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  width: 100%; height: 1px;
+  background: #E0E2E3;
+}
+
+.shofy-divider span {
+  position: relative;
+  display: inline-block;
+  padding: 0 16px;
+  background: #fff;
+  font-size: 14px;
+  color: #767A7D;
+}
+
+/* ── Form Fields ── */
+.shofy-field {
+  margin-bottom: 18px;
+}
+
+.shofy-field-row {
+  display: flex;
+  gap: 16px;
+}
+
+.shofy-field-half {
+  flex: 1;
+}
+
+.shofy-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #010F1C;
+  margin-bottom: 6px;
+}
+
+.shofy-input-wrapper {
+  position: relative;
+}
+
+.shofy-input {
+  width: 100%;
+  height: 50px;
+  padding: 0 16px;
+  border: 1px solid #E0E2E3;
+  border-radius: 8px;
+  font-family: 'Jost', sans-serif;
+  font-size: 15px;
+  color: #010F1C;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.shofy-input::placeholder {
+  color: #A0A2A4;
+}
+
+.shofy-input:focus {
+  border-color: #0989FF;
+  box-shadow: 0 0 0 3px rgba(9, 137, 255, 0.1);
+}
+
+.shofy-input-error {
+  border-color: #FD4B6B !important;
+  box-shadow: 0 0 0 3px rgba(253, 75, 107, 0.1) !important;
+}
+
+.shofy-field-error {
+  display: block;
+  font-size: 13px;
+  color: #FD4B6B;
+  margin-top: 4px;
+}
+
+/* ── Password Toggle ── */
+.shofy-password-wrapper {
+  position: relative;
+}
+
+.shofy-password-wrapper .shofy-input {
+  padding-right: 48px;
+}
+
+.shofy-toggle-password {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #767A7D;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.shofy-toggle-password:hover {
+  color: #010F1C;
+}
+
+/* ── Checkbox ── */
+.shofy-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #55585B;
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+}
+
+.shofy-checkbox input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.shofy-checkmark {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid #C3C7C9;
+  border-radius: 4px;
+  position: relative;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.shofy-checkbox input:checked + .shofy-checkmark {
+  background: #0989FF;
+  border-color: #0989FF;
+}
+
+.shofy-checkbox input:checked + .shofy-checkmark::after {
+  content: '';
+  position: absolute;
+  left: 5px; top: 2px;
+  width: 5px; height: 9px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* ── Form Options (Remember + Forgot) ── */
+.shofy-form-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.shofy-forgot-link {
+  font-size: 14px;
+  color: #0989FF;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.shofy-forgot-link:hover { color: #0770d6; }
+
+/* ── Submit Button ── */
+.shofy-button-wrapper {
+  margin-top: 8px;
+}
+
+.shofy-submit-btn {
+  display: block;
+  width: 100%;
+  height: 50px;
+  border: none;
+  border-radius: 8px;
+  background: #010F1C;
+  color: #ffffff;
+  font-family: 'Jost', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s;
+  text-align: center;
+  line-height: 50px;
+}
+
+.shofy-submit-btn:hover {
+  background: #0989FF;
+  box-shadow: 0 4px 16px rgba(9, 137, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.shofy-submit-btn:active {
+  transform: translateY(0);
+}
+
+/* ── Alert Messages ── */
+.shofy-alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.shofy-alert-error {
+  background: #fff0f3;
+  color: #c41d3f;
+  border: 1px solid #fecdd3;
+}
+
+.shofy-alert-warning {
+  background: #fffbeb;
+  color: #a16207;
+  border: 1px solid #fde68a;
+}
+
+.shofy-alert-success {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.shofy-alert-info {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+/* ── Terms ── */
+.shofy-terms {
+  margin-bottom: 20px;
+}
+
+/* ── Reset/Info Card specifics ── */
+.shofy-reset-card {
+  max-width: 440px;
+  text-align: center;
+}
+
+.shofy-reset-card .shofy-field {
+  text-align: left;
+}
+
+.shofy-reset-icon {
+  margin-bottom: 20px;
+}
+
+.shofy-back-link {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.shofy-back-link a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #0989FF;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.shofy-back-link a:hover {
+  color: #0770d6;
+}
+
+/* ── Info Page ── */
+.shofy-info-card {
+  max-width: 480px;
+  text-align: center;
+}
+
+.shofy-info-icon {
+  margin-bottom: 16px;
+}
+
+.shofy-info-title {
+  margin-bottom: 12px;
+}
+
+.shofy-info-message {
+  font-size: 15px;
+  color: #55585B;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.shofy-info-hint {
+  font-size: 13px;
+  color: #767A7D;
+}
+
+.shofy-info-actions {
+  margin-top: 24px;
+}
+
+.shofy-info-btn {
+  display: inline-block;
+  width: auto;
+  padding: 0 32px;
+  text-decoration: none;
+}
+
+/* ── Responsive ── */
+@media (max-width: 576px) {
+  .shofy-login-card {
+    padding: 32px 24px 40px;
+    border-radius: 8px;
+  }
+
+  .shofy-form-title { font-size: 22px; }
+  .shofy-form-subtitle { font-size: 14px; }
+
+  .shofy-field-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .shofy-shape-1 { width: 250px; height: 250px; }
+  .shofy-shape-2 { width: 200px; height: 200px; }
+  .shofy-shape-3, .shofy-shape-4 { display: none; }
+}
+
+@media (max-width: 400px) {
+  .shofy-page-wrapper { padding: 20px 12px; }
+  .shofy-login-card { padding: 28px 20px 32px; }
+}

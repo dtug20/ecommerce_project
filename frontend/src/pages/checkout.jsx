@@ -1,5 +1,4 @@
-import React,{useEffect} from 'react';
-import Cookies from 'js-cookie';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 // internal
 import SEO from '@/components/seo';
@@ -8,16 +7,15 @@ import HeaderTwo from '@/layout/headers/header-2';
 import Footer from '@/layout/footers/footer';
 import CommonBreadcrumb from '@/components/breadcrumb/common-breadcrumb';
 import CheckoutArea from '@/components/checkout/checkout-area';
-
+import keycloak from '@/lib/keycloak';
 
 const CheckoutPage = () => {
   const router = useRouter();
   useEffect(() => {
-    const isAuthenticate = Cookies.get("userInfo");
-    if(!isAuthenticate){
-      router.push("/login")
+    if (!keycloak.authenticated) {
+      keycloak.login({ redirectUri: window.location.href });
     }
-  },[router])
+  }, [router]);
   return (
     <Wrapper>
       <SEO pageTitle="Checkout" />

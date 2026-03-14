@@ -1,0 +1,156 @@
+{
+  "realm": "shofy",
+  "enabled": true,
+  "displayName": "Shofy E-Commerce",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
+  "resetPasswordAllowed": true,
+  "verifyEmail": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "sslRequired": "external",
+  "defaultSignatureAlgorithm": "RS256",
+  "accessTokenLifespan": 900,
+  "refreshTokenMaxReuse": 0,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "offlineSessionIdleTimeout": 2592000,
+  "accessCodeLifespan": 60,
+  "accessCodeLifespanLogin": 1800,
+  "accessCodeLifespanUserAction": 300,
+  "actionTokenGeneratedByAdminLifespan": 43200,
+  "actionTokenGeneratedByUserLifespan": 300,
+  "smtpServer": {},
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "Default role for registered customers",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "admin",
+        "description": "Full admin access to backend and CRM",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "manager",
+        "description": "Manager access to CRM",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "staff",
+        "description": "Staff access to CRM",
+        "composite": false,
+        "clientRole": false
+      }
+    ]
+  },
+  "defaultRoles": ["user"],
+  "clients": [
+    {
+      "clientId": "shofy-frontend",
+      "name": "Shofy Frontend (Next.js)",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "protocol": "openid-connect",
+      "rootUrl": "http://localhost:3000",
+      "baseUrl": "http://localhost:3000",
+      "redirectUris": [
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:3000/*"
+      }
+    },
+    {
+      "clientId": "shofy-crm",
+      "name": "Shofy CRM (Admin Panel)",
+      "enabled": true,
+      "publicClient": false,
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "protocol": "openid-connect",
+      "secret": "CHANGE_ME_CRM_SECRET",
+      "rootUrl": "http://localhost:8080",
+      "baseUrl": "http://localhost:8080",
+      "redirectUris": [
+        "http://localhost:8080/*"
+      ],
+      "webOrigins": [
+        "http://localhost:8080"
+      ],
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:8080/*"
+      }
+    },
+    {
+      "clientId": "shofy-backend",
+      "name": "Shofy Backend (Resource Server)",
+      "enabled": true,
+      "publicClient": false,
+      "bearerOnly": true,
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": false,
+      "protocol": "openid-connect",
+      "secret": "CHANGE_ME_BACKEND_SECRET"
+    }
+  ],
+  "clientScopes": [
+    {
+      "name": "shofy-scope",
+      "description": "Shofy custom scope",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "realm-roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "mongo-id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "mongoId",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "mongoId",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    }
+  ],
+  "browserFlow": "browser",
+  "registrationFlow": "registration",
+  "directGrantFlow": "direct grant",
+  "resetCredentialsFlow": "reset credentials"
+}

@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
-import Cookies from "js-cookie";
 //internal import
 import useCartInfo from "./use-cart-info";
 import { set_shipping } from "@/redux/features/order/orderSlice";

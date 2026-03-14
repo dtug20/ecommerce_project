@@ -192,13 +192,8 @@ exports.stockOutProducts = async (req, res,next) => {
     next(error)
   }
 };
-const productId = req.params.id;
-    await productServices.deleteProduct(productId);
-    
-    // Emit real-time update
-    emitProductDeleted(productId);
-    
-// update product
+
+// delete product
 exports.deleteProduct = async (req, res,next) => {
   try {
     await productServices.deleteProduct(req.params.id);

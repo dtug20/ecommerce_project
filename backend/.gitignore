@@ -1,2 +1,6 @@
-.vercel
+# Handled by root .gitignore
+# This file kept minimal to avoid duplication
+
+node_modules/
 .env
+.DS_Store

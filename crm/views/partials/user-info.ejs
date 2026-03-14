@@ -1,0 +1,14 @@
+<% if (user) { %>
+<div class="sidebar-user mt-auto p-3 border-top">
+    <div class="d-flex align-items-center mb-2">
+        <i class="bi bi-person-circle me-2"></i>
+        <div>
+            <small class="d-block fw-bold"><%= user.name || user.email %></small>
+            <small class="text-muted"><%= user.role %></small>
+        </div>
+    </div>
+    <a href="/logout" class="btn btn-outline-danger btn-sm w-100">
+        <i class="bi bi-box-arrow-right"></i> Logout
+    </a>
+</div>
+<% } %>

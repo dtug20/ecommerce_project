@@ -1,0 +1,56 @@
+# ── Dependencies (each service installs its own) ──
+node_modules/
+*/node_modules/
+
+# ── Next.js build output ──
+.next/
+out/
+
+# ── Build artifacts ──
+build/
+dist/
+coverage/
+
+# ── Git ──
+.git/
+.gitignore
+
+# ── Docker (avoid recursive copy) ──
+pgdata/
+mongodata/
+docker-compose.yml
+
+# ── IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+
+# ── Secrets & Certificates ──
+*.pem
+*.key
+*.crt
+*.pfx
+
+# ── Debug Logs ──
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Docs & Scripts ──
+*.md
+scripts/
+.claude/
+
+# ── Previews (not needed in container) ──
+keycloak/themes/shofy-theme/previews/
+
+# ── Env files (injected at runtime) ──
+.env
+.env.local
+.env.*.local
+!.env.example

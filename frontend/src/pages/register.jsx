@@ -1,20 +1,28 @@
-import React from 'react';
-import SEO from '@/components/seo';
-import HeaderTwo from '@/layout/headers/header-2';
-import Footer from '@/layout/footers/footer';
-import Wrapper from '@/layout/wrapper';
-import CommonBreadcrumb from '@/components/breadcrumb/common-breadcrumb';
-import RegisterArea from '@/components/login-register/register-area';
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+import keycloak from "@/lib/keycloak";
+import Loader from "@/components/loader/loader";
 
 const RegisterPage = () => {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (keycloak.authenticated) {
+      router.push("/");
+    } else {
+      keycloak.register({
+        redirectUri: window.location.origin + "/",
+      });
+    }
+  }, [router]);
+
   return (
-    <Wrapper>
-      <SEO pageTitle="Login" />
-      <HeaderTwo style_2={true} />
-      <CommonBreadcrumb title="Register" subtitle="Register" center={true} />
-      <RegisterArea />
-      <Footer primary_style={true} />
-    </Wrapper>
+    <div
+      className="d-flex align-items-center justify-content-center"
+      style={{ height: "100vh" }}
+    >
+      <Loader spinner="fade" loading={true} />
+    </div>
   );
 };
 

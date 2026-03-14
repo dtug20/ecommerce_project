@@ -1,0 +1,200 @@
+/* ================================================
+   Shofy Theme — Shared Components
+   Language Switcher + Toast Notifications
+   ================================================ */
+
+/* ── Language Switcher ── */
+.shofy-lang-switcher {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+}
+
+.shofy-lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #f8f9fa;
+  border: 1.5px solid #E0E2E3;
+  border-radius: 8px;
+  font-family: 'Jost', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #55585B;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shofy-lang-btn:hover {
+  border-color: #0989FF;
+  background: #fff;
+}
+
+.shofy-lang-switcher.open .shofy-lang-btn {
+  border-color: #0989FF;
+  background: #fff;
+}
+
+.shofy-lang-chevron {
+  transition: transform 0.2s;
+}
+
+.shofy-lang-switcher.open .shofy-lang-chevron {
+  transform: rotate(180deg);
+}
+
+.shofy-lang-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 140px;
+  background: #fff;
+  border: 1.5px solid #E0E2E3;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  list-style: none;
+  padding: 4px;
+  margin: 0;
+  z-index: 100;
+}
+
+.shofy-lang-menu-open {
+  display: block;
+}
+
+.shofy-lang-option {
+  display: block;
+  padding: 8px 14px;
+  font-size: 14px;
+  color: #55585B;
+  border-radius: 6px;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+
+.shofy-lang-option:hover {
+  background: #eff6ff;
+  color: #0989FF;
+}
+
+.shofy-lang-active {
+  font-weight: 600;
+  color: #0989FF;
+  background: #f0f7ff;
+}
+
+/* ── Toast Notifications ── */
+#shofy-toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 380px;
+}
+
+.shofy-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  animation: shofy-toast-in 0.3s ease;
+}
+
+.shofy-toast-out {
+  animation: shofy-toast-out 0.35s ease forwards;
+}
+
+.shofy-toast-error { border-left: 4px solid #FD4B6B; background: #fff0f3; }
+.shofy-toast-warning { border-left: 4px solid #FFB342; background: #fffbeb; }
+.shofy-toast-success { border-left: 4px solid #31B757; background: #f0fdf4; }
+.shofy-toast-info { border-left: 4px solid #0989FF; background: #eff6ff; }
+
+.shofy-toast-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.shofy-toast-error .shofy-toast-icon { color: #FD4B6B; }
+.shofy-toast-warning .shofy-toast-icon { color: #FFB342; }
+.shofy-toast-success .shofy-toast-icon { color: #31B757; }
+.shofy-toast-info .shofy-toast-icon { color: #0989FF; }
+
+.shofy-toast-body { flex: 1; min-width: 0; }
+
+.shofy-toast-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #010F1C;
+  margin-bottom: 2px;
+}
+
+.shofy-toast-message {
+  font-size: 13px;
+  color: #55585B;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.shofy-toast-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  color: #767A7D;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.shofy-toast-close:hover { opacity: 1; }
+
+.shofy-toast-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  border-radius: 0 0 0 10px;
+  animation: shofy-toast-progress linear forwards;
+}
+
+.shofy-toast-error .shofy-toast-progress { background: #FD4B6B; }
+.shofy-toast-warning .shofy-toast-progress { background: #FFB342; }
+.shofy-toast-success .shofy-toast-progress { background: #31B757; }
+.shofy-toast-info .shofy-toast-progress { background: #0989FF; }
+
+@keyframes shofy-toast-in {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes shofy-toast-out {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(40px); }
+}
+
+@keyframes shofy-toast-progress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+/* ── Responsive Toast ── */
+@media (max-width: 480px) {
+  #shofy-toast-container {
+    right: 12px;
+    left: 12px;
+    max-width: none;
+  }
+}

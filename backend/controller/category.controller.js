@@ -92,10 +92,6 @@ exports.deleteCategory = async (req,res,next) => {
   }
 }
 
-    // Emit real-time update
-    emitCategoryUpdated(result);
-    
-    
 // update category
 exports.updateCategory = async (req,res,next) => {
   try {

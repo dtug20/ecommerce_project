@@ -1,0 +1,42 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  DEPLOY_PATH: /opt/shofy
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            set -e
+
+            cd ${{ env.DEPLOY_PATH }}
+
+            # Pull latest code
+            git fetch origin main
+            git reset --hard origin/main
+
+            # Build and restart services
+            docker compose -f docker-compose.prod.yml build --parallel
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+
+            # Cleanup old images
+            docker image prune -f
+
+            echo "Deploy complete at $(date)"

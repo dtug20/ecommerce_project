@@ -1,18 +1,18 @@
 import React from "react";
-import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
 // internal
 import { Box, DeliveryTwo, Processing, Truck } from "@/svg";
 import { userLoggedOut } from "@/redux/features/auth/authSlice";
+import { useKeycloak } from "@/components/providers/keycloak-provider";
 
 const NavProfileTab = ({ orderData }) => {
   const {user} = useSelector(state => state.auth)
   const dispatch = useDispatch();
-  const router = useRouter();
+  const keycloak = useKeycloak();
   // handle logout
   const handleLogout = () => {
     dispatch(userLoggedOut());
-    router.push('/')
+    keycloak.logout({ redirectUri: window.location.origin });
   }
   return (
     <div className="profile__main">

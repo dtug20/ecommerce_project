@@ -1,0 +1,62 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: shofy-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: shofy-postgres
+    environment:
+      POSTGRES_DB: ${PG_DB:-keycloak}
+      POSTGRES_USER: ${PG_USER:-keycloak}
+      POSTGRES_PASSWORD: ${PG_PASS:-keycloak_password}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/init-postgres.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "${PG_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-keycloak}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4.4
+    container_name: shofy-keycloak
+    env_file: .env
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin123}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/${PG_DB:-keycloak}
+      KC_DB_USERNAME: ${PG_USER:-keycloak}
+      KC_DB_PASSWORD: ${PG_PASS:-keycloak_password}
+      KC_DB_SCHEMA: keycloak
+      KC_HOSTNAME: ${KEYCLOAK_URL:-http://localhost:8180}
+      KC_HTTP_ENABLED: "true"
+      KC_HTTP_PORT: 8180
+      KC_HOSTNAME_STRICT: "false"
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+    command: start-dev
+    volumes:
+      - ./keycloak/themes/shofy-theme:/opt/keycloak/themes/shofy-theme
+    ports:
+      - "8180:8180"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  mongodata:
+  pgdata:

@@ -1,90 +1,19 @@
 import { apiSlice } from "@/redux/api/apiSlice";
 import { userLoggedIn } from "./authSlice";
-import Cookies from "js-cookie";
 
 export const authApi = apiSlice.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
-    registerUser: builder.mutation({
-      query: (data) => ({
-        url: "/api/user/signup",
-        method: "POST",
-        body: data,
-      }),
-    }),
-    // signUpProvider
-    signUpProvider: builder.mutation({
-      query: (token) => ({
-        url: `/api/user/register/${token}`,
-        method: "POST",
-      }),
-
-      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
-        try {
-          const result = await queryFulfilled;
-
-          Cookies.set(
-            "userInfo",
-            JSON.stringify({
-              accessToken: result.data.data.token,
-              user: result.data.data.user,
-            }),
-            { expires: 0.5 }
-          );
-
-          dispatch(
-            userLoggedIn({
-              accessToken: result.data.data.token,
-              user: result.data.data.user,
-            })
-          );
-        } catch (err) {
-          // do nothing
-        }
-      },
-    }),
-    // login
-    loginUser: builder.mutation({
-      query: (data) => ({
-        url: "/api/user/login",
-        method: "POST",
-        body: data,
-      }),
-
-      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
-        try {
-          const result = await queryFulfilled;
-
-          Cookies.set(
-            "userInfo",
-            JSON.stringify({
-              accessToken: result.data.data.token,
-              user: result.data.data.user,
-            }),
-            { expires: 0.5 }
-          );
-
-          dispatch(
-            userLoggedIn({
-              accessToken: result.data.data.token,
-              user: result.data.data.user,
-            })
-          );
-        } catch (err) {
-          // do nothing
-        }
-      },
-    }),
-    // get me
-    getUser: builder.query({
+    // get user profile from backend (syncs Keycloak user with MongoDB)
+    getUserProfile: builder.query({
       query: () => "/api/user/me",
-
       async onQueryStarted(arg, { queryFulfilled, dispatch }) {
         try {
           const result = await queryFulfilled;
           dispatch(
             userLoggedIn({
               user: result.data,
+              authenticated: true,
             })
           );
         } catch (err) {
@@ -92,83 +21,20 @@ export const authApi = apiSlice.injectEndpoints({
         }
       },
     }),
-    // confirmEmail
-    confirmEmail: builder.query({
-      query: (token) => `/api/user/confirmEmail/${token}`,
-
-      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
-        try {
-          const result = await queryFulfilled;
-
-          Cookies.set(
-            "userInfo",
-            JSON.stringify({
-              accessToken: result.data.data.token,
-              user: result.data.data.user,
-            }),
-            { expires: 0.5 }
-          );
-
-          dispatch(
-            userLoggedIn({
-              accessToken: result.data.data.token,
-              user: result.data.data.user,
-            })
-          );
-        } catch (err) {
-          // do nothing
-        }
-      },
-    }),
-    // reset password
-    resetPassword: builder.mutation({
-      query: (data) => ({
-        url: "/api/user/forget-password",
-        method: "PATCH",
-        body: data,
-      }),
-    }),
-    // confirmForgotPassword
-    confirmForgotPassword: builder.mutation({
-      query: (data) => ({
-        url: "/api/user/confirm-forget-password",
-        method: "PATCH",
-        body: data,
-      }),
-    }),
-    // change password
-    changePassword: builder.mutation({
-      query: (data) => ({
-        url: "/api/user/change-password",
-        method: "PATCH",
-        body: data,
-      }),
-    }),
-    // updateProfile password
+    // update profile (business data only)
     updateProfile: builder.mutation({
       query: ({ id, ...data }) => ({
         url: `/api/user/update-user/${id}`,
         method: "PUT",
         body: data,
       }),
-
       async onQueryStarted(arg, { queryFulfilled, dispatch }) {
         try {
           const result = await queryFulfilled;
-
-          Cookies.set(
-            "userInfo",
-            JSON.stringify({
-              accessToken: result.data.data.token,
-              user: result.data.data.user,
-            }),
-            { expires: 0.5 }
-          );
-
           dispatch(
             userLoggedIn({
-              accessToken: result.data.data.token,
-              user: result.data.data.user,
+              user: result.data,
+              authenticated: true,
             })
           );
         } catch (err) {
@@ -180,12 +46,6 @@ export const authApi = apiSlice.injectEndpoints({
 });
 
 export const {
-  useLoginUserMutation,
-  useRegisterUserMutation,
-  useConfirmEmailQuery,
-  useResetPasswordMutation,
-  useConfirmForgotPasswordMutation,
-  useChangePasswordMutation,
+  useGetUserProfileQuery,
   useUpdateProfileMutation,
-  useSignUpProviderMutation,
 } = authApi;

@@ -1,26 +1,24 @@
-import { useState } from "react";
-import LoginForm from "../forms/login-form";
+import keycloak from "@/lib/keycloak";
 
 const CheckoutLogin = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const handleLogin = () => {
+    keycloak.login({ redirectUri: window.location.href });
+  };
+
+  if (keycloak.authenticated) return null;
+
   return (
     <div className="tp-checkout-verify-item">
       <p className="tp-checkout-verify-reveal">
         Returning customer?{" "}
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={handleLogin}
           type="button"
           className="tp-checkout-login-form-reveal-btn"
         >
           Click here to login
         </button>
       </p>
-
-      {isOpen && (
-        <div id="tpReturnCustomerLoginForm" className="tp-return-customer">
-          <LoginForm />
-        </div>
-      )}
     </div>
   );
 };

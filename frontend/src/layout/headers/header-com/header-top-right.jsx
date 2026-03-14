@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { userLoggedOut } from "@/redux/features/auth/authSlice";
+import { useKeycloak } from "@/components/providers/keycloak-provider";
 
 // language
 function Language({active,handleActive}) {
@@ -63,11 +63,11 @@ function Currency({active,handleActive}) {
 function ProfileSetting({active,handleActive}) {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-  const router = useRouter();
+  const keycloak = useKeycloak();
   // handle logout
   const handleLogout = () => {
     dispatch(userLoggedOut());
-    router.push('/')
+    keycloak.logout({ redirectUri: window.location.origin });
   }
   return (
     <div className="tp-header-top-menu-item tp-header-setting">
