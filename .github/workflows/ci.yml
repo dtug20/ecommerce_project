@@ -85,8 +85,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create dummy .env for validation
-        run: cp .env.production.example .env
+      - name: Create dummy .env files for validation
+        run: |
+          cp .env.production.example .env
+          cp backend/.env.example backend/.env
+          cp crm/.env.example crm/.env
 
       - name: Verify compose config
         run: docker compose -f docker-compose.prod.yml config --quiet
