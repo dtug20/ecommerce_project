@@ -85,13 +85,7 @@ const sampleUsers = [
     status: 'active',
     emailVerified: true,
     gender: 'male',
-    address: {
-      street: '123 Admin Street',
-      city: 'San Francisco',
-      state: 'CA',
-      zipCode: '94105',
-      country: 'USA'
-    }
+    address: '123 Admin Street, San Francisco, CA 94105, USA'
   },
   {
     name: 'John Doe',
@@ -103,13 +97,7 @@ const sampleUsers = [
     emailVerified: true,
     gender: 'male',
     dateOfBirth: new Date('1990-05-15'),
-    address: {
-      street: '456 Customer Ave',
-      city: 'New York',
-      state: 'NY',
-      zipCode: '10001',
-      country: 'USA'
-    }
+    address: '456 Customer Ave, New York, NY 10001, USA'
   },
   {
     name: 'Jane Smith',
@@ -121,13 +109,7 @@ const sampleUsers = [
     emailVerified: false,
     gender: 'female',
     dateOfBirth: new Date('1988-12-22'),
-    address: {
-      street: '789 Main Street',
-      city: 'Los Angeles',
-      state: 'CA',
-      zipCode: '90210',
-      country: 'USA'
-    }
+    address: '789 Main Street, Los Angeles, CA 90210, USA'
   },
   {
     name: 'Staff Member',
@@ -307,10 +289,10 @@ const createSampleOrders = async (users, products) => {
       finalAmount: 1038.91,
       shippingAddress: {
         name: customer1.name,
-        address: customer1.address.street,
-        city: customer1.address.city,
-        zipCode: customer1.address.zipCode,
-        country: customer1.address.country,
+        address: customer1.address,
+        city: '',
+        zipCode: '',
+        country: '',
         phone: customer1.phone
       },
       paymentMethod: 'card',
@@ -350,10 +332,10 @@ const createSampleOrders = async (users, products) => {
       finalAmount: 2423.07,
       shippingAddress: {
         name: customer2.name,
-        address: customer2.address.street,
-        city: customer2.address.city,
-        zipCode: customer2.address.zipCode,
-        country: customer2.address.country,
+        address: customer2.address,
+        city: '',
+        zipCode: '',
+        country: '',
         phone: customer2.phone
       },
       paymentMethod: 'paypal',

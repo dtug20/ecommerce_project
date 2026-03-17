@@ -24,7 +24,7 @@ const KeycloakProvider = ({ children }) => {
           typeof window !== "undefined"
             ? `${window.location.origin}/silent-check-sso.html`
             : undefined,
-        pkceMethod: "S256",
+        enablePkce: false,
         checkLoginIframe: false,
       })
       .then((authenticated) => {
