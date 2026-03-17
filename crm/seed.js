@@ -116,7 +116,7 @@ const sampleUsers = [
     email: 'staff@shofy.com',
     password: 'password123',
     phone: '+1-555-0104',
-    role: 'staff',
+    role: 'admin',
     status: 'active',
     emailVerified: true,
     gender: 'female'
