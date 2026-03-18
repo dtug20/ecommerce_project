@@ -1,27 +1,16 @@
 const { secret } = require("../config/secret");
-const stripe = require("stripe")(secret.stripe_key);
+// const stripe = require("stripe")(secret.stripe_key); // STRIPE DISABLED
 const Order = require("../model/Order");
 const { emitOrderCreated, emitOrderUpdated } = require("../utils/socketEmitter");
 
-// create-payment-intent
+// create-payment-intent - DISABLED (Stripe removed)
 exports.paymentIntent = async (req, res, next) => {
   try {
-    const price = Number(req.body.price);
-    // Validate price is a positive finite number and meets Stripe minimum ($0.50)
-    if (!price || !isFinite(price) || price < 0.50) {
-      return res.status(400).json({
-        status: "fail",
-        error: "Invalid price. Must be at least $0.50.",
-      });
-    }
-    const amount = Math.round(price * 100); // cents, rounded to avoid floating point issues
-    const paymentIntent = await stripe.paymentIntents.create({
-      currency: "usd",
-      amount: amount,
-      payment_method_types: ["card"],
-    });
-    res.send({
-      clientSecret: paymentIntent.client_secret,
+    // Stripe payment intent creation disabled - only COD available
+    return res.status(200).json({
+      status: "success",
+      message: "Stripe disabled - only Cash on Delivery available",
+      clientSecret: null
     });
   } catch (error) {
     next(error)
@@ -42,15 +31,12 @@ exports.addOrder = async (req, res, next) => {
       });
     }
 
-    // Verify PaymentIntent with Stripe for card payments
-    if (paymentMethod === "Card" && paymentIntent?.id) {
-      const stripePI = await stripe.paymentIntents.retrieve(paymentIntent.id);
-      if (stripePI.status !== "succeeded") {
-        return res.status(400).json({
-          status: "fail",
-          error: "Payment has not been completed",
-        });
-      }
+    // Stripe verification disabled - only COD payment supported
+    if (paymentMethod !== "COD") {
+      return res.status(400).json({
+        status: "fail",
+        error: "Only Cash on Delivery payment method is supported",
+      });
     }
 
     const orderItems = await Order.create({
