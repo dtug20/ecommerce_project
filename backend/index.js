@@ -91,7 +91,7 @@ const { keycloakConfig } = require("./config/keycloak");
 const socketJwksClient = jwksRsa({
   cache: true,
   rateLimit: true,
-  jwksRequestsPerMinute: 5,
+  jwksRequestsPerMinute: 30,
   jwksUri: keycloakConfig.jwksUri,
 });
 

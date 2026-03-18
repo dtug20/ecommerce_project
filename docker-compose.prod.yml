@@ -53,6 +53,7 @@ services:
     command: start
     volumes:
       - ./keycloak/themes/shofy-theme:/opt/keycloak/themes/shofy-theme
+      - ./keycloak/themes/shofy-crm-theme:/opt/keycloak/themes/shofy-crm-theme
     ports:
       - "127.0.0.1:8180:8180"
     depends_on:

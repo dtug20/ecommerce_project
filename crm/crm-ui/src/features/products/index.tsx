@@ -1,0 +1,809 @@
+import { useState, useCallback, useRef } from 'react';
+import {
+  Table,
+  Button,
+  Input,
+  Select,
+  Modal,
+  Form,
+  InputNumber,
+  Switch,
+  Tooltip,
+  Popconfirm,
+  Image,
+  Typography,
+  Badge,
+  Row,
+  Col,
+  Descriptions,
+  Divider,
+  Tag,
+} from 'antd';
+import type { TableProps } from 'antd';
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+  ClearOutlined,
+  SearchOutlined,
+  WarningOutlined,
+  PictureOutlined,
+} from '@ant-design/icons';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+
+import { productsApi, categoriesApi } from '@/services/api';
+import type { Product, Category } from '@/types';
+import { formatCurrency } from '@/hooks/useFormatters';
+import StatusBadge from '@/components/commons/StatusBadge';
+import PageHeader from '@/components/commons/PageHeader';
+
+const { Text } = Typography;
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+interface Filters {
+  search: string;
+  category: string;
+  status: string;
+}
+
+interface ProductFormValues {
+  title: string;
+  description?: string;
+  price: number;
+  discount?: number;
+  quantity: number;
+  shipping?: number;
+  category?: string;
+  status: 'Show' | 'Hide';
+  img?: string;
+  featured?: boolean;
+  colors?: string;
+  sizes?: string;
+  tags?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const EMPTY_FILTERS: Filters = { search: '', category: '', status: '' };
+const PAGE_SIZE = 10;
+const PLACEHOLDER_IMG = 'https://placehold.co/64x64?text=No+Img';
+const DEBOUNCE_MS = 300;
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function splitComma(value: string | undefined): string[] {
+  if (!value) return [];
+  return value
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function joinArray(arr: string[] | undefined): string {
+  return arr ? arr.join(', ') : '';
+}
+
+// ---------------------------------------------------------------------------
+// ProductModal — Add / Edit
+// ---------------------------------------------------------------------------
+
+interface ProductModalProps {
+  open: boolean;
+  editingProduct: Product | null;
+  categories: Category[];
+  onClose: () => void;
+}
+
+function ProductModal({ open, editingProduct, categories, onClose }: ProductModalProps) {
+  const [form] = Form.useForm<ProductFormValues>();
+  const queryClient = useQueryClient();
+
+  const isEdit = editingProduct !== null;
+
+  // Reset form whenever the modal opens
+  const handleAfterOpenChange = (visible: boolean) => {
+    if (visible) {
+      if (editingProduct) {
+        form.setFieldsValue({
+          title: editingProduct.title,
+          description: editingProduct.description ?? '',
+          price: editingProduct.price,
+          discount: editingProduct.discount ?? 0,
+          quantity: editingProduct.quantity,
+          shipping: editingProduct.shipping ?? 0,
+          category: editingProduct.category?._id ?? undefined,
+          status: editingProduct.status as 'Show' | 'Hide',
+          img: editingProduct.img ?? '',
+          featured: editingProduct.featured ?? false,
+          colors: joinArray(editingProduct.colors),
+          sizes: joinArray(editingProduct.sizes),
+          tags: joinArray(editingProduct.tags),
+        });
+      } else {
+        form.resetFields();
+        form.setFieldsValue({ status: 'Show', featured: false, discount: 0, shipping: 0 });
+      }
+    }
+  };
+
+  const createMutation = useMutation({
+    mutationFn: (data: Partial<Product>) => productsApi.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      toast.success('Product created successfully');
+      onClose();
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Failed to create product');
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<Product> }) =>
+      productsApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      toast.success('Product updated successfully');
+      onClose();
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Failed to update product');
+    },
+  });
+
+  const isLoading = createMutation.isPending || updateMutation.isPending;
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      const payload: Partial<Product> = {
+        title: values.title,
+        description: values.description,
+        price: values.price,
+        discount: values.discount ?? 0,
+        quantity: values.quantity,
+        shipping: values.shipping ?? 0,
+        status: values.status,
+        img: values.img,
+        featured: values.featured ?? false,
+        colors: splitComma(values.colors),
+        sizes: splitComma(values.sizes),
+        tags: splitComma(values.tags),
+      };
+      if (values.category) {
+        // Send category id — backend resolves to object
+        (payload as Record<string, unknown>).category = values.category;
+      }
+
+      if (isEdit && editingProduct) {
+        updateMutation.mutate({ id: editingProduct._id, data: payload });
+      } else {
+        createMutation.mutate(payload);
+      }
+    } catch {
+      // Ant Design validation error — swallow so form highlights fields
+    }
+  };
+
+  return (
+    <Modal
+      title={isEdit ? 'Edit Product' : 'Add Product'}
+      open={open}
+      onCancel={onClose}
+      onOk={handleSubmit}
+      okText={isEdit ? 'Update' : 'Create'}
+      confirmLoading={isLoading}
+      width={720}
+      afterOpenChange={handleAfterOpenChange}
+      destroyOnHidden
+    >
+      <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="title"
+              label="Title"
+              rules={[{ required: true, message: 'Product title is required' }]}
+            >
+              <Input placeholder="Enter product title" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Form.Item name="description" label="Description">
+          <Input.TextArea rows={3} placeholder="Enter product description" />
+        </Form.Item>
+
+        <Row gutter={16}>
+          <Col xs={24} sm={12}>
+            <Form.Item
+              name="price"
+              label="Price (USD)"
+              rules={[{ required: true, message: 'Price is required' }]}
+            >
+              <InputNumber
+                min={0}
+                precision={2}
+                style={{ width: '100%' }}
+                placeholder="0.00"
+                prefix="$"
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Form.Item name="discount" label="Discount (%)">
+              <InputNumber min={0} max={100} style={{ width: '100%' }} placeholder="0" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col xs={24} sm={12}>
+            <Form.Item
+              name="quantity"
+              label="Quantity"
+              rules={[{ required: true, message: 'Quantity is required' }]}
+            >
+              <InputNumber min={0} style={{ width: '100%' }} placeholder="0" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Form.Item name="shipping" label="Shipping Cost (USD)">
+              <InputNumber min={0} precision={2} style={{ width: '100%' }} placeholder="0.00" prefix="$" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col xs={24} sm={12}>
+            <Form.Item name="category" label="Category">
+              <Select
+                placeholder="Select category"
+                allowClear
+                showSearch
+                optionFilterProp="label"
+                options={categories.map((c) => ({ value: c._id, label: c.parent }))}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Form.Item name="status" label="Status">
+              <Select
+                options={[
+                  { value: 'Show', label: 'Show' },
+                  { value: 'Hide', label: 'Hide' },
+                ]}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Form.Item name="img" label="Image URL">
+          <Input placeholder="https://example.com/image.jpg" />
+        </Form.Item>
+
+        <Form.Item name="featured" label="Featured" valuePropName="checked">
+          <Switch />
+        </Form.Item>
+
+        <Row gutter={16}>
+          <Col xs={24} sm={8}>
+            <Form.Item name="colors" label="Colors" tooltip="Comma-separated values">
+              <Input placeholder="red, blue, green" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={8}>
+            <Form.Item name="sizes" label="Sizes" tooltip="Comma-separated values">
+              <Input placeholder="S, M, L, XL" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={8}>
+            <Form.Item name="tags" label="Tags" tooltip="Comma-separated values">
+              <Input placeholder="sale, new, hot" />
+            </Form.Item>
+          </Col>
+        </Row>
+      </Form>
+    </Modal>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ViewProductModal — read-only detail modal
+// ---------------------------------------------------------------------------
+
+interface ViewProductModalProps {
+  product: Product | null;
+  onClose: () => void;
+}
+
+function ViewProductModal({ product, onClose }: ViewProductModalProps) {
+  if (!product) return null;
+
+  return (
+    <Modal
+      title="Product Details"
+      open={product !== null}
+      onCancel={onClose}
+      footer={
+        <Button onClick={onClose}>Close</Button>
+      }
+      width={680}
+    >
+      <div style={{ display: 'flex', gap: 16, marginBottom: 16, alignItems: 'flex-start' }}>
+        {product.img ? (
+          <Image
+            src={product.img}
+            alt={product.title}
+            width={120}
+            height={120}
+            style={{ objectFit: 'cover', borderRadius: 8, border: '1px solid #f0f0f0' }}
+            fallback={PLACEHOLDER_IMG}
+          />
+        ) : (
+          <div
+            style={{
+              width: 120,
+              height: 120,
+              background: '#f5f5f5',
+              borderRadius: 8,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#bbb',
+              flexShrink: 0,
+            }}
+          >
+            <PictureOutlined style={{ fontSize: 32 }} />
+          </div>
+        )}
+        <div>
+          <Typography.Title level={5} style={{ margin: 0, marginBottom: 4 }}>
+            {product.title}
+          </Typography.Title>
+          {product.slug && (
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              /{product.slug}
+            </Text>
+          )}
+          <div style={{ marginTop: 8 }}>
+            <StatusBadge status={product.status} />
+            {product.featured && <Tag color="gold" style={{ marginLeft: 4 }}>Featured</Tag>}
+          </div>
+        </div>
+      </div>
+
+      <Descriptions bordered size="small" column={2}>
+        <Descriptions.Item label="Price">
+          {formatCurrency(product.price)}
+          {product.discount ? (
+            <Badge
+              count={`-${product.discount}%`}
+              style={{ backgroundColor: '#f50', marginLeft: 6 }}
+            />
+          ) : null}
+        </Descriptions.Item>
+        <Descriptions.Item label="Quantity">
+          <span style={{ color: (product.quantity ?? 0) <= 10 ? '#ff4d4f' : undefined }}>
+            {product.quantity ?? 0}
+            {(product.quantity ?? 0) <= 10 && (
+              <WarningOutlined style={{ color: '#ff4d4f', marginLeft: 4 }} />
+            )}
+          </span>
+        </Descriptions.Item>
+        <Descriptions.Item label="Category">
+          {product.category?.parent ?? '—'}
+        </Descriptions.Item>
+        <Descriptions.Item label="Brand">
+          {product.brand?.name ?? '—'}
+        </Descriptions.Item>
+        <Descriptions.Item label="Shipping Cost">
+          {product.shipping ? formatCurrency(product.shipping) : 'Free'}
+        </Descriptions.Item>
+        <Descriptions.Item label="Sell Count">
+          {product.sellCount ?? 0}
+        </Descriptions.Item>
+        {product.colors && product.colors.length > 0 && (
+          <Descriptions.Item label="Colors" span={2}>
+            {product.colors.map((c) => (
+              <Tag key={c}>{c}</Tag>
+            ))}
+          </Descriptions.Item>
+        )}
+        {product.sizes && product.sizes.length > 0 && (
+          <Descriptions.Item label="Sizes" span={2}>
+            {product.sizes.map((s) => (
+              <Tag key={s}>{s}</Tag>
+            ))}
+          </Descriptions.Item>
+        )}
+        {product.tags && product.tags.length > 0 && (
+          <Descriptions.Item label="Tags" span={2}>
+            {product.tags.map((t) => (
+              <Tag key={t} color="blue">{t}</Tag>
+            ))}
+          </Descriptions.Item>
+        )}
+      </Descriptions>
+
+      {product.description && (
+        <>
+          <Divider />
+          <Typography.Paragraph style={{ marginBottom: 0 }}>
+            {product.description}
+          </Typography.Paragraph>
+        </>
+      )}
+    </Modal>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ProductsPage — main component
+// ---------------------------------------------------------------------------
+
+export default function ProductsPage() {
+  const queryClient = useQueryClient();
+
+  // Pagination
+  const [page, setPage] = useState(1);
+
+  // Filters
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  // Committed search (debounced)
+  const [committedSearch, setCommittedSearch] = useState('');
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
+
+  // ---------------------------------------------------------------------------
+  // Queries
+  // ---------------------------------------------------------------------------
+
+  const queryParams = {
+    page,
+    limit: PAGE_SIZE,
+    ...(committedSearch ? { search: committedSearch } : {}),
+    ...(filters.category ? { category: filters.category } : {}),
+    ...(filters.status ? { status: filters.status } : {}),
+  };
+
+  const {
+    data: productsData,
+    isLoading: productsLoading,
+    isFetching,
+  } = useQuery({
+    queryKey: ['products', queryParams],
+    queryFn: () => productsApi.getAll(queryParams),
+  });
+
+  const { data: categoriesData } = useQuery({
+    queryKey: ['categories', { status: 'Show' }],
+    queryFn: () => categoriesApi.getAll({ status: 'Show' }),
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const categories: Category[] = categoriesData?.data ?? [];
+  const products: Product[] = productsData?.data ?? [];
+  const pagination = productsData?.pagination;
+
+  // ---------------------------------------------------------------------------
+  // Mutations
+  // ---------------------------------------------------------------------------
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => productsApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      toast.success('Product deleted successfully');
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Failed to delete product');
+    },
+  });
+
+  // ---------------------------------------------------------------------------
+  // Handlers
+  // ---------------------------------------------------------------------------
+
+  const handleSearchChange = useCallback((value: string) => {
+    setFilters((prev) => ({ ...prev, search: value }));
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      setCommittedSearch(value);
+      setPage(1);
+    }, DEBOUNCE_MS);
+  }, []);
+
+  const handleFilterChange = useCallback(
+    (key: keyof Omit<Filters, 'search'>, value: string) => {
+      setFilters((prev) => ({ ...prev, [key]: value }));
+      setPage(1);
+    },
+    [],
+  );
+
+  const handleClearFilters = useCallback(() => {
+    setFilters(EMPTY_FILTERS);
+    setCommittedSearch('');
+    setPage(1);
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+  }, []);
+
+  const handleOpenAdd = useCallback(() => {
+    setEditingProduct(null);
+    setModalOpen(true);
+  }, []);
+
+  const handleOpenEdit = useCallback((product: Product) => {
+    setEditingProduct(product);
+    setModalOpen(true);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setModalOpen(false);
+    setEditingProduct(null);
+  }, []);
+
+  const handleView = useCallback((product: Product) => {
+    setViewingProduct(product);
+  }, []);
+
+  const handleCloseView = useCallback(() => {
+    setViewingProduct(null);
+  }, []);
+
+  const handleDelete = useCallback(
+    (id: string) => {
+      deleteMutation.mutate(id);
+    },
+    [deleteMutation],
+  );
+
+  // ---------------------------------------------------------------------------
+  // Table columns
+  // ---------------------------------------------------------------------------
+
+  const columns: TableProps<Product>['columns'] = [
+    {
+      title: 'Image',
+      dataIndex: 'img',
+      key: 'img',
+      width: 80,
+      render: (img: string | undefined, record: Product) =>
+        img ? (
+          <Image
+            src={img}
+            alt={record.title}
+            width={56}
+            height={56}
+            style={{ objectFit: 'cover', borderRadius: 6, border: '1px solid #f0f0f0' }}
+            fallback={PLACEHOLDER_IMG}
+            preview={false}
+          />
+        ) : (
+          <div
+            style={{
+              width: 56,
+              height: 56,
+              background: '#f5f5f5',
+              borderRadius: 6,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#bbb',
+            }}
+          >
+            <PictureOutlined style={{ fontSize: 20 }} />
+          </div>
+        ),
+    },
+    {
+      title: 'Product',
+      key: 'product',
+      render: (_: unknown, record: Product) => (
+        <div>
+          <Text strong style={{ display: 'block' }}>
+            {record.title}
+          </Text>
+          {record.slug && (
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              {record.slug}
+            </Text>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: 'Category',
+      key: 'category',
+      width: 140,
+      render: (_: unknown, record: Product) => (
+        <Text>{record.category?.parent ?? '—'}</Text>
+      ),
+    },
+    {
+      title: 'Price',
+      key: 'price',
+      width: 140,
+      render: (_: unknown, record: Product) => (
+        <div>
+          <Text strong>{formatCurrency(record.price)}</Text>
+          {record.discount && record.discount > 0 ? (
+            <Badge
+              count={`-${record.discount}%`}
+              style={{ backgroundColor: '#f50', marginLeft: 6, fontSize: 10 }}
+            />
+          ) : null}
+        </div>
+      ),
+    },
+    {
+      title: 'Quantity',
+      dataIndex: 'quantity',
+      key: 'quantity',
+      width: 110,
+      render: (qty: number) => {
+        const isLow = qty <= 10;
+        return (
+          <span style={{ color: isLow ? '#ff4d4f' : undefined, fontWeight: isLow ? 600 : undefined }}>
+            {qty}
+            {isLow && (
+              <Tooltip title="Low stock">
+                <WarningOutlined style={{ color: '#ff4d4f', marginLeft: 4 }} />
+              </Tooltip>
+            )}
+          </span>
+        );
+      },
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      width: 90,
+      render: (status: string) => <StatusBadge status={status} />,
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      width: 130,
+      fixed: 'right' as const,
+      render: (_: unknown, record: Product) => (
+        <Button.Group size="small">
+          <Tooltip title="View">
+            <Button icon={<EyeOutlined />} onClick={() => handleView(record)} />
+          </Tooltip>
+          <Tooltip title="Edit">
+            <Button icon={<EditOutlined />} onClick={() => handleOpenEdit(record)} />
+          </Tooltip>
+          <Tooltip title="Delete">
+            <Popconfirm
+              title="Delete product"
+              description="Are you sure you want to delete this product? This action cannot be undone."
+              onConfirm={() => handleDelete(record._id)}
+              okText="Delete"
+              okButtonProps={{ danger: true }}
+              cancelText="Cancel"
+              placement="topRight"
+            >
+              <Button icon={<DeleteOutlined />} danger loading={deleteMutation.isPending} />
+            </Popconfirm>
+          </Tooltip>
+        </Button.Group>
+      ),
+    },
+  ];
+
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
+
+  const hasActiveFilters =
+    filters.search !== '' || filters.category !== '' || filters.status !== '';
+
+  return (
+    <div>
+      <PageHeader
+        title="Product Management"
+        extra={
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenAdd}>
+            Add Product
+          </Button>
+        }
+      />
+
+      {/* Filters Row */}
+      <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
+        <Col xs={24} sm={12} md={8} lg={7}>
+          <Input
+            placeholder="Search products..."
+            prefix={<SearchOutlined style={{ color: '#bbb' }} />}
+            value={filters.search}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            allowClear
+            onClear={() => handleSearchChange('')}
+          />
+        </Col>
+
+        <Col xs={24} sm={12} md={6} lg={5}>
+          <Select
+            placeholder="All Categories"
+            style={{ width: '100%' }}
+            value={filters.category || undefined}
+            onChange={(val) => handleFilterChange('category', val ?? '')}
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            options={categories.map((c) => ({ value: c._id, label: c.parent }))}
+          />
+        </Col>
+
+        <Col xs={24} sm={12} md={5} lg={4}>
+          <Select
+            placeholder="All Statuses"
+            style={{ width: '100%' }}
+            value={filters.status || undefined}
+            onChange={(val) => handleFilterChange('status', val ?? '')}
+            allowClear
+            options={[
+              { value: 'Show', label: 'Show' },
+              { value: 'Hide', label: 'Hide' },
+            ]}
+          />
+        </Col>
+
+        <Col xs={24} sm={12} md={5} lg={4}>
+          <Button
+            icon={<ClearOutlined />}
+            onClick={handleClearFilters}
+            disabled={!hasActiveFilters}
+          >
+            Clear Filters
+          </Button>
+        </Col>
+      </Row>
+
+      {/* Products Table */}
+      <Table<Product>
+        rowKey="_id"
+        columns={columns}
+        dataSource={products}
+        loading={productsLoading || isFetching}
+        expandable={{ childrenColumnName: '__children' }}
+        scroll={{ x: 900 }}
+        pagination={{
+          current: page,
+          pageSize: PAGE_SIZE,
+          total: pagination?.totalItems ?? 0,
+          showSizeChanger: false,
+          showTotal: (total, range) => `${range[0]}–${range[1]} of ${total} products`,
+          onChange: (newPage) => setPage(newPage),
+        }}
+      />
+
+      {/* Add / Edit Modal */}
+      <ProductModal
+        open={modalOpen}
+        editingProduct={editingProduct}
+        categories={categories}
+        onClose={handleCloseModal}
+      />
+
+      {/* View Modal */}
+      <ViewProductModal product={viewingProduct} onClose={handleCloseView} />
+    </div>
+  );
+}

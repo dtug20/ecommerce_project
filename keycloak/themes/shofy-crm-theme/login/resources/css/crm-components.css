@@ -1,0 +1,180 @@
+/* ================================================
+   Shofy CRM Theme — Shared Components
+   Language Switcher + Toast Notifications
+   ================================================ */
+
+/* ── Language Switcher ── */
+.crm-lang-switcher {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+}
+
+.crm-lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #f9fafb;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.crm-lang-btn:hover {
+  border-color: #a42c48;
+  background: #fff;
+}
+
+.crm-lang-switcher.open .crm-lang-btn {
+  border-color: #a42c48;
+  background: #fff;
+}
+
+.crm-lang-chevron {
+  transition: transform 0.2s;
+}
+
+.crm-lang-switcher.open .crm-lang-chevron {
+  transform: rotate(180deg);
+}
+
+.crm-lang-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 140px;
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  list-style: none;
+  padding: 4px;
+  margin: 0;
+  z-index: 100;
+}
+
+.crm-lang-menu-open {
+  display: block;
+}
+
+.crm-lang-option {
+  display: block;
+  padding: 8px 14px;
+  font-size: 14px;
+  color: #6b7280;
+  border-radius: 6px;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+
+.crm-lang-option:hover {
+  background: #fdf2f4;
+  color: #a42c48;
+}
+
+.crm-lang-active {
+  font-weight: 600;
+  color: #a42c48;
+  background: #fdf2f4;
+}
+
+/* ── Toast Notifications ── */
+#crm-toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 380px;
+}
+
+.crm-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  animation: crm-toast-in 0.3s ease;
+}
+
+.crm-toast-out {
+  animation: crm-toast-out 0.35s ease forwards;
+}
+
+.crm-toast-error { border-left: 4px solid #ef4444; background: #fef2f2; }
+.crm-toast-warning { border-left: 4px solid #f59e0b; background: #fffbeb; }
+.crm-toast-success { border-left: 4px solid #22c55e; background: #f0fdf4; }
+.crm-toast-info { border-left: 4px solid #a42c48; background: #fdf2f4; }
+
+.crm-toast-icon { width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px; }
+.crm-toast-error .crm-toast-icon { color: #ef4444; }
+.crm-toast-warning .crm-toast-icon { color: #f59e0b; }
+.crm-toast-success .crm-toast-icon { color: #22c55e; }
+.crm-toast-info .crm-toast-icon { color: #a42c48; }
+
+.crm-toast-body { flex: 1; min-width: 0; }
+.crm-toast-title { font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 2px; }
+.crm-toast-message { font-size: 13px; color: #6b7280; line-height: 1.4; word-break: break-word; }
+
+.crm-toast-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  color: #9ca3af;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+.crm-toast-close:hover { opacity: 1; }
+
+.crm-toast-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  border-radius: 0 0 0 10px;
+  animation: crm-toast-progress linear forwards;
+}
+
+.crm-toast-error .crm-toast-progress { background: #ef4444; }
+.crm-toast-warning .crm-toast-progress { background: #f59e0b; }
+.crm-toast-success .crm-toast-progress { background: #22c55e; }
+.crm-toast-info .crm-toast-progress { background: #a42c48; }
+
+@keyframes crm-toast-in {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes crm-toast-out {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(40px); }
+}
+
+@keyframes crm-toast-progress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+@media (max-width: 480px) {
+  #crm-toast-container {
+    right: 12px;
+    left: 12px;
+    max-width: none;
+  }
+}

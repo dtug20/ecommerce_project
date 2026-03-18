@@ -51,6 +51,7 @@ services:
     command: start-dev
     volumes:
       - ./keycloak/themes/shofy-theme:/opt/keycloak/themes/shofy-theme
+      - ./keycloak/themes/shofy-crm-theme:/opt/keycloak/themes/shofy-crm-theme
     ports:
       - "8180:8180"
     depends_on:

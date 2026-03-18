@@ -41,42 +41,16 @@ app.use(keycloak.middleware({ logout: '/logout', admin: '/' }));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan('combined'));
+app.use(morgan(':method :url :status :response-time ms'));
 
-// Serve static files
+// Serve static assets (JS/CSS/images) but NOT index.html
+// index.html is served by the protected SPA routes below
+const reactBuildPath = path.join(__dirname, 'crm-ui', 'dist');
+app.use(express.static(reactBuildPath, { index: false }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-
-// ─── Extract user info for all views ───────────────────────────
-
-app.use((req, res, next) => {
-  res.locals.user = null;
-  if (req.kauth && req.kauth.grant) {
-    const token = req.kauth.grant.access_token.content;
-    const roles = token.realm_access?.roles || [];
-    // Pick the highest CRM role
-    const role = roles.includes('admin')
-      ? 'Admin'
-      : roles.includes('manager')
-        ? 'Manager'
-        : roles.includes('staff')
-          ? 'Staff'
-          : 'User';
-    res.locals.user = {
-      name: token.name || token.preferred_username || token.email,
-      email: token.email,
-      role,
-      roles,
-    };
-  }
-  next();
-});
 
 // ─── Database connection ───────────────────────────────────────
 
-// MongoDB connection — ONLY used by sync routes (/api/sync/*)
-// All other CRUD operations go through Backend API via apiProxy
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/shofy', {
@@ -85,7 +59,6 @@ const connectDB = async () => {
     console.log('CRM Connected to MongoDB (sync-only)');
   } catch (error) {
     console.warn('MongoDB connection failed (sync routes will be unavailable):', error.message);
-    // Don't exit — CRM still works for CRUD via Backend API proxy
   }
 };
 
@@ -100,39 +73,39 @@ const crmProtect = keycloak.protect((token) => {
   );
 });
 
+// ─── API Auth Middleware ─────────────────────────────────────
+// Wraps keycloak.protect() but returns 401 JSON for API requests
+// instead of redirecting to Keycloak login (which breaks XHR from React SPA)
+const keycloakProtectMiddleware = keycloak.protect();
+const apiProtect = (req, res, next) => {
+  const originalRedirect = res.redirect.bind(res);
+  res.redirect = (url) => {
+    if (req.path.startsWith('/api/') || req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.status(401).json({ success: false, message: 'Unauthorized — please login' });
+    }
+    return originalRedirect(url);
+  };
+  keycloakProtectMiddleware(req, res, next);
+};
+
 // ─── API Proxy Middleware ─────────────────────────────────────
-// Attaches req.api (ApiProxy) for forwarding requests to Backend API
 const attachProxy = require('./middleware/attachProxy');
 
-// ─── API Routes (protected by Keycloak, proxied to Backend) ──
+// ─── API Routes (protected by Keycloak session, proxied to Backend) ──
 
-app.use('/api/products', keycloak.protect(), attachProxy, require('./routes/products'));
-app.use('/api/categories', keycloak.protect(), attachProxy, require('./routes/categories'));
-app.use('/api/orders', keycloak.protect(), attachProxy, require('./routes/orders'));
-app.use('/api/users', keycloak.protect(), attachProxy, require('./routes/users'));
-// Sync routes still use direct MongoDB access (dual-DB sync)
-app.use('/api/sync', keycloak.protect(), require('./routes/sync.routes'));
+app.use('/api/products', apiProtect, attachProxy, require('./routes/products'));
+app.use('/api/categories', apiProtect, attachProxy, require('./routes/categories'));
+app.use('/api/orders', apiProtect, attachProxy, require('./routes/orders'));
+app.use('/api/users', apiProtect, attachProxy, require('./routes/users'));
+app.use('/api/sync', apiProtect, require('./routes/sync.routes'));
 
-// ─── Page Routes (protected, admin/manager/staff only) ────────
+// ─── Page Routes (React SPA, protected by Keycloak) ─────────
 
-app.get('/', crmProtect, (req, res) => {
-  res.render('dashboard', { title: 'Shofy CRM Dashboard' });
-});
-
-app.get('/products', crmProtect, (req, res) => {
-  res.render('products', { title: 'Product Management' });
-});
-
-app.get('/categories', crmProtect, (req, res) => {
-  res.render('categories', { title: 'Category Management' });
-});
-
-app.get('/orders', crmProtect, (req, res) => {
-  res.render('orders', { title: 'Order Management' });
-});
-
-app.get('/users', crmProtect, (req, res) => {
-  res.render('users', { title: 'User Management' });
+const spaRoutes = ['/', '/products', '/categories', '/orders', '/users'];
+spaRoutes.forEach((route) => {
+  app.get(route, crmProtect, (req, res) => {
+    res.sendFile(path.join(reactBuildPath, 'index.html'));
+  });
 });
 
 // ─── Error handling ────────────────────────────────────────────
@@ -146,7 +119,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({
     success: false,

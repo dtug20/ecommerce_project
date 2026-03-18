@@ -9,7 +9,7 @@ const ROLE_PRIORITY = ["admin", "manager", "staff", "user"];
 const jwksClient = jwksRsa({
   cache: true,
   rateLimit: true,
-  jwksRequestsPerMinute: 5,
+  jwksRequestsPerMinute: 30,
   jwksUri: keycloakConfig.jwksUri,
 });
 
