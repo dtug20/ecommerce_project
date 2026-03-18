@@ -9,9 +9,14 @@ const NavProfileTab = ({ orderData }) => {
   const {user} = useSelector(state => state.auth)
   const dispatch = useDispatch();
   const keycloak = useKeycloak();
-  // handle logout
+  // handle logout — clear sensitive data before Keycloak redirect
   const handleLogout = () => {
     dispatch(userLoggedOut());
+    localStorage.removeItem('cart_products');
+    localStorage.removeItem('wishlist_items');
+    localStorage.removeItem('compare_items');
+    localStorage.removeItem('couponInfo');
+    localStorage.removeItem('shipping_info');
     keycloak.logout({ redirectUri: window.location.origin });
   }
   return (

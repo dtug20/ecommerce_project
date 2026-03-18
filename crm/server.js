@@ -96,12 +96,17 @@ const crmProtect = keycloak.protect((token) => {
   );
 });
 
-// ─── API Routes (protected by Keycloak) ────────────────────────
+// ─── API Proxy Middleware ─────────────────────────────────────
+// Attaches req.api (ApiProxy) for forwarding requests to Backend API
+const attachProxy = require('./middleware/attachProxy');
 
-app.use('/api/products', keycloak.protect(), require('./routes/products'));
-app.use('/api/categories', keycloak.protect(), require('./routes/categories'));
-app.use('/api/orders', keycloak.protect(), require('./routes/orders'));
-app.use('/api/users', keycloak.protect(), require('./routes/users'));
+// ─── API Routes (protected by Keycloak, proxied to Backend) ──
+
+app.use('/api/products', keycloak.protect(), attachProxy, require('./routes/products'));
+app.use('/api/categories', keycloak.protect(), attachProxy, require('./routes/categories'));
+app.use('/api/orders', keycloak.protect(), attachProxy, require('./routes/orders'));
+app.use('/api/users', keycloak.protect(), attachProxy, require('./routes/users'));
+// Sync routes still use direct MongoDB access (dual-DB sync)
 app.use('/api/sync', keycloak.protect(), require('./routes/sync.routes'));
 
 // ─── Page Routes (protected, admin/manager/staff only) ────────

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useRef } from "r
 import { useDispatch } from "react-redux";
 import keycloak from "@/lib/keycloak";
 import { userLoggedIn, userLoggedOut } from "@/redux/features/auth/authSlice";
+import { authApi } from "@/redux/features/auth/authApi";
 import Loader from "@/components/loader/loader";
 
 const KeycloakContext = createContext(null);
@@ -24,12 +25,18 @@ const KeycloakProvider = ({ children }) => {
           typeof window !== "undefined"
             ? `${window.location.origin}/silent-check-sso.html`
             : undefined,
-        enablePkce: false,
+        enablePkce: true,
         checkLoginIframe: false,
       })
-      .then((authenticated) => {
+      .then(async (authenticated) => {
         if (authenticated) {
           syncUserToRedux();
+          // Fetch MongoDB profile to populate _id for orders, reviews, etc.
+          try {
+            await dispatch(authApi.endpoints.getUserProfile.initiate());
+          } catch (err) {
+            console.error("[Keycloak] Failed to fetch user profile:", err);
+          }
         }
         setInitialized(true);
       })

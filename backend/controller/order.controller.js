@@ -6,10 +6,15 @@ const { emitOrderCreated, emitOrderUpdated } = require("../utils/socketEmitter")
 // create-payment-intent
 exports.paymentIntent = async (req, res, next) => {
   try {
-    const product = req.body;
-    const price = Number(product.price);
-    const amount = price * 100;
-    // Create a PaymentIntent with the order amount and currency
+    const price = Number(req.body.price);
+    // Validate price is a positive finite number and meets Stripe minimum ($0.50)
+    if (!price || !isFinite(price) || price < 0.50) {
+      return res.status(400).json({
+        status: "fail",
+        error: "Invalid price. Must be at least $0.50.",
+      });
+    }
+    const amount = Math.round(price * 100); // cents, rounded to avoid floating point issues
     const paymentIntent = await stripe.paymentIntents.create({
       currency: "usd",
       amount: amount,
@@ -19,14 +24,42 @@ exports.paymentIntent = async (req, res, next) => {
       clientSecret: paymentIntent.client_secret,
     });
   } catch (error) {
-    console.log(error);
     next(error)
   }
 };
-// addOrder
+// addOrder — whitelist fields and enforce authenticated user
 exports.addOrder = async (req, res, next) => {
   try {
-    const orderItems = await Order.create(req.body);
+    const { cart, name, address, email, contact, city, country, zipCode,
+            subTotal, shippingCost, discount, totalAmount, shippingOption,
+            cardInfo, paymentIntent, paymentMethod, orderNote } = req.body;
+
+    // Validate required fields
+    if (!cart || !name || !totalAmount || !paymentMethod) {
+      return res.status(400).json({
+        status: "fail",
+        error: "Missing required order fields",
+      });
+    }
+
+    // Verify PaymentIntent with Stripe for card payments
+    if (paymentMethod === "Card" && paymentIntent?.id) {
+      const stripePI = await stripe.paymentIntents.retrieve(paymentIntent.id);
+      if (stripePI.status !== "succeeded") {
+        return res.status(400).json({
+          status: "fail",
+          error: "Payment has not been completed",
+        });
+      }
+    }
+
+    const orderItems = await Order.create({
+      user: req.user._id, // enforce authenticated user, not client-supplied
+      cart, name, address, email, contact, city, country, zipCode,
+      subTotal, shippingCost, discount, totalAmount, shippingOption,
+      cardInfo, paymentIntent, paymentMethod, orderNote,
+      status: "pending", // always start as pending
+    });
 
     // Emit real-time update
     emitOrderCreated(orderItems);
@@ -38,7 +71,6 @@ exports.addOrder = async (req, res, next) => {
     });
   }
   catch (error) {
-    console.log(error);
     next(error)
   }
 };
@@ -68,7 +100,7 @@ exports.getSingleOrder = async (req, res, next) => {
   }
 };
 
-exports.updateOrderStatus = async (req, res) => {
+exports.updateOrderStatus = async (req, res, next) => {
   const newStatus = req.body.status;
   try {
     const updatedOrder = await Order.findByIdAndUpdate(

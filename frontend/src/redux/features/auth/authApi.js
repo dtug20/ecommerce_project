@@ -7,24 +7,27 @@ export const authApi = apiSlice.injectEndpoints({
     // get user profile from backend (syncs Keycloak user with MongoDB)
     getUserProfile: builder.query({
       query: () => "/api/user/me",
-      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
+      async onQueryStarted(arg, { queryFulfilled, dispatch, getState }) {
         try {
           const result = await queryFulfilled;
+          // Backend returns { status, data: { user } } — merge MongoDB _id with existing Keycloak user
+          const mongoUser = result.data?.data?.user || result.data;
+          const existingUser = getState().auth.user;
           dispatch(
             userLoggedIn({
-              user: result.data,
+              user: { ...existingUser, ...mongoUser },
               authenticated: true,
             })
           );
         } catch (err) {
-          // do nothing
+          console.error("[Auth] Failed to sync user profile:", err);
         }
       },
     }),
-    // update profile (business data only)
+    // update profile (business data only — backend uses token identity, no id needed)
     updateProfile: builder.mutation({
-      query: ({ id, ...data }) => ({
-        url: `/api/user/update-user/${id}`,
+      query: (data) => ({
+        url: `/api/user/update-user`,
         method: "PUT",
         body: data,
       }),

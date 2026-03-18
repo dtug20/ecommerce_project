@@ -131,7 +131,7 @@ exports.getSingleProduct = async (req,res,next) => {
     });
     
     if (!product) {
-      console.warn(`Product not found for ID: ${id}`);
+      console.warn(`Product not found for ID: ${req.params.id}`);
       return null;  // Return null if product is not found
     }
     res.json(product)

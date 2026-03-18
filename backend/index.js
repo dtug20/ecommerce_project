@@ -3,6 +3,9 @@ const express = require("express");
 const app = express();
 const path = require('path');
 const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+const mongoSanitize = require("express-mongo-sanitize");
 const http = require('http');
 const { Server } = require('socket.io');
 const connectDB = require("./config/db");
@@ -23,12 +26,50 @@ const reviewRoutes = require("./routes/review.routes");
 const adminRoutes = require("./routes/admin.routes");
 // const uploadRouter = require('./routes/uploadFile.route');
 const cloudinaryRoutes = require("./routes/cloudinary.routes");
+// admin CRUD routes (for CRM proxy)
+const adminProductRoutes = require("./routes/admin.product.routes");
+const adminCategoryRoutes = require("./routes/admin.category.routes");
+const adminOrderRoutes = require("./routes/admin.order.routes");
+const adminUserRoutes = require("./routes/admin.user.routes");
 
 // middleware
-app.use(cors());
-app.use(express.json());
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:8080',
+  'http://localhost:8081',
+  secret.client_url,
+  secret.admin_url,
+].filter(Boolean);
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
+app.use(helmet());
+app.use(mongoSanitize());
+app.use(express.json({ limit: '100kb' }));
 app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Global rate limiter
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200, // limit each IP to 200 requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { status: "fail", error: "Too many requests, please try again later" },
+});
+app.use(globalLimiter);
+
+// Stricter rate limit for payment and order creation
+const paymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { status: "fail", error: "Too many payment attempts, please try again later" },
+});
+app.use("/api/order/create-payment-intent", paymentLimiter);
+app.use("/api/order/saveOrder", paymentLimiter);
 
 // Create HTTP server and attach Socket.io
 const server = http.createServer(app);
@@ -105,16 +146,16 @@ app.use("/api/user-order", userOrderRoutes);
 app.use("/api/review", reviewRoutes);
 app.use("/api/cloudinary", cloudinaryRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/admin/products", adminProductRoutes);
+app.use("/api/admin/categories", adminCategoryRoutes);
+app.use("/api/admin/orders", adminOrderRoutes);
+app.use("/api/admin/users", adminUserRoutes);
 
 // root route
 app.get("/", (req, res) => res.send("Apps worked successfully"));
 
-server.listen(PORT, () => console.log(`server running on port ${PORT}`));
-
-// global error handler
-app.use(globalErrorHandler);
-//* handle not found
-app.use((req, res, next) => {
+// 404 handler (must be after all routes)
+app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: 'Not Found',
@@ -125,7 +166,11 @@ app.use((req, res, next) => {
       },
     ],
   });
-  next();
 });
+
+// global error handler (must be last middleware)
+app.use(globalErrorHandler);
+
+server.listen(PORT, () => console.log(`server running on port ${PORT}`));
 
 module.exports = app;

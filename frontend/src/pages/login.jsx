@@ -7,11 +7,17 @@ const LoginPage = () => {
   const router = useRouter();
 
   useEffect(() => {
+    // Validate redirect param to prevent open redirect attacks
+    const rawRedirect = router.query.redirect;
+    const safeRedirect = (typeof rawRedirect === 'string' && rawRedirect.startsWith('/') && !rawRedirect.includes('://'))
+      ? rawRedirect
+      : '/';
+
     if (keycloak.authenticated) {
-      router.push(router.query.redirect || "/");
+      router.push(safeRedirect);
     } else {
       keycloak.login({
-        redirectUri: window.location.origin + (router.query.redirect || "/"),
+        redirectUri: window.location.origin + safeRedirect,
       });
     }
   }, [router]);

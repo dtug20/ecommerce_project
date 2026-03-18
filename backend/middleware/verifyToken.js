@@ -69,8 +69,8 @@ module.exports = async (req, res, next) => {
       // Try by email (for migrated users whose keycloakId hasn't been set yet)
       mongoUser = await User.findOne({ email: payload.email });
       if (mongoUser) {
+        // Link Keycloak identity but preserve existing status (don't reactivate blocked users)
         mongoUser.keycloakId = payload.sub;
-        mongoUser.status = "active";
         await mongoUser.save({ validateBeforeSave: false });
       } else {
         // Auto-create MongoDB user record on first Keycloak login
@@ -82,6 +82,20 @@ module.exports = async (req, res, next) => {
           status: "active",
         });
       }
+    }
+
+    // Check if user is blocked or inactive
+    if (mongoUser.status === "blocked") {
+      return res.status(403).json({
+        status: "fail",
+        error: "Your account has been blocked. Please contact support.",
+      });
+    }
+    if (mongoUser.status === "inactive") {
+      return res.status(403).json({
+        status: "fail",
+        error: "Your account is inactive. Please verify your email.",
+      });
     }
 
     // Preserve MongoDB ObjectId for backward compatibility with order queries
@@ -96,7 +110,7 @@ module.exports = async (req, res, next) => {
         error: "Token expired",
       });
     }
-    console.error("[Auth] Token verification failed:", error.message);
+    console.error("[Auth] Token verification failed:", error.name, error.message, error.code);
     res.status(403).json({
       status: "fail",
       error: "Invalid token",

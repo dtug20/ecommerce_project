@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const verifyToken = require('../middleware/verifyToken');
+const authorization = require('../middleware/authorization');
 const {
   addCoupon,
   addAllCoupon,
@@ -10,10 +12,10 @@ const {
 } = require('../controller/coupon.controller');
 
 //add a coupon
-router.post('/add', addCoupon);
+router.post('/add', verifyToken, authorization("admin", "manager"), addCoupon);
 
 //add multiple coupon
-router.post('/all', addAllCoupon);
+router.post('/all', verifyToken, authorization("admin", "manager"), addAllCoupon);
 
 //get all coupon
 router.get('/', getAllCoupons);
@@ -22,9 +24,9 @@ router.get('/', getAllCoupons);
 router.get('/:id', getCouponById);
 
 //update a coupon
-router.patch('/:id', updateCoupon);
+router.patch('/:id', verifyToken, authorization("admin", "manager"), updateCoupon);
 
 //delete a coupon
-router.delete('/:id', deleteCoupon);
+router.delete('/:id', verifyToken, authorization("admin", "manager"), deleteCoupon);
 
 module.exports = router;

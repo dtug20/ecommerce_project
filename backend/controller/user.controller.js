@@ -29,10 +29,11 @@ exports.getProfile = async (req, res, next) => {
   }
 };
 
-// PUT /api/user/update-user/:id — update business profile data
+// PUT /api/user/update-user — update own business profile data
 exports.updateUser = async (req, res, next) => {
   try {
-    const userId = req.params.id;
+    // Use authenticated user's ID, not URL param (prevents IDOR)
+    const userId = req.user._id;
     const user = await User.findById(userId);
     if (user) {
       user.name = req.body.name || user.name;

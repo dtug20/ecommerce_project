@@ -2,11 +2,13 @@ const express = require('express');
 const router = express.Router();
 // internal
 const productController = require('../controller/product.controller');
+const verifyToken = require('../middleware/verifyToken');
+const authorization = require('../middleware/authorization');
 
 // add a product
-router.post('/add', productController.addProduct);
+router.post('/add', verifyToken, authorization("admin", "manager"), productController.addProduct);
 // add all product
-router.post('/add-all', productController.addAllProducts);
+router.post('/add-all', verifyToken, authorization("admin", "manager"), productController.addAllProducts);
 // get all products
 router.get('/all', productController.getAllProducts);
 // get offer timer product
@@ -23,11 +25,11 @@ router.get('/related-product/:id', productController.getRelatedProducts);
 router.get("/single-product/:id", productController.getSingleProduct);
 // stock Product
 router.get("/stock-out", productController.stockOutProducts);
-// get Single Product
-router.patch("/edit-product/:id", productController.updateProduct);
+// edit Product
+router.patch("/edit-product/:id", verifyToken, authorization("admin", "manager"), productController.updateProduct);
 // get Products ByType
 router.get('/:type', productController.getProductsByType);
-// get Products ByType 
-router.delete('/:id', productController.deleteProduct);
+// delete Product
+router.delete('/:id', verifyToken, authorization("admin", "manager"), productController.deleteProduct);
 
 module.exports = router;

@@ -6,7 +6,9 @@ const User = require("../model/User");
 
 // add a review
 exports.addReview = async (req, res,next) => {
-  const { userId, productId, rating, comment } = req.body;
+  const { productId, rating, comment } = req.body;
+  // Use authenticated user's ID, not client-supplied userId
+  const userId = req.user._id;
   try {
     // Check if the user has already left a review for this product
     const existingReview = await Review.findOne({

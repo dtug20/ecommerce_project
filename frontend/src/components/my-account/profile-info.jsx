@@ -29,7 +29,6 @@ const ProfileInfo = () => {
   // on submit
   const onSubmit = (data) => {
     updateProfile({
-      id:user?._id,
       name:data.name,
       email:data.email,
       phone:data.phone,
