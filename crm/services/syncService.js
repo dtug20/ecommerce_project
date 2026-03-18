@@ -1,8 +1,16 @@
 const mongoose = require('mongoose');
 const axios = require('axios');
 
-// Frontend database connection (separate from CRM)
-const frontendConnection = mongoose.createConnection(process.env.FRONTEND_MONGO_URI || 'mongodb://127.0.0.1:27017/shofy');
+// Frontend database connection (separate from CRM) — lazy, won't crash if unavailable
+let frontendConnection;
+try {
+  frontendConnection = mongoose.createConnection(process.env.FRONTEND_MONGO_URI || 'mongodb://127.0.0.1:27017/shofy', {
+    serverSelectionTimeoutMS: 5000,
+  });
+  frontendConnection.on('error', (err) => console.warn('Frontend DB connection error:', err.message));
+} catch (err) {
+  console.warn('Frontend DB connection failed:', err.message);
+}
 
 // Frontend Product Schema (matching the frontend model structure)
 const FrontendProductSchema = new mongoose.Schema({

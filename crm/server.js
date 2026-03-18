@@ -75,13 +75,17 @@ app.use((req, res, next) => {
 
 // ─── Database connection ───────────────────────────────────────
 
+// MongoDB connection — ONLY used by sync routes (/api/sync/*)
+// All other CRUD operations go through Backend API via apiProxy
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/shofy');
-    console.log('CRM Connected to MongoDB (shofy database)');
+    await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/shofy', {
+      serverSelectionTimeoutMS: 5000,
+    });
+    console.log('CRM Connected to MongoDB (sync-only)');
   } catch (error) {
-    console.error('MongoDB connection error:', error.message);
-    process.exit(1);
+    console.warn('MongoDB connection failed (sync routes will be unavailable):', error.message);
+    // Don't exit — CRM still works for CRUD via Backend API proxy
   }
 };
 

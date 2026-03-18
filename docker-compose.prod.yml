@@ -4,6 +4,8 @@ services:
     image: mongo:7
     container_name: shofy-mongodb
     restart: unless-stopped
+    ports:
+      - "0.0.0.0:27017:27017"
     volumes:
       - mongodata:/data/db
     healthcheck:
