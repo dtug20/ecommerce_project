@@ -1,21 +1,23 @@
 name: Deploy to VPS
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
 env:
   DEPLOY_PATH: /opt/shofy
+  REGISTRY: ghcr.io
 
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
@@ -28,12 +30,17 @@ jobs:
 
             cd ${{ env.DEPLOY_PATH }}
 
-            # Pull latest code
+            # Pull latest code (for compose file, nginx config, themes, etc.)
             git fetch origin main
             git reset --hard origin/main
 
-            # Build and restart services
-            docker compose -f docker-compose.prod.yml build --parallel
+            # Login to GitHub Container Registry
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USER }} --password-stdin
+
+            # Pull latest images
+            docker compose -f docker-compose.prod.yml pull backend frontend crm
+
+            # Restart with new images
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
 
             # Cleanup old images
@@ -49,7 +56,7 @@ jobs:
                 -d text="✅ *Shofy Deploy Successful*
             📦 Server: $(hostname)
             🕐 $(date '+%Y-%m-%d %H:%M:%S')
-            🐳 Running containers: $(docker ps --format '{{.Names}}' | tr '\n' ', ')" || true
+            🐳 Containers: $(docker ps --format '{{.Names}}' | tr '\n' ', ')" || true
             fi
 
             echo "Deploy complete at $(date)"
