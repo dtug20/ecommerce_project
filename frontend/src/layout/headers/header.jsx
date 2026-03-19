@@ -76,7 +76,7 @@ const Header = () => {
             <div className="container">
               <div className="tp-mega-menu-wrapper p-relative">
                 <div className="row align-items-center">
-                  <div className="col-xl-3 col-lg-3">
+                  <div className="col-xl-2 col-lg-2">
                     {/* category start */}
                     <div className="tp-header-category tp-category-menu tp-header-category-toggle">
                       <button
@@ -86,7 +86,7 @@ const Header = () => {
                         <span>
                           <CategoryMenu />
                         </span>
-                        All Departments
+                        All Product Type
                       </button>
                       <nav className="tp-category-menu-content">
                         <HeaderCategory categoryType="electronics" isCategoryActive={isCategoryActive} />
@@ -94,7 +94,7 @@ const Header = () => {
                     </div>
                     {/* category end */}
                   </div>
-                  <div className="col-xl-6 col-lg-6">
+                  <div className="col-xl-7 col-lg-7">
                     <div className="main-menu menu-style-1">
                       <nav className="tp-main-menu-content">
                         <Menus />
@@ -128,14 +128,14 @@ const Header = () => {
         <div className="container">
           <div className="tp-mega-menu-wrapper p-relative">
             <div className="row align-items-center">
-              <div className="col-xl-3 col-lg-3 col-md-3 col-6">
+              <div className="col-xl-2 col-lg-3 col-md-3 col-6">
                 <div className="logo">
                   <Link href="/">
                     <Image src={logo} alt="logo" />
                   </Link>
                 </div>
               </div>
-              <div className="col-xl-6 col-lg-6 col-md-6 d-none d-md-block">
+              <div className="col-xl-7 col-lg-6 col-md-6 d-none d-md-block">
                 <div className="tp-header-sticky-menu main-menu menu-style-1 d-none d-lg-block">
                   <nav id="mobile-menu">
                     <Menus />

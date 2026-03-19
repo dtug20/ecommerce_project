@@ -32,6 +32,10 @@ const CategorySchema = mongoose.Schema({
     enum: ['Show', 'Hide'],
     default: 'Show',
   },
+  featured: {
+    type: Boolean,
+    default: false,
+  },
 },{
   timestamps: true
 })

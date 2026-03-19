@@ -19,6 +19,7 @@ import {
   Row,
   Col,
   Tooltip,
+  Upload,
 } from 'antd';
 import {
   PlusOutlined,
@@ -32,6 +33,7 @@ import toast from 'react-hot-toast';
 import type { TableProps } from 'antd';
 import type { Category, CategoryStats } from '@/types';
 import { categoriesApi } from '@/services/api';
+import api from '@/services/api';
 import { formatDate } from '@/hooks/useFormatters';
 import StatusBadge from '@/components/commons/StatusBadge';
 import PageHeader from '@/components/commons/PageHeader';
@@ -47,7 +49,7 @@ interface CategoryFormValues {
   productType: string;
   description?: string;
   img?: string;
-  children?: string;
+  children?: string[];
   status: 'Show' | 'Hide';
   sortOrder?: number;
   featured?: boolean;
@@ -216,7 +218,7 @@ export default function CategoriesPage() {
       productType: category.productType,
       description: category.description,
       img: category.img,
-      children: category.children?.join(', ') ?? '',
+      children: category.children ?? [],
       status: category.status,
       sortOrder: category.sortOrder ?? 0,
       featured: category.featured ?? false,
@@ -243,11 +245,8 @@ export default function CategoriesPage() {
         productType: values.productType,
         description: values.description,
         img: values.img,
-        children: values.children
-          ? values.children
-              .split(',')
-              .map((c) => c.trim())
-              .filter(Boolean)
+        children: Array.isArray(values.children)
+          ? values.children.map((c) => c?.trim()).filter(Boolean)
           : [],
         status: values.status,
         sortOrder: values.sortOrder,
@@ -531,7 +530,16 @@ export default function CategoriesPage() {
                 label="Product Type"
                 rules={[{ required: true, message: 'Product type is required' }]}
               >
-                <Input placeholder="e.g. electronics" />
+                <Select
+                  options={[
+                    { value: 'fashion', label: 'Fashion' },
+                    { value: 'electronics', label: 'Electronics' },
+                    { value: 'beauty', label: 'Beauty' },
+                    { value: 'jewelry', label: 'Jewelry' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                  placeholder="Select product type"
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -540,17 +548,76 @@ export default function CategoriesPage() {
             <TextArea rows={3} placeholder="Brief description of the category" />
           </Form.Item>
 
-          <Form.Item name="img" label="Image URL">
-            <Input placeholder="https://example.com/image.jpg" />
+          <Form.Item name="img" hidden>
+             <Input />
+          </Form.Item>
+          <Form.Item label="Category Image">
+            <Upload
+              name="image"
+              listType="picture-card"
+              showUploadList={false}
+              customRequest={async (options) => {
+                const { file, onSuccess, onError } = options;
+                const formData = new FormData();
+                formData.append('image', file as Blob);
+                try {
+                  const res = await api.post('/api/cloudinary/add-img', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                  });
+                  const url = res.data?.data?.url;
+                  if (url) {
+                    form.setFieldsValue({ img: url });
+                    if (onSuccess) onSuccess('ok');
+                    toast.success('Image uploaded successfully');
+                  } else {
+                    throw new Error('No URL returned');
+                  }
+                } catch (err: any) {
+                  if (onError) onError(err);
+                  toast.error('Upload failed');
+                }
+              }}
+            >
+              <Form.Item dependencies={['img']} noStyle>
+                {() => {
+                  const imgUrl = form.getFieldValue('img');
+                  return imgUrl ? (
+                    <img src={imgUrl} alt="category" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  ) : (
+                    <div>
+                      <PlusOutlined />
+                      <div style={{ marginTop: 8 }}>Upload</div>
+                    </div>
+                  );
+                }}
+              </Form.Item>
+            </Upload>
           </Form.Item>
 
-          <Form.Item
-            name="children"
-            label="Sub-categories"
-            extra="Enter comma-separated sub-category names"
-          >
-            <Input placeholder="e.g. Phones, Tablets, Laptops" />
-          </Form.Item>
+          <Form.List name="children">
+            {(fields, { add, remove }) => (
+              <>
+                <div style={{ marginBottom: 8 }}>Sub-categories</div>
+                {fields.map((field) => (
+                  <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                    <Form.Item
+                      {...field}
+                      rules={[{ required: true, message: 'Missing sub-category name' }]}
+                      style={{ margin: 0, width: 300 }}
+                    >
+                      <Input placeholder="Sub-category name" />
+                    </Form.Item>
+                    <Button danger icon={<DeleteOutlined />} size="small" onClick={() => remove(field.name)} />
+                  </Space>
+                ))}
+                <Form.Item>
+                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                    Add Sub-category
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
 
           <Row gutter={16}>
             <Col span={12}>

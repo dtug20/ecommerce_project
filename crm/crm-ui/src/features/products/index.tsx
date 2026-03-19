@@ -18,6 +18,7 @@ import {
   Descriptions,
   Divider,
   Tag,
+  Cascader,
 } from 'antd';
 import type { TableProps } from 'antd';
 import {
@@ -58,7 +59,7 @@ interface ProductFormValues {
   discount?: number;
   quantity: number;
   shipping?: number;
-  category?: string;
+  category?: string[];
   status: 'Show' | 'Hide';
   img?: string;
   featured?: boolean;
@@ -120,7 +121,9 @@ function ProductModal({ open, editingProduct, categories, onClose }: ProductModa
           discount: editingProduct.discount ?? 0,
           quantity: editingProduct.quantity,
           shipping: editingProduct.shipping ?? 0,
-          category: editingProduct.category?._id ?? undefined,
+          category: editingProduct.productType && (editingProduct as any).parent 
+            ? [editingProduct.productType, (editingProduct as any).parent, (editingProduct as any).children].filter(Boolean)
+            : undefined,
           status: editingProduct.status as 'Show' | 'Hide',
           img: editingProduct.img ?? '',
           featured: editingProduct.featured ?? false,
@@ -179,9 +182,21 @@ function ProductModal({ open, editingProduct, categories, onClose }: ProductModa
         sizes: splitComma(values.sizes),
         tags: splitComma(values.tags),
       };
-      if (values.category) {
-        // Send category id — backend resolves to object
-        (payload as Record<string, unknown>).category = values.category;
+      const categoryVal = values.category;
+      if (categoryVal && categoryVal.length > 0) {
+        const prodType = categoryVal[0];
+        const parentName = categoryVal[1] || '';
+        const childName = categoryVal[2] || '';
+        const catObj = categories.find(c => c.parent === parentName && c.productType === prodType);
+        if (catObj) {
+           (payload as any).productType = prodType;
+           (payload as any).parent = parentName;
+           (payload as any).children = childName;
+           (payload as any).category = {
+             id: catObj._id,
+             name: parentName,
+           };
+        }
       }
 
       if (isEdit && editingProduct) {
@@ -266,12 +281,29 @@ function ProductModal({ open, editingProduct, categories, onClose }: ProductModa
         <Row gutter={16}>
           <Col xs={24} sm={12}>
             <Form.Item name="category" label="Category">
-              <Select
+              <Cascader
                 placeholder="Select category"
                 allowClear
                 showSearch
-                optionFilterProp="label"
-                options={categories.map((c) => ({ value: c._id, label: c.parent }))}
+                options={Object.entries(
+                  categories.reduce((acc, cat) => {
+                    const pt = cat.productType || 'other';
+                    if (!acc[pt]) acc[pt] = [];
+                    acc[pt].push(cat);
+                    return acc;
+                  }, {} as Record<string, Category[]>)
+                ).map(([pt, cats]) => ({
+                  value: pt,
+                  label: pt.charAt(0).toUpperCase() + pt.slice(1),
+                  children: cats.map(c => ({
+                    value: c.parent,
+                    label: c.parent,
+                    children: c.children?.map(child => ({
+                      value: child,
+                      label: child
+                    })) || []
+                  }))
+                }))}
               />
             </Form.Item>
           </Col>
@@ -401,7 +433,7 @@ function ViewProductModal({ product, onClose }: ViewProductModalProps) {
           </span>
         </Descriptions.Item>
         <Descriptions.Item label="Category">
-          {product.category?.parent ?? '—'}
+          {(product as any).parent ? `${(product as any).parent} > ${(product as any).children || ''}` : (product.category?.parent ?? '—')}
         </Descriptions.Item>
         <Descriptions.Item label="Brand">
           {product.brand?.name ?? '—'}
@@ -629,9 +661,9 @@ export default function ProductsPage() {
     {
       title: 'Category',
       key: 'category',
-      width: 140,
+      width: 160,
       render: (_: unknown, record: Product) => (
-        <Text>{record.category?.parent ?? '—'}</Text>
+        <Text>{(record as any).parent ? `${(record as any).parent} > ${(record as any).children || ''}` : (record.category?.parent ?? '—')}</Text>
       ),
     },
     {

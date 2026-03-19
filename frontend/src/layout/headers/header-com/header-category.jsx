@@ -2,16 +2,16 @@ import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 // internal
-import { useGetProductTypeCategoryQuery } from "@/redux/features/categoryApi";
+import { useGetShowCategoryQuery } from "@/redux/features/categoryApi";
 import ErrorMsg from "@/components/common/error-msg";
 import Loader from "@/components/loader/loader";
 
-const HeaderCategory = ({ isCategoryActive, categoryType = "electronics" }) => {
+const HeaderCategory = ({ isCategoryActive }) => {
   const {
     data: categories,
     isError,
     isLoading,
-  } = useGetProductTypeCategoryQuery(categoryType);
+  } = useGetShowCategoryQuery();
   const router = useRouter();
 
   // handle category route
@@ -34,6 +34,7 @@ const HeaderCategory = ({ isCategoryActive, categoryType = "electronics" }) => {
       );
     }
   };
+
   // decide what to render
   let content = null;
 
@@ -52,34 +53,67 @@ const HeaderCategory = ({ isCategoryActive, categoryType = "electronics" }) => {
   }
   if (!isLoading && !isError && categories?.result?.length > 0) {
     const category_items = categories.result;
-    content = category_items.map((item) => (
-      <li className="has-dropdown" key={item._id}>
+
+    // Use the exact 5 predefined default types
+    const defaultTypes = ["fashion", "electronics", "beauty", "jewelry", "other"];
+
+    // Group categories by strictly the default productTypes
+    const grouped = defaultTypes.reduce((acc, type) => {
+      acc[type] = category_items.filter(cat => cat.productType === type);
+      return acc;
+    }, {});
+
+    content = defaultTypes.map((type, idx) => {
+      const cats = grouped[type] || [];
+      return (
+      <li className="has-dropdown" key={idx}>
         <a
           className="cursor-pointer"
-          onClick={() => handleCategoryRoute(item.parent, "parent")}
+          onClick={() => router.push(`/shop?categoryType=${type}`)}
         >
-          {item.img && (
-            <span>
-              <Image src={item.img} alt="cate img" width={50} height={50} />
-            </span>
-          )}
-          {item.parent}
+          {type.charAt(0).toUpperCase() + type.slice(1)}
         </a>
 
-        {item.children && (
+        {cats.length > 0 && (
           <ul className="tp-submenu">
-            {item.children.map((child, i) => (
+            {cats.map((item) => (
               <li
-                key={i}
-                onClick={() => handleCategoryRoute(child, "children")}
+                key={item._id}
+                className={item.children && item.children.length > 0 ? "has-dropdown" : ""}
               >
-                <a className="cursor-pointer">{child}</a>
+                <a
+                  className="cursor-pointer"
+                  onClick={() => handleCategoryRoute(item.parent, "parent")}
+                >
+                  {item.img && (
+                    <span>
+                      <Image src={item.img} alt="cate img" width={50} height={50} />
+                    </span>
+                  )}
+                  {item.parent}
+                </a>
+
+                {item.children && item.children.length > 0 && (
+                  <ul className="tp-submenu">
+                    {item.children.map((child, i) => (
+                      <li
+                        key={i}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCategoryRoute(child, "children");
+                        }}
+                      >
+                        <a className="cursor-pointer">{child}</a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             ))}
           </ul>
         )}
       </li>
-    ));
+    )});
   }
   return <ul className={isCategoryActive ? "active" : ""}>{content}</ul>;
 };
