@@ -1,23 +1,18 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   Row,
   Col,
   Card,
   Statistic,
   Table,
-  Badge,
-  Button,
-  Space,
   Tag,
   Typography,
-  Divider,
 } from 'antd';
 import {
   ShoppingOutlined,
   ShoppingCartOutlined,
   TeamOutlined,
   TagsOutlined,
-  SyncOutlined,
 } from '@ant-design/icons';
 import {
   LineChart,
@@ -32,9 +27,8 @@ import {
   Cell,
   Legend,
 } from 'recharts';
-import toast from 'react-hot-toast';
 import type { ColumnsType } from 'antd/es/table';
-import { productsApi, ordersApi, usersApi, categoriesApi, syncApi } from '@/services/api';
+import { productsApi, ordersApi, usersApi, categoriesApi } from '@/services/api';
 import { formatCurrency, formatDate } from '@/hooks/useFormatters';
 import StatusBadge from '@/components/commons/StatusBadge';
 import type { Order, Product, MonthlyStats } from '@/types/index';
@@ -139,42 +133,10 @@ const lowStockColumns: ColumnsType<Product> = [
 ];
 
 // ---------------------------------------------------------------------------
-// Sync status indicator helper
-// ---------------------------------------------------------------------------
-
-interface SyncIndicatorProps {
-  label: string;
-  crmCount: number;
-  frontendCount: number;
-  isSynced: boolean;
-}
-
-function SyncIndicator({ label, crmCount, frontendCount, isSynced }: SyncIndicatorProps) {
-  return (
-    <Space direction="vertical" size={2} style={{ minWidth: 140 }}>
-      <Space>
-        <Badge status={isSynced ? 'success' : 'warning'} />
-        <Text strong>{label}</Text>
-      </Space>
-      <Text type="secondary" style={{ fontSize: 12 }}>
-        CRM: {crmCount} / Frontend: {frontendCount}
-      </Text>
-      {!isSynced && (
-        <Tag color="orange" style={{ fontSize: 11 }}>
-          Out of sync
-        </Tag>
-      )}
-    </Space>
-  );
-}
-
-// ---------------------------------------------------------------------------
 // Main Dashboard component
 // ---------------------------------------------------------------------------
 
 export default function Dashboard() {
-  const queryClient = useQueryClient();
-
   // ----- Stats queries -----
 
   const { data: productStatsData, isLoading: loadingProductStats } = useQuery({
@@ -197,14 +159,6 @@ export default function Dashboard() {
     queryFn: () => categoriesApi.getStats(),
   });
 
-  // ----- Sync status query -----
-
-  const { data: syncStatusData, isLoading: loadingSyncStatus } = useQuery({
-    queryKey: ['syncStatus'],
-    queryFn: () => syncApi.getSyncStatus(),
-    refetchInterval: 30_000,
-  });
-
   // ----- Recent orders query -----
 
   const { data: recentOrdersData, isLoading: loadingRecentOrders } = useQuery({
@@ -221,70 +175,12 @@ export default function Dashboard() {
       productsApi.getAll({ 'quantity[lte]': 10, limit: 5 } as Parameters<typeof productsApi.getAll>[0]),
   });
 
-  // ----- Sync mutations -----
-
-  const invalidateSyncStatus = () => {
-    void queryClient.invalidateQueries({ queryKey: ['syncStatus'] });
-  };
-
-  const syncAllMutation = useMutation({
-    mutationFn: () => syncApi.syncAll(),
-    onSuccess: (res) => {
-      toast.success(res.message ?? 'Sync all completed successfully');
-      invalidateSyncStatus();
-    },
-    onError: () => {
-      toast.error('Failed to sync all. Please try again.');
-    },
-  });
-
-  const syncProductsMutation = useMutation({
-    mutationFn: () => syncApi.syncProducts(),
-    onSuccess: (res) => {
-      toast.success(res.message ?? 'Products synced successfully');
-      invalidateSyncStatus();
-    },
-    onError: () => {
-      toast.error('Failed to sync products. Please try again.');
-    },
-  });
-
-  const syncCategoriesMutation = useMutation({
-    mutationFn: () => syncApi.syncCategories(),
-    onSuccess: (res) => {
-      toast.success(res.message ?? 'Categories synced successfully');
-      invalidateSyncStatus();
-    },
-    onError: () => {
-      toast.error('Failed to sync categories. Please try again.');
-    },
-  });
-
-  const syncUsersMutation = useMutation({
-    mutationFn: () => syncApi.syncUsers(),
-    onSuccess: (res) => {
-      toast.success(res.message ?? 'Users synced successfully');
-      invalidateSyncStatus();
-    },
-    onError: () => {
-      toast.error('Failed to sync users. Please try again.');
-    },
-  });
-
-  const anySyncLoading =
-    syncAllMutation.isPending ||
-    syncProductsMutation.isPending ||
-    syncCategoriesMutation.isPending ||
-    syncUsersMutation.isPending;
-
   // ----- Derived data -----
 
   const productStats = productStatsData?.data;
   const orderStats = orderStatsData?.data;
   const userStats = userStatsData?.data;
   const categoryStats = categoryStatsData?.data;
-  const syncStatus = syncStatusData?.data;
-
   const recentOrders: Order[] = recentOrdersData?.data ?? [];
   const lowStockProducts: Product[] = lowStockData?.data ?? [];
 
@@ -364,99 +260,7 @@ export default function Dashboard() {
       </Row>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 2. Sync Section                                                      */}
-      {/* ------------------------------------------------------------------ */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col span={24}>
-          <Card
-            title={
-              <Space>
-                <SyncOutlined spin={anySyncLoading} />
-                <span>Frontend Synchronization</span>
-              </Space>
-            }
-            loading={loadingSyncStatus}
-          >
-            <Row gutter={[24, 16]} align="middle">
-              {/* Sync status indicators */}
-              <Col xs={24} md={12}>
-                <Space size={32} wrap>
-                  <SyncIndicator
-                    label="Products"
-                    crmCount={syncStatus?.crm.products ?? 0}
-                    frontendCount={syncStatus?.frontend.products ?? 0}
-                    isSynced={syncStatus?.synced.products ?? false}
-                  />
-                  <SyncIndicator
-                    label="Categories"
-                    crmCount={syncStatus?.crm.categories ?? 0}
-                    frontendCount={syncStatus?.frontend.categories ?? 0}
-                    isSynced={syncStatus?.synced.categories ?? false}
-                  />
-                  <SyncIndicator
-                    label="Users"
-                    crmCount={syncStatus?.crm.users ?? 0}
-                    frontendCount={syncStatus?.frontend.users ?? 0}
-                    isSynced={syncStatus?.synced.users ?? false}
-                  />
-                </Space>
-              </Col>
-
-              <Col xs={24} md={12}>
-                <Divider type="vertical" style={{ height: 60, display: 'none' }} />
-                <Space wrap>
-                  <Button
-                    type="primary"
-                    icon={<SyncOutlined />}
-                    loading={syncAllMutation.isPending}
-                    disabled={anySyncLoading}
-                    onClick={() => syncAllMutation.mutate()}
-                  >
-                    Sync All
-                  </Button>
-                  <Button
-                    icon={<ShoppingOutlined />}
-                    loading={syncProductsMutation.isPending}
-                    disabled={anySyncLoading}
-                    onClick={() => syncProductsMutation.mutate()}
-                  >
-                    Products Only
-                  </Button>
-                  <Button
-                    icon={<TagsOutlined />}
-                    loading={syncCategoriesMutation.isPending}
-                    disabled={anySyncLoading}
-                    onClick={() => syncCategoriesMutation.mutate()}
-                  >
-                    Categories Only
-                  </Button>
-                  <Button
-                    icon={<TeamOutlined />}
-                    loading={syncUsersMutation.isPending}
-                    disabled={anySyncLoading}
-                    onClick={() => syncUsersMutation.mutate()}
-                  >
-                    Users Only
-                  </Button>
-                  <Button
-                    icon={<SyncOutlined />}
-                    disabled={anySyncLoading}
-                    onClick={() => {
-                      void queryClient.invalidateQueries({ queryKey: ['syncStatus'] });
-                      toast.success('Sync status refreshed');
-                    }}
-                  >
-                    Check Status
-                  </Button>
-                </Space>
-              </Col>
-            </Row>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* 3. Recent Orders + Low Stock Products                                */}
+      {/* 2. Recent Orders + Low Stock Products                                */}
       {/* ------------------------------------------------------------------ */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         {/* Recent Orders */}

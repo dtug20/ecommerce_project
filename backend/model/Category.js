@@ -36,9 +36,30 @@ const CategorySchema = mongoose.Schema({
     type: Boolean,
     default: false,
   },
+
+  // Extended category fields
+  name: { type: String },
+  slug: { type: String, unique: true, sparse: true },
+  icon: { type: String },
+  parentCategory: { type: mongoose.Schema.Types.ObjectId, ref: "Category" },
+  ancestors: [
+    {
+      _id: { type: mongoose.Schema.Types.ObjectId, required: true },
+      name: { type: String, required: true },
+      slug: { type: String, required: true },
+    },
+  ],
+  level: { type: Number, default: 0 },
+  sortOrder: { type: Number, default: 0 },
 },{
   timestamps: true
 })
+
+CategorySchema.index({ slug: 1 }, { unique: true, sparse: true });
+CategorySchema.index({ parentCategory: 1 }, { sparse: true });
+CategorySchema.index({ level: 1 });
+CategorySchema.index({ sortOrder: 1 });
+CategorySchema.index({ "ancestors._id": 1 });
 
 const Category = mongoose.model('Category',CategorySchema);
 module.exports = Category;

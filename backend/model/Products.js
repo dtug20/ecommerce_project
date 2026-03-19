@@ -140,11 +140,52 @@ const productsSchema = mongoose.Schema({
     type: Number,
     default: 0,
     min: 0
-  }
+  },
+
+  // Extended product fields
+  vendor: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  barcode: { type: String },
+  weight: { type: Number },
+  dimensions: {
+    length: { type: Number },
+    width: { type: Number },
+    height: { type: Number },
+  },
+  variants: [
+    {
+      sku: { type: String, required: true },
+      color: {
+        name: { type: String },
+        clrCode: { type: String },
+      },
+      size: { type: String },
+      price: { type: Number, required: true },
+      stock: { type: Number, required: true, default: 0 },
+      images: [{ type: String }],
+    },
+  ],
+  shipping: {
+    freeShipping: { type: Boolean, default: false },
+    shippingCost: { type: Number, default: 0 },
+    estimatedDelivery: { type: String },
+  },
+  seo: {
+    metaTitle: { type: String, maxlength: 70 },
+    metaDescription: { type: String, maxlength: 160 },
+    metaKeywords: [{ type: String }],
+    ogImage: { type: String },
+  },
 }, {
   timestamps: true,
 })
 
+productsSchema.index({ vendor: 1 }, { sparse: true });
+productsSchema.index({ price: 1 });
+productsSchema.index({ sellCount: -1 });
+productsSchema.index({ "offerDate.endDate": 1 }, { sparse: true });
+productsSchema.index({ tags: 1 });
+productsSchema.index({ title: "text", description: "text", tags: "text" });
+productsSchema.index({ createdAt: -1 });
 
 const Products = mongoose.model('Products', productsSchema)
 

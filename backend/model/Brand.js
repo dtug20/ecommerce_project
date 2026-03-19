@@ -35,9 +35,18 @@ const brandSchema = mongoose.Schema({
     type: ObjectId,
     ref: "Products"
   }],
+
+  // Extended brand fields
+  slug: { type: String, unique: true, sparse: true },
+  featured: { type: Boolean, default: false },
+  sortOrder: { type: Number, default: 0 },
 }, {
   timestamps: true
 });
+
+brandSchema.index({ slug: 1 }, { unique: true, sparse: true });
+brandSchema.index({ featured: 1 });
+brandSchema.index({ sortOrder: 1 });
 
 const Brand = mongoose.model("Brand", brandSchema);
 

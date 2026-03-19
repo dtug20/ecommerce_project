@@ -1,6 +1,26 @@
 /**
  * Socket.io event emitter utility
  * Emit real-time updates to all connected clients
+ *
+ * Current events (Phase 1):
+ *   product:created/updated/deleted, products:refresh
+ *   category:created/updated/deleted, categories:refresh
+ *   order:created/updated/deleted, orders:refresh
+ *   user:created/updated/deleted, users:refresh
+ *
+ * Planned events (Phase 2+):
+ *   page:created, page:updated, page:deleted
+ *   menu:updated
+ *   banner:created, banner:updated, banner:deleted
+ *   blog:published, blog:updated, blog:deleted
+ *   settings:updated
+ *   vendor:created, vendor:updated, vendor:statusChanged
+ *   wishlist:updated
+ *   review:moderated
+ *
+ * Consumers:
+ *   - Storefront (Next.js): RTK Query cache invalidation via socketClient.js
+ *   - CRM (React): TanStack Query invalidation via socket listener
  */
 
 const emitEvent = (eventName, data = {}) => {

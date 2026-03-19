@@ -56,9 +56,9 @@ const connectDB = async () => {
     await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/shofy', {
       serverSelectionTimeoutMS: 5000,
     });
-    console.log('CRM Connected to MongoDB (sync-only)');
+    console.log('CRM Connected to MongoDB');
   } catch (error) {
-    console.warn('MongoDB connection failed (sync routes will be unavailable):', error.message);
+    console.warn('MongoDB connection failed:', error.message);
   }
 };
 
@@ -97,7 +97,8 @@ app.use('/api/products', apiProtect, attachProxy, require('./routes/products'));
 app.use('/api/categories', apiProtect, attachProxy, require('./routes/categories'));
 app.use('/api/orders', apiProtect, attachProxy, require('./routes/orders'));
 app.use('/api/users', apiProtect, attachProxy, require('./routes/users'));
-app.use('/api/sync', apiProtect, require('./routes/sync.routes'));
+// Sync service removed in Phase 1 — single database, no sync needed
+// app.use('/api/sync', apiProtect, require('./routes/sync.routes'));
 
 // ─── Page Routes (React SPA, protected by Keycloak) ─────────
 

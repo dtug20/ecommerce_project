@@ -9,7 +9,26 @@ Shofy is a full-stack e-commerce application with three services:
 - **Backend** (`backend/`) — Express.js REST API on port 7001
 - **CRM** (`crm/`) — Express.js admin panel with EJS on port 8080
 
-**Database architecture:** CRM uses its own database (`shofy_ecommerce`) and one-way syncs to the frontend database (`shofy`) via a sync service. The backend connects to whatever `MONGO_URI` is set in its `.env`.
+**Database architecture (Phase 1 complete):** Migrating from dual-database (`shofy` + `shofy_ecommerce`) with sync service to a single unified database. The sync service has been removed from the CRM. Migration scripts are in `migration/`. The backend connects to whatever `MONGO_URI` is set in its `.env`.
+
+## Phase 1 Status (Complete)
+
+**What changed:**
+- **8 new backend models** created: SiteSetting, Page, Menu, Banner, BlogPost, Wishlist, EmailTemplate, ActivityLog
+- **7 existing models updated** with new fields (all backward-compatible with defaults)
+- **API v1 routes** at `/api/v1/{auth,store,user,vendor,admin}/*` with standardized response envelope
+- **Legacy aliases** at `/api/*` preserved with `Deprecation: true` headers (sunset: 2026-08-01)
+- **Sync service removed** from CRM (route, dashboard UI, mutations)
+- **CRM proxy paths updated** to `/api/v1/admin/*`
+- **verifyToken** now includes `vendor` in ROLE_PRIORITY
+- **Health endpoint** at `GET /health` (outside rate limiter)
+- **Migration scripts** in `migration/` (00-12, run manually during deployment)
+- **Utilities** added: `utils/respond.js` (standardized responses), `utils/pagination.js`
+
+**What did NOT change:**
+- Frontend (`frontend/`) — no changes, uses legacy aliases
+- Existing API endpoints — all continue to work via legacy aliases
+- CRM model files — still present (transition period)
 
 ## Commands
 

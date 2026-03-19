@@ -80,9 +80,53 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "processing", "delivered",'cancel'],
+      enum: ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled", "cancel"],
       lowercase: true,
     },
+
+    // Extended order fields
+    orderNumber: { type: String, unique: true, sparse: true },
+    tax: { type: Number, default: 0 },
+    paymentStatus: {
+      type: String,
+      enum: ["unpaid", "paid", "refunded", "partially-refunded"],
+      default: "unpaid",
+    },
+    paymentGateway: {
+      type: String,
+      enum: ["stripe", "paypal", "cod", "bank-transfer"],
+    },
+    transactionId: { type: String },
+    paidAt: { type: Date },
+    refundedAt: { type: Date },
+    refundAmount: { type: Number, default: 0 },
+    trackingNumber: { type: String },
+    carrier: { type: String },
+    trackingUrl: { type: String },
+    shippedAt: { type: Date },
+    deliveredAt: { type: Date },
+    estimatedDelivery: { type: Date },
+    splitOrders: [{ type: mongoose.Schema.Types.ObjectId, ref: "Order" }],
+    parentOrder: { type: mongoose.Schema.Types.ObjectId, ref: "Order" },
+    items: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Products",
+          required: true,
+        },
+        vendor: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        title: { type: String, required: true },
+        sku: { type: String },
+        image: { type: String },
+        price: { type: Number, required: true },
+        quantity: { type: Number, required: true },
+        color: { type: String },
+        size: { type: String },
+        subtotal: { type: Number, required: true },
+        vendorCommission: { type: Number },
+      },
+    ],
   },
   {
     timestamps: true,
@@ -113,6 +157,14 @@ orderSchema.pre('save', async function (next) {
     next();
   }
 });
+
+orderSchema.index({ orderNumber: 1 }, { unique: true, sparse: true });
+orderSchema.index({ paymentStatus: 1 });
+orderSchema.index({ paymentMethod: 1 });
+orderSchema.index({ createdAt: -1 });
+orderSchema.index({ "items.vendor": 1 }, { sparse: true });
+orderSchema.index({ trackingNumber: 1 }, { sparse: true });
+orderSchema.index({ parentOrder: 1 }, { sparse: true });
 
 const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);
 module.exports = Order;

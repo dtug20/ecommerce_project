@@ -14,23 +14,9 @@ const PORT = process.env.PORT || secret.port || 7001;
 const morgan = require('morgan')
 // error handler
 const globalErrorHandler = require("./middleware/global-error-handler");
-// routes
-const userRoutes = require("./routes/user.routes");
-const categoryRoutes = require("./routes/category.routes");
-const brandRoutes = require("./routes/brand.routes");
-const userOrderRoutes = require("./routes/user.order.routes");
-const productRoutes = require("./routes/product.routes");
-const orderRoutes = require("./routes/order.routes");
-const couponRoutes = require("./routes/coupon.routes");
-const reviewRoutes = require("./routes/review.routes");
-const adminRoutes = require("./routes/admin.routes");
-// const uploadRouter = require('./routes/uploadFile.route');
-const cloudinaryRoutes = require("./routes/cloudinary.routes");
-// admin CRUD routes (for CRM proxy)
-const adminProductRoutes = require("./routes/admin.product.routes");
-const adminCategoryRoutes = require("./routes/admin.category.routes");
-const adminOrderRoutes = require("./routes/admin.order.routes");
-const adminUserRoutes = require("./routes/admin.user.routes");
+// routes — v1 (canonical) and legacy aliases
+const v1Routes      = require("./routes/v1");
+const legacyAliases = require("./routes/legacy-aliases");
 
 // middleware
 const allowedOrigins = [
@@ -51,6 +37,15 @@ app.use(mongoSanitize());
 app.use(express.json({ limit: '100kb' }));
 app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Health check — liveness probe (no auth, outside rate limiter)
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // Global rate limiter
 const globalLimiter = rateLimit({
@@ -135,21 +130,12 @@ io.on('connection', (socket) => {
 // connect database
 connectDB();
 
-app.use("/api/user", userRoutes);
-app.use("/api/category", categoryRoutes);
-app.use("/api/brand", brandRoutes);
-app.use("/api/product", productRoutes);
-// app.use('/api/upload',uploadRouter);
-app.use("/api/order", orderRoutes);
-app.use("/api/coupon", couponRoutes);
-app.use("/api/user-order", userOrderRoutes);
-app.use("/api/review", reviewRoutes);
-app.use("/api/cloudinary", cloudinaryRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/admin/products", adminProductRoutes);
-app.use("/api/admin/categories", adminCategoryRoutes);
-app.use("/api/admin/orders", adminOrderRoutes);
-app.use("/api/admin/users", adminUserRoutes);
+// v1 — canonical versioned API
+app.use("/api/v1", v1Routes);
+
+// Legacy routes — preserved for backward compatibility with Deprecation headers
+// All original /api/* paths continue to work until the 2026-08-01 sunset date.
+app.use("/api", legacyAliases);
 
 // root route
 app.get("/", (req, res) => res.send("Apps worked successfully"));

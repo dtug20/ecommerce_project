@@ -1,4 +1,4 @@
-// Order controller — proxies to Backend API /api/admin/orders
+// Order controller — proxies to Backend API /api/v1/admin/orders
 
 const handleError = (res, error) => {
   const status = error.response?.status || 500;
@@ -8,7 +8,7 @@ const handleError = (res, error) => {
 
 exports.getAllOrders = async (req, res) => {
   try {
-    const result = await req.api.get('/api/admin/orders', req.query);
+    const result = await req.api.get('/api/v1/admin/orders', req.query);
     res.json(result);
   } catch (error) {
     handleError(res, error);
@@ -17,7 +17,7 @@ exports.getAllOrders = async (req, res) => {
 
 exports.getOrderById = async (req, res) => {
   try {
-    const result = await req.api.get(`/api/admin/orders/${req.params.id}`);
+    const result = await req.api.get(`/api/v1/admin/orders/${req.params.id}`);
     res.json(result);
   } catch (error) {
     handleError(res, error);
@@ -26,7 +26,7 @@ exports.getOrderById = async (req, res) => {
 
 exports.createOrder = async (req, res) => {
   try {
-    const result = await req.api.post('/api/admin/orders', req.body);
+    const result = await req.api.post('/api/v1/admin/orders', req.body);
     res.status(201).json(result);
   } catch (error) {
     handleError(res, error);
@@ -35,7 +35,7 @@ exports.createOrder = async (req, res) => {
 
 exports.updateOrder = async (req, res) => {
   try {
-    const result = await req.api.patch(`/api/admin/orders/${req.params.id}`, req.body);
+    const result = await req.api.patch(`/api/v1/admin/orders/${req.params.id}`, req.body);
     res.json(result);
   } catch (error) {
     handleError(res, error);
@@ -44,7 +44,7 @@ exports.updateOrder = async (req, res) => {
 
 exports.updateOrderStatus = async (req, res) => {
   try {
-    const result = await req.api.patch(`/api/admin/orders/${req.params.id}/status`, req.body);
+    const result = await req.api.patch(`/api/v1/admin/orders/${req.params.id}/status`, req.body);
     res.json(result);
   } catch (error) {
     handleError(res, error);
@@ -53,7 +53,7 @@ exports.updateOrderStatus = async (req, res) => {
 
 exports.deleteOrder = async (req, res) => {
   try {
-    const result = await req.api.delete(`/api/admin/orders/${req.params.id}`);
+    const result = await req.api.delete(`/api/v1/admin/orders/${req.params.id}`);
     res.json(result);
   } catch (error) {
     handleError(res, error);
@@ -62,7 +62,7 @@ exports.deleteOrder = async (req, res) => {
 
 exports.getOrderStats = async (req, res) => {
   try {
-    const result = await req.api.get('/api/admin/orders/stats');
+    const result = await req.api.get('/api/v1/admin/orders/stats');
     res.json(result);
   } catch (error) {
     handleError(res, error);

@@ -3,7 +3,7 @@ const jwksRsa = require("jwks-rsa");
 const { keycloakConfig } = require("../config/keycloak");
 const User = require("../model/User");
 
-const ROLE_PRIORITY = ["admin", "manager", "staff", "user"];
+const ROLE_PRIORITY = ["admin", "manager", "staff", "vendor", "user"];
 
 // JWKS client with caching (matches MediaSoft pattern)
 const jwksClient = jwksRsa({
