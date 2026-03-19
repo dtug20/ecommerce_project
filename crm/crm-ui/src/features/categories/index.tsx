@@ -20,7 +20,10 @@ import {
   Col,
   Tooltip,
   Upload,
+  Tree,
+  Card,
 } from 'antd';
+import type { DataNode } from 'antd/es/tree';
 import {
   PlusOutlined,
   EditOutlined,
@@ -28,6 +31,8 @@ import {
   DeleteOutlined,
   ClearOutlined,
   PictureOutlined,
+  TableOutlined,
+  ApartmentOutlined,
 } from '@ant-design/icons';
 import toast from 'react-hot-toast';
 import type { TableProps } from 'antd';
@@ -46,6 +51,9 @@ const { TextArea } = Input;
 
 interface CategoryFormValues {
   parent: string;
+  slug?: string;
+  icon?: string;
+  parentCategory?: string;
   productType: string;
   description?: string;
   img?: string;
@@ -112,8 +120,71 @@ function CategoryImage({ src, alt }: { src?: string; alt: string }) {
 // Main page
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Tree builder
+// ---------------------------------------------------------------------------
+
+function buildTreeData(
+  categories: Category[],
+  onEdit: (cat: Category) => void,
+  onDelete: (id: string) => void,
+): DataNode[] {
+  return categories.map((cat) => {
+    const nodeTitle = (
+      <Space size={6}>
+        <Typography.Text strong>{cat.parent}</Typography.Text>
+        <Badge
+          count={cat.products?.length ?? 0}
+          showZero
+          style={{ backgroundColor: '#1677ff', fontSize: 10 }}
+        />
+        <StatusBadge status={cat.status} type="general" />
+        <Button
+          size="small"
+          type="text"
+          icon={<EditOutlined />}
+          onClick={(e) => { e.stopPropagation(); onEdit(cat); }}
+        />
+        <Popconfirm
+          title="Delete category?"
+          onConfirm={() => onDelete(cat._id)}
+          okText="Delete"
+          okButtonProps={{ danger: true }}
+        >
+          <Button
+            size="small"
+            type="text"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </Popconfirm>
+      </Space>
+    );
+
+    const childNodes: DataNode[] = (cat.children ?? []).map((childName, idx) => ({
+      key: `${cat._id}-child-${idx}`,
+      title: <Typography.Text style={{ fontSize: 13 }}>{childName}</Typography.Text>,
+      isLeaf: true,
+    }));
+
+    return {
+      key: cat._id,
+      title: nodeTitle,
+      children: childNodes.length > 0 ? childNodes : undefined,
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Main page
+// ---------------------------------------------------------------------------
+
 export default function CategoriesPage() {
   const queryClient = useQueryClient();
+
+  // View mode
+  const [viewMode, setViewMode] = useState<'table' | 'tree'>('table');
 
   // Pagination
   const [page, setPage] = useState(1);
@@ -215,6 +286,9 @@ export default function CategoriesPage() {
     setEditingCategory(category);
     form.setFieldsValue({
       parent: category.parent,
+      slug: (category as any).slug ?? '',
+      icon: (category as any).icon ?? '',
+      parentCategory: (category as any).parentCategory ?? undefined,
       productType: category.productType,
       description: category.description,
       img: category.img,
@@ -251,6 +325,9 @@ export default function CategoriesPage() {
         status: values.status,
         sortOrder: values.sortOrder,
         featured: values.featured,
+        ...(values.slug ? { slug: values.slug } : {}),
+        ...(values.icon ? { icon: values.icon } : {}),
+        ...(values.parentCategory ? { parentCategory: values.parentCategory } : {}),
       };
 
       if (editingCategory) {
@@ -403,99 +480,148 @@ export default function CategoriesPage() {
   // Render
   // ---------------------------------------------------------------------------
 
+  // Tree data derived from all loaded categories (no pagination for tree view)
+  const allCategoriesQuery = useQuery({
+    queryKey: ['categories', 'all'],
+    queryFn: () => categoriesApi.getAll({ limit: 500 }),
+    enabled: viewMode === 'tree',
+    staleTime: 1000 * 60 * 5,
+  });
+  const allCategories: Category[] = allCategoriesQuery.data?.data ?? [];
+  const treeData = buildTreeData(allCategories, handleEditCategory, handleDeleteCategory);
+
   return (
     <div>
       {/* Page header */}
       <PageHeader
         title="Category Management"
         extra={
-          <Button type="primary" icon={<PlusOutlined />} onClick={handleAddCategory}>
-            Add Category
-          </Button>
+          <Space>
+            <Space.Compact>
+              <Tooltip title="Table view">
+                <Button
+                  icon={<TableOutlined />}
+                  type={viewMode === 'table' ? 'primary' : 'default'}
+                  onClick={() => setViewMode('table')}
+                />
+              </Tooltip>
+              <Tooltip title="Tree view">
+                <Button
+                  icon={<ApartmentOutlined />}
+                  type={viewMode === 'tree' ? 'primary' : 'default'}
+                  onClick={() => setViewMode('tree')}
+                />
+              </Tooltip>
+            </Space.Compact>
+            <Button type="primary" icon={<PlusOutlined />} onClick={handleAddCategory}>
+              Add Category
+            </Button>
+          </Space>
         }
       />
 
-      {/* Filters row */}
-      <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
-        <Col xs={24} sm={12} md={8} lg={7}>
-          <Input
-            placeholder="Search categories..."
-            value={searchInput}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
+      {viewMode === 'tree' ? (
+        /* Tree View */
+        <Card
+          loading={allCategoriesQuery.isLoading || allCategoriesQuery.isFetching}
+          style={{ minHeight: 300 }}
+        >
+          {treeData.length === 0 ? (
+            <Typography.Text type="secondary">No categories found</Typography.Text>
+          ) : (
+            <Tree
+              treeData={treeData}
+              defaultExpandAll
+              blockNode
+              style={{ fontSize: 14 }}
+            />
+          )}
+        </Card>
+      ) : (
+        <>
+          {/* Filters row */}
+          <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
+            <Col xs={24} sm={12} md={8} lg={7}>
+              <Input
+                placeholder="Search categories..."
+                value={searchInput}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+                allowClear
+              />
+            </Col>
+
+            <Col xs={24} sm={12} md={5} lg={5}>
+              <Select
+                style={{ width: '100%' }}
+                placeholder="All Statuses"
+                value={statusFilter || undefined}
+                onChange={(val?: string) => {
+                  setStatusFilter(val ?? '');
+                  setPage(1);
+                }}
+                allowClear
+                options={[
+                  { label: 'Show', value: 'Show' },
+                  { label: 'Hide', value: 'Hide' },
+                ]}
+              />
+            </Col>
+
+            <Col xs={24} sm={12} md={7} lg={7}>
+              <Select
+                style={{ width: '100%' }}
+                placeholder="All Product Types"
+                value={productTypeFilter || undefined}
+                onChange={(val?: string) => {
+                  setProductTypeFilter(val ?? '');
+                  setPage(1);
+                }}
+                allowClear
+                loading={statsQuery.isLoading}
+                options={productTypeStats.map((pt) => ({
+                  label: `${pt._id} (${pt.count})`,
+                  value: pt._id,
+                }))}
+              />
+            </Col>
+
+            {hasActiveFilters && (
+              <Col xs={24} sm={12} md={4} lg={3}>
+                <Button
+                  icon={<ClearOutlined />}
+                  onClick={handleClearFilters}
+                  style={{ width: '100%' }}
+                >
+                  Clear
+                </Button>
+              </Col>
+            )}
+          </Row>
+
+          {/* Categories table */}
+          <Table<Category>
+            rowKey="_id"
+            columns={columns}
+            dataSource={categories}
+            loading={categoriesQuery.isLoading || categoriesQuery.isFetching}
+            expandable={{ childrenColumnName: '__children' }}
+            pagination={{
+              current: page,
+              pageSize: limit,
+              total: pagination?.totalItems ?? 0,
+              showSizeChanger: false,
+              showTotal: (total) => `Total ${total} categories`,
+              onChange: (p) => setPage(p),
             }}
-            allowClear
+            scroll={{ x: 820 }}
+            size="middle"
+            locale={{ emptyText: 'No categories found' }}
           />
-        </Col>
-
-        <Col xs={24} sm={12} md={5} lg={5}>
-          <Select
-            style={{ width: '100%' }}
-            placeholder="All Statuses"
-            value={statusFilter || undefined}
-            onChange={(val?: string) => {
-              setStatusFilter(val ?? '');
-              setPage(1);
-            }}
-            allowClear
-            options={[
-              { label: 'Show', value: 'Show' },
-              { label: 'Hide', value: 'Hide' },
-            ]}
-          />
-        </Col>
-
-        <Col xs={24} sm={12} md={7} lg={7}>
-          <Select
-            style={{ width: '100%' }}
-            placeholder="All Product Types"
-            value={productTypeFilter || undefined}
-            onChange={(val?: string) => {
-              setProductTypeFilter(val ?? '');
-              setPage(1);
-            }}
-            allowClear
-            loading={statsQuery.isLoading}
-            options={productTypeStats.map((pt) => ({
-              label: `${pt._id} (${pt.count})`,
-              value: pt._id,
-            }))}
-          />
-        </Col>
-
-        {hasActiveFilters && (
-          <Col xs={24} sm={12} md={4} lg={3}>
-            <Button
-              icon={<ClearOutlined />}
-              onClick={handleClearFilters}
-              style={{ width: '100%' }}
-            >
-              Clear
-            </Button>
-          </Col>
-        )}
-      </Row>
-
-      {/* Categories table */}
-      <Table<Category>
-        rowKey="_id"
-        columns={columns}
-        dataSource={categories}
-        loading={categoriesQuery.isLoading || categoriesQuery.isFetching}
-        expandable={{ childrenColumnName: '__children' }}
-        pagination={{
-          current: page,
-          pageSize: limit,
-          total: pagination?.totalItems ?? 0,
-          showSizeChanger: false,
-          showTotal: (total) => `Total ${total} categories`,
-          onChange: (p) => setPage(p),
-        }}
-        scroll={{ x: 820 }}
-        size="middle"
-        locale={{ emptyText: 'No categories found' }}
-      />
+        </>
+      )}
 
       {/* Add / Edit Modal */}
       <Modal
@@ -525,6 +651,14 @@ export default function CategoriesPage() {
               </Form.Item>
             </Col>
             <Col span={12}>
+              <Form.Item name="slug" label="Slug" tooltip="Auto-generated from name if left blank">
+                <Input placeholder="e.g. electronics" style={{ fontFamily: 'monospace' }} />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
               <Form.Item
                 name="productType"
                 label="Product Type"
@@ -540,6 +674,26 @@ export default function CategoriesPage() {
                   ]}
                   placeholder="Select product type"
                 />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="parentCategory" label="Parent Category" tooltip="Optional — makes this a child of another category">
+                <Select
+                  allowClear
+                  showSearch={{ optionFilterProp: 'label' }}
+                  placeholder="None (top-level)"
+                  options={categories
+                    .filter((c) => !editingCategory || c._id !== editingCategory._id)
+                    .map((c) => ({ value: c._id, label: c.parent }))}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item name="icon" label="Icon Name" tooltip="Icon identifier (e.g. icon class name or emoji)">
+                <Input placeholder="e.g. laptop, shirt" />
               </Form.Item>
             </Col>
           </Row>

@@ -7,8 +7,8 @@ import Link from "next/link";
 import { Cart, CompareThree, QuickView, Wishlist } from "@/svg";
 import { handleProductModal } from "@/redux/features/productModalSlice";
 import { add_cart_product } from "@/redux/features/cartSlice";
-import { add_to_wishlist } from "@/redux/features/wishlist-slice";
 import { add_to_compare } from "@/redux/features/compareSlice";
+import useWishlist from "@/hooks/use-wishlist";
 
 const ProductItem = ({ product, style_2 = false }) => {
   const { _id, img, category, title, reviews, price, discount, tags, status } = product || {};
@@ -18,6 +18,7 @@ const ProductItem = ({ product, style_2 = false }) => {
   const isAddedToCart = cart_products.some((prd) => prd._id === _id);
   const isAddedToWishlist = wishlist.some((prd) => prd._id === _id);
   const dispatch = useDispatch();
+  const { handleWishlistProduct } = useWishlist();
 
   useEffect(() => {
     if (reviews && reviews.length > 0) {
@@ -34,9 +35,9 @@ const ProductItem = ({ product, style_2 = false }) => {
   const handleAddProduct = (prd) => {
     dispatch(add_cart_product(prd));
   };
-  // handle wishlist product
-  const handleWishlistProduct = (prd) => {
-    dispatch(add_to_wishlist(prd));
+  // handle wishlist product (uses shared hook for auth-aware sync)
+  const handleWishlistProductClick = (prd) => {
+    handleWishlistProduct(prd, isAddedToWishlist);
   };
 
   // handle compare product
@@ -94,7 +95,7 @@ const ProductItem = ({ product, style_2 = false }) => {
                 Quick View
               </span>
             </button>
-            <button disabled={status === 'out-of-stock'} onClick={() => handleWishlistProduct(product)} className={`tp-product-action-btn-2 ${isAddedToWishlist ? 'active' : ''} tp-product-add-to-wishlist-btn`}>
+            <button disabled={status === 'out-of-stock'} onClick={() => handleWishlistProductClick(product)} className={`tp-product-action-btn-2 ${isAddedToWishlist ? 'active' : ''} tp-product-add-to-wishlist-btn`}>
               <Wishlist />
               <span className="tp-product-tooltip tp-product-tooltip-right">
                 Add To Wishlist

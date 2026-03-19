@@ -1,24 +1,47 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import ReviewForm from '../forms/review-form';
 import ReviewItem from './review-item';
+import ReviewRatingBreakdown from './review-rating-breakdown';
+import { useGetProductReviewsQuery } from '@/redux/features/cmsApi';
 
 const DetailsTabNav = ({ product }) => {
-  const {_id, description, additionalInformation, reviews } = product || {};
-  const activeRef = useRef(null)
+  const { _id, description, additionalInformation, reviews: embeddedReviews } = product || {};
+  const activeRef = useRef(null);
   const marker = useRef(null);
+
+  // Pagination state for server-side reviews
+  const [page, setPage] = useState(1);
+  const LIMIT = 10;
+
+  // Try to load reviews from the server-side endpoint (Task 16.1)
+  const {
+    data: reviewsData,
+    isLoading: reviewsLoading,
+  } = useGetProductReviewsQuery(
+    { productId: _id, page, limit: LIMIT },
+    { skip: !_id }
+  );
+
+  // Use server reviews if available, fall back to embedded reviews array
+  const reviews = reviewsData?.reviews || embeddedReviews || [];
+  const totalReviews = reviewsData?.total ?? (embeddedReviews?.length || 0);
+  const totalPages = reviewsData?.pages ?? 1;
+
   // handleActive
   const handleActive = (e) => {
     if (e.target.classList.contains('active')) {
       marker.current.style.left = e.target.offsetLeft + "px";
       marker.current.style.width = e.target.offsetWidth + "px";
     }
-  }
+  };
+
   useEffect(() => {
     if (activeRef.current?.classList.contains('active')) {
       marker.current.style.left = activeRef.current.offsetLeft + 'px';
       marker.current.style.width = activeRef.current.offsetWidth + 'px';
     }
   }, []);
+
   // nav item
   function NavItem({ active = false, id, title, linkRef }) {
     return (
@@ -47,7 +70,7 @@ const DetailsTabNav = ({ product }) => {
           <div className="nav nav-tabs justify-content-center p-relative tp-product-tab" id="navPresentationTab" role="tablist">
             <NavItem active={true} linkRef={activeRef} id="desc" title="Description" />
             <NavItem id="additional" title="Additional information" />
-            <NavItem id="review" title={`Reviews (${reviews.length})`} />
+            <NavItem id="review" title={`Reviews (${totalReviews})`} />
 
             <span ref={marker} id="productTabMarker" className="tp-product-details-tab-line"></span>
           </div>
@@ -73,8 +96,7 @@ const DetailsTabNav = ({ product }) => {
           </div>
           {/* addInfo */}
           <div className="tab-pane fade" id="nav-additional" role="tabpanel" aria-labelledby="nav-additional-tab" tabIndex="-1">
-
-            <div className="tp-product-details-additional-info ">
+            <div className="tp-product-details-additional-info">
               <div className="row justify-content-center">
                 <div className="col-xl-10">
                   <table>
@@ -97,17 +119,55 @@ const DetailsTabNav = ({ product }) => {
               <div className="row">
                 <div className="col-lg-6">
                   <div className="tp-product-details-review-statics">
+                    {/* Rating breakdown bar chart */}
+                    <ReviewRatingBreakdown reviews={reviews} />
 
-                    {/* reviews */}
+                    {/* reviews list */}
                     <div className="tp-product-details-review-list pr-110">
                       <h3 className="tp-product-details-review-title">Rating & Review</h3>
-                      {reviews.length === 0 && <h3 className="tp-product-details-review-title">
-                        There are no reviews yet.
-                      </h3>
-                      }
-                      {reviews.length > 0 && reviews.map(item => (
+
+                      {reviewsLoading && (
+                        <div className="text-center py-3">
+                          <div className="spinner-border spinner-border-sm" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {!reviewsLoading && reviews.length === 0 && (
+                        <p className="text-muted">There are no reviews yet.</p>
+                      )}
+
+                      {!reviewsLoading && reviews.length > 0 && reviews.map((item) => (
                         <ReviewItem key={item._id} review={item} />
                       ))}
+
+                      {/* Pagination */}
+                      {totalPages > 1 && (
+                        <div className="d-flex gap-2 mt-20">
+                          <button
+                            type="button"
+                            disabled={page === 1}
+                            onClick={() => setPage((p) => p - 1)}
+                            className="tp-btn tp-btn-2"
+                            style={{ fontSize: '13px', padding: '6px 14px' }}
+                          >
+                            Previous
+                          </button>
+                          <span className="d-flex align-items-center px-2" style={{ fontSize: '13px' }}>
+                            Page {page} of {totalPages}
+                          </span>
+                          <button
+                            type="button"
+                            disabled={page >= totalPages}
+                            onClick={() => setPage((p) => p + 1)}
+                            className="tp-btn tp-btn-2"
+                            style={{ fontSize: '13px', padding: '6px 14px' }}
+                          >
+                            Next
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

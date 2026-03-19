@@ -1,6 +1,7 @@
 const { secret } = require("../config/secret");
 // const stripe = require("stripe")(secret.stripe_key); // STRIPE DISABLED
 const Order = require("../model/Order");
+const Coupon = require("../model/Coupon");
 const { emitOrderCreated, emitOrderUpdated } = require("../utils/socketEmitter");
 
 // create-payment-intent - DISABLED (Stripe removed)
@@ -39,10 +40,49 @@ exports.addOrder = async (req, res, next) => {
       });
     }
 
+    // Validate coupon (if provided) and record usage
+    let resolvedDiscount = discount || 0;
+    let appliedCoupon = null;
+
+    if (req.body.couponCode) {
+      const coupon = await Coupon.findOne({
+        couponCode: { $regex: `^${req.body.couponCode}$`, $options: 'i' },
+        status: 'active',
+      });
+
+      if (coupon) {
+        const now = new Date();
+        const withinDates =
+          (!coupon.startTime || now >= coupon.startTime) &&
+          (!coupon.endTime || now <= coupon.endTime);
+        const withinUsageLimit =
+          coupon.usageLimit == null || coupon.usageCount < coupon.usageLimit;
+        const userUsage = req.user
+          ? coupon.usedBy.filter((u) => u.userId.toString() === req.user._id.toString()).length
+          : 0;
+        const withinPerUserLimit =
+          coupon.perUserLimit == null || userUsage < coupon.perUserLimit;
+
+        if (withinDates && withinUsageLimit && withinPerUserLimit) {
+          // Increment usage atomically
+          await Coupon.findByIdAndUpdate(coupon._id, {
+            $inc: { usageCount: 1 },
+            $push: {
+              usedBy: {
+                userId: req.user._id,
+                usedAt: now,
+              },
+            },
+          });
+          appliedCoupon = coupon.couponCode;
+        }
+      }
+    }
+
     const orderItems = await Order.create({
       user: req.user._id, // enforce authenticated user, not client-supplied
       cart, name, address, email, contact, city, country, zipCode,
-      subTotal, shippingCost, discount, totalAmount, shippingOption,
+      subTotal, shippingCost, discount: resolvedDiscount, totalAmount, shippingOption,
       cardInfo, paymentIntent, paymentMethod, orderNote,
       status: "pending", // always start as pending
     });
@@ -54,6 +94,7 @@ exports.addOrder = async (req, res, next) => {
       success: true,
       message: "Order added successfully",
       order: orderItems,
+      ...(appliedCoupon && { appliedCoupon }),
     });
   }
   catch (error) {

@@ -20,6 +20,7 @@ import {
   MailOutlined,
   GiftOutlined,
   PictureOutlined,
+  StarOutlined,
 } from '@ant-design/icons';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import useAppStore from '@/stores/appStore';
@@ -43,6 +44,7 @@ const FLAT_NAV: FlatNavItem[] = [
   { key: '/categories', label: 'Categories', path: '/categories' },
   { key: '/orders', label: 'Orders', path: '/orders' },
   { key: '/users', label: 'Users', path: '/users' },
+  { key: '/reviews', label: 'Reviews', path: '/reviews' },
   { key: '/coupons', label: 'Coupons', path: '/coupons' },
   { key: '/cms/pages', label: 'Pages', path: '/cms/pages' },
   { key: '/cms/menus', label: 'Menus', path: '/cms/menus' },
@@ -108,6 +110,11 @@ const MENU_ITEMS: ItemType[] = [
     key: '/users',
     icon: <TeamOutlined />,
     label: 'Users',
+  },
+  {
+    key: '/reviews',
+    icon: <StarOutlined />,
+    label: 'Reviews',
   },
   {
     key: '/coupons',

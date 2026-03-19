@@ -16,6 +16,7 @@ const categoryServices = require('../../services/category.service');
 const brandService = require('../../services/brand.service');
 const Brand = require('../../model/Brand');
 const Coupon = require('../../model/Coupon');
+const Reviews = require('../../model/Review');
 const { getPaginationParams, buildPagination } = require('../../utils/pagination');
 
 // ---------------------------------------------------------------------------
@@ -156,17 +157,45 @@ exports.searchProducts = async (req, res, next) => {
 
 /**
  * GET /api/v1/store/products/:id
+ * Returns full product detail including variants, seo, shipping fields,
+ * plus review stats (avg rating and count from approved reviews only).
  */
 exports.getProduct = async (req, res, next) => {
   try {
     const product = await Product.findById(req.params.id).populate({
       path: 'reviews',
-      populate: { path: 'userId', select: 'name email imageURL' },
+      match: { status: 'approved' },
+      populate: { path: 'userId', select: 'name imageURL' },
     });
     if (!product) {
       return respond.notFound(res, 'PRODUCT_NOT_FOUND', 'Product not found');
     }
-    return respond.success(res, product, 'Product retrieved successfully');
+
+    // Review stats: avg rating + count (approved only)
+    const reviewStats = await Reviews.aggregate([
+      { $match: { productId: product._id, status: 'approved' } },
+      {
+        $group: {
+          _id: null,
+          avgRating: { $avg: '$rating' },
+          totalReviews: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const stats = reviewStats[0]
+      ? {
+          avgRating: parseFloat(reviewStats[0].avgRating.toFixed(1)),
+          totalReviews: reviewStats[0].totalReviews,
+        }
+      : { avgRating: 0, totalReviews: 0 };
+
+    return res.status(200).json({
+      success: true,
+      message: 'Product retrieved successfully',
+      data: product,
+      reviewStats: stats,
+    });
   } catch (err) {
     next(err);
   }
@@ -338,11 +367,181 @@ exports.getSingleBrand = async (req, res, next) => {
 
 /**
  * GET /api/v1/store/coupons
+ * Supports ?showOnCheckout=true and ?showOnProductPage=true display rule filters.
  */
 exports.getAllCoupons = async (req, res, next) => {
   try {
-    const data = await Coupon.find({}).sort({ _id: -1 });
+    const filter = {};
+
+    if (req.query.showOnCheckout === 'true') {
+      filter['displayRules.showOnCheckout'] = true;
+    }
+    if (req.query.showOnProductPage === 'true') {
+      filter['displayRules.showOnProductPage'] = true;
+    }
+    if (req.query.showOnBanner === 'true') {
+      filter['displayRules.showOnBanner'] = true;
+    }
+
+    // Only return active coupons to storefront
+    filter.status = 'active';
+
+    const data = await Coupon.find(filter).sort({ _id: -1 });
     return respond.success(res, data, 'Coupons retrieved successfully');
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * POST /api/v1/store/coupons/validate
+ *
+ * Body:
+ *   couponCode   {string}   required
+ *   orderAmount  {number}   required — subtotal of the cart
+ *   productType  {string}   optional — product type of items in cart
+ *   productIds   {string[]} optional — product IDs in cart
+ *   categoryIds  {string[]} optional — category IDs of cart items
+ *   userId       {string}   optional — authenticated user's ID for per-user limit check
+ *
+ * Returns:
+ *   { valid: true, discountPercentage, discountAmount }  or
+ *   { valid: false, reason: '<CODE>' }
+ */
+exports.validateCoupon = async (req, res, next) => {
+  try {
+    const { couponCode, orderAmount, productType, productIds = [], categoryIds = [], userId } = req.body;
+
+    if (!couponCode) {
+      return respond.error(res, 'MISSING_COUPON_CODE', 'couponCode is required', 400);
+    }
+    if (orderAmount === undefined || orderAmount === null) {
+      return respond.error(res, 'MISSING_ORDER_AMOUNT', 'orderAmount is required', 400);
+    }
+
+    // 1. Find coupon (case-insensitive)
+    const coupon = await Coupon.findOne({
+      couponCode: { $regex: `^${couponCode}$`, $options: 'i' },
+    });
+
+    if (!coupon) {
+      return respond.success(res, { valid: false, reason: 'COUPON_NOT_FOUND' }, 'Coupon not found');
+    }
+
+    // 2. Status check
+    if (coupon.status !== 'active') {
+      return respond.success(res, { valid: false, reason: 'COUPON_INACTIVE' }, 'Coupon is inactive');
+    }
+
+    const now = new Date();
+
+    // 3. Date range check
+    if (coupon.startTime && now < coupon.startTime) {
+      return respond.success(res, { valid: false, reason: 'COUPON_NOT_STARTED' }, 'Coupon has not started yet');
+    }
+    if (coupon.endTime && now > coupon.endTime) {
+      return respond.success(res, { valid: false, reason: 'COUPON_EXPIRED' }, 'Coupon has expired');
+    }
+
+    // 4. Minimum amount check
+    if (orderAmount < coupon.minimumAmount) {
+      return respond.success(
+        res,
+        { valid: false, reason: 'MIN_AMOUNT_NOT_MET', minimumAmount: coupon.minimumAmount },
+        'Minimum order amount not met'
+      );
+    }
+
+    // 5. Product type check
+    if (coupon.productType && productType) {
+      if (coupon.productType.toLowerCase() !== productType.toLowerCase()) {
+        return respond.success(
+          res,
+          { valid: false, reason: 'PRODUCT_TYPE_MISMATCH' },
+          'Coupon not valid for this product type'
+        );
+      }
+    }
+
+    // 6. Usage limit check
+    if (coupon.usageLimit != null && coupon.usageCount >= coupon.usageLimit) {
+      return respond.success(
+        res,
+        { valid: false, reason: 'USAGE_LIMIT_REACHED' },
+        'Coupon usage limit has been reached'
+      );
+    }
+
+    // 7. Per-user limit check
+    if (userId && coupon.perUserLimit != null) {
+      const userUsageCount = coupon.usedBy.filter(
+        (u) => u.userId.toString() === userId.toString()
+      ).length;
+
+      if (userUsageCount >= coupon.perUserLimit) {
+        return respond.success(
+          res,
+          { valid: false, reason: 'PER_USER_LIMIT_REACHED' },
+          'You have already used this coupon the maximum number of times'
+        );
+      }
+    }
+
+    // 8. Applicable products check (if coupon restricts to specific products)
+    if (coupon.applicableProducts && coupon.applicableProducts.length > 0) {
+      const applicableIds = coupon.applicableProducts.map((id) => id.toString());
+      const hasMatch = productIds.some((pid) => applicableIds.includes(pid.toString()));
+      if (!hasMatch) {
+        return respond.success(
+          res,
+          { valid: false, reason: 'NO_APPLICABLE_PRODUCTS' },
+          'Coupon is not valid for any products in your cart'
+        );
+      }
+    }
+
+    // 9. Applicable categories check
+    if (coupon.applicableCategories && coupon.applicableCategories.length > 0) {
+      const applicableCatIds = coupon.applicableCategories.map((id) => id.toString());
+      const hasCatMatch = categoryIds.some((cid) => applicableCatIds.includes(cid.toString()));
+      if (!hasCatMatch) {
+        return respond.success(
+          res,
+          { valid: false, reason: 'NO_APPLICABLE_CATEGORIES' },
+          'Coupon is not valid for any categories in your cart'
+        );
+      }
+    }
+
+    // 10. Excluded products check
+    if (coupon.excludedProducts && coupon.excludedProducts.length > 0) {
+      const excludedIds = coupon.excludedProducts.map((id) => id.toString());
+      const hasExcluded = productIds.some((pid) => excludedIds.includes(pid.toString()));
+      if (hasExcluded) {
+        return respond.success(
+          res,
+          { valid: false, reason: 'EXCLUDED_PRODUCT_IN_CART' },
+          'Your cart contains a product excluded from this coupon'
+        );
+      }
+    }
+
+    // All checks passed — calculate discount
+    const discountAmount = parseFloat(
+      ((orderAmount * coupon.discountPercentage) / 100).toFixed(2)
+    );
+
+    return respond.success(
+      res,
+      {
+        valid: true,
+        discountPercentage: coupon.discountPercentage,
+        discountAmount,
+        couponCode: coupon.couponCode,
+        title: coupon.title,
+      },
+      'Coupon is valid'
+    );
   } catch (err) {
     next(err);
   }

@@ -19,6 +19,9 @@ import {
   Divider,
   Tag,
   Cascader,
+  Tabs,
+  Space,
+  ColorPicker,
 } from 'antd';
 import type { TableProps } from 'antd';
 import {
@@ -35,7 +38,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 import { productsApi, categoriesApi } from '@/services/api';
-import type { Product, Category } from '@/types';
+import type { Product, Category, ProductVariant, ProductSeo } from '@/types';
 import { formatCurrency } from '@/hooks/useFormatters';
 import StatusBadge from '@/components/commons/StatusBadge';
 import PageHeader from '@/components/commons/PageHeader';
@@ -66,6 +69,27 @@ interface ProductFormValues {
   colors?: string;
   sizes?: string;
   tags?: string;
+  // Shipping/physical
+  weight?: number;
+  dimLength?: number;
+  dimWidth?: number;
+  dimHeight?: number;
+  barcode?: string;
+  // SEO
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string[];
+  ogImage?: string;
+}
+
+// Variant editing state (kept in component state, not in the Form directly)
+interface VariantFormState {
+  sku: string;
+  colorName: string;
+  colorHex: string;
+  size: string;
+  price: number;
+  stock: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -104,9 +128,313 @@ interface ProductModalProps {
   onClose: () => void;
 }
 
+// ---------------------------------------------------------------------------
+// VariantsTab — inline variant management
+// ---------------------------------------------------------------------------
+
+interface VariantsTabProps {
+  variants: ProductVariant[];
+  onChange: (variants: ProductVariant[]) => void;
+}
+
+function VariantsTab({ variants, onChange }: VariantsTabProps) {
+  const [addingVariant, setAddingVariant] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [variantForm] = Form.useForm<VariantFormState>();
+
+  const handleAddOrUpdate = async () => {
+    try {
+      const values = await variantForm.validateFields();
+      // Validate SKU unique within product
+      const isDuplicate = variants.some(
+        (v, i) => v.sku === values.sku && i !== editingIndex,
+      );
+      if (isDuplicate) {
+        toast.error('SKU must be unique within this product');
+        return;
+      }
+      const newVariant: ProductVariant = {
+        sku: values.sku,
+        color: { name: values.colorName, clrCode: values.colorHex },
+        size: values.size,
+        price: values.price,
+        stock: values.stock,
+      };
+      if (editingIndex !== null) {
+        const updated = [...variants];
+        updated[editingIndex] = { ...updated[editingIndex], ...newVariant };
+        onChange(updated);
+        setEditingIndex(null);
+      } else {
+        onChange([...variants, newVariant]);
+      }
+      variantForm.resetFields();
+      setAddingVariant(false);
+    } catch {
+      // validation errors surface on form
+    }
+  };
+
+  const handleEditVariant = (index: number) => {
+    const v = variants[index];
+    variantForm.setFieldsValue({
+      sku: v.sku,
+      colorName: v.color.name,
+      colorHex: v.color.clrCode,
+      size: v.size,
+      price: v.price,
+      stock: v.stock,
+    });
+    setEditingIndex(index);
+    setAddingVariant(true);
+  };
+
+  const handleDeleteVariant = (index: number) => {
+    onChange(variants.filter((_, i) => i !== index));
+  };
+
+  const variantColumns: TableProps<ProductVariant>['columns'] = [
+    {
+      title: 'SKU',
+      dataIndex: 'sku',
+      key: 'sku',
+      width: 120,
+      render: (sku: string) => (
+        <Tag style={{ fontFamily: 'monospace' }}>{sku}</Tag>
+      ),
+    },
+    {
+      title: 'Color',
+      key: 'color',
+      width: 120,
+      render: (_: unknown, record: ProductVariant) => (
+        <Space size={6}>
+          <span
+            style={{
+              display: 'inline-block',
+              width: 16,
+              height: 16,
+              borderRadius: '50%',
+              background: record.color.clrCode,
+              border: '1px solid #d9d9d9',
+            }}
+          />
+          <Text style={{ fontSize: 12 }}>{record.color.name}</Text>
+        </Space>
+      ),
+    },
+    { title: 'Size', dataIndex: 'size', key: 'size', width: 70 },
+    {
+      title: 'Price',
+      dataIndex: 'price',
+      key: 'price',
+      width: 90,
+      render: (v: number) => `$${v.toFixed(2)}`,
+    },
+    {
+      title: 'Stock',
+      dataIndex: 'stock',
+      key: 'stock',
+      width: 70,
+      render: (v: number) => (
+        <span style={{ color: v <= 5 ? '#ff4d4f' : undefined }}>{v}</span>
+      ),
+    },
+    {
+      title: '',
+      key: 'actions',
+      width: 80,
+      render: (_: unknown, _record: ProductVariant, index: number) => (
+        <Space size={2}>
+          <Button size="small" icon={<EditOutlined />} onClick={() => handleEditVariant(index)} />
+          <Popconfirm
+            title="Remove this variant?"
+            onConfirm={() => handleDeleteVariant(index)}
+            okText="Remove"
+            okButtonProps={{ danger: true }}
+          >
+            <Button size="small" danger icon={<DeleteOutlined />} />
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <div>
+      <Table<ProductVariant>
+        rowKey={(_, idx) => String(idx)}
+        columns={variantColumns}
+        dataSource={variants}
+        pagination={false}
+        size="small"
+        style={{ marginBottom: 12 }}
+        expandable={{ childrenColumnName: '__children' }}
+        locale={{ emptyText: 'No variants added yet' }}
+      />
+
+      {addingVariant ? (
+        <div style={{ border: '1px solid #f0f0f0', borderRadius: 6, padding: 12, background: '#fafafa' }}>
+          <Text strong style={{ display: 'block', marginBottom: 8 }}>
+            {editingIndex !== null ? 'Edit Variant' : 'Add Variant'}
+          </Text>
+          <Form form={variantForm} layout="vertical">
+            <Row gutter={12}>
+              <Col span={6}>
+                <Form.Item name="sku" label="SKU" rules={[{ required: true, message: 'Required' }]}>
+                  <Input placeholder="SKU-001" style={{ fontFamily: 'monospace' }} />
+                </Form.Item>
+              </Col>
+              <Col span={5}>
+                <Form.Item name="colorName" label="Color Name" rules={[{ required: true, message: 'Required' }]}>
+                  <Input placeholder="Red" />
+                </Form.Item>
+              </Col>
+              <Col span={4}>
+                <Form.Item name="colorHex" label="Hex Code" rules={[{ required: true, message: 'Required' }]}>
+                  <Input placeholder="#FF0000" />
+                </Form.Item>
+              </Col>
+              <Col span={3}>
+                <Form.Item name="size" label="Size" rules={[{ required: true, message: 'Required' }]}>
+                  <Input placeholder="M" />
+                </Form.Item>
+              </Col>
+              <Col span={3}>
+                <Form.Item name="price" label="Price" rules={[{ required: true, message: 'Required' }]}>
+                  <InputNumber min={0} precision={2} style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+              <Col span={3}>
+                <Form.Item name="stock" label="Stock" rules={[{ required: true, message: 'Required' }]}>
+                  <InputNumber min={0} style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Space>
+              <Button type="primary" size="small" onClick={handleAddOrUpdate}>
+                {editingIndex !== null ? 'Update' : 'Add'}
+              </Button>
+              <Button
+                size="small"
+                onClick={() => {
+                  setAddingVariant(false);
+                  setEditingIndex(null);
+                  variantForm.resetFields();
+                }}
+              >
+                Cancel
+              </Button>
+            </Space>
+          </Form>
+        </div>
+      ) : (
+        <Button
+          type="dashed"
+          icon={<PlusOutlined />}
+          onClick={() => {
+            setAddingVariant(true);
+            setEditingIndex(null);
+            variantForm.resetFields();
+          }}
+        >
+          Add Variant
+        </Button>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// SeoTab
+// ---------------------------------------------------------------------------
+
+interface SeoTabProps {
+  form: ReturnType<typeof Form.useForm<ProductFormValues>>[0];
+  slug?: string;
+}
+
+function SeoTab({ form, slug }: SeoTabProps) {
+  const metaTitle = Form.useWatch('metaTitle', form) ?? '';
+  const metaDescription = Form.useWatch('metaDescription', form) ?? '';
+  const titleLen = metaTitle.length;
+  const descLen = metaDescription.length;
+
+  return (
+    <div>
+      <Form.Item
+        name="metaTitle"
+        label={
+          <Space>
+            <span>Meta Title</span>
+            <Text
+              type={titleLen > 70 ? 'danger' : 'secondary'}
+              style={{ fontSize: 12 }}
+            >
+              {titleLen}/70
+            </Text>
+          </Space>
+        }
+      >
+        <Input placeholder="SEO page title (recommended: 50–70 chars)" maxLength={120} showCount />
+      </Form.Item>
+
+      <Form.Item
+        name="metaDescription"
+        label={
+          <Space>
+            <span>Meta Description</span>
+            <Text
+              type={descLen > 160 ? 'danger' : 'secondary'}
+              style={{ fontSize: 12 }}
+            >
+              {descLen}/160
+            </Text>
+          </Space>
+        }
+      >
+        <Input.TextArea
+          rows={3}
+          placeholder="SEO description (recommended: under 160 chars)"
+          maxLength={320}
+          showCount
+        />
+      </Form.Item>
+
+      <Form.Item name="metaKeywords" label="Meta Keywords">
+        <Select
+          mode="tags"
+          placeholder="Add keywords and press Enter"
+          tokenSeparators={[',']}
+          style={{ width: '100%' }}
+        />
+      </Form.Item>
+
+      <Form.Item name="ogImage" label="OG Image URL">
+        <Input placeholder="https://example.com/og-image.jpg" />
+      </Form.Item>
+
+      {slug && (
+        <Form.Item label="Canonical URL (preview)">
+          <Input
+            readOnly
+            value={`/products/${slug}`}
+            style={{ background: '#f5f5f5', color: '#888', fontFamily: 'monospace', fontSize: 12 }}
+          />
+        </Form.Item>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ProductModal — Add / Edit (with Variants + SEO tabs)
+// ---------------------------------------------------------------------------
+
 function ProductModal({ open, editingProduct, categories, onClose }: ProductModalProps) {
   const [form] = Form.useForm<ProductFormValues>();
   const queryClient = useQueryClient();
+  const [variants, setVariants] = useState<ProductVariant[]>([]);
 
   const isEdit = editingProduct !== null;
 
@@ -121,7 +449,7 @@ function ProductModal({ open, editingProduct, categories, onClose }: ProductModa
           discount: editingProduct.discount ?? 0,
           quantity: editingProduct.quantity,
           shipping: editingProduct.shipping ?? 0,
-          category: editingProduct.productType && (editingProduct as any).parent 
+          category: editingProduct.productType && (editingProduct as any).parent
             ? [editingProduct.productType, (editingProduct as any).parent, (editingProduct as any).children].filter(Boolean)
             : undefined,
           status: editingProduct.status as 'Show' | 'Hide',
@@ -130,10 +458,21 @@ function ProductModal({ open, editingProduct, categories, onClose }: ProductModa
           colors: joinArray(editingProduct.colors),
           sizes: joinArray(editingProduct.sizes),
           tags: joinArray(editingProduct.tags),
+          weight: editingProduct.weight,
+          dimLength: editingProduct.dimensions?.length,
+          dimWidth: editingProduct.dimensions?.width,
+          dimHeight: editingProduct.dimensions?.height,
+          barcode: editingProduct.barcode ?? '',
+          metaTitle: editingProduct.seo?.metaTitle ?? '',
+          metaDescription: editingProduct.seo?.metaDescription ?? '',
+          metaKeywords: editingProduct.seo?.metaKeywords ?? [],
+          ogImage: editingProduct.seo?.ogImage ?? '',
         });
+        setVariants(editingProduct.variants ?? []);
       } else {
         form.resetFields();
         form.setFieldsValue({ status: 'Show', featured: false, discount: 0, shipping: 0 });
+        setVariants([]);
       }
     }
   };
@@ -168,6 +507,12 @@ function ProductModal({ open, editingProduct, categories, onClose }: ProductModa
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
+      const seo: ProductSeo = {
+        metaTitle: values.metaTitle,
+        metaDescription: values.metaDescription,
+        metaKeywords: values.metaKeywords ?? [],
+        ogImage: values.ogImage,
+      };
       const payload: Partial<Product> = {
         title: values.title,
         description: values.description,
@@ -181,6 +526,15 @@ function ProductModal({ open, editingProduct, categories, onClose }: ProductModa
         colors: splitComma(values.colors),
         sizes: splitComma(values.sizes),
         tags: splitComma(values.tags),
+        variants,
+        seo,
+        weight: values.weight,
+        dimensions: {
+          length: values.dimLength,
+          width: values.dimWidth,
+          height: values.dimHeight,
+        },
+        barcode: values.barcode,
       };
       const categoryVal = values.category;
       if (categoryVal && categoryVal.length > 0) {
@@ -209,6 +563,167 @@ function ProductModal({ open, editingProduct, categories, onClose }: ProductModa
     }
   };
 
+  const tabItems = [
+    {
+      key: 'general',
+      label: 'General',
+      children: (
+        <>
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="title"
+                label="Title"
+                rules={[{ required: true, message: 'Product title is required' }]}
+              >
+                <Input placeholder="Enter product title" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item name="description" label="Description">
+            <Input.TextArea rows={3} placeholder="Enter product description" />
+          </Form.Item>
+
+          <Row gutter={16}>
+            <Col xs={24} sm={12}>
+              <Form.Item
+                name="price"
+                label="Price (USD)"
+                rules={[{ required: true, message: 'Price is required' }]}
+              >
+                <InputNumber min={0} precision={2} style={{ width: '100%' }} placeholder="0.00" prefix="$" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12}>
+              <Form.Item name="discount" label="Discount (%)">
+                <InputNumber min={0} max={100} style={{ width: '100%' }} placeholder="0" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col xs={24} sm={12}>
+              <Form.Item
+                name="quantity"
+                label="Quantity"
+                rules={[{ required: true, message: 'Quantity is required' }]}
+              >
+                <InputNumber min={0} style={{ width: '100%' }} placeholder="0" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12}>
+              <Form.Item name="shipping" label="Shipping Cost (USD)">
+                <InputNumber min={0} precision={2} style={{ width: '100%' }} placeholder="0.00" prefix="$" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col xs={24} sm={12}>
+              <Form.Item name="category" label="Category">
+                <Cascader
+                  placeholder="Select category"
+                  allowClear
+                  showSearch
+                  options={Object.entries(
+                    categories.reduce((acc, cat) => {
+                      const pt = cat.productType || 'other';
+                      if (!acc[pt]) acc[pt] = [];
+                      acc[pt].push(cat);
+                      return acc;
+                    }, {} as Record<string, Category[]>)
+                  ).map(([pt, cats]) => ({
+                    value: pt,
+                    label: pt.charAt(0).toUpperCase() + pt.slice(1),
+                    children: cats.map(c => ({
+                      value: c.parent,
+                      label: c.parent,
+                      children: c.children?.map(child => ({ value: child, label: child })) || [],
+                    })),
+                  }))}
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12}>
+              <Form.Item name="status" label="Status">
+                <Select
+                  options={[
+                    { value: 'Show', label: 'Show' },
+                    { value: 'Hide', label: 'Hide' },
+                  ]}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item name="img" label="Image URL">
+            <Input placeholder="https://example.com/image.jpg" />
+          </Form.Item>
+
+          <Form.Item name="featured" label="Featured" valuePropName="checked">
+            <Switch />
+          </Form.Item>
+
+          <Row gutter={16}>
+            <Col xs={24} sm={8}>
+              <Form.Item name="colors" label="Colors" tooltip="Comma-separated values">
+                <Input placeholder="red, blue, green" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Form.Item name="sizes" label="Sizes" tooltip="Comma-separated values">
+                <Input placeholder="S, M, L, XL" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Form.Item name="tags" label="Tags" tooltip="Comma-separated values">
+                <Input placeholder="sale, new, hot" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Divider orientation="left" style={{ fontSize: 13 }}>Shipping & Physical</Divider>
+          <Row gutter={12}>
+            <Col xs={24} sm={6}>
+              <Form.Item name="weight" label="Weight (g)">
+                <InputNumber min={0} style={{ width: '100%' }} placeholder="0" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={6}>
+              <Form.Item name="dimLength" label="Length (cm)">
+                <InputNumber min={0} precision={1} style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={6}>
+              <Form.Item name="dimWidth" label="Width (cm)">
+                <InputNumber min={0} precision={1} style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={6}>
+              <Form.Item name="dimHeight" label="Height (cm)">
+                <InputNumber min={0} precision={1} style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Form.Item name="barcode" label="Barcode / GTIN">
+            <Input placeholder="e.g. 012345678905" style={{ fontFamily: 'monospace' }} />
+          </Form.Item>
+        </>
+      ),
+    },
+    {
+      key: 'variants',
+      label: `Variants${variants.length > 0 ? ` (${variants.length})` : ''}`,
+      children: <VariantsTab variants={variants} onChange={setVariants} />,
+    },
+    {
+      key: 'seo',
+      label: 'SEO',
+      children: <SeoTab form={form} slug={editingProduct?.slug} />,
+    },
+  ];
+
   return (
     <Modal
       title={isEdit ? 'Edit Product' : 'Add Product'}
@@ -217,133 +732,12 @@ function ProductModal({ open, editingProduct, categories, onClose }: ProductModa
       onOk={handleSubmit}
       okText={isEdit ? 'Update' : 'Create'}
       confirmLoading={isLoading}
-      width={720}
+      width={800}
       afterOpenChange={handleAfterOpenChange}
       destroyOnHidden
     >
-      <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="title"
-              label="Title"
-              rules={[{ required: true, message: 'Product title is required' }]}
-            >
-              <Input placeholder="Enter product title" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Form.Item name="description" label="Description">
-          <Input.TextArea rows={3} placeholder="Enter product description" />
-        </Form.Item>
-
-        <Row gutter={16}>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="price"
-              label="Price (USD)"
-              rules={[{ required: true, message: 'Price is required' }]}
-            >
-              <InputNumber
-                min={0}
-                precision={2}
-                style={{ width: '100%' }}
-                placeholder="0.00"
-                prefix="$"
-              />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item name="discount" label="Discount (%)">
-              <InputNumber min={0} max={100} style={{ width: '100%' }} placeholder="0" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="quantity"
-              label="Quantity"
-              rules={[{ required: true, message: 'Quantity is required' }]}
-            >
-              <InputNumber min={0} style={{ width: '100%' }} placeholder="0" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item name="shipping" label="Shipping Cost (USD)">
-              <InputNumber min={0} precision={2} style={{ width: '100%' }} placeholder="0.00" prefix="$" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col xs={24} sm={12}>
-            <Form.Item name="category" label="Category">
-              <Cascader
-                placeholder="Select category"
-                allowClear
-                showSearch
-                options={Object.entries(
-                  categories.reduce((acc, cat) => {
-                    const pt = cat.productType || 'other';
-                    if (!acc[pt]) acc[pt] = [];
-                    acc[pt].push(cat);
-                    return acc;
-                  }, {} as Record<string, Category[]>)
-                ).map(([pt, cats]) => ({
-                  value: pt,
-                  label: pt.charAt(0).toUpperCase() + pt.slice(1),
-                  children: cats.map(c => ({
-                    value: c.parent,
-                    label: c.parent,
-                    children: c.children?.map(child => ({
-                      value: child,
-                      label: child
-                    })) || []
-                  }))
-                }))}
-              />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item name="status" label="Status">
-              <Select
-                options={[
-                  { value: 'Show', label: 'Show' },
-                  { value: 'Hide', label: 'Hide' },
-                ]}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Form.Item name="img" label="Image URL">
-          <Input placeholder="https://example.com/image.jpg" />
-        </Form.Item>
-
-        <Form.Item name="featured" label="Featured" valuePropName="checked">
-          <Switch />
-        </Form.Item>
-
-        <Row gutter={16}>
-          <Col xs={24} sm={8}>
-            <Form.Item name="colors" label="Colors" tooltip="Comma-separated values">
-              <Input placeholder="red, blue, green" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={8}>
-            <Form.Item name="sizes" label="Sizes" tooltip="Comma-separated values">
-              <Input placeholder="S, M, L, XL" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={8}>
-            <Form.Item name="tags" label="Tags" tooltip="Comma-separated values">
-              <Input placeholder="sale, new, hot" />
-            </Form.Item>
-          </Col>
-        </Row>
+      <Form form={form} layout="vertical" style={{ marginTop: 8 }}>
+        <Tabs items={tabItems} size="small" />
       </Form>
     </Modal>
   );

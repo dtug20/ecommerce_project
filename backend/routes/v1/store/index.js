@@ -12,6 +12,7 @@ const express = require('express');
 const router = express.Router();
 const ctrl = require('../../../controller/v1/store.controller');
 const storeCmsCtrl = require('../../../controller/v1/store-cms.controller');
+const reviewCtrl = require('../../../controller/v1/review.controller');
 const Category = require('../../../model/Category');
 const respond = require('../../../utils/respond');
 
@@ -29,10 +30,12 @@ router.get('/products/top-rated',     ctrl.getTopRatedProducts);
 router.get('/products/popular/:type', ctrl.getPopularProductByType);
 router.get('/products/type/:type',    ctrl.getProductsByType);
 
-// Parameterised product routes
-router.get('/products/:id/related',  ctrl.getRelatedProducts);
-router.get('/products/:id',          ctrl.getProduct);
-router.get('/products',              ctrl.getAllProducts);
+// Parameterised product routes — /products/:id/reviews and /products/:id/related
+// must be declared before /products/:id to prevent the id segment matching
+router.get('/products/:productId/reviews', reviewCtrl.getApprovedProductReviews);
+router.get('/products/:id/related',        ctrl.getRelatedProducts);
+router.get('/products/:id',                ctrl.getProduct);
+router.get('/products',                    ctrl.getAllProducts);
 
 // ---------------------------------------------------------------------------
 // Categories
@@ -78,14 +81,10 @@ router.get('/brands',        ctrl.getAllBrands);
 // Coupons
 // ---------------------------------------------------------------------------
 
-router.get('/coupons/:id', ctrl.getCouponById);
-router.get('/coupons',     ctrl.getAllCoupons);
-
-// ---------------------------------------------------------------------------
-// Reviews — stub (Phase 3)
-// ---------------------------------------------------------------------------
-
-router.get('/reviews', NOT_IMPLEMENTED);
+// /coupons/validate must precede /coupons/:id to avoid matching 'validate' as id
+router.post('/coupons/validate', ctrl.validateCoupon);
+router.get('/coupons/:id',       ctrl.getCouponById);
+router.get('/coupons',           ctrl.getAllCoupons);
 
 // ---------------------------------------------------------------------------
 // CMS — Phase 2

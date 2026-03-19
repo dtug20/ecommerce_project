@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Cart, QuickView, Wishlist } from "@/svg";
 import { handleProductModal } from "@/redux/features/productModalSlice";
 import { add_cart_product } from "@/redux/features/cartSlice";
-import { add_to_wishlist } from "@/redux/features/wishlist-slice";
+import useWishlist from "@/hooks/use-wishlist";
 
 const ProductItem = ({ product, prdCenter = false,primary_style=false }) => {
   const { _id, img, title, discount, price, tags,status } = product || {};
@@ -15,14 +15,16 @@ const ProductItem = ({ product, prdCenter = false,primary_style=false }) => {
   const isAddedToCart = cart_products.some((prd) => prd._id === _id);
   const isAddedToWishlist = wishlist.some((prd) => prd._id === _id);
   const dispatch = useDispatch();
+  const { handleWishlistProduct } = useWishlist();
 
   // handle add product
   const handleAddProduct = (prd) => {
     dispatch(add_cart_product(prd));
   };
-   // handle wishlist product
-   const handleWishlistProduct = (prd) => {
-    dispatch(add_to_wishlist(prd));
+
+  // handle wishlist product (uses shared hook for auth-aware sync)
+  const handleWishlistProductClick = (prd) => {
+    handleWishlistProduct(prd, isAddedToWishlist);
   };
 
   return (
@@ -68,7 +70,7 @@ const ProductItem = ({ product, prdCenter = false,primary_style=false }) => {
               <span className="tp-product-tooltip">Quick View</span>
             </button>
 
-            <button disabled={status === 'out-of-stock'} onClick={()=> handleWishlistProduct(product)} className={`tp-product-action-btn-3 
+            <button disabled={status === 'out-of-stock'} onClick={()=> handleWishlistProductClick(product)} className={`tp-product-action-btn-3
             ${isAddedToWishlist?'active':''} tp-product-add-to-wishlist-btn`}>
               <Wishlist />
               <span className="tp-product-tooltip">Add To Wishlist</span>

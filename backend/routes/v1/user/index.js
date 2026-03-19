@@ -8,10 +8,7 @@
 const express = require('express');
 const router = express.Router();
 const ctrl = require('../../../controller/v1/user.controller');
-const respond = require('../../../utils/respond');
-
-const NOT_IMPLEMENTED = (req, res) =>
-  respond.error(res, 'NOT_IMPLEMENTED', 'This endpoint is not yet implemented', 501);
+const wishlistCtrl = require('../../../controller/v1/wishlist.controller');
 
 // ---------------------------------------------------------------------------
 // Profile
@@ -35,20 +32,23 @@ router.post('/orders',    ctrl.createOrder);
 router.post('/reviews', ctrl.addReview);
 
 // ---------------------------------------------------------------------------
-// Wishlist — Phase 3 stubs
+// Wishlist
 // ---------------------------------------------------------------------------
 
-router.get('/wishlist',                NOT_IMPLEMENTED);
-router.post('/wishlist',               NOT_IMPLEMENTED);
-router.delete('/wishlist/:productId',  NOT_IMPLEMENTED);
+router.get('/wishlist',                               wishlistCtrl.getWishlist);
+router.post('/wishlist',                              wishlistCtrl.addToWishlist);
+router.delete('/wishlist',                            wishlistCtrl.clearWishlist);
+router.delete('/wishlist/:productId',                 wishlistCtrl.removeFromWishlist);
+router.post('/wishlist/:productId/move-to-cart',      wishlistCtrl.moveToCart);
 
 // ---------------------------------------------------------------------------
-// Addresses — Phase 3 stubs
+// Addresses
 // ---------------------------------------------------------------------------
 
-router.get('/addresses',        NOT_IMPLEMENTED);
-router.post('/addresses',       NOT_IMPLEMENTED);
-router.put('/addresses/:id',    NOT_IMPLEMENTED);
-router.delete('/addresses/:id', NOT_IMPLEMENTED);
+router.get('/addresses',               ctrl.getAddresses);
+router.post('/addresses',              ctrl.addAddress);
+router.put('/addresses/:id',           ctrl.updateAddress);
+router.patch('/addresses/:id/default', ctrl.setDefaultAddress);
+router.delete('/addresses/:id',        ctrl.deleteAddress);
 
 module.exports = router;

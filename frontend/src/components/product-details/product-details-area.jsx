@@ -4,20 +4,36 @@ import DetailsWrapper from "./details-wrapper";
 import { useDispatch } from "react-redux";
 import DetailsTabNav from "./details-tab-nav";
 import RelatedProducts from "./related-products";
+import ProductVariantSelector from "./product-variant-selector";
 
 const ProductDetailsArea = ({ productItem }) => {
-  const { _id, img, imageURLs, videoId,status } = productItem || {};
+  const { _id, img, imageURLs, videoId, status, variants } = productItem || {};
   const [activeImg, setActiveImg] = useState(img);
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const dispatch = useDispatch();
-  // active image change when img change
+
+  // Active image change when img changes
   useEffect(() => {
     setActiveImg(img);
   }, [img]);
 
-  // handle image active
+  // When a variant with an image is selected, update the displayed image
+  const handleVariantSelected = (variant) => {
+    setSelectedVariant(variant);
+    if (variant?.image) {
+      setActiveImg(variant.image);
+    } else if (!variant) {
+      setActiveImg(img);
+    }
+  };
+
+  // Handle image active from thumbnail strip
   const handleImageActive = (item) => {
     setActiveImg(item.img);
   };
+
+  const hasVariants = variants && variants.length > 0;
+
   return (
     <section className="tp-product-details-area">
       <div className="tp-product-details-top pb-115">
@@ -37,12 +53,22 @@ const ProductDetailsArea = ({ productItem }) => {
               {/* product-details-thumb-wrapper end */}
             </div>
             <div className="col-xl-5 col-lg-6">
+              {/* Variant selector (shown above DetailsWrapper when product has variants) */}
+              {hasVariants && (
+                <div className="mb-20">
+                  <ProductVariantSelector
+                    variants={variants}
+                    onVariantSelected={handleVariantSelected}
+                  />
+                </div>
+              )}
               {/* product-details-wrapper start */}
               <DetailsWrapper
                 productItem={productItem}
                 handleImageActive={handleImageActive}
                 activeImg={activeImg}
                 detailsBottom={true}
+                selectedVariant={selectedVariant}
               />
               {/* product-details-wrapper end */}
             </div>

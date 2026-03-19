@@ -1,6 +1,22 @@
 const Product = require('../model/Products');
 const Category = require('../model/Category');
 const Brand = require('../model/Brand');
+const Reviews = require('../model/Review');
+
+/**
+ * Generate a URL-safe slug from a title string.
+ * @param {string} title
+ * @returns {string}
+ */
+const toSlug = (title) =>
+  title
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[\s_]+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 
 // GET /api/admin/products
 exports.getAllProducts = async (req, res, next) => {
@@ -79,18 +95,64 @@ exports.getProductById = async (req, res, next) => {
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
-    res.json({ success: true, data: product });
+
+    // Include review stats (approved reviews only)
+    const reviewStats = await Reviews.aggregate([
+      { $match: { productId: product._id, status: 'approved' } },
+      {
+        $group: {
+          _id: null,
+          avgRating: { $avg: '$rating' },
+          totalReviews: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const stats = reviewStats[0]
+      ? {
+          avgRating: parseFloat(reviewStats[0].avgRating.toFixed(1)),
+          totalReviews: reviewStats[0].totalReviews,
+        }
+      : { avgRating: 0, totalReviews: 0 };
+
+    res.json({ success: true, data: product, reviewStats: stats });
   } catch (error) {
     next(error);
   }
+};
+
+/**
+ * Validate that variant SKUs are unique within a product body.
+ * Returns a string error message, or null if valid.
+ * @param {Array} variants
+ * @returns {string|null}
+ */
+const validateVariantSkus = (variants) => {
+  if (!Array.isArray(variants) || variants.length === 0) return null;
+  const skus = variants.map((v) => v.sku).filter(Boolean);
+  const uniqueSkus = new Set(skus);
+  if (uniqueSkus.size !== skus.length) {
+    return 'Variant SKUs must be unique within the product';
+  }
+  return null;
 };
 
 // POST /api/admin/products
 exports.createProduct = async (req, res, next) => {
   try {
     const body = req.body;
-    if (body.title) {
-      body.slug = body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+    // Auto-generate slug from title if not provided
+    if (body.title && !body.slug) {
+      body.slug = toSlug(body.title);
+    }
+
+    // Validate variant SKUs uniqueness
+    if (body.variants) {
+      const skuError = validateVariantSkus(body.variants);
+      if (skuError) {
+        return res.status(400).json({ success: false, message: skuError });
+      }
     }
 
     const product = await Product.create(body);
@@ -121,8 +183,18 @@ exports.createProduct = async (req, res, next) => {
 exports.updateProduct = async (req, res, next) => {
   try {
     const body = req.body;
-    if (body.title) {
-      body.slug = body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+    // Auto-generate slug from title if title changed but no explicit slug provided
+    if (body.title && !body.slug) {
+      body.slug = toSlug(body.title);
+    }
+
+    // Validate variant SKUs uniqueness
+    if (body.variants) {
+      const skuError = validateVariantSkus(body.variants);
+      if (skuError) {
+        return res.status(400).json({ success: false, message: skuError });
+      }
     }
 
     const oldProduct = await Product.findById(req.params.id);

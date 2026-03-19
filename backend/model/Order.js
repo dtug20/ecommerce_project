@@ -108,6 +108,14 @@ const orderSchema = new mongoose.Schema(
     estimatedDelivery: { type: Date },
     splitOrders: [{ type: mongoose.Schema.Types.ObjectId, ref: "Order" }],
     parentOrder: { type: mongoose.Schema.Types.ObjectId, ref: "Order" },
+    statusHistory: [
+      {
+        status: { type: String },
+        timestamp: { type: Date, default: Date.now },
+        updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
+        note: { type: String },
+      },
+    ],
     items: [
       {
         product: {

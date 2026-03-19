@@ -16,6 +16,7 @@ const multer = require('multer');
 const authorization = require('../../../middleware/authorization');
 const ctrl = require('../../../controller/v1/admin.controller');
 const cmsCtrl = require('../../../controller/v1/cms.controller');
+const reviewCtrl = require('../../../controller/v1/review.controller');
 const respond = require('../../../utils/respond');
 
 const upload = multer();
@@ -161,6 +162,19 @@ router.delete('/blog/:id',           authorization('admin', 'manager'), cmsCtrl.
 
 router.get('/settings',     cmsCtrl.getSettings);
 router.patch('/settings',   authorization('admin', 'manager'), cmsCtrl.updateSettings);
+
+// ---------------------------------------------------------------------------
+// Reviews — Phase 3
+// Note: /reviews/:id sub-routes must be declared before /reviews/:id
+// ---------------------------------------------------------------------------
+
+router.get('/reviews',                                          reviewCtrl.listReviews);
+router.get('/reviews/:id',                                      reviewCtrl.getReview);
+router.get('/products/:productId/reviews',                      reviewCtrl.getProductReviews);
+router.patch('/reviews/:id/approve',   authorization('admin', 'manager'), reviewCtrl.approveReview);
+router.patch('/reviews/:id/reject',    authorization('admin', 'manager'), reviewCtrl.rejectReview);
+router.post('/reviews/:id/reply',      authorization('admin', 'manager'), reviewCtrl.replyToReview);
+router.delete('/reviews/:id',          authorization('admin', 'manager'), reviewCtrl.deleteReview);
 
 // ---------------------------------------------------------------------------
 // Email templates — Phase 3 stub

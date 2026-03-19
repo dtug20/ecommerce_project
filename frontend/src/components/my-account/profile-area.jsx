@@ -5,6 +5,7 @@ import NavProfileTab from "./nav-profile-tab";
 import ProfileInfo from "./profile-info";
 import ChangePassword from "./change-password";
 import MyOrders from "./my-orders";
+import AddressBook from "./address-book";
 
 const ProfileArea = ({orderData}) => {
   return (
@@ -56,6 +57,15 @@ const ProfileArea = ({orderData}) => {
                       aria-labelledby="nav-order-tab"
                     >
                       <MyOrders orderData={orderData} />
+                    </div>
+
+                    <div
+                      className="tab-pane fade"
+                      id="nav-addresses"
+                      role="tabpanel"
+                      aria-labelledby="nav-addresses-tab"
+                    >
+                      <AddressBook />
                     </div>
                   </div>
                 </div>

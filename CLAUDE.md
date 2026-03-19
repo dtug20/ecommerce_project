@@ -70,6 +70,43 @@ Stub forms in editor (8): promo-section, testimonials, newsletter, custom-html, 
 ### CMS Content Flow
 Admin creates/edits content in CRM → CRM proxies to Backend API → Backend saves to MongoDB → Socket.io emits event → Frontend RTK Query cache invalidated → Storefront re-renders with new content.
 
+## Phase 3 Status (Complete)
+
+**What changed:**
+
+### Backend — E-commerce Core
+
+- **Wishlist CRUD** (`controller/v1/wishlist.controller.js`) — 5 endpoints: get, add ($addToSet + upsert), remove ($pull), clear, move-to-cart. All emit `wishlist:updated` Socket.io event.
+- **Address Book** (in `controller/v1/user.controller.js`) — 5 endpoints: list, add (with isDefault logic), update, delete (default protection), set-default. Addresses are embedded subdocuments on User model.
+- **Review Moderation** (`controller/v1/review.controller.js`) — 8 functions: admin list (paginated, filterable by status/rating/search/productId), get, product reviews, approve, reject (with reason), reply, delete (cascades to Product/User arrays). Store endpoint returns approved-only reviews with rating breakdown (avgRating + count per star). User review submission sets `status: 'pending'` and `isVerifiedPurchase` based on delivered order check.
+- **Enhanced Products** — Admin create/update accepts `variants[]`, `seo{}`, `weight`, `dimensions`, `barcode`. Auto-generates slug. Validates variant SKU uniqueness. Product detail includes `reviewStats`.
+- **Coupon Validation** — `POST /api/v1/store/coupons/validate` runs 10 checks (status, date range, min amount, productType, usageLimit, perUserLimit, applicableProducts, applicableCategories, excludedProducts). `GET /api/v1/store/coupons` filters by displayRules. Order creation validates coupon at save time, increments `usageCount`, pushes to `usedBy[]`.
+- **Order Tracking** — `statusHistory[]` added to Order model. Status updates accept `trackingNumber`, `carrier`, `trackingUrl`, `estimatedDelivery`. Auto-generates tracking URLs from carrier templates (DHL, FedEx, GHTK, GHN, ViettelPost). Auto-sets `shippedAt`/`deliveredAt` on status transitions.
+
+### CRM — Enhanced Pages
+
+- **Review Moderation** (`ReviewsPage.tsx`) — Stats cards (Pending/Approved/Rejected/Avg Rating), filterable table, row actions (approve/reject with reason/reply/delete/view), bulk approve/reject. CRM proxy via `reviewController.js` + `review.routes.js`.
+- **Enhanced Product Form** — Variants tab (table with SKU, color picker, size, price, stock, add/edit/delete). SEO tab (meta title/description with char counters, keywords tags, OG image). Main form additions: weight, dimensions, barcode.
+- **Enhanced Category Page** — Tree view toggle with Ant Design Tree. Create/edit modal: slug, icon, parent category select.
+- **Enhanced Order Detail** — Shipping tracking section (carrier select, tracking number, URL, estimated delivery, save/track buttons). Order timeline with Ant Design Steps showing status history.
+- **Enhanced Coupon Management** — Display rules toggles (showOnBanner, showOnCheckout, showOnProductPage). Targeting: applicable products/categories, excluded products multi-select. Usage tracking view.
+- **Sidebar** — Reviews entry added between Users and Coupons.
+
+### Frontend — Shopping Experience
+
+- **Server-Side Wishlist** — RTK Query endpoints (get/add/remove/clear). `useWishlist` hook: auth-aware (calls API when authenticated, always updates localStorage). 7 product item components updated. Wishlist page shows server data when logged in, localStorage for anonymous.
+- **Product Variant Selector** — `ProductVariantSelector.jsx`: color swatches + size buttons from `variants[]`. Selection updates displayed price, stock, and images. Cart payload includes `selectedVariant`. Falls back to legacy `imageURLs` when no variants.
+- **Address Book** — RTK Query endpoints (CRUD + set default). `AddressBook.jsx` tab in profile with Bootstrap cards. `CheckoutSavedAddresses.jsx` in checkout: radio list of saved addresses, auto-fills form, pre-selects default.
+- **Review Enhancements** — `getProductReviews` endpoint loads approved reviews with pagination. `ReviewRatingBreakdown.jsx` (progress bars). `ReviewItem.jsx` shows verified purchase badge + admin reply. Review form: auth check, moderation notice, pending confirmation.
+- **Order Tracking** — `OrderStatusTimeline.jsx` (vertical stepper: Placed→Processing→Shipped→Delivered). `OrderTrackingCard.jsx` (carrier, copyable tracking number, Track Package link). Integrated in order detail page.
+- **Coupon Display Rules** — `CheckoutCouponSuggestions.jsx` shows available coupons in checkout. `validateCoupon` mutation for server-side validation. `use-checkout-submit.js` updated with server-side validation + client-side fallback.
+
+### Wishlist Sync Strategy
+Anonymous users: localStorage only (existing behavior preserved). Authenticated users: all add/remove operations call API AND update localStorage. `useWishlist` hook handles the branching. Cart remains localStorage-only (server-side cart sync deferred to Phase 4).
+
+### Review Moderation Flow
+User submits review → status set to `pending` → admin sees in CRM Review Moderation page → approves/rejects → only `approved` reviews shown on storefront. Admin can reply to reviews (shown below comment on storefront). `isVerifiedPurchase` badge shown for users who purchased the product.
+
 ## Commands
 
 ### Setup

@@ -17,6 +17,7 @@ import type {
   BlogPost,
   SiteSettings,
   Coupon,
+  Review,
 } from '@/types/index';
 
 // Axios instance with relative baseURL — proxied by Vite to the CRM backend
@@ -131,6 +132,16 @@ export const ordersApi = {
     api
       .patch<ApiResponse<Order>>(`/api/orders/${id}/status`, { status })
       .then((r) => r.data),
+
+  updateTracking: (
+    id: string,
+    data: {
+      trackingNumber?: string;
+      carrier?: string;
+      trackingUrl?: string;
+      estimatedDelivery?: string;
+    },
+  ) => api.patch<ApiResponse<Order>>(`/api/orders/${id}`, data).then((r) => r.data),
 
   delete: (id: string) =>
     api.delete<ApiResponse<null>>(`/api/orders/${id}`).then((r) => r.data),
@@ -308,6 +319,39 @@ export const couponsApi = {
     api.patch<ApiResponse<Coupon>>(`/api/coupons/${id}`, data).then(r => r.data),
   delete: (id: string) =>
     api.delete<ApiResponse<null>>(`/api/coupons/${id}`).then(r => r.data),
+};
+
+// ---------------------------------------------------------------------------
+// Reviews
+// ---------------------------------------------------------------------------
+
+export interface ReviewQuery {
+  page?: number;
+  limit?: number;
+  status?: string;
+  rating?: number;
+  search?: string;
+  productId?: string;
+}
+
+export const reviewsApi = {
+  getAll: (params?: ReviewQuery) =>
+    api.get<ApiResponse<Review[]>>('/api/reviews', { params }).then((r) => r.data),
+
+  getById: (id: string) =>
+    api.get<ApiResponse<Review>>(`/api/reviews/${id}`).then((r) => r.data),
+
+  approve: (id: string) =>
+    api.patch<ApiResponse<Review>>(`/api/reviews/${id}/approve`).then((r) => r.data),
+
+  reject: (id: string, reason?: string) =>
+    api.patch<ApiResponse<Review>>(`/api/reviews/${id}/reject`, { reason }).then((r) => r.data),
+
+  reply: (id: string, text: string) =>
+    api.post<ApiResponse<Review>>(`/api/reviews/${id}/reply`, { text }).then((r) => r.data),
+
+  delete: (id: string) =>
+    api.delete<ApiResponse<null>>(`/api/reviews/${id}`).then((r) => r.data),
 };
 
 export default api;

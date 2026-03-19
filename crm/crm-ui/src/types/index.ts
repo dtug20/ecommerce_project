@@ -1,4 +1,21 @@
 // Product
+export interface ProductVariant {
+  _id?: string;
+  sku: string;
+  color: { name: string; clrCode: string };
+  size: string;
+  price: number;
+  stock: number;
+  images?: string[];
+}
+
+export interface ProductSeo {
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string[];
+  ogImage?: string;
+}
+
 export interface Product {
   _id: string;
   title: string;
@@ -19,6 +36,11 @@ export interface Product {
   productType?: string;
   sellCount?: number;
   reviews?: Review[];
+  variants?: ProductVariant[];
+  seo?: ProductSeo;
+  weight?: number;
+  dimensions?: { length?: number; width?: number; height?: number };
+  barcode?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -40,6 +62,13 @@ export interface Category {
 }
 
 // Order
+export interface OrderStatusHistory {
+  status: string;
+  timestamp: string;
+  updatedBy?: string;
+  note?: string;
+}
+
 export interface Order {
   _id: string;
   invoice?: number;
@@ -65,7 +94,12 @@ export interface Order {
   orderStatus?: string;
   status?: string;
   trackingNumber?: string;
+  carrier?: string;
+  trackingUrl?: string;
+  shippedAt?: string;
+  deliveredAt?: string;
   estimatedDelivery?: string;
+  statusHistory?: OrderStatusHistory[];
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -111,10 +145,17 @@ export interface User {
 // Review
 export interface Review {
   _id: string;
-  userId: string;
-  productId: string;
+  userId: { _id: string; name: string; email: string; imageURL?: string };
+  productId: { _id: string; title: string; img?: string; slug?: string };
   rating: number;
   comment: string;
+  images?: string[];
+  status: 'pending' | 'approved' | 'rejected';
+  isVerifiedPurchase: boolean;
+  helpful?: { count: number };
+  adminReply?: { text: string; repliedAt: string; repliedBy: string };
+  createdAt: string;
+  updatedAt: string;
 }
 
 // API Response types
@@ -343,6 +384,16 @@ export interface Coupon {
   usageLimit?: number;
   usageCount?: number;
   perUserLimit?: number;
+  displayRules?: {
+    showOnBanner?: boolean;
+    showOnCheckout?: boolean;
+    showOnProductPage?: boolean;
+    targetPages?: string[];
+  };
+  applicableProducts?: string[];
+  applicableCategories?: string[];
+  excludedProducts?: string[];
+  usedBy?: Array<{ userId: string; usedAt: string }>;
   createdAt: string;
   updatedAt: string;
 }

@@ -49,6 +49,11 @@ const ProfileNavTab = () => {
           title="Change Password"
           icon="fa-regular fa-lock"
         />
+        <SingleNav
+          id="addresses"
+          title="Address Book"
+          icon="fa-regular fa-location-dot"
+        />
       </div>
     </nav>
   );

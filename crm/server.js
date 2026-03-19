@@ -104,6 +104,9 @@ app.use('/api/users', apiProtect, attachProxy, require('./routes/users'));
 app.use('/api/cms', apiProtect, require('./routes/cms.routes'));
 app.use('/api/coupons', apiProtect, require('./routes/coupon.routes'));
 
+// Phase 3 — Reviews
+app.use('/api/reviews', apiProtect, require('./routes/review.routes'));
+
 // ─── Page Routes (React SPA, protected by Keycloak) ─────────
 
 const spaRoutes = ['/', '/products', '/categories', '/orders', '/users'];

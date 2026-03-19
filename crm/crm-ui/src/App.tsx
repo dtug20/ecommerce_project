@@ -10,6 +10,9 @@ const CategoriesPage = lazy(() => import('@/features/categories/CategoriesPage')
 const OrdersPage = lazy(() => import('@/features/orders/OrdersPage'));
 const UsersPage = lazy(() => import('@/features/users/UsersPage'));
 
+// New: Reviews
+const ReviewsPage = lazy(() => import('@/features/reviews/ReviewsPage'));
+
 // New: Coupons
 const CouponsPage = lazy(() => import('@/features/coupons/CouponsPage'));
 
@@ -70,6 +73,9 @@ export default function App() {
           <Route path="/categories" element={<SuspenseRoute><CategoriesPage /></SuspenseRoute>} />
           <Route path="/orders" element={<SuspenseRoute><OrdersPage /></SuspenseRoute>} />
           <Route path="/users" element={<SuspenseRoute><UsersPage /></SuspenseRoute>} />
+
+          {/* Reviews */}
+          <Route path="/reviews" element={<SuspenseRoute><ReviewsPage /></SuspenseRoute>} />
 
           {/* Coupons */}
           <Route path="/coupons" element={<SuspenseRoute><CouponsPage /></SuspenseRoute>} />

@@ -9,7 +9,7 @@ import { Cart, QuickView, Wishlist } from "@/svg";
 import Timer from "@/components/common/timer";
 import { handleProductModal } from "@/redux/features/productModalSlice";
 import { add_cart_product } from "@/redux/features/cartSlice";
-import { add_to_wishlist } from "@/redux/features/wishlist-slice";
+import useWishlist from "@/hooks/use-wishlist";
 
 const ProductItem = ({ product, offer_style = false }) => {
   const { _id, img, category, title, reviews, price, discount,status,offerDate } = product || {};
@@ -19,6 +19,7 @@ const ProductItem = ({ product, offer_style = false }) => {
   const isAddedToCart = cart_products.some((prd) => prd._id === _id);
   const isAddedToWishlist = wishlist.some((prd) => prd._id === _id);
   const dispatch = useDispatch();
+  const { handleWishlistProduct } = useWishlist();
   const [ratingVal, setRatingVal] = useState(0);
   useEffect(() => {
     if (reviews && reviews.length > 0) {
@@ -35,9 +36,9 @@ const ProductItem = ({ product, offer_style = false }) => {
   const handleAddProduct = (prd) => {
     dispatch(add_cart_product(prd));
   };
-  // handle wishlist product
-  const handleWishlistProduct = (prd) => {
-    dispatch(add_to_wishlist(prd));
+  // handle wishlist product (uses shared hook for auth-aware sync)
+  const handleWishlistProductClick = (prd) => {
+    handleWishlistProduct(prd, isAddedToWishlist);
   };
 
   return (
@@ -96,7 +97,7 @@ const ProductItem = ({ product, offer_style = false }) => {
               <button
                 type="button"
                 className={`tp-product-action-btn ${isAddedToWishlist ? 'active' : ''} tp-product-add-to-wishlist-btn`}
-                onClick={() => handleWishlistProduct(product)}
+                onClick={() => handleWishlistProductClick(product)}
                 disabled={status === 'out-of-stock'}
               >
                 <Wishlist />
