@@ -110,11 +110,99 @@ export const initSocket = (store) => {
     if (invalidateCallbacks.user) invalidateCallbacks.user();
   });
 
+  // CMS Page events
+  socket.on('page:created', () => {
+    console.log('[Socket.io] Page created');
+    if (invalidateCallbacks.page) invalidateCallbacks.page();
+  });
+  socket.on('page:updated', () => {
+    console.log('[Socket.io] Page updated');
+    if (invalidateCallbacks.page) invalidateCallbacks.page();
+  });
+  socket.on('page:deleted', () => {
+    console.log('[Socket.io] Page deleted');
+    if (invalidateCallbacks.page) invalidateCallbacks.page();
+  });
+
+  // Menu events
+  socket.on('menu:updated', () => {
+    console.log('[Socket.io] Menu updated');
+    if (invalidateCallbacks.menu) invalidateCallbacks.menu();
+  });
+
+  // Banner events
+  socket.on('banner:created', () => {
+    console.log('[Socket.io] Banner created');
+    if (invalidateCallbacks.banner) invalidateCallbacks.banner();
+  });
+  socket.on('banner:updated', () => {
+    console.log('[Socket.io] Banner updated');
+    if (invalidateCallbacks.banner) invalidateCallbacks.banner();
+  });
+  socket.on('banner:deleted', () => {
+    console.log('[Socket.io] Banner deleted');
+    if (invalidateCallbacks.banner) invalidateCallbacks.banner();
+  });
+
+  // Blog events
+  socket.on('blog:created', () => {
+    console.log('[Socket.io] Blog post created');
+    if (invalidateCallbacks.blog) invalidateCallbacks.blog();
+  });
+  socket.on('blog:published', () => {
+    console.log('[Socket.io] Blog post published');
+    if (invalidateCallbacks.blog) invalidateCallbacks.blog();
+  });
+  socket.on('blog:updated', () => {
+    console.log('[Socket.io] Blog post updated');
+    if (invalidateCallbacks.blog) invalidateCallbacks.blog();
+  });
+  socket.on('blog:deleted', () => {
+    console.log('[Socket.io] Blog post deleted');
+    if (invalidateCallbacks.blog) invalidateCallbacks.blog();
+  });
+
+  // Settings events
+  socket.on('settings:updated', () => {
+    console.log('[Socket.io] Settings updated');
+    if (invalidateCallbacks.settings) invalidateCallbacks.settings();
+  });
+
   return socket;
 };
 
 export const registerInvalidateCallback = (resourceType, callback) => {
   invalidateCallbacks[resourceType] = callback;
+};
+
+/**
+ * Register RTK Query cache invalidation callbacks.
+ *
+ * Call this once after initialising the socket, passing the Redux store and
+ * the RTK Query api object, e.g.:
+ *
+ *   import { initSocket, registerCmsInvalidations } from '@/utils/socketClient';
+ *   import { apiSlice } from '@/redux/api/apiSlice';
+ *
+ *   const socket = initSocket(store);
+ *   registerCmsInvalidations(store, apiSlice);
+ */
+export const registerCmsInvalidations = (store, api) => {
+  registerInvalidateCallback('page', () =>
+    store.dispatch(api.util.invalidateTags(['Page']))
+  );
+  registerInvalidateCallback('menu', () =>
+    store.dispatch(api.util.invalidateTags(['Menu']))
+  );
+  registerInvalidateCallback('banner', () =>
+    store.dispatch(api.util.invalidateTags(['Banners']))
+  );
+  registerInvalidateCallback('blog', () =>
+    store.dispatch(api.util.invalidateTags(['BlogPosts', 'BlogPost']))
+  );
+  registerInvalidateCallback('settings', () =>
+    store.dispatch(api.util.invalidateTags(['SiteSettings']))
+  );
 };
 
 export const getSocket = () => socket;

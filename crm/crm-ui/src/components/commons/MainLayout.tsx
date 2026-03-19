@@ -1,4 +1,5 @@
 import { Breadcrumb, Layout, Menu } from 'antd';
+import type { ItemType } from 'antd/es/menu/interface';
 import {
   DashboardOutlined,
   LogoutOutlined,
@@ -7,57 +8,144 @@ import {
   ShoppingOutlined,
   TagsOutlined,
   TeamOutlined,
+  FileTextOutlined,
+  MenuOutlined,
+  NotificationOutlined,
+  EditOutlined,
+  SettingOutlined,
+  BgColorsOutlined,
+  InfoCircleOutlined,
+  CreditCardOutlined,
+  CarOutlined,
+  MailOutlined,
+  GiftOutlined,
+  PictureOutlined,
 } from '@ant-design/icons';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import useAppStore from '@/stores/appStore';
 
 const { Sider, Content, Header } = Layout;
 
-interface NavItem {
+// ---------------------------------------------------------------------------
+// Navigation structure
+// ---------------------------------------------------------------------------
+
+interface FlatNavItem {
   key: string;
-  icon: React.ReactNode;
   label: string;
   path: string;
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { key: '/', icon: <DashboardOutlined />, label: 'Dashboard', path: '/' },
+// Flat list used for selected-key and title resolution
+const FLAT_NAV: FlatNavItem[] = [
+  { key: '/', label: 'Dashboard', path: '/' },
+  { key: '/products', label: 'Products', path: '/products' },
+  { key: '/categories', label: 'Categories', path: '/categories' },
+  { key: '/orders', label: 'Orders', path: '/orders' },
+  { key: '/users', label: 'Users', path: '/users' },
+  { key: '/coupons', label: 'Coupons', path: '/coupons' },
+  { key: '/cms/pages', label: 'Pages', path: '/cms/pages' },
+  { key: '/cms/menus', label: 'Menus', path: '/cms/menus' },
+  { key: '/cms/blog', label: 'Blog', path: '/cms/blog' },
+  { key: '/cms/banners', label: 'Banners', path: '/cms/banners' },
+  { key: '/settings/theme', label: 'Theme', path: '/settings/theme' },
+  { key: '/settings/general', label: 'General', path: '/settings/general' },
+  { key: '/settings/payment', label: 'Payment', path: '/settings/payment' },
+  { key: '/settings/shipping', label: 'Shipping', path: '/settings/shipping' },
+  { key: '/settings/email-templates', label: 'Email Templates', path: '/settings/email-templates' },
+];
+
+function resolveSelectedKey(pathname: string): string {
+  if (pathname === '/') return '/';
+  const match = FLAT_NAV
+    .filter((item) => item.path !== '/' && pathname.startsWith(item.path))
+    .sort((a, b) => b.path.length - a.path.length)[0];
+  return match?.key ?? '/';
+}
+
+function resolvePageTitle(pathname: string): string {
+  if (pathname === '/') return 'Dashboard';
+  const match = FLAT_NAV
+    .filter((item) => item.path !== '/' && pathname.startsWith(item.path))
+    .sort((a, b) => b.path.length - a.path.length)[0];
+  return match?.label ?? 'Dashboard';
+}
+
+// Keys that should be open when a child is selected
+function resolveOpenKeys(pathname: string): string[] {
+  const open: string[] = [];
+  if (pathname.startsWith('/cms')) open.push('sub-cms');
+  if (pathname.startsWith('/settings')) open.push('sub-settings');
+  return open;
+}
+
+// ---------------------------------------------------------------------------
+// Menu item tree
+// ---------------------------------------------------------------------------
+
+const MENU_ITEMS: ItemType[] = [
+  {
+    key: '/',
+    icon: <DashboardOutlined />,
+    label: 'Dashboard',
+  },
   {
     key: '/products',
     icon: <ShoppingOutlined />,
     label: 'Products',
-    path: '/products',
   },
   {
     key: '/categories',
     icon: <TagsOutlined />,
     label: 'Categories',
-    path: '/categories',
   },
   {
     key: '/orders',
     icon: <ShoppingCartOutlined />,
     label: 'Orders',
-    path: '/orders',
   },
-  { key: '/users', icon: <TeamOutlined />, label: 'Users', path: '/users' },
+  {
+    key: '/users',
+    icon: <TeamOutlined />,
+    label: 'Users',
+  },
+  {
+    key: '/coupons',
+    icon: <GiftOutlined />,
+    label: 'Coupons',
+  },
+  {
+    key: 'sub-cms',
+    icon: <EditOutlined />,
+    label: 'CMS',
+    children: [
+      { key: '/cms/pages', icon: <FileTextOutlined />, label: 'Pages' },
+      { key: '/cms/menus', icon: <MenuOutlined />, label: 'Menus' },
+      { key: '/cms/blog', icon: <EditOutlined />, label: 'Blog' },
+      { key: '/cms/banners', icon: <PictureOutlined />, label: 'Banners' },
+    ],
+  },
+  {
+    key: 'sub-settings',
+    icon: <SettingOutlined />,
+    label: 'Settings',
+    children: [
+      { key: '/settings/theme', icon: <BgColorsOutlined />, label: 'Theme' },
+      { key: '/settings/general', icon: <InfoCircleOutlined />, label: 'General' },
+      { key: '/settings/payment', icon: <CreditCardOutlined />, label: 'Payment' },
+      { key: '/settings/shipping', icon: <CarOutlined />, label: 'Shipping' },
+      { key: '/settings/email-templates', icon: <MailOutlined />, label: 'Email Templates' },
+    ],
+  },
 ];
 
-function resolveSelectedKey(pathname: string): string {
-  // Exact match first, then longest prefix
-  const match = NAV_ITEMS.filter((item) =>
-    pathname === '/' ? item.path === '/' : pathname.startsWith(item.path) && item.path !== '/',
-  ).sort((a, b) => b.path.length - a.path.length)[0];
+// Suppress unused import warnings for icons only used in labels
+void NotificationOutlined;
+void ShopOutlined;
 
-  return match?.key ?? '/';
-}
-
-function resolvePageTitle(pathname: string): string {
-  const item = NAV_ITEMS.find((nav) =>
-    pathname === '/' ? nav.path === '/' : pathname.startsWith(nav.path) && nav.path !== '/',
-  );
-  return item?.label ?? 'Dashboard';
-}
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export default function MainLayout() {
   const { sidebarCollapsed, toggleSidebar } = useAppStore();
@@ -66,14 +154,11 @@ export default function MainLayout() {
 
   const selectedKey = resolveSelectedKey(location.pathname);
   const pageTitle = resolvePageTitle(location.pathname);
-
-  const menuItems = NAV_ITEMS.map((item) => ({
-    key: item.key,
-    icon: item.icon,
-    label: item.label,
-  }));
+  const defaultOpenKeys = resolveOpenKeys(location.pathname);
 
   function handleMenuClick({ key }: { key: string }) {
+    // Ignore sub-menu group keys (they don't map to routes)
+    if (key.startsWith('sub-')) return;
     navigate(key);
   }
 
@@ -127,7 +212,8 @@ export default function MainLayout() {
           theme="dark"
           mode="inline"
           selectedKeys={[selectedKey]}
-          items={menuItems}
+          defaultOpenKeys={defaultOpenKeys}
+          items={MENU_ITEMS}
           onClick={handleMenuClick}
           style={{ borderRight: 0, marginTop: 8 }}
         />

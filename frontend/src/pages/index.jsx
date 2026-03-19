@@ -1,6 +1,9 @@
 import SEO from "@/components/seo";
 import Wrapper from "@/layout/wrapper";
 import Header from "@/layout/headers/header";
+import Footer from "@/layout/footers/footer";
+import BlockRenderer from "@/components/cms/BlockRenderer";
+// Keep all existing imports as fallback
 import ElectronicCategory from "@/components/categories/electronic-category";
 import HomeHeroSlider from "@/components/hero-banner/home-hero-slider";
 import FeatureArea from "@/components/features/feature-area";
@@ -14,27 +17,60 @@ import NewArrivals from "@/components/products/electronics/new-arrivals";
 import BlogArea from "@/components/blog/electronic/blog-area";
 import InstagramArea from "@/components/instagram/instagram-area";
 import CtaArea from "@/components/cta/cta-area";
-import Footer from "@/layout/footers/footer";
 
-export default function Home() {
+// Fallback layout when CMS data is not available
+function FallbackHome() {
+  return (
+    <>
+      <HomeHeroSlider />
+      <ElectronicCategory />
+      <FeatureArea />
+      <ProductArea />
+      <BannerArea />
+      <OfferProducts />
+      <ProductGadgetArea />
+      <ProductBanner />
+      <NewArrivals />
+      <ProductSmArea />
+      <BlogArea />
+      <InstagramArea />
+      <CtaArea />
+    </>
+  );
+}
+
+export default function Home({ page, settings }) {
+  const hasCmsContent = page && page.blocks && page.blocks.length > 0;
+
   return (
     <Wrapper>
-      <SEO pageTitle='Home'/>
-      <Header/>
-      <HomeHeroSlider/>
-      <ElectronicCategory/>
-      <FeatureArea/>
-      <ProductArea/>
-      <BannerArea/>
-      <OfferProducts/>
-      <ProductGadgetArea/>
-      <ProductBanner/>
-       <NewArrivals/>
-      <ProductSmArea/>
-      <BlogArea/>
-      <InstagramArea/>
-      <CtaArea/>
-      <Footer/>
+      <SEO pageTitle={page?.seo?.metaTitle || settings?.siteName || 'Home'} />
+      <Header />
+      {hasCmsContent ? (
+        <BlockRenderer blocks={page.blocks} />
+      ) : (
+        <FallbackHome />
+      )}
+      <Footer />
     </Wrapper>
-  )
+  );
+}
+
+export async function getServerSideProps() {
+  const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:7001';
+  let page = null;
+  let settings = null;
+
+  try {
+    const [pageRes, settingsRes] = await Promise.all([
+      fetch(`${API_URL}/api/v1/store/pages/home`).then((r) => (r.ok ? r.json() : null)),
+      fetch(`${API_URL}/api/v1/store/settings`).then((r) => (r.ok ? r.json() : null)),
+    ]);
+    page = pageRes?.data || null;
+    settings = settingsRes?.data || null;
+  } catch (err) {
+    console.error('[Home SSR] Error fetching CMS data:', err.message);
+  }
+
+  return { props: { page, settings } };
 }

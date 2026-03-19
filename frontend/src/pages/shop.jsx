@@ -1,160 +1,107 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
+import { useRouter } from "next/router";
 import SEO from "@/components/seo";
 import Wrapper from "@/layout/wrapper";
 import HeaderTwo from "@/layout/headers/header-2";
 import ShopBreadcrumb from "@/components/breadcrumb/shop-breadcrumb";
 import ShopArea from "@/components/shop/shop-area";
-import { useGetAllProductsQuery } from "@/redux/features/productApi";
 import ErrorMsg from "@/components/common/error-msg";
 import Footer from "@/layout/footers/footer";
 import ShopFilterOffCanvas from "@/components/common/shop-filter-offcanvas";
 import ShopLoader from "@/components/loader/shop/shop-loader";
+import { useGetFilteredProductsQuery } from "@/redux/features/cmsApi";
 
 const ShopPage = ({ query }) => {
-  const { data: products, isError, isLoading } = useGetAllProductsQuery();
-  const [priceValue, setPriceValue] = useState([0, 0]);
-  const [selectValue, setSelectValue] = useState("");
-  const [currPage, setCurrPage] = useState(1);
-  // Load the maximum price once the products have been loaded
-  useEffect(() => {
-    if (!isLoading && !isError && products?.data?.length > 0) {
-      const maxPrice = products.data.reduce((max, product) => {
-        return product.price > max ? product.price : max;
-      }, 0);
-      setPriceValue([0, maxPrice]);
-    }
-  }, [isLoading, isError, products]);
+  const router = useRouter();
+  const [selectValue, setSelectValue] = useState(query.sort || "");
 
-  // handleChanges
-  const handleChanges = (val) => {
-    setCurrPage(1);
-    setPriceValue(val);
+  // Build API params from URL query
+  const apiParams = {
+    page: query.page || 1,
+    limit: 20,
+    ...(query.category && { category: query.category }),
+    ...(query.subCategory && { category: query.subCategory }),
+    ...(query.brand && { brand: query.brand }),
+    ...(query.color && { color: query.color }),
+    ...(query.minPrice && { minPrice: query.minPrice }),
+    ...(query.maxPrice && { maxPrice: query.maxPrice }),
+    ...(query.productType && { productType: query.productType }),
+    ...(query.sort && query.sort !== 'Default Sorting'
+      ? {
+          sortBy:
+            query.sort === 'Low to High' || query.sort === 'High to Low'
+              ? 'price'
+              : 'createdAt',
+          sortOrder: query.sort === 'Low to High' ? 'asc' : 'desc',
+        }
+      : {}),
   };
 
-  // selectHandleFilter
+  const { data: productsData, isError, isLoading } = useGetFilteredProductsQuery(apiParams);
+
+  // Push filter changes to URL query params with shallow routing so the
+  // page does not fully reload but getServerSideProps runs on next navigation
+  const handleFilterChange = useCallback(
+    (newFilters) => {
+      const currentQuery = { ...router.query, ...newFilters };
+      // Remove falsy/empty values to keep the URL clean
+      Object.keys(currentQuery).forEach((key) => {
+        if (!currentQuery[key]) delete currentQuery[key];
+      });
+      router.push({ pathname: '/shop', query: currentQuery }, undefined, {
+        shallow: true,
+      });
+    },
+    [router]
+  );
+
   const selectHandleFilter = (e) => {
     setSelectValue(e.value);
+    handleFilterChange({ sort: e.value, page: 1 });
   };
 
-  // other props
   const otherProps = {
     priceFilterValues: {
-      priceValue,
-      handleChanges,
+      priceValue: [
+        parseInt(query.minPrice) || 0,
+        parseInt(query.maxPrice) || 10000,
+      ],
+      handleChanges: (val) =>
+        handleFilterChange({ minPrice: val[0], maxPrice: val[1], page: 1 }),
     },
     selectHandleFilter,
-    currPage,
-    setCurrPage,
+    currPage: parseInt(query.page) || 1,
+    setCurrPage: (page) => handleFilterChange({ page }),
   };
-  // decide what to render
+
   let content = null;
 
   if (isLoading) {
-    content = <ShopLoader loading={isLoading}/>;
-  }
-  if (!isLoading && isError) {
-    content = <div className="pb-80 text-center"><ErrorMsg msg="There was an error" /></div>;
-  }
-  if (!isLoading && !isError && products?.data?.length === 0) {
-    content = <ErrorMsg msg="No Products found!" />;
-  }
-  if (!isLoading && !isError && products?.data?.length > 0) {
-    // products
-    let product_items = products.data;
-    // select short filtering
-    if (selectValue) {
-      if (selectValue === "Default Sorting") {
-        product_items = products.data;
-      } else if (selectValue === "Low to High") {
-        product_items = products.data
-          .slice()
-          .sort((a, b) => Number(a.price) - Number(b.price));
-      } else if (selectValue === "High to Low") {
-        product_items = products.data
-          .slice()
-          .sort((a, b) => Number(b.price) - Number(a.price));
-      } else if (selectValue === "New Added") {
-        product_items = products.data
-          .slice()
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      } else if (selectValue === "On Sale") {
-        product_items = products.data.filter((p) => p.discount > 0);
-      } else {
-        product_items = products.data;
-      }
-    }
-    // price filter
-    product_items = product_items.filter(
-      (p) => p.price >= priceValue[0] && p.price <= priceValue[1]
+    content = <ShopLoader loading={isLoading} />;
+  } else if (isError) {
+    content = (
+      <div className="pb-80 text-center">
+        <ErrorMsg msg="There was an error" />
+      </div>
     );
-
-    // status filter
-    if (query.status) {
-      if (query.status === "on-sale") {
-        product_items = product_items.filter((p) => p.discount > 0);
-      } else if (query.status === "in-stock") {
-        product_items = product_items.filter((p) => p.status === "in-stock");
-      }
-    }
-
-    // category filter
-    if (query.category) {
-      product_items = product_items.filter(
-        (p) =>
-          p.parent?.toLowerCase().replace("&", "").split(" ").join("-") ===
-          query.category
-      );
-    }
-
-    // category filter
-    if (query.subCategory) {
-      product_items = product_items.filter(
-        (p) =>
-          p.children?.toLowerCase().replace("&", "").split(" ").join("-") ===
-          query.subCategory
-      );
-    }
-
-    // color filter
-    if (query.color) {
-      product_items = product_items.filter((product) => {
-        for (let i = 0; i < product.imageURLs.length; i++) {
-          const color = product.imageURLs[i]?.color;
-          if (
-            color &&
-            color?.name.toLowerCase().replace("&", "").split(" ").join("-") ===
-              query.color
-          ) {
-            return true; // match found, include product in result
-          }
-        }
-        return false; // no match found, exclude product from result
-      });
-    }
-
-    // brand filter
-    if (query.brand) {
-      product_items = product_items.filter(
-        (p) =>
-          p.brand?.name?.toLowerCase().replace("&", "").split(" ").join("-") ===
-          query.brand
-      );
-    }
-
+  } else if (!productsData?.data?.length) {
+    content = <ErrorMsg msg="No Products found!" />;
+  } else {
     content = (
       <>
         <ShopArea
-          all_products={products.data}
-          products={product_items}
+          all_products={productsData.data}
+          products={productsData.data}
           otherProps={otherProps}
         />
         <ShopFilterOffCanvas
-          all_products={products.data}
+          all_products={productsData.data}
           otherProps={otherProps}
         />
       </>
     );
   }
+
   return (
     <Wrapper>
       <SEO pageTitle="Shop" />
@@ -170,10 +117,5 @@ export default ShopPage;
 
 export const getServerSideProps = async (context) => {
   const { query } = context;
-
-  return {
-    props: {
-      query,
-    },
-  };
+  return { props: { query } };
 };

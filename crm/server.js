@@ -100,6 +100,10 @@ app.use('/api/users', apiProtect, attachProxy, require('./routes/users'));
 // Sync service removed in Phase 1 — single database, no sync needed
 // app.use('/api/sync', apiProtect, require('./routes/sync.routes'));
 
+// Phase 2 — CMS and Coupons
+app.use('/api/cms', apiProtect, require('./routes/cms.routes'));
+app.use('/api/coupons', apiProtect, require('./routes/coupon.routes'));
+
 // ─── Page Routes (React SPA, protected by Keycloak) ─────────
 
 const spaRoutes = ['/', '/products', '/categories', '/orders', '/users'];

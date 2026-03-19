@@ -11,6 +11,8 @@
 const express = require('express');
 const router = express.Router();
 const ctrl = require('../../../controller/v1/store.controller');
+const storeCmsCtrl = require('../../../controller/v1/store-cms.controller');
+const Category = require('../../../model/Category');
 const respond = require('../../../utils/respond');
 
 const NOT_IMPLEMENTED = (req, res) =>
@@ -21,10 +23,11 @@ const NOT_IMPLEMENTED = (req, res) =>
 // ---------------------------------------------------------------------------
 
 // Static / query-based product routes — must precede /:id
-router.get('/products/offer',        ctrl.getOfferProducts);
-router.get('/products/top-rated',    ctrl.getTopRatedProducts);
+router.get('/products/search',        ctrl.searchProducts);
+router.get('/products/offer',         ctrl.getOfferProducts);
+router.get('/products/top-rated',     ctrl.getTopRatedProducts);
 router.get('/products/popular/:type', ctrl.getPopularProductByType);
-router.get('/products/type/:type',   ctrl.getProductsByType);
+router.get('/products/type/:type',    ctrl.getProductsByType);
 
 // Parameterised product routes
 router.get('/products/:id/related',  ctrl.getRelatedProducts);
@@ -36,6 +39,27 @@ router.get('/products',              ctrl.getAllProducts);
 // ---------------------------------------------------------------------------
 
 // Static category routes before /:id
+router.get('/categories/tree', async (req, res, next) => {
+  try {
+    const categories = await Category.find({ status: 'Show' })
+      .select('parent children productType _id')
+      .sort({ parent: 1 });
+
+    // Build hierarchical tree grouped by parent
+    const tree = categories.map((cat) => ({
+      id: cat._id,
+      name: cat.parent,
+      productType: cat.productType,
+      children: (cat.children || []).map((child) => ({
+        name: child,
+      })),
+    }));
+
+    return respond.success(res, tree, 'Category tree retrieved successfully');
+  } catch (err) {
+    next(err);
+  }
+});
 router.get('/categories/show/:type', ctrl.getCategoriesByType);
 router.get('/categories/show',       ctrl.getShowCategories);
 router.get('/categories/:id',        ctrl.getSingleCategory);
@@ -64,14 +88,19 @@ router.get('/coupons',     ctrl.getAllCoupons);
 router.get('/reviews', NOT_IMPLEMENTED);
 
 // ---------------------------------------------------------------------------
-// CMS stubs — Phase 2
+// CMS — Phase 2
 // ---------------------------------------------------------------------------
 
-router.get('/pages/:slug',      NOT_IMPLEMENTED);
-router.get('/menus/:location',  NOT_IMPLEMENTED);
-router.get('/banners',          NOT_IMPLEMENTED);
-router.get('/blog',             NOT_IMPLEMENTED);
-router.get('/blog/:slug',       NOT_IMPLEMENTED);
-router.get('/settings/public',  NOT_IMPLEMENTED);
+router.get('/pages/:slug',      storeCmsCtrl.getPageBySlug);
+router.get('/menus/:location',  storeCmsCtrl.getMenuByLocation);
+router.get('/banners',          storeCmsCtrl.getActiveBanners);
+
+// Blog: /blog/featured must be before /blog/:slug
+router.get('/blog/featured',    storeCmsCtrl.getFeaturedBlogPosts);
+router.get('/blog/:slug',       storeCmsCtrl.getBlogPostBySlug);
+router.get('/blog',             storeCmsCtrl.listPublishedBlogPosts);
+
+// Public settings — replaces /settings/public stub
+router.get('/settings',         storeCmsCtrl.getPublicSettings);
 
 module.exports = router;

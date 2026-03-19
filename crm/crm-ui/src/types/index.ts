@@ -174,3 +174,175 @@ export interface SyncStatus {
   frontend: { products: number; categories: number; users: number };
   synced: { products: boolean; categories: boolean; users: boolean };
 }
+
+// ---------------------------------------------------------------------------
+// CMS Types
+// ---------------------------------------------------------------------------
+
+export interface ContentBlock {
+  _id?: string;
+  blockType: string;
+  title?: string;
+  subtitle?: string;
+  order: number;
+  settings: Record<string, unknown>;
+  isVisible: boolean;
+  visibleFrom?: string;
+  visibleUntil?: string;
+}
+
+export interface Page {
+  _id: string;
+  title: string;
+  slug: string;
+  type: 'home' | 'landing' | 'custom';
+  status: 'draft' | 'published' | 'archived';
+  blocks: ContentBlock[];
+  seo: { metaTitle?: string; metaDescription?: string; ogImage?: string };
+  publishedAt?: string;
+  createdBy?: { _id: string; name: string };
+  updatedBy?: { _id: string; name: string };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MenuItem {
+  _id?: string;
+  label: string;
+  labelVi?: string;
+  type: 'link' | 'page' | 'category' | 'product' | 'custom';
+  url?: string;
+  target?: '_self' | '_blank';
+  reference?: { model?: string; id?: string };
+  icon?: string;
+  image?: string;
+  children: MenuItem[];
+  order: number;
+  isVisible: boolean;
+}
+
+export interface CmsMenu {
+  _id: string;
+  name: string;
+  slug: string;
+  location: string;
+  items: MenuItem[];
+  status: 'active' | 'inactive';
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BannerContent {
+  text?: string;
+  textVi?: string;
+  buttonText?: string;
+  buttonTextVi?: string;
+  buttonUrl?: string;
+  image?: string;
+  imageMobile?: string;
+  backgroundColor?: string;
+  textColor?: string;
+}
+
+export interface Banner {
+  _id: string;
+  title: string;
+  type: 'announcement-bar' | 'popup' | 'hero-slide' | 'promotional-banner' | 'category-banner';
+  content: BannerContent;
+  scheduling: { startDate?: string; endDate?: string; isAlwaysActive: boolean };
+  targeting: { pages: string[]; userSegments: string[] };
+  position?: string;
+  priority: number;
+  status: 'active' | 'inactive' | 'scheduled';
+  dismissible: boolean;
+  analytics: { impressions: number; clicks: number; dismissals: number };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogPost {
+  _id: string;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  content: string;
+  featuredImage?: string;
+  author: { _id: string; name: string };
+  category?: string;
+  tags: string[];
+  status: 'draft' | 'published' | 'archived';
+  featured: boolean;
+  views: number;
+  publishedAt?: string;
+  seo: { metaTitle?: string; metaDescription?: string; ogImage?: string };
+  i18n: { titleVi?: string; excerptVi?: string; contentVi?: string };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SiteSettings {
+  _id?: string;
+  siteName: string;
+  siteDescription?: string;
+  logo?: string;
+  favicon?: string;
+  ogImage?: string;
+  theme: {
+    primaryColor: string;
+    secondaryColor: string;
+    accentColor: string;
+    fontFamily: string;
+    headerStyle: string;
+    footerStyle: string;
+  };
+  contact: {
+    email?: string;
+    phone?: string;
+    address?: string;
+    socialLinks: Array<{ platform: string; url: string }>;
+  };
+  shipping: {
+    freeShippingThreshold: number;
+    defaultShippingCost: number;
+    enabledMethods: string[];
+  };
+  payment: {
+    enabledGateways: string[];
+    currency: string;
+    currencySymbol: string;
+  };
+  seo: {
+    defaultTitle?: string;
+    defaultDescription?: string;
+    defaultKeywords: string[];
+    googleAnalyticsId?: string;
+    facebookPixelId?: string;
+  };
+  maintenance: {
+    isEnabled: boolean;
+    message?: string;
+  };
+  i18n: {
+    defaultLanguage: string;
+    supportedLanguages: string[];
+  };
+}
+
+export interface Coupon {
+  _id: string;
+  title: string;
+  logo?: string;
+  couponCode: string;
+  startTime: string;
+  endTime: string;
+  discountPercentage: number;
+  minimumAmount: number;
+  productType: string;
+  status: 'active' | 'inactive';
+  usageLimit?: number;
+  usageCount?: number;
+  perUserLimit?: number;
+  createdAt: string;
+  updatedAt: string;
+}

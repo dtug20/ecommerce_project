@@ -7,13 +7,34 @@ import logo from '@assets/img/logo/logo.svg';
 import pay from '@assets/img/footer/footer-pay.png';
 import social_data from '@/data/social-data';
 import { Email, Location } from '@/svg';
+import { useGetSettingsQuery } from '@/redux/features/cmsApi';
 
-const Footer = ({ style_2 = false, style_3 = false,primary_style=false }) => {
+const Footer = ({ style_2 = false, style_3 = false, primary_style = false }) => {
   const { t } = useTranslation();
+  const { data: settingsData } = useGetSettingsQuery();
+  const siteSettings = settingsData?.data;
+
+  // Contact info — prefer CMS settings, fall back to hardcoded values
+  const phone = siteSettings?.contact?.phone || '+01622064136';
+  const email = siteSettings?.contact?.email || 'shuvoprogramer@gmail.com';
+  const address = siteSettings?.contact?.address || 'Savar, Dhaka, Bangladesh';
+
+  // Social links — prefer CMS settings, fall back to static data
+  const socialLinks = siteSettings?.contact?.socialLinks;
+  const hasDynamicSocial = socialLinks && Object.keys(socialLinks).length > 0;
+
   return (
     <footer>
-      <div className={`tp-footer-area ${primary_style?'tp-footer-style-2 tp-footer-style-primary tp-footer-style-6':''} ${style_2 ?'tp-footer-style-2':style_3 ? 'tp-footer-style-2 tp-footer-style-3': ''}`}
-        data-bg-color={`${style_2 ? 'footer-bg-white' : 'footer-bg-grey'}`}>
+      <div
+        className={`tp-footer-area ${
+          primary_style
+            ? 'tp-footer-style-2 tp-footer-style-primary tp-footer-style-6'
+            : ''
+        } ${
+          style_2 ? 'tp-footer-style-2' : style_3 ? 'tp-footer-style-2 tp-footer-style-3' : ''
+        }`}
+        data-bg-color={`${style_2 ? 'footer-bg-white' : 'footer-bg-grey'}`}
+      >
         <div className="tp-footer-top pt-95 pb-40">
           <div className="container">
             <div className="row">
@@ -25,11 +46,27 @@ const Footer = ({ style_2 = false, style_3 = false,primary_style=false }) => {
                         <Image src={logo} alt="logo" />
                       </Link>
                     </div>
-                    <p className="tp-footer-desc">{t("footer.description")}</p>
+                    <p className="tp-footer-desc">{t('footer.description')}</p>
                     <div className="tp-footer-social">
-                      {social_data.map(s => <a href={s.link} key={s.id} target="_blank">
-                        <i className={s.icon}></i>
-                      </a>
+                      {hasDynamicSocial ? (
+                        Object.entries(socialLinks).map(([platform, url]) =>
+                          url ? (
+                            <a
+                              key={platform}
+                              href={url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <i className={`fa-brands fa-${platform}`}></i>
+                            </a>
+                          ) : null
+                        )
+                      ) : (
+                        social_data.map((s) => (
+                          <a href={s.link} key={s.id} target="_blank" rel="noreferrer">
+                            <i className={s.icon}></i>
+                          </a>
+                        ))
                       )}
                     </div>
                   </div>
@@ -37,41 +74,43 @@ const Footer = ({ style_2 = false, style_3 = false,primary_style=false }) => {
               </div>
               <div className="col-xl-2 col-lg-3 col-md-4 col-sm-6">
                 <div className="tp-footer-widget footer-col-2 mb-50">
-                  <h4 className="tp-footer-widget-title">{t("footer.myAccount")}</h4>
+                  <h4 className="tp-footer-widget-title">{t('footer.myAccount')}</h4>
                   <div className="tp-footer-widget-content">
                     <ul>
-                      <li><a href="#">{t("footer.trackOrders")}</a></li>
-                      <li><a href="#">{t("footer.shipping")}</a></li>
-                      <li><a href="#">{t("footer.wishlist")}</a></li>
-                      <li><a href="#">{t("footer.myAccount")}</a></li>
-                      <li><a href="#">{t("footer.orderHistory")}</a></li>
-                      <li><a href="#">{t("footer.returns")}</a></li>
+                      <li><a href="#">{t('footer.trackOrders')}</a></li>
+                      <li><a href="#">{t('footer.shipping')}</a></li>
+                      <li><a href="#">{t('footer.wishlist')}</a></li>
+                      <li><a href="#">{t('footer.myAccount')}</a></li>
+                      <li><a href="#">{t('footer.orderHistory')}</a></li>
+                      <li><a href="#">{t('footer.returns')}</a></li>
                     </ul>
                   </div>
                 </div>
               </div>
               <div className="col-xl-3 col-lg-3 col-md-4 col-sm-6">
                 <div className="tp-footer-widget footer-col-3 mb-50">
-                  <h4 className="tp-footer-widget-title">{t("footer.information")}</h4>
+                  <h4 className="tp-footer-widget-title">{t('footer.information')}</h4>
                   <div className="tp-footer-widget-content">
                     <ul>
-                      <li><a href="#">{t("footer.ourStory")}</a></li>
-                      <li><a href="#">{t("footer.careers")}</a></li>
-                      <li><a href="#">{t("footer.privacyPolicy")}</a></li>
-                      <li><a href="#">{t("footer.termsConditions")}</a></li>
-                      <li><a href="#">{t("footer.latestNews")}</a></li>
-                      <li><a href="#">{t("footer.contactUs")}</a></li>
+                      <li><a href="#">{t('footer.ourStory')}</a></li>
+                      <li><a href="#">{t('footer.careers')}</a></li>
+                      <li><a href="#">{t('footer.privacyPolicy')}</a></li>
+                      <li><a href="#">{t('footer.termsConditions')}</a></li>
+                      <li><a href="#">{t('footer.latestNews')}</a></li>
+                      <li><a href="#">{t('footer.contactUs')}</a></li>
                     </ul>
                   </div>
                 </div>
               </div>
               <div className="col-xl-3 col-lg-3 col-md-4 col-sm-6">
                 <div className="tp-footer-widget footer-col-4 mb-50">
-                  <h4 className="tp-footer-widget-title">{t("footer.talkToUs")}</h4>
+                  <h4 className="tp-footer-widget-title">{t('footer.talkToUs')}</h4>
                   <div className="tp-footer-widget-content">
                     <div className="tp-footer-talk mb-20">
-                      <span>{t("footer.gotQuestions")}</span>
-                      <h4><a href="tel:670-413-90-762">+01622064136</a></h4>
+                      <span>{t('footer.gotQuestions')}</span>
+                      <h4>
+                        <a href={`tel:${phone.replace(/\s/g, '')}`}>{phone}</a>
+                      </h4>
                     </div>
                     <div className="tp-footer-contact">
                       <div className="tp-footer-contact-item d-flex align-items-start">
@@ -81,7 +120,9 @@ const Footer = ({ style_2 = false, style_3 = false,primary_style=false }) => {
                           </span>
                         </div>
                         <div className="tp-footer-contact-content">
-                          <p><a href="mailto:shofy@support.com">shuvoprogramer@gmail.com</a></p>
+                          <p>
+                            <a href={`mailto:${email}`}>{email}</a>
+                          </p>
                         </div>
                       </div>
                       <div className="tp-footer-contact-item d-flex align-items-start">
@@ -91,7 +132,7 @@ const Footer = ({ style_2 = false, style_3 = false,primary_style=false }) => {
                           </span>
                         </div>
                         <div className="tp-footer-contact-content">
-                          <p><a href="https://www.google.com/maps/place/Sleepy+Hollow+Rd,+Gouverneur,+NY+13642,+USA/@44.3304966,-75.4552367,17z/data=!3m1!4b1!4m6!3m5!1s0x4cccddac8972c5eb:0x56286024afff537a!8m2!3d44.3304928!4d-75.453048!16s%2Fg%2F1tdsjdj4" target="_blank">Savar <br /> Dhaka, Bangladesh</a></p>
+                          <p>{address}</p>
                         </div>
                       </div>
                     </div>
@@ -107,8 +148,10 @@ const Footer = ({ style_2 = false, style_3 = false,primary_style=false }) => {
               <div className="row align-items-center">
                 <div className="col-md-6">
                   <div className="tp-footer-copyright">
-                    <p>{t("footer.copyright", { year: new Date().getFullYear() })}  |  Next js Template by
-                      <Link href="/">{" "}❤</Link>.
+                    <p>
+                      {t('footer.copyright', { year: new Date().getFullYear() })} | Next js
+                      Template by
+                      <Link href="/"> &hearts;</Link>.
                     </p>
                   </div>
                 </div>

@@ -10,6 +10,13 @@ import type {
   User,
   UserStats,
   SyncStatus,
+  Page,
+  ContentBlock,
+  CmsMenu,
+  Banner,
+  BlogPost,
+  SiteSettings,
+  Coupon,
 } from '@/types/index';
 
 // Axios instance with relative baseURL — proxied by Vite to the CRM backend
@@ -201,6 +208,106 @@ export const syncApi = {
 
   getSyncStatus: () =>
     api.get<ApiResponse<SyncStatus>>('/api/sync/sync-status').then((r) => r.data),
+};
+
+// ---------------------------------------------------------------------------
+// CMS — Pages
+// ---------------------------------------------------------------------------
+export const pagesApi = {
+  getAll: (params?: { page?: number; limit?: number; status?: string; search?: string }) =>
+    api.get<ApiResponse<Page[]>>('/api/cms/pages', { params }).then(r => r.data),
+  getById: (id: string) =>
+    api.get<ApiResponse<Page>>(`/api/cms/pages/${id}`).then(r => r.data),
+  create: (data: Partial<Page>) =>
+    api.post<ApiResponse<Page>>('/api/cms/pages', data).then(r => r.data),
+  update: (id: string, data: Partial<Page>) =>
+    api.patch<ApiResponse<Page>>(`/api/cms/pages/${id}`, data).then(r => r.data),
+  updateBlocks: (id: string, blocks: ContentBlock[]) =>
+    api.patch<ApiResponse<Page>>(`/api/cms/pages/${id}/blocks`, { blocks }).then(r => r.data),
+  delete: (id: string) =>
+    api.delete<ApiResponse<null>>(`/api/cms/pages/${id}`).then(r => r.data),
+  duplicate: (id: string) =>
+    api.post<ApiResponse<Page>>(`/api/cms/pages/${id}/duplicate`).then(r => r.data),
+};
+
+// ---------------------------------------------------------------------------
+// CMS — Menus
+// ---------------------------------------------------------------------------
+export const menusApi = {
+  getAll: () =>
+    api.get<ApiResponse<CmsMenu[]>>('/api/cms/menus').then(r => r.data),
+  getById: (id: string) =>
+    api.get<ApiResponse<CmsMenu>>(`/api/cms/menus/${id}`).then(r => r.data),
+  create: (data: Partial<CmsMenu>) =>
+    api.post<ApiResponse<CmsMenu>>('/api/cms/menus', data).then(r => r.data),
+  update: (id: string, data: Partial<CmsMenu>) =>
+    api.patch<ApiResponse<CmsMenu>>(`/api/cms/menus/${id}`, data).then(r => r.data),
+  delete: (id: string) =>
+    api.delete<ApiResponse<null>>(`/api/cms/menus/${id}`).then(r => r.data),
+};
+
+// ---------------------------------------------------------------------------
+// CMS — Banners
+// ---------------------------------------------------------------------------
+export const bannersApi = {
+  getAll: (params?: { type?: string; status?: string; page?: number; limit?: number }) =>
+    api.get<ApiResponse<Banner[]>>('/api/cms/banners', { params }).then(r => r.data),
+  getById: (id: string) =>
+    api.get<ApiResponse<Banner>>(`/api/cms/banners/${id}`).then(r => r.data),
+  create: (data: Partial<Banner>) =>
+    api.post<ApiResponse<Banner>>('/api/cms/banners', data).then(r => r.data),
+  update: (id: string, data: Partial<Banner>) =>
+    api.patch<ApiResponse<Banner>>(`/api/cms/banners/${id}`, data).then(r => r.data),
+  delete: (id: string) =>
+    api.delete<ApiResponse<null>>(`/api/cms/banners/${id}`).then(r => r.data),
+  updatePriority: (items: Array<{ id: string; priority: number }>) =>
+    api.patch<ApiResponse<null>>('/api/cms/banners/priority', { items }).then(r => r.data),
+};
+
+// ---------------------------------------------------------------------------
+// CMS — Blog
+// ---------------------------------------------------------------------------
+export const blogApi = {
+  getAll: (params?: { page?: number; limit?: number; status?: string; category?: string; search?: string }) =>
+    api.get<ApiResponse<BlogPost[]>>('/api/cms/blog', { params }).then(r => r.data),
+  getById: (id: string) =>
+    api.get<ApiResponse<BlogPost>>(`/api/cms/blog/${id}`).then(r => r.data),
+  create: (data: Partial<BlogPost>) =>
+    api.post<ApiResponse<BlogPost>>('/api/cms/blog', data).then(r => r.data),
+  update: (id: string, data: Partial<BlogPost>) =>
+    api.patch<ApiResponse<BlogPost>>(`/api/cms/blog/${id}`, data).then(r => r.data),
+  delete: (id: string) =>
+    api.delete<ApiResponse<null>>(`/api/cms/blog/${id}`).then(r => r.data),
+  publish: (id: string) =>
+    api.patch<ApiResponse<BlogPost>>(`/api/cms/blog/${id}/publish`).then(r => r.data),
+  unpublish: (id: string) =>
+    api.patch<ApiResponse<BlogPost>>(`/api/cms/blog/${id}/unpublish`).then(r => r.data),
+};
+
+// ---------------------------------------------------------------------------
+// CMS — Settings
+// ---------------------------------------------------------------------------
+export const settingsApi = {
+  get: () =>
+    api.get<ApiResponse<SiteSettings>>('/api/cms/settings').then(r => r.data),
+  update: (data: Partial<SiteSettings>) =>
+    api.patch<ApiResponse<SiteSettings>>('/api/cms/settings', data).then(r => r.data),
+};
+
+// ---------------------------------------------------------------------------
+// Coupons
+// ---------------------------------------------------------------------------
+export const couponsApi = {
+  getAll: (params?: { page?: number; limit?: number; status?: string; productType?: string; search?: string }) =>
+    api.get<ApiResponse<Coupon[]>>('/api/coupons', { params }).then(r => r.data),
+  getById: (id: string) =>
+    api.get<ApiResponse<Coupon>>(`/api/coupons/${id}`).then(r => r.data),
+  create: (data: Partial<Coupon>) =>
+    api.post<ApiResponse<Coupon>>('/api/coupons', data).then(r => r.data),
+  update: (id: string, data: Partial<Coupon>) =>
+    api.patch<ApiResponse<Coupon>>(`/api/coupons/${id}`, data).then(r => r.data),
+  delete: (id: string) =>
+    api.delete<ApiResponse<null>>(`/api/coupons/${id}`).then(r => r.data),
 };
 
 export default api;

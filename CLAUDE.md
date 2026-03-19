@@ -26,9 +26,49 @@ Shofy is a full-stack e-commerce application with three services:
 - **Utilities** added: `utils/respond.js` (standardized responses), `utils/pagination.js`
 
 **What did NOT change:**
-- Frontend (`frontend/`) — no changes, uses legacy aliases
 - Existing API endpoints — all continue to work via legacy aliases
 - CRM model files — still present (transition period)
+
+## Phase 2 Status (Complete)
+
+**What changed:**
+
+### Backend — CMS Controllers
+- **`controller/v1/cms.controller.js`** — 32 functions: Pages (7), Menus (5), Banners (6), Blog (7), Settings (2), Coupons (5). All use `respond.*` and emit Socket.io events.
+- **`controller/v1/store-cms.controller.js`** — 7 public read endpoints: getPageBySlug, getMenuByLocation, getActiveBanners, listPublishedBlogPosts, getFeaturedBlogPosts, getBlogPostBySlug, getPublicSettings.
+- **Server-side product filtering** in `store.controller.js` — `getAllProducts` accepts 14 query params (category, brand, minPrice, maxPrice, color, size, productType, status, search, tag, featured, vendor + pagination). `searchProducts` uses `$text` index.
+- **Admin routes** — CMS stubs replaced with real routes for all 6 resource groups.
+- **Store routes** — CMS endpoints live + `/products/search` + `/categories/tree`.
+
+### CRM — 13 New Feature Pages
+- **Sidebar** — hierarchical menu with CMS and Settings sub-menus, Coupons entry
+- **CMS Pages**: PagesListPage (table), PageEditorPage (three-panel: block palette + block list + settings)
+- **CMS Menus**: MenusPage (list), MenuEditorPage (two-panel: tree + settings form)
+- **CMS Blog**: BlogListPage (table), BlogEditorPage (split: editor + sticky sidebar)
+- **CMS Banners**: BannersPage (table + wide modal with 4 sections)
+- **Settings**: ThemeSettingsPage, GeneralSettingsPage, PaymentSettingsPage, ShippingSettingsPage, EmailTemplatesPage (placeholder)
+- **Coupons**: CouponsPage (CRUD table with create/edit modal)
+- **CRM proxy routes** added: `/api/cms/*` and `/api/coupons/*` in `crm/server.js`
+
+### Frontend — Dynamic CMS Integration
+- **RTK Query** — `cmsApi.js` with 10 endpoints for CMS data
+- **BlockRenderer** — maps blockType to lazy components, renders blocks in order
+- **7 block components**: HeroSlider, FeaturedProducts, CategoryShowcase, BannerGrid, TextBlock, ProductCarousel, Newsletter
+- **Homepage** — SSR via `getServerSideProps`, renders CMS blocks when available, falls back to hardcoded layout
+- **Navigation** — `DynamicMenu` component tries CMS menu first, falls back to categories
+- **Footer** — uses settings API for contact info and social links with fallback
+- **Blog** — SSR blog listing + `blog/[slug].jsx` detail page
+- **Shop** — server-side filtering via URL query params (replaced client-side filtering)
+- **Theme** — CSS variables (`--tp-theme-primary`, etc.) applied from settings
+- **Socket.io** — CMS event listeners for page/menu/banner/blog/settings cache invalidation
+- **AnnouncementBar** — dismissible banner from CMS with localStorage persistence
+
+### Block Types Status
+Fully implemented (6): hero-slider, featured-products, category-showcase, banner-grid, text-block, product-carousel
+Stub forms in editor (8): promo-section, testimonials, newsletter, custom-html, brand-showcase, countdown-deal, image-gallery, video-section
+
+### CMS Content Flow
+Admin creates/edits content in CRM → CRM proxies to Backend API → Backend saves to MongoDB → Socket.io emits event → Frontend RTK Query cache invalidated → Storefront re-renders with new content.
 
 ## Commands
 

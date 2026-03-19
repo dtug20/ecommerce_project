@@ -15,6 +15,7 @@ const router = express.Router();
 const multer = require('multer');
 const authorization = require('../../../middleware/authorization');
 const ctrl = require('../../../controller/v1/admin.controller');
+const cmsCtrl = require('../../../controller/v1/cms.controller');
 const respond = require('../../../utils/respond');
 
 const upload = multer();
@@ -108,37 +109,74 @@ router.get('/analytics/top-categories',      ctrl.getMostSellingCategory);
 router.get('/analytics/recent-orders',       ctrl.getDashboardRecentOrder);
 
 // ---------------------------------------------------------------------------
-// CMS stubs — Phase 2
+// Pages — CMS Phase 2
 // ---------------------------------------------------------------------------
 
-router.get('/pages',          NOT_IMPLEMENTED);
-router.post('/pages',         NOT_IMPLEMENTED);
-router.patch('/pages/:id',    NOT_IMPLEMENTED);
-router.delete('/pages/:id',   NOT_IMPLEMENTED);
+router.get('/pages',                  cmsCtrl.listPages);
+router.get('/pages/:id',              cmsCtrl.getPage);
+router.post('/pages',                 authorization('admin', 'manager'), cmsCtrl.createPage);
+router.post('/pages/:id/duplicate',   authorization('admin', 'manager'), cmsCtrl.duplicatePage);
+router.patch('/pages/:id/blocks',     authorization('admin', 'manager'), cmsCtrl.updatePageBlocks);
+router.patch('/pages/:id',            authorization('admin', 'manager'), cmsCtrl.updatePage);
+router.delete('/pages/:id',           authorization('admin', 'manager'), cmsCtrl.deletePage);
 
-router.get('/menus/:location',  NOT_IMPLEMENTED);
-router.put('/menus/:location',  NOT_IMPLEMENTED);
+// ---------------------------------------------------------------------------
+// Menus — CMS Phase 2
+// ---------------------------------------------------------------------------
 
-router.get('/banners',          NOT_IMPLEMENTED);
-router.post('/banners',         NOT_IMPLEMENTED);
-router.patch('/banners/:id',    NOT_IMPLEMENTED);
-router.delete('/banners/:id',   NOT_IMPLEMENTED);
+router.get('/menus',         cmsCtrl.listMenus);
+router.get('/menus/:id',     cmsCtrl.getMenu);
+router.post('/menus',        authorization('admin', 'manager'), cmsCtrl.createMenu);
+router.patch('/menus/:id',   authorization('admin', 'manager'), cmsCtrl.updateMenu);
+router.delete('/menus/:id',  authorization('admin', 'manager'), cmsCtrl.deleteMenu);
 
-router.get('/blog',             NOT_IMPLEMENTED);
-router.post('/blog',            NOT_IMPLEMENTED);
-router.patch('/blog/:id',       NOT_IMPLEMENTED);
-router.delete('/blog/:id',      NOT_IMPLEMENTED);
+// ---------------------------------------------------------------------------
+// Banners — CMS Phase 2
+// Note: /banners/priority must be declared before /banners/:id
+// ---------------------------------------------------------------------------
 
-router.get('/settings/:namespace',   NOT_IMPLEMENTED);
-router.patch('/settings/:namespace', NOT_IMPLEMENTED);
+router.patch('/banners/priority',    authorization('admin', 'manager'), cmsCtrl.updateBannerPriority);
+router.get('/banners',               cmsCtrl.listBanners);
+router.get('/banners/:id',           cmsCtrl.getBanner);
+router.post('/banners',              authorization('admin', 'manager'), cmsCtrl.createBanner);
+router.patch('/banners/:id',         authorization('admin', 'manager'), cmsCtrl.updateBanner);
+router.delete('/banners/:id',        authorization('admin', 'manager'), cmsCtrl.deleteBanner);
+
+// ---------------------------------------------------------------------------
+// Blog — CMS Phase 2
+// Note: specific sub-routes must be declared before /blog/:id
+// ---------------------------------------------------------------------------
+
+router.patch('/blog/:id/publish',    authorization('admin', 'manager'), cmsCtrl.publishBlogPost);
+router.patch('/blog/:id/unpublish',  authorization('admin', 'manager'), cmsCtrl.unpublishBlogPost);
+router.get('/blog',                  cmsCtrl.listBlogPosts);
+router.get('/blog/:id',              cmsCtrl.getBlogPost);
+router.post('/blog',                 authorization('admin', 'manager'), cmsCtrl.createBlogPost);
+router.patch('/blog/:id',            authorization('admin', 'manager'), cmsCtrl.updateBlogPost);
+router.delete('/blog/:id',           authorization('admin', 'manager'), cmsCtrl.deleteBlogPost);
+
+// ---------------------------------------------------------------------------
+// Settings — CMS Phase 2
+// ---------------------------------------------------------------------------
+
+router.get('/settings',     cmsCtrl.getSettings);
+router.patch('/settings',   authorization('admin', 'manager'), cmsCtrl.updateSettings);
+
+// ---------------------------------------------------------------------------
+// Email templates — Phase 3 stub
+// ---------------------------------------------------------------------------
 
 router.get('/email-templates',       NOT_IMPLEMENTED);
 router.patch('/email-templates/:id', NOT_IMPLEMENTED);
 
 // ---------------------------------------------------------------------------
-// Health — Task 10 implementation placeholder
+// Coupons — CMS Phase 2
 // ---------------------------------------------------------------------------
 
-router.get('/health', NOT_IMPLEMENTED);
+router.get('/coupons',          cmsCtrl.listCoupons);
+router.get('/coupons/:id',      cmsCtrl.getCoupon);
+router.post('/coupons',         authorization('admin', 'manager'), cmsCtrl.createCoupon);
+router.patch('/coupons/:id',    authorization('admin', 'manager'), cmsCtrl.updateCoupon);
+router.delete('/coupons/:id',   authorization('admin', 'manager'), cmsCtrl.deleteCoupon);
 
 module.exports = router;
