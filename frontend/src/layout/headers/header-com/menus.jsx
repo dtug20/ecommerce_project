@@ -28,10 +28,8 @@ const Menus = () => {
   // Filter to show only featured categories, or fallback if none are featured
   let menuCategories = category_items.filter((cat) => cat.featured);
   if (menuCategories.length === 0) {
-    menuCategories = category_items;
+    menuCategories = category_items.slice(0, 5); // Only fallback to 5 if rendering all
   }
-  // Limit to maximum 5 items to avoid overcrowding the main menu layout (col-xl-6)
-  menuCategories = menuCategories.slice(0, 5);
 
   return (
     <ul>
