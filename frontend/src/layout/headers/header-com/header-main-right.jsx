@@ -2,12 +2,14 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslation } from "react-i18next";
 // internal
 import useCartInfo from "@/hooks/use-cart-info";
 import { CartTwo, Compare, Menu, User, Wishlist } from "@/svg";
 import { openCartMini } from "@/redux/features/cartSlice";
 
 const HeaderMainRight = ({ setIsCanvasOpen }) => {
+  const { t } = useTranslation();
   const { user: userInfo } = useSelector((state) => state.auth);
   const { wishlist } = useSelector((state) => state.wishlist);
   const { quantity } = useCartInfo();
@@ -41,13 +43,13 @@ const HeaderMainRight = ({ setIsCanvasOpen }) => {
           <div className="tp-header-login-content d-none d-xl-block">
             {!userInfo?.name && (
               <Link href="/login">
-                <span>Hello,</span>
+                <span>{t("header.hello")}</span>
               </Link>
             )}
-            {userInfo?.name && <span>Hello, {userInfo?.name}</span>}
+            {userInfo?.name && <span>{t("header.helloName", { name: userInfo.name })}</span>}
             <div className="tp-header-login-title">
-              {!userInfo?.name && <Link href="/login">Sign In</Link>}
-              {userInfo?.name && <Link href="/profile">Your Account</Link>}
+              {!userInfo?.name && <Link href="/login">{t("header.signIn")}</Link>}
+              {userInfo?.name && <Link href="/profile">{t("header.yourAccount")}</Link>}
             </div>
           </div>
         </div>

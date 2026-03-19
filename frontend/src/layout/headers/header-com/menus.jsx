@@ -1,56 +1,54 @@
 import React from "react";
-import { useRouter } from "next/router";
+import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import { useGetShowCategoryQuery } from "@/redux/features/categoryApi";
 
+const MAX_MENU_CATEGORIES = 5;
+
+const buildCategorySlug = (title) =>
+  title.toLowerCase().replace("&", "").split(" ").join("-");
+
 const Menus = () => {
-  const router = useRouter();
+  const { t } = useTranslation();
   const { data: categories, isError, isLoading } = useGetShowCategoryQuery();
-
-  // handle category route
-  const handleCategoryRoute = (title, route) => {
-    if (route === "parent") {
-      router.push(
-        `/shop?category=${title.toLowerCase().replace("&", "").split(" ").join("-")}`
-      );
-    } else {
-      router.push(
-        `/shop?subCategory=${title.toLowerCase().replace("&", "").split(" ").join("-")}`
-      );
-    }
-  };
-
-  if (isLoading || isError) {
-    return <ul></ul>;
-  }
 
   const category_items = categories?.result || [];
 
-  // Filter to show only featured categories, or fallback if none are featured
-  let menuCategories = category_items.filter((cat) => cat.featured);
+  // Filter to show only featured categories (capped), or fallback if none are featured
+  let menuCategories = category_items.filter((cat) => cat.featured).slice(0, MAX_MENU_CATEGORIES);
   if (menuCategories.length === 0) {
-    menuCategories = category_items.slice(0, 5); // Only fallback to 5 if rendering all
+    menuCategories = category_items.slice(0, MAX_MENU_CATEGORIES);
   }
 
   return (
     <ul>
-      {menuCategories.map((item) => (
+      <li>
+        <Link href="/">{t("nav.home")}</Link>
+      </li>
+      <li>
+        <Link href="/shop">{t("nav.shop")}</Link>
+      </li>
+      {!isLoading && !isError && menuCategories.map((item) => (
         <li key={item._id} className={item.children && item.children.length > 0 ? "has-dropdown" : ""}>
-          <a className="cursor-pointer" onClick={() => handleCategoryRoute(item.parent, "parent")}>
+          <Link href={`/shop?category=${buildCategorySlug(item.parent)}`}>
             {item.parent}
-          </a>
+          </Link>
           {item.children && item.children.length > 0 && (
             <ul className="tp-submenu">
               {item.children.map((child, i) => (
                 <li key={i}>
-                  <a className="cursor-pointer" onClick={() => handleCategoryRoute(child, "children")}>
+                  <Link href={`/shop?subCategory=${buildCategorySlug(child)}`}>
                     {child}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
           )}
         </li>
       ))}
+      <li>
+        <Link href="/coupon">{t("nav.coupons")}</Link>
+      </li>
     </ul>
   );
 };

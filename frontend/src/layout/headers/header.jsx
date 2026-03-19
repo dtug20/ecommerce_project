@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 // internal
 import Menus from "./header-com/menus";
 import useSticky from "@/hooks/use-sticky";
@@ -23,6 +24,7 @@ const Header = () => {
   const { quantity } = useCartInfo();
   const { sticky } = useSticky();
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   return (
     <>
       <header>
@@ -36,7 +38,7 @@ const Header = () => {
                     <span>
                       <ShippingCar />
                     </span>
-                    <p>FREE Express Shipping On Orders $570+</p>
+                    <p>{t("header.freeShipping")}</p>
                   </div>
                 </div>
                 <div className="col-md-6">
@@ -86,10 +88,10 @@ const Header = () => {
                         <span>
                           <CategoryMenu />
                         </span>
-                        All Product Type
+                        {t("header.allProductTypes")}
                       </button>
                       <nav className="tp-category-menu-content">
-                        <HeaderCategory categoryType="electronics" isCategoryActive={isCategoryActive} />
+                        <HeaderCategory isCategoryActive={isCategoryActive} />
                       </nav>
                     </div>
                     {/* category end */}
@@ -109,7 +111,7 @@ const Header = () => {
                         </span>
                       </div>
                       <div className="tp-header-contact-content">
-                        <h5>Hotline:</h5>
+                        <h5>{t("header.hotline")}</h5>
                         <p>
                           <a href="tel:966-595-035-008">+(966) 595 035 008</a>
                         </p>

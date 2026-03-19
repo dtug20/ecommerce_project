@@ -4,6 +4,7 @@ import ReactModal from "react-modal";
 // import { Elements } from "@stripe/react-stripe-js"; // STRIPE DISABLED
 // import { loadStripe } from "@stripe/stripe-js"; // STRIPE DISABLED
 import '../styles/index.scss';
+import "@/i18n";
 import KeycloakProvider from "@/components/providers/keycloak-provider";
 if (typeof window !== "undefined") {
   require("bootstrap/dist/js/bootstrap");
