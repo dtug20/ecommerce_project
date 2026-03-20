@@ -715,7 +715,7 @@ export default function CategoriesPage() {
                 const formData = new FormData();
                 formData.append('image', file as Blob);
                 try {
-                  const res = await api.post('/api/cloudinary/add-img', formData, {
+                  const res = await api.post('/api/v1/admin/media/upload', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                   });
                   const url = res.data?.data?.url;

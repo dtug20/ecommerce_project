@@ -22,16 +22,16 @@ const Menus = () => {
 
   // Fallback to category-based menu
   const category_items = categories?.result || [];
-  let menuCategories = category_items.filter((cat) => cat.featured).slice(0, MAX_MENU_CATEGORIES);
+  let menuCategories = [...category_items]
+    .filter((cat) => cat.featured)
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+    .slice(0, MAX_MENU_CATEGORIES);
   if (menuCategories.length === 0) {
     menuCategories = category_items.slice(0, MAX_MENU_CATEGORIES);
   }
 
   return (
     <ul>
-      <li>
-        <Link href="/">{t("nav.home")}</Link>
-      </li>
       <li>
         <Link href="/shop">{t("nav.shop")}</Link>
       </li>
