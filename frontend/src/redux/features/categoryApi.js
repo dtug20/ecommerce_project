@@ -11,10 +11,16 @@ export const categoryApi = apiSlice.injectEndpoints({
       }),
     }),
     getShowCategory: builder.query({
-      query: () => `/api/v1/store/categories/show`
+      query: () => `/api/v1/store/categories/show`,
+      transformResponse: (response) => ({
+        result: response.data || response.result || response,
+      }),
     }),
     getProductTypeCategory: builder.query({
-      query: (type) => `/api/v1/store/categories/show/${type}`
+      query: (type) => `/api/v1/store/categories/show/${type}`,
+      transformResponse: (response) => ({
+        result: response.data || response.result || response,
+      }),
     }),
   }),
 });
