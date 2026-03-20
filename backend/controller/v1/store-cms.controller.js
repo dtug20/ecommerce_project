@@ -82,11 +82,8 @@ exports.getMenuByLocation = async (req, res, next) => {
     });
 
     if (!menu) {
-      return respond.notFound(
-        res,
-        'MENU_NOT_FOUND',
-        `No active menu found for location "${req.params.location}"`
-      );
+      // Return empty menu instead of 404 — frontend calls this on every page load
+      return respond.success(res, { items: [], location: req.params.location }, 'No menu configured for this location');
     }
 
     const menuObj = menu.toObject();
