@@ -35,7 +35,11 @@ const ElectronicCategory = () => {
         <div className="tp-product-category-item text-center mb-40">
           <div className="tp-product-category-thumb fix">
             <a className='cursor-pointer' onClick={() => handleCategoryRoute(item.parent)}>
-              <Image src={item.img} alt="product-category" width={76} height={98} />
+              {item.img ? (
+                <Image src={item.img} alt="product-category" width={76} height={98} />
+              ) : (
+                <div style={{ width: 76, height: 98, background: '#f0f0f0', borderRadius: 8 }} />
+              )}
             </a>
           </div>
           <div className="tp-product-category-content">

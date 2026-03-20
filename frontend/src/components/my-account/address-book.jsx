@@ -163,7 +163,7 @@ const AddressBook = () => {
   const [editingAddress, setEditingAddress] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
-  const addresses = data?.addresses || data || [];
+  const addresses = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
 
   const handleAdd = async (formData) => {
     try {
