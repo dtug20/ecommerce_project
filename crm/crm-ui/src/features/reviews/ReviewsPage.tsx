@@ -22,6 +22,7 @@ import {
   Divider,
   Image,
   DatePicker,
+  Empty,
 } from 'antd';
 import type { TableProps } from 'antd';
 import {
@@ -746,6 +747,7 @@ export default function ReviewsPage() {
         loading={isLoading || isFetching}
         scroll={{ x: 1200 }}
         expandable={{ childrenColumnName: '__children' }}
+        locale={{ emptyText: <Empty description="No reviews found" /> }}
         rowSelection={{
           selectedRowKeys,
           onChange: (keys) => setSelectedRowKeys(keys),

@@ -21,6 +21,7 @@ import {
   Descriptions,
   Divider,
   Dropdown,
+  Empty,
 } from 'antd';
 import type { TableProps, MenuProps } from 'antd';
 import {
@@ -898,6 +899,7 @@ export default function VendorsPage() {
         loading={isLoading || isFetching}
         scroll={{ x: 900 }}
         expandable={{ childrenColumnName: '__children' }}
+        locale={{ emptyText: <Empty description="No vendors found" /> }}
         pagination={{
           current: page,
           pageSize: PAGE_SIZE,

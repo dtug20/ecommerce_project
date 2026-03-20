@@ -32,7 +32,7 @@ const ProfilePage = () => {
 
   return (
     <Wrapper>
-      <SEO pageTitle="Profile" />
+      <SEO pageTitle="My Account" noindex />
       <HeaderTwo style_2={true} />
       <ProfileArea orderData={orderData} />
       <Footer style_2={true} />

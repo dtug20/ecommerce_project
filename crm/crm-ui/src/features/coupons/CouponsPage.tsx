@@ -15,6 +15,7 @@ import {
   Col,
   Card,
   Typography,
+  Empty,
 } from 'antd';
 import type { TableProps } from 'antd';
 import {
@@ -484,6 +485,7 @@ export default function CouponsPage() {
         loading={isLoading || isFetching}
         scroll={{ x: 1100 }}
         expandable={{ childrenColumnName: '__children' }}
+        locale={{ emptyText: <Empty description="No coupons found" /> }}
         pagination={{
           current: page,
           pageSize: PAGE_SIZE,

@@ -1,140 +1,117 @@
-# Shofy – Full Stack eCommerce Web Application + Admin Panel
+# Shofy E-Commerce Platform
 
+Multi-vendor marketplace with CMS-driven storefront, built with Express.js, Next.js 13, React 19 + Ant Design 6, and MongoDB.
 
-![Shofy Image Banner](https://shorturl.at/oNJu5)
+## Architecture
 
-Shofy is a powerful and modern full stack eCommerce web application built using Next.js, Express.js, MongoDB with Mongoose, Redux Toolkit, RTK Query, Stripe payment method, Bootstrap 5, and Sass. It includes a feature-rich admin panel for easy management and control of your online store.
+| Service | Stack | Port | Purpose |
+|---------|-------|------|---------|
+| **Backend API** | Express.js + MongoDB | 7001 | Unified REST API |
+| **Storefront** | Next.js 13 (Pages Router) + Bootstrap 5 | 3000 | Customer-facing store |
+| **CRM Admin** | Vite + React 19 + TypeScript + Ant Design 6 | 8080 | Admin panel |
+| **Auth** | Keycloak 26 | 8180 | SSO, RBAC (RS256 JWT) |
+| **Database** | MongoDB 7 | 27017 | Single database (`shofy`) |
 
-## Features Overview
+## Quick Start
 
-- **Next.js:** Next.js is The React Framework for Production, providing a fast and scalable foundation for your eCommerce website.
-- **Express.js:** Express.js is a minimal and flexible Node.js web application framework that offers a robust set of features for web and mobile applications.
-- **MongoDB:** MongoDB is a developer-friendly data platform that provides the services and tools necessary to build distributed applications at scale.
-- **Mongoose:** Mongoose provides a straightforward, schema-based solution to model your application data, offering built-in type casting, validation, and query building.
-- **Stripe:** Stripe offers online payment solutions, allowing you to create a secure and reliable website with e-commerce functionality.
-- **Nodemailer:** Nodemailer is a module for Node.js applications that facilitates easy email sending, keeping your users informed and engaged.
-- **Authentication:** Shofy includes features for Google login, user registration, email verification, forgot password, reset password, and profile updates.
-- **Redux Toolkit:** Manage state effortlessly with Redux Toolkit, providing a convenient and efficient way to handle state in your application.
-- **RTK Query:** RTK Query is a powerful data fetching and caching tool, ensuring efficient data retrieval for a smoother user experience.
-- **Typescript + Next.js App Directory:** Shofy leverages TypeScript in combination with Next.js, enhancing code reliability and maintainability.
-- **Form Validation:** Ensure data accuracy and consistency with form validation capabilities.
-- **Bootstrap 5 (latest Version) Framework:** Bootstrap is a popular HTML, CSS, and JS framework for responsive, mobile-first projects.
-- **Responsive Layout Design:** Shofy is fully responsive across all devices, providing a seamless experience for your customers.
-- **Touch Friendly:** The web application is designed for easy browsing on touch devices, making it accessible to a wide range of users.
+### Prerequisites
+- Node.js 20+
+- MongoDB 7+
+- Keycloak 26+ (for authentication)
 
-## Full Features List
+### Development
 
-- **React JS:** Utilize the power of React.js to create dynamic and interactive user interfaces.
-- **Next.js:** The React Framework for Production, optimizing your web application's performance.
-- **Express.js:** Create a robust backend for your eCommerce website using Express.js.
-- **MongoDB:** Store and retrieve data efficiently with the flexibility and scalability of MongoDB.
-- **Mongoose:** Model your application data effortlessly with Mongoose's schema-based solution.
-- **Stripe:** Integrate secure and reliable payment solutions into your online store.
-- **Nodemailer:** Keep your users informed with easy email sending capabilities.
-- **Authentication:** Enable secure user registration, login, and profile updates, including Google login option.
-- **Redux Toolkit:** Efficiently manage state in your application with Redux Toolkit.
-- **Dynamic Routes:** Create dynamic and user-friendly URLs for enhanced navigation.
-- **Based on Bootstrap 5.x:** Utilize the latest version of Bootstrap for responsive and customizable design elements.
-- **Free Premium Quality Support:** Enjoy premium support for a smooth development experience.
-- **Logo Slider Integration:** Showcase your brand and products with a logo slider.
-- **Sticky Header:** Improve user navigation with a sticky header that remains visible as users scroll.
-- **Google Fonts:** Access a wide range of fonts from Google Fonts for creative typography.
-- **100% Responsive:** Ensure a seamless experience on all devices with a fully responsive layout.
-- **Nice and Clean Design:** Present your products with a clean and professional design.
-- **Clean and Commented Code:** Maintainable and well-organized code for easy customization.
-- **Customizable Components:** Tailor the components of each page to match your brand identity.
-- **Integrated with FontAwesome:** Utilize FontAwesome icons to enhance the visual appeal of your website.
-- **Multiple Home Pages:** Choose from a variety of home page designs to best suit your business.
-- **Inner Pages:** Access a range of inner pages for various sections of your eCommerce website.
-- **Image Background:** Customize page backgrounds with visually appealing images.
-- **Flexible and Multi-Purpose:** Shofy is versatile and can be adapted to various eCommerce niches.
-- **Valid CSS3:** Comply with modern CSS standards for a better user experience.
-- **24/7 Awesome Support:** Get continuous support for any inquiries or issues you may encounter.
-- **Detailed Documentation:** Access comprehensive documentation for easy development and setup.
+```bash
+# Install all dependencies
+npm run install:all
 
-## Powerful Additional Features
+# Copy environment files
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env.local
+cp crm/.env.example crm/.env
 
-- **All E-commerce Features and Apps Included:** Shofy provides a comprehensive eCommerce solution with all the essential features and apps needed for a successful online store.
-- **Variation Swatch:** Create clean and professional product pages with variation swatches that capture your customer's attention and allow easy selection of product variations.
-- **Filter Variations, Pagination, Filters by Size & Color:** Improve user experience and boost conversion rates by reducing the time needed for customers to complete their orders through filtering options and pagination.
-- **Video Gallery:** Offer customers a detailed view of products with an engaging video gallery that showcases products from different angles or in use.
-- **Sale Countdown Timer:** Increase sales and engagement for special occasions or limited-time offers with sale countdown timers that create a sense of urgency for shoppers.
-- **Product Quick View:** Enable customers to view product details without leaving their current page, providing a convenient and efficient shopping experience.
-- **Quantity Select:** Provide users with two options for selecting product quantities: a dropdown select box or manual input for more flexibility.
-- **Google and Email Password-based Authentication:** Secure user accounts with authentication methods, including Google login and email-based password authentication.
-- **User Profile and Information Update:** Allow users to update their profile information, ensuring accurate and up-to-date data for future interactions.
-- **Powerful Payment Gateway Integration using Stripe:** Securely process payments with Stripe integration, providing a smooth and reliable shopping experience for customers.
+# Start backend + frontend
+npm run dev
 
-## Installation and Usage
+# Start CRM (separate terminal)
+cd crm && npm run dev
+```
 
-To get started with Shofy, follow these steps:
+### Docker
 
-1. Clone the repository:
+```bash
+docker compose up -d
+```
 
-   ```bash
-   https://github.com/ShuvoProgram/shofy-electronics-ecommerce.git
-   ```
+## API Documentation
 
-2. frontend directory:
+Interactive Swagger UI: `http://localhost:7001/api-docs`
 
-   ```bash
-   cd frontend
-   ```
-3. Install dependencies:
+### API Route Groups
 
-   ```bash
-   npm install
-   ```
+| Prefix | Auth | Purpose |
+|--------|------|---------|
+| `/api/v1/store/*` | Public | Storefront endpoints |
+| `/api/v1/auth/*` | Public | Authentication + payment webhooks |
+| `/api/v1/user/*` | User token | User profile, orders, wishlist, addresses |
+| `/api/v1/vendor/*` | Vendor token | Vendor self-service |
+| `/api/v1/admin/*` | Staff+ token | Admin CRM operations |
 
-4. Configure environment variables.
+## Project Structure
 
-5. Build the project:
+```
+├── backend/           # Express.js REST API
+│   ├── controller/    # Route handlers (v1/ for versioned API)
+│   ├── model/         # Mongoose schemas (16 collections)
+│   ├── routes/        # Express routers
+│   ├── middleware/     # Auth, validation, activity log
+│   ├── services/      # Payment service
+│   ├── utils/         # Respond, pagination, email
+│   ├── validations/   # Joi schemas
+│   └── seeds/         # Email template seeds
+├── frontend/          # Next.js 13 storefront
+│   ├── src/pages/     # Pages (SSR, ISR)
+│   ├── src/components/# React components
+│   ├── src/redux/     # Redux Toolkit + RTK Query
+│   ├── src/hooks/     # Custom hooks
+│   └── tests/e2e/     # Playwright E2E tests
+├── crm/               # Admin panel
+│   ├── crm-ui/        # React 19 + TypeScript + Ant Design 6
+│   ├── controllers/   # API proxy controllers
+│   ├── routes/        # Proxy routes
+│   └── server.js      # Express proxy server
+├── migration/         # Database migration scripts
+├── scripts/           # Utility scripts (backup)
+└── docker-compose.yml # Full stack Docker setup
+```
 
-   ```bash
-   npm run build
-   ```
+## Key Features
 
-6. Start the server:
+- **Multi-vendor marketplace** — vendor registration, approval, products, orders, payouts
+- **CMS engine** — homepage builder, menu editor, blog, banners, theme settings
+- **Full e-commerce** — products with variants, server-side filtering, wishlists, address book
+- **Review moderation** — admin approval flow with verified purchase badges
+- **Order tracking** — carrier integration, status timeline, email notifications
+- **Analytics dashboard** — revenue trends, top products, customer growth, vendor performance
+- **Email templates** — editable with merge tags, preview, test send
+- **Activity logging** — automatic audit trail of admin actions
+- **Payment gateways** — COD, bank transfer (VNPay/MoMo/Stripe stubs ready)
 
-   ```bash
-   npm run dev
-   ```
+## Documentation
 
-7. Access the application at the specified URL.
+- [Deployment Guide](DEPLOYMENT.md) — Docker, manual deploy, SSL, backups
+- [Admin Guide](ADMIN_GUIDE.md) — CRM user documentation
+- [API Docs](http://localhost:7001/api-docs) — Swagger UI (when running)
 
-## Client Side Live Link
+## Testing
 
-[Shofy Client Side Live Link](https://shofy-e.vercel.app/)
+```bash
+# Backend API tests
+cd backend && npx jest
 
-## Server Side Live Link
+# Frontend E2E tests
+cd frontend && npx playwright test
 
-[Shofy Server Side Live Link](https://shofy-backend-dlt.vercel.app)
-
-## Sources and Credits
-
-- Twitter Bootstrap
-- Swiper Slider
-- Google Fonts
-- Free Font Awesome Icons by Fontawesome
-
-## Thank You for Choosing Shofy!
-
-We hope you find Shofy to be a powerful and effective solution for your eCommerce needs. Should you encounter
-
- any issues or have any questions, please feel free to reach out to our support team at shuvoprogramer@gmail.com. Happy selling!
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
+# CRM TypeScript check
+cd crm/crm-ui && npx tsc --noEmit
+```

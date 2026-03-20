@@ -22,6 +22,7 @@ import {
   Tabs,
   Space,
   ColorPicker,
+  Empty,
 } from 'antd';
 import type { TableProps } from 'antd';
 import {
@@ -1210,6 +1211,7 @@ export default function ProductsPage() {
         loading={productsLoading || isFetching}
         expandable={{ childrenColumnName: '__children' }}
         scroll={{ x: 900 }}
+        locale={{ emptyText: <Empty description="No products found" /> }}
         pagination={{
           current: page,
           pageSize: PAGE_SIZE,

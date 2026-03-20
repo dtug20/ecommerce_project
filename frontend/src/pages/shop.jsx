@@ -104,7 +104,11 @@ const ShopPage = ({ query }) => {
 
   return (
     <Wrapper>
-      <SEO pageTitle="Shop" />
+      <SEO
+        pageTitle="Shop"
+        description="Browse our full product catalog — electronics, fashion, beauty and more"
+        url="/shop"
+      />
       <HeaderTwo style_2={true} />
       <ShopBreadcrumb title="Shop Grid" subtitle="Shop Grid" />
       {content}

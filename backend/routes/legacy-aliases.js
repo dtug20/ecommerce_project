@@ -3,10 +3,11 @@
 /**
  * Legacy API aliases — /api/*
  *
- * Every original /api/* route is re-exported here with deprecation headers
- * pointing consumers to the /api/v1/* equivalents.
+ * REMOVED IN PHASE 5 (2026-03-20): This file is no longer mounted in index.js.
+ * All consumers must migrate to /api/v1/* paths.
  *
- * Sunset date: 2026-08-01
+ * This file is kept for reference only. Do not re-mount it.
+ * Original sunset date was: 2026-08-01.
  */
 
 const express = require('express');

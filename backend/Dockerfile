@@ -7,6 +7,6 @@ RUN npm ci --omit=dev
 
 COPY . .
 
-EXPOSE 7001
+EXPOSE ${PORT:-4000}
 
 CMD ["node", "index.js"]

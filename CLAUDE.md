@@ -178,6 +178,48 @@ User applies via profile → admin sees in CRM Vendor Management → approves (s
 - All email sends are fire-and-forget (never block API responses)
 - Supports EN/VI bilingual templates
 
+## Phase 5 Status (Complete)
+
+**What changed:**
+
+### Backend — Validation & Security
+- **Joi validation schemas** (`validations/` — 22 schemas) for all write endpoints: products, orders, users, reviews, coupons, vendors, CMS (pages, menus, banners, blog, settings)
+- **Validation middleware** (`middleware/validate.js`) — body validation (422 on failure) + query validation (400). Applied to all POST/PATCH routes
+- **Swagger API docs** (`config/swagger.js`) — OpenAPI 3.0 spec, ~40 endpoints documented with JSDoc. Mounted at `GET /api-docs` (Swagger UI) and `GET /api-docs.json`
+- **Legacy route aliases removed** — `/api/*` no longer proxied; only `/api/v1/*` routes active. `legacy-aliases.js` kept for reference
+- **Security hardening** — Helmet (crossOriginEmbedderPolicy disabled for Cloudinary), CORS with explicit methods/headers, auth rate limiter (10/15min), upload rate limiter (30/15min), payment rate limiter updated to v1 paths
+
+### Frontend — SEO & Performance
+- **ISR** — Product detail (`revalidate: 60`) and blog post (`revalidate: 3600`) pages converted from SSR to ISR with `getStaticPaths` (fallback: 'blocking'). On-demand revalidation via `POST /api/revalidate`
+- **JSON-LD structured data** — Product, Article, BreadcrumbList, Organization schemas injected via `<JsonLd>` component
+- **Dynamic sitemap** — `GET /sitemap.xml` generates XML with all products + blog posts (cached 1h)
+- **robots.txt** — blocks /cart, /checkout, /profile, /order/, /api/
+- **SEO component** — full Open Graph + Twitter Card + canonical URL + noindex support. Applied to all key pages
+- **Image optimization** — `next.config.js` updated with avif/webp formats, `output: 'standalone'` for Docker
+- **Cloudinary URL optimizer** — `utils/cloudinaryUrl.js` for on-the-fly transforms
+- **Font optimization** — preconnect hints for Google Fonts, lang="en" on HTML
+
+### CRM — UI Polish
+- **Error boundary** — class component wrapping all lazy routes, shows Ant Design Result on crash
+- **Empty states** — Ant Design `<Empty>` locale added to Products, Orders, Vendors, Reviews, Coupons, Activity Log tables
+
+### Infrastructure
+- **Docker Compose** — backend, crm, frontend services added to existing mongodb/postgres/keycloak stack
+- **CRM Dockerfile** — two-stage build (Vite UI → production server)
+- **Frontend Dockerfile** — two-stage build with Next.js standalone output
+- **CI/CD** — enhanced to include CRM TypeScript check + build, frontend lint + build
+- **Environment configs** — `.env.example` files updated for all 3 services
+
+### Testing
+- **Playwright E2E** — config + 4 test files (homepage, shop, blog, cart)
+- **Jest API tests** — config + 3 test files (health, store products, store CMS + auth protection)
+
+### Documentation
+- **README.md** — architecture overview, quick start, project structure, features
+- **DEPLOYMENT.md** — Docker, manual deploy, SSL/Nginx, backup/restore
+- **ADMIN_GUIDE.md** — full CRM user documentation
+- **scripts/backup.sh** — MongoDB backup with compression + retention
+
 ## Commands
 
 ### Setup

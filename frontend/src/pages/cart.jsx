@@ -9,7 +9,7 @@ import CommonBreadcrumb from '@/components/breadcrumb/common-breadcrumb';
 const CartPage = () => {
   return (
     <Wrapper>
-      <SEO pageTitle="Cart" />
+      <SEO pageTitle="Cart" noindex />
       <HeaderTwo style_2={true} />
       <CommonBreadcrumb title="Shopping Cart" subtitle="Shopping Cart" />
       <CartArea/>

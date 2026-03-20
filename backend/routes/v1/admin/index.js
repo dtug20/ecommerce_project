@@ -14,6 +14,8 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const authorization = require('../../../middleware/authorization');
+const { validate } = require('../../../middleware/validate');
+const v = require('../../../validations');
 const ctrl = require('../../../controller/v1/admin.controller');
 const cmsCtrl = require('../../../controller/v1/cms.controller');
 const reviewCtrl = require('../../../controller/v1/review.controller');
@@ -39,11 +41,147 @@ const NOT_IMPLEMENTED = (req, res) =>
 // Products
 // ---------------------------------------------------------------------------
 
+/**
+ * @swagger
+ * /api/v1/admin/products/stats:
+ *   get:
+ *     summary: Get product statistics
+ *     tags: [Admin Products]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Product stats
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/products/stats',  ctrl.getProductStats);
+
+/**
+ * @swagger
+ * /api/v1/admin/products/{id}:
+ *   get:
+ *     summary: Get product by ID
+ *     tags: [Admin Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Product object
+ *       404:
+ *         description: Not found
+ */
 router.get('/products/:id',    ctrl.getProductById);
+
+/**
+ * @swagger
+ * /api/v1/admin/products:
+ *   get:
+ *     summary: List all products (admin)
+ *     tags: [Admin Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Paginated product list
+ */
 router.get('/products',        ctrl.getAllProducts);
-router.post('/products',       authorization('admin', 'manager'), logActivity('create', 'product'), ctrl.createProduct);
-router.patch('/products/:id',  authorization('admin', 'manager'), logActivity('update', 'product'), ctrl.updateProduct);
+
+/**
+ * @swagger
+ * /api/v1/admin/products:
+ *   post:
+ *     summary: Create product
+ *     tags: [Admin Products]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [title, price, quantity, productType]
+ *             properties:
+ *               title:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               quantity:
+ *                 type: integer
+ *               productType:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Product created
+ *       422:
+ *         description: Validation error
+ */
+router.post('/products',       authorization('admin', 'manager'), validate(v.createProduct), logActivity('create', 'product'), ctrl.createProduct);
+
+/**
+ * @swagger
+ * /api/v1/admin/products/{id}:
+ *   patch:
+ *     summary: Update product
+ *     tags: [Admin Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Product updated
+ *       422:
+ *         description: Validation error
+ */
+router.patch('/products/:id',  authorization('admin', 'manager'), validate(v.updateProduct), logActivity('update', 'product'), ctrl.updateProduct);
+
+/**
+ * @swagger
+ * /api/v1/admin/products/{id}:
+ *   delete:
+ *     summary: Delete product
+ *     tags: [Admin Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Product deleted
+ */
 router.delete('/products/:id', authorization('admin', 'manager'), logActivity('delete', 'product'), ctrl.deleteProduct);
 
 // ---------------------------------------------------------------------------
@@ -62,10 +200,84 @@ router.delete('/categories/:id', authorization('admin', 'manager'), logActivity(
 // Orders
 // ---------------------------------------------------------------------------
 
+/**
+ * @swagger
+ * /api/v1/admin/orders/stats:
+ *   get:
+ *     summary: Get order statistics
+ *     tags: [Admin Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Order stats
+ */
 router.get('/orders/stats',          ctrl.getOrderStats);
 router.get('/orders/:id',            ctrl.getOrderById);
+
+/**
+ * @swagger
+ * /api/v1/admin/orders:
+ *   get:
+ *     summary: List all orders
+ *     tags: [Admin Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: paymentMethod
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Paginated order list
+ */
 router.get('/orders',                ctrl.getAllOrders);
 router.post('/orders',               authorization('admin', 'manager'), logActivity('create', 'order'), ctrl.createOrder);
+
+/**
+ * @swagger
+ * /api/v1/admin/orders/{id}/status:
+ *   patch:
+ *     summary: Update order status
+ *     tags: [Admin Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *               trackingNumber:
+ *                 type: string
+ *               carrier:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Status updated
+ */
 router.patch('/orders/:id/status',   logActivity('status-change', 'order'), ctrl.updateOrderStatus);
 router.patch('/orders/:id',          authorization('admin', 'manager'), logActivity('update', 'order'), ctrl.updateOrder);
 router.delete('/orders/:id',         authorization('admin', 'manager'), logActivity('delete', 'order'), ctrl.deleteOrder);
@@ -79,8 +291,8 @@ router.get('/users/:id/orders',     ctrl.getUserOrders);
 router.get('/users/:id',            ctrl.getUserById);
 router.get('/users',                ctrl.getAllUsers);
 router.post('/users',               authorization('admin', 'manager'), logActivity('create', 'user'), ctrl.createUser);
-router.patch('/users/:id/status',   authorization('admin', 'manager'), logActivity('status-change', 'user'), ctrl.updateUserStatus);
-router.patch('/users/:id',          authorization('admin', 'manager'), logActivity('update', 'user'), ctrl.updateUser);
+router.patch('/users/:id/status',   authorization('admin', 'manager'), validate(v.updateUserStatus), logActivity('status-change', 'user'), ctrl.updateUserStatus);
+router.patch('/users/:id',          authorization('admin', 'manager'), validate(v.updateUser), logActivity('update', 'user'), ctrl.updateUser);
 router.delete('/users/:id',         authorization('admin', 'manager'), logActivity('delete', 'user'), ctrl.deleteUser);
 
 // ---------------------------------------------------------------------------
@@ -98,6 +310,27 @@ router.delete('/staff/:id',       authorization('admin', 'manager'), ctrl.delete
 // Media / Cloudinary
 // ---------------------------------------------------------------------------
 
+/**
+ * @swagger
+ * /api/v1/admin/media/upload:
+ *   post:
+ *     summary: Upload single image
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Image uploaded
+ */
 router.post(
   '/media/upload',
   authorization('admin', 'manager'),
@@ -113,15 +346,21 @@ router.post(
 router.delete('/media', authorization('admin', 'manager'), ctrl.deleteImage);
 
 // ---------------------------------------------------------------------------
-// Analytics — Phase 4 (new endpoints replace legacy proxies below)
-//
-// NOTE: The legacy routes (/analytics/dashboard-amount, /analytics/top-categories)
-// have been removed here because the new analytics controller covers the same
-// data with richer responses.  The legacy controller functions remain intact in
-// user.order.controller.js and are still served via the legacy /api/user-order/*
-// routes for backward compatibility.
+// Analytics
 // ---------------------------------------------------------------------------
 
+/**
+ * @swagger
+ * /api/v1/admin/analytics/dashboard:
+ *   get:
+ *     summary: Admin dashboard analytics
+ *     tags: [Admin Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dashboard data
+ */
 router.get('/analytics/dashboard',         analyticsCtrl.getDashboard);
 router.get('/analytics/sales-report',      analyticsCtrl.getSalesReport);
 router.get('/analytics/revenue',           analyticsCtrl.getRevenue);
@@ -138,12 +377,34 @@ router.get('/analytics/dashboard-amount',  ctrl.getDashboardAmount);
 // Pages — CMS Phase 2
 // ---------------------------------------------------------------------------
 
+/**
+ * @swagger
+ * /api/v1/admin/pages:
+ *   get:
+ *     summary: List CMS pages
+ *     tags: [Admin CMS]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Page list
+ *   post:
+ *     summary: Create CMS page
+ *     tags: [Admin CMS]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Page created
+ *       422:
+ *         description: Validation error
+ */
 router.get('/pages',                  cmsCtrl.listPages);
 router.get('/pages/:id',              cmsCtrl.getPage);
-router.post('/pages',                 authorization('admin', 'manager'), logActivity('create', 'page'), cmsCtrl.createPage);
+router.post('/pages',                 authorization('admin', 'manager'), validate(v.createPage), logActivity('create', 'page'), cmsCtrl.createPage);
 router.post('/pages/:id/duplicate',   authorization('admin', 'manager'), cmsCtrl.duplicatePage);
 router.patch('/pages/:id/blocks',     authorization('admin', 'manager'), logActivity('update', 'page'), cmsCtrl.updatePageBlocks);
-router.patch('/pages/:id',            authorization('admin', 'manager'), logActivity('update', 'page'), cmsCtrl.updatePage);
+router.patch('/pages/:id',            authorization('admin', 'manager'), validate(v.updatePage), logActivity('update', 'page'), cmsCtrl.updatePage);
 router.delete('/pages/:id',           authorization('admin', 'manager'), logActivity('delete', 'page'), cmsCtrl.deletePage);
 
 // ---------------------------------------------------------------------------
@@ -152,8 +413,8 @@ router.delete('/pages/:id',           authorization('admin', 'manager'), logActi
 
 router.get('/menus',         cmsCtrl.listMenus);
 router.get('/menus/:id',     cmsCtrl.getMenu);
-router.post('/menus',        authorization('admin', 'manager'), logActivity('create', 'menu'), cmsCtrl.createMenu);
-router.patch('/menus/:id',   authorization('admin', 'manager'), logActivity('update', 'menu'), cmsCtrl.updateMenu);
+router.post('/menus',        authorization('admin', 'manager'), validate(v.createMenu), logActivity('create', 'menu'), cmsCtrl.createMenu);
+router.patch('/menus/:id',   authorization('admin', 'manager'), validate(v.updateMenu), logActivity('update', 'menu'), cmsCtrl.updateMenu);
 router.delete('/menus/:id',  authorization('admin', 'manager'), logActivity('delete', 'menu'), cmsCtrl.deleteMenu);
 
 // ---------------------------------------------------------------------------
@@ -164,8 +425,8 @@ router.delete('/menus/:id',  authorization('admin', 'manager'), logActivity('del
 router.patch('/banners/priority',    authorization('admin', 'manager'), cmsCtrl.updateBannerPriority);
 router.get('/banners',               cmsCtrl.listBanners);
 router.get('/banners/:id',           cmsCtrl.getBanner);
-router.post('/banners',              authorization('admin', 'manager'), logActivity('create', 'banner'), cmsCtrl.createBanner);
-router.patch('/banners/:id',         authorization('admin', 'manager'), logActivity('update', 'banner'), cmsCtrl.updateBanner);
+router.post('/banners',              authorization('admin', 'manager'), validate(v.createBanner), logActivity('create', 'banner'), cmsCtrl.createBanner);
+router.patch('/banners/:id',         authorization('admin', 'manager'), validate(v.updateBanner), logActivity('update', 'banner'), cmsCtrl.updateBanner);
 router.delete('/banners/:id',        authorization('admin', 'manager'), logActivity('delete', 'banner'), cmsCtrl.deleteBanner);
 
 // ---------------------------------------------------------------------------
@@ -177,8 +438,8 @@ router.patch('/blog/:id/publish',    authorization('admin', 'manager'), logActiv
 router.patch('/blog/:id/unpublish',  authorization('admin', 'manager'), logActivity('update', 'blog'), cmsCtrl.unpublishBlogPost);
 router.get('/blog',                  cmsCtrl.listBlogPosts);
 router.get('/blog/:id',              cmsCtrl.getBlogPost);
-router.post('/blog',                 authorization('admin', 'manager'), logActivity('create', 'blog'), cmsCtrl.createBlogPost);
-router.patch('/blog/:id',            authorization('admin', 'manager'), logActivity('update', 'blog'), cmsCtrl.updateBlogPost);
+router.post('/blog',                 authorization('admin', 'manager'), validate(v.createBlogPost), logActivity('create', 'blog'), cmsCtrl.createBlogPost);
+router.patch('/blog/:id',            authorization('admin', 'manager'), validate(v.updateBlogPost), logActivity('update', 'blog'), cmsCtrl.updateBlogPost);
 router.delete('/blog/:id',           authorization('admin', 'manager'), logActivity('delete', 'blog'), cmsCtrl.deleteBlogPost);
 
 // ---------------------------------------------------------------------------
@@ -190,20 +451,18 @@ router.patch('/settings',   authorization('admin', 'manager'), logActivity('upda
 
 // ---------------------------------------------------------------------------
 // Reviews — Phase 3
-// Note: /reviews/:id sub-routes must be declared before /reviews/:id
 // ---------------------------------------------------------------------------
 
 router.get('/reviews',                                          reviewCtrl.listReviews);
 router.get('/reviews/:id',                                      reviewCtrl.getReview);
 router.get('/products/:productId/reviews',                      reviewCtrl.getProductReviews);
 router.patch('/reviews/:id/approve',   authorization('admin', 'manager'), reviewCtrl.approveReview);
-router.patch('/reviews/:id/reject',    authorization('admin', 'manager'), reviewCtrl.rejectReview);
-router.post('/reviews/:id/reply',      authorization('admin', 'manager'), reviewCtrl.replyToReview);
+router.patch('/reviews/:id/reject',    authorization('admin', 'manager'), validate(v.rejectReview), reviewCtrl.rejectReview);
+router.post('/reviews/:id/reply',      authorization('admin', 'manager'), validate(v.replyToReview), reviewCtrl.replyToReview);
 router.delete('/reviews/:id',          authorization('admin', 'manager'), reviewCtrl.deleteReview);
 
 // ---------------------------------------------------------------------------
 // Email Templates — Phase 4
-// Replaces the NOT_IMPLEMENTED stubs from Phase 3
 // ---------------------------------------------------------------------------
 
 router.get('/email-templates',              emailTemplateCtrl.listTemplates);
@@ -214,7 +473,6 @@ router.post('/email-templates/:id/test',    authorization('admin', 'manager'), e
 
 // ---------------------------------------------------------------------------
 // Activity Log — Phase 4
-// /export must be declared before /:id-style routes (no parameterised ID here)
 // ---------------------------------------------------------------------------
 
 router.get('/activity-log/export', authorization('admin'), activityLogCtrl.exportLogs);
@@ -226,12 +484,43 @@ router.get('/activity-log',        authorization('admin', 'manager'), activityLo
 // ---------------------------------------------------------------------------
 
 if (vendorCtrl) {
+  /**
+   * @swagger
+   * /api/v1/admin/vendors:
+   *   get:
+   *     summary: List all vendors
+   *     tags: [Admin Vendors]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Vendor list
+   */
   router.get('/vendors/stats',                          vendorCtrl.getVendorStats);
   router.get('/vendors',                                vendorCtrl.listVendors);
   router.get('/vendors/:id',                            vendorCtrl.getVendorById);
   router.get('/vendors/:id/products',                   vendorCtrl.getVendorProducts);
   router.get('/vendors/:id/orders',                     vendorCtrl.getVendorOrders);
   router.get('/vendors/:id/payouts',                    vendorCtrl.getVendorPayouts);
+
+  /**
+   * @swagger
+   * /api/v1/admin/vendors/{id}/approve:
+   *   patch:
+   *     summary: Approve vendor application
+   *     tags: [Admin Vendors]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: string
+   *     responses:
+   *       200:
+   *         description: Vendor approved
+   */
   router.patch('/vendors/:id/approve',                  authorization('admin', 'manager'), logActivity('status-change', 'vendor'), vendorCtrl.approveVendor);
   router.patch('/vendors/:id/reject',                   authorization('admin', 'manager'), logActivity('status-change', 'vendor'), vendorCtrl.rejectVendor);
   router.patch('/vendors/:id/suspend',                  authorization('admin', 'manager'), logActivity('status-change', 'vendor'), vendorCtrl.suspendVendor);
@@ -243,10 +532,32 @@ if (vendorCtrl) {
 // Coupons — CMS Phase 2
 // ---------------------------------------------------------------------------
 
+/**
+ * @swagger
+ * /api/v1/admin/coupons:
+ *   get:
+ *     summary: List all coupons
+ *     tags: [Admin CMS]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Coupon list
+ *   post:
+ *     summary: Create coupon
+ *     tags: [Admin CMS]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Coupon created
+ *       422:
+ *         description: Validation error
+ */
 router.get('/coupons',          cmsCtrl.listCoupons);
 router.get('/coupons/:id',      cmsCtrl.getCoupon);
-router.post('/coupons',         authorization('admin', 'manager'), logActivity('create', 'coupon'), cmsCtrl.createCoupon);
-router.patch('/coupons/:id',    authorization('admin', 'manager'), logActivity('update', 'coupon'), cmsCtrl.updateCoupon);
+router.post('/coupons',         authorization('admin', 'manager'), validate(v.createCoupon), logActivity('create', 'coupon'), cmsCtrl.createCoupon);
+router.patch('/coupons/:id',    authorization('admin', 'manager'), validate(v.updateCoupon), logActivity('update', 'coupon'), cmsCtrl.updateCoupon);
 router.delete('/coupons/:id',   authorization('admin', 'manager'), logActivity('delete', 'coupon'), cmsCtrl.deleteCoupon);
 
 module.exports = router;

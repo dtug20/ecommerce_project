@@ -58,6 +58,60 @@ services:
       postgres:
         condition: service_healthy
 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: shofy-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      MONGO_URI: mongodb://mongodb:27017/shofy
+      PORT: 4000
+      STORE_URL: http://localhost:3001
+      ADMIN_URL: http://localhost:8081
+    env_file:
+      - ./backend/.env
+
+  crm:
+    build:
+      context: ./crm
+      dockerfile: Dockerfile
+    container_name: shofy-crm
+    restart: unless-stopped
+    ports:
+      - "${CRM_PORT:-8081}:8081"
+    depends_on:
+      - backend
+    environment:
+      NODE_ENV: production
+      BACKEND_API_URL: http://backend:4000
+      CRM_PORT: 8081
+    env_file:
+      - ./crm/.env
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: shofy-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3001}:3001"
+    depends_on:
+      - backend
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_BASE_URL: http://backend:4000
+      PORT: 3001
+    env_file:
+      - ./frontend/.env.local
+
 volumes:
   mongodata:
   pgdata:

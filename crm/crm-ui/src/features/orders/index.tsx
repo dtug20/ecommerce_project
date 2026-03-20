@@ -14,6 +14,7 @@ import {
   Row,
   Col,
   Card,
+  Empty,
 } from 'antd';
 import {
   SearchOutlined,
@@ -693,6 +694,7 @@ export default function OrdersPage() {
           pagination={pagination}
           scroll={{ x: 1100 }}
           size="small"
+          locale={{ emptyText: <Empty description="No orders found" /> }}
         />
       </Card>
 

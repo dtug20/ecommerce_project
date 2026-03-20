@@ -11,34 +11,60 @@ const { Server } = require('socket.io');
 const connectDB = require("./config/db");
 const { secret } = require("./config/secret");
 const PORT = process.env.PORT || secret.port || 7001;
-const morgan = require('morgan')
+const morgan = require('morgan');
 // error handler
 const globalErrorHandler = require("./middleware/global-error-handler");
-// routes — v1 (canonical) and legacy aliases
-const v1Routes      = require("./routes/v1");
-const legacyAliases = require("./routes/legacy-aliases");
+// routes — v1 (canonical)
+const v1Routes = require("./routes/v1");
 
-// middleware
+// ---------------------------------------------------------------------------
+// CORS
+// ---------------------------------------------------------------------------
+
 const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'http://localhost:8080',
-  'http://localhost:8081',
-  secret.client_url,
-  secret.admin_url,
-].filter(Boolean);
+  ...new Set([
+    process.env.STORE_URL || 'http://localhost:3000',
+    process.env.ADMIN_URL || 'http://localhost:8080',
+    'http://localhost:3001',
+    'http://localhost:8081',
+    // secret.* are the same env vars — included as a safety net in case
+    // STORE_URL / ADMIN_URL differ from what secret.js reads
+    secret.client_url,
+    secret.admin_url,
+  ].filter(Boolean)),
+];
 
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-app.use(helmet());
+
+// ---------------------------------------------------------------------------
+// Security headers
+// ---------------------------------------------------------------------------
+
+app.use(helmet({
+  // Allow Cloudinary images and Swagger UI assets to load in browsers
+  crossOriginEmbedderPolicy: false,
+  // No HTML pages served from this API — skip CSP (avoids blocking Swagger UI)
+  contentSecurityPolicy: false,
+}));
+
+// ---------------------------------------------------------------------------
+// Body parsing + sanitization
+// ---------------------------------------------------------------------------
+
 app.use(mongoSanitize());
 app.use(express.json({ limit: '100kb' }));
 app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ---------------------------------------------------------------------------
 // Health check — liveness probe (no auth, outside rate limiter)
+// ---------------------------------------------------------------------------
+
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "ok",
@@ -47,32 +73,81 @@ app.get("/health", (req, res) => {
   });
 });
 
-// Global rate limiter
+// ---------------------------------------------------------------------------
+// Swagger UI — API documentation (outside rate limiter so docs stay accessible)
+// ---------------------------------------------------------------------------
+
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Shofy API Documentation',
+  swaggerOptions: {
+    persistAuthorization: true,
+  },
+}));
+
+// Serve raw OpenAPI JSON for tooling (Postman, code-gen, etc.)
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
+// ---------------------------------------------------------------------------
+// Rate limiters
+// ---------------------------------------------------------------------------
+
+// Global — 200 req / 15 min per IP
 const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200, // limit each IP to 200 requests per window
+  windowMs: 15 * 60 * 1000,
+  max: 200,
   standardHeaders: true,
   legacyHeaders: false,
   message: { status: "fail", error: "Too many requests, please try again later" },
 });
 app.use(globalLimiter);
 
-// Stricter rate limit for payment and order creation
+// Auth endpoints — 10 req / 15 min per IP (prevents brute-force)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { status: "fail", error: "Too many authentication attempts, please try again later" },
+});
+app.use("/api/v1/auth", authLimiter);
+
+// Payment / order creation — 20 req / 15 min per IP
 const paymentLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
   message: { status: "fail", error: "Too many payment attempts, please try again later" },
 });
-app.use("/api/order/create-payment-intent", paymentLimiter);
-app.use("/api/order/saveOrder", paymentLimiter);
+app.use("/api/v1/user/orders", paymentLimiter);
 
-// Create HTTP server and attach Socket.io
+// Media upload — 30 req / 15 min per IP
+const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { status: "fail", error: "Too many upload requests, please try again later" },
+});
+app.use("/api/v1/admin/media", uploadLimiter);
+
+// ---------------------------------------------------------------------------
+// Socket.io
+// ---------------------------------------------------------------------------
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:8080'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
-  }
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  },
 });
 
 // Store io instance globally for use in controllers
@@ -127,20 +202,29 @@ io.on('connection', (socket) => {
   });
 });
 
-// connect database
+// ---------------------------------------------------------------------------
+// Database
+// ---------------------------------------------------------------------------
+
 connectDB();
 
-// v1 — canonical versioned API
+// ---------------------------------------------------------------------------
+// API routes — v1 (canonical)
+//
+// NOTE: Legacy /api/* aliases were removed in Phase 5 (2026-03-20).
+// The file backend/routes/legacy-aliases.js is kept for reference but is no
+// longer mounted. All consumers must use /api/v1/* paths.
+// ---------------------------------------------------------------------------
+
 app.use("/api/v1", v1Routes);
 
-// Legacy routes — preserved for backward compatibility with Deprecation headers
-// All original /api/* paths continue to work until the 2026-08-01 sunset date.
-app.use("/api", legacyAliases);
+// Root route
+app.get("/", (req, res) => res.send("Shofy API is running. Documentation: /api-docs"));
 
-// root route
-app.get("/", (req, res) => res.send("Apps worked successfully"));
-
+// ---------------------------------------------------------------------------
 // 404 handler (must be after all routes)
+// ---------------------------------------------------------------------------
+
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -154,7 +238,10 @@ app.use((req, res) => {
   });
 });
 
-// global error handler (must be last middleware)
+// ---------------------------------------------------------------------------
+// Global error handler (must be last middleware)
+// ---------------------------------------------------------------------------
+
 app.use(globalErrorHandler);
 
 server.listen(PORT, () => console.log(`server running on port ${PORT}`));

@@ -3,6 +3,8 @@ import Wrapper from "@/layout/wrapper";
 import Header from "@/layout/headers/header";
 import Footer from "@/layout/footers/footer";
 import BlockRenderer from "@/components/cms/BlockRenderer";
+import JsonLd from "@/components/seo/JsonLd";
+import { organizationJsonLd } from "@/utils/structuredData";
 // Keep all existing imports as fallback
 import ElectronicCategory from "@/components/categories/electronic-category";
 import HomeHeroSlider from "@/components/hero-banner/home-hero-slider";
@@ -42,9 +44,20 @@ function FallbackHome() {
 export default function Home({ page, settings }) {
   const hasCmsContent = page && page.blocks && page.blocks.length > 0;
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+
   return (
     <Wrapper>
-      <SEO pageTitle={page?.seo?.metaTitle || settings?.siteName || 'Home'} />
+      <SEO
+        pageTitle={page?.seo?.metaTitle || settings?.siteName || "Home"}
+        description={
+          page?.seo?.metaDescription ||
+          settings?.siteDescription ||
+          "Shop electronics, fashion, beauty and more at Shofy"
+        }
+        url="/"
+      />
+      <JsonLd data={organizationJsonLd(siteUrl)} />
       <Header />
       {hasCmsContent ? (
         <BlockRenderer blocks={page.blocks} />

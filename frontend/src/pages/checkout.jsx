@@ -18,7 +18,7 @@ const CheckoutPage = () => {
   }, [router]);
   return (
     <Wrapper>
-      <SEO pageTitle="Checkout" />
+      <SEO pageTitle="Checkout" noindex />
       <HeaderTwo style_2={true} />
       <CommonBreadcrumb title="Checkout" subtitle="Checkout" bg_clr={true} />
       <CheckoutArea/>

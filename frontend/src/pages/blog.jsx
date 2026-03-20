@@ -120,7 +120,11 @@ const BlogPostBoxPage = ({ posts, pagination, currentPage }) => {
 
   return (
     <Wrapper>
-      <SEO pageTitle="Blog" />
+      <SEO
+        pageTitle="Blog"
+        description="Latest news, product updates and articles from Shofy"
+        url="/blog"
+      />
       <HeaderTwo style_2={true} />
       <BlogBreadcrumb />
       {hasCmsPosts ? (

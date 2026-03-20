@@ -2,8 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['i.ibb.co','lh3.googleusercontent.com','res.cloudinary.com'],
+    domains: ['i.ibb.co', 'lh3.googleusercontent.com', 'res.cloudinary.com'],
+    formats: ['image/avif', 'image/webp'],
   },
+  output: 'standalone',
 }
 
 module.exports = nextConfig

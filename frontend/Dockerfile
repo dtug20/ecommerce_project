@@ -31,6 +31,7 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/next.config.js ./
 COPY --from=builder /app/jsconfig.json ./
 
-EXPOSE 3000
+EXPOSE ${PORT:-3001}
+ENV PORT=${PORT:-3001}
 
 CMD ["npm", "start"]

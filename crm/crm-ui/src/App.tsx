@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ConfigProvider, Spin } from 'antd';
 import MainLayout from '@/components/commons/MainLayout';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Existing pages
 const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage'));
@@ -60,7 +61,11 @@ function PageLoader() {
 }
 
 function SuspenseRoute({ children }: { children: React.ReactNode }) {
-  return <Suspense fallback={<PageLoader />}>{children}</Suspense>;
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<PageLoader />}>{children}</Suspense>
+    </ErrorBoundary>
+  );
 }
 
 export default function App() {

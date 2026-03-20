@@ -3,12 +3,17 @@ import SEO from "@/components/seo";
 import HeaderTwo from "@/layout/headers/header-2";
 import Wrapper from "@/layout/wrapper";
 import Footer from "@/layout/footers/footer";
+import JsonLd from "@/components/seo/JsonLd";
+import { articleJsonLd } from "@/utils/structuredData";
+
+const API_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:7001";
 
 export default function BlogPostPage({ post }) {
   if (!post) {
     return (
       <Wrapper>
-        <SEO pageTitle="Blog Post Not Found" />
+        <SEO pageTitle="Blog Post Not Found" noindex />
         <HeaderTwo style_2={true} />
         <div className="container pt-100 pb-100 text-center">
           <h3>Post not found</h3>
@@ -18,11 +23,13 @@ export default function BlogPostPage({ post }) {
     );
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+
   const publishedDate = post.publishedAt
-    ? new Date(post.publishedAt).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
+    ? new Date(post.publishedAt).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       })
     : null;
 
@@ -31,7 +38,11 @@ export default function BlogPostPage({ post }) {
       <SEO
         pageTitle={post.seo?.metaTitle || post.title}
         description={post.seo?.metaDescription || post.excerpt}
+        image={post.featuredImage}
+        url={`/blog/${post.slug}`}
+        type="article"
       />
+      <JsonLd data={articleJsonLd(post, siteUrl)} />
       <HeaderTwo style_2={true} />
       <section className="tp-postbox-area pt-80 pb-80">
         <div className="container">
@@ -43,7 +54,7 @@ export default function BlogPostPage({ post }) {
                     <img
                       src={post.featuredImage}
                       alt={post.title}
-                      style={{ width: '100%', borderRadius: '8px' }}
+                      style={{ width: "100%", borderRadius: "8px" }}
                     />
                   </div>
                 )}
@@ -94,23 +105,36 @@ export default function BlogPostPage({ post }) {
   );
 }
 
-export async function getServerSideProps({ params }) {
-  const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:7001';
-  let post = null;
-
+export async function getStaticPaths() {
   try {
-    const res = await fetch(`${API_URL}/api/v1/store/blog/${params.slug}`);
-    if (res.ok) {
-      const data = await res.json();
-      post = data.data || null;
-    }
-  } catch (err) {
-    console.error('[BlogPost SSR] Error:', err.message);
+    const res = await fetch(`${API_URL}/api/v1/store/blog?limit=30`);
+    const data = await res.json();
+    const paths = (data.data || []).map((p) => ({
+      params: { slug: p.slug },
+    }));
+    return { paths, fallback: "blocking" };
+  } catch {
+    return { paths: [], fallback: "blocking" };
   }
+}
 
-  if (!post) {
+export async function getStaticProps({ params }) {
+  try {
+    const res = await fetch(
+      `${API_URL}/api/v1/store/blog/${params.slug}`
+    );
+
+    if (!res.ok) return { notFound: true };
+
+    const data = await res.json();
+    if (!data.success || !data.data) return { notFound: true };
+
+    return {
+      props: { post: data.data },
+      revalidate: 3600,
+    };
+  } catch (err) {
+    console.error("[BlogPost ISR] Error:", err.message);
     return { notFound: true };
   }
-
-  return { props: { post } };
 }

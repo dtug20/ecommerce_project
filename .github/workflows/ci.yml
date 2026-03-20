@@ -44,21 +44,45 @@ jobs:
       - run: npm ci
       - name: Lint
         run: npm run lint
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:7001
+          NEXT_PUBLIC_KEYCLOAK_URL: http://localhost:8180
+          NEXT_PUBLIC_KEYCLOAK_REALM: shofy
+          NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: shofy-frontend
 
   crm:
     name: CRM Check
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: crm
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node (CRM server)
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: crm/package-lock.json
-      - run: npm ci
+      - name: Install CRM server deps
+        run: npm ci
+        working-directory: crm
+
+      - name: Setup Node (CRM UI)
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: crm/crm-ui/package-lock.json
+      - name: Install CRM UI deps
+        run: npm ci
+        working-directory: crm/crm-ui
+      - name: TypeScript check
+        run: npx tsc --noEmit
+        working-directory: crm/crm-ui
+      - name: Build CRM UI
+        run: npm run build
+        working-directory: crm/crm-ui
 
   # ── Build & Push Docker Images ──
   build-images:

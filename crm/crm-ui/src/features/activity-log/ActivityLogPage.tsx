@@ -11,6 +11,7 @@ import {
   Descriptions,
   DatePicker,
   Tooltip,
+  Empty,
 } from 'antd';
 import type { TableProps } from 'antd';
 import {
@@ -424,6 +425,7 @@ export default function ActivityLogPage() {
         loading={isLoading || isFetching}
         scroll={{ x: 900 }}
         expandable={{ childrenColumnName: '__children' }}
+        locale={{ emptyText: <Empty description="No activity log entries found" /> }}
         onRow={(record) => ({
           onClick: () => {
             setDetailEntry(record);

@@ -23,32 +23,182 @@ const NOT_IMPLEMENTED = (req, res) =>
 // Products
 // ---------------------------------------------------------------------------
 
-// Static / query-based product routes — must precede /:id
+/**
+ * @swagger
+ * /api/v1/store/products/search:
+ *   get:
+ *     summary: Full-text product search
+ *     tags: [Store Products]
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Search results
+ */
 router.get('/products/search',        ctrl.searchProducts);
+
+/**
+ * @swagger
+ * /api/v1/store/products/offer:
+ *   get:
+ *     summary: Get products with active offers
+ *     tags: [Store Products]
+ *     responses:
+ *       200:
+ *         description: Offer products
+ */
 router.get('/products/offer',         ctrl.getOfferProducts);
 router.get('/products/top-rated',     ctrl.getTopRatedProducts);
 router.get('/products/popular/:type', ctrl.getPopularProductByType);
 router.get('/products/type/:type',    ctrl.getProductsByType);
 
-// Parameterised product routes — /products/:id/reviews and /products/:id/related
-// must be declared before /products/:id to prevent the id segment matching
+/**
+ * @swagger
+ * /api/v1/store/products/{productId}/reviews:
+ *   get:
+ *     summary: Get approved reviews for a product
+ *     tags: [Store Products]
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Approved reviews with rating breakdown
+ */
 router.get('/products/:productId/reviews', reviewCtrl.getApprovedProductReviews);
 router.get('/products/:id/related',        ctrl.getRelatedProducts);
+
+/**
+ * @swagger
+ * /api/v1/store/products/{id}:
+ *   get:
+ *     summary: Get product by ID
+ *     tags: [Store Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Product detail
+ *       404:
+ *         description: Not found
+ */
 router.get('/products/:id',                ctrl.getProduct);
+
+/**
+ * @swagger
+ * /api/v1/store/products:
+ *   get:
+ *     summary: List products with server-side filtering
+ *     tags: [Store Products]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: brand
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: minPrice
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: maxPrice
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: color
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: size
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: productType
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: tag
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: featured
+ *         schema:
+ *           type: boolean
+ *       - in: query
+ *         name: vendor
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Paginated product list
+ */
 router.get('/products',                    ctrl.getAllProducts);
 
 // ---------------------------------------------------------------------------
 // Categories
 // ---------------------------------------------------------------------------
 
-// Static category routes before /:id
+/**
+ * @swagger
+ * /api/v1/store/categories/tree:
+ *   get:
+ *     summary: Get hierarchical category tree
+ *     tags: [Store Categories]
+ *     responses:
+ *       200:
+ *         description: Category tree
+ */
 router.get('/categories/tree', async (req, res, next) => {
   try {
     const categories = await Category.find({ status: 'Show' })
       .select('parent children productType _id')
       .sort({ parent: 1 });
 
-    // Build hierarchical tree grouped by parent
     const tree = categories.map((cat) => ({
       id: cat._id,
       name: cat.parent,
@@ -63,6 +213,17 @@ router.get('/categories/tree', async (req, res, next) => {
     next(err);
   }
 });
+
+/**
+ * @swagger
+ * /api/v1/store/categories:
+ *   get:
+ *     summary: List all visible categories
+ *     tags: [Store Categories]
+ *     responses:
+ *       200:
+ *         description: Category list
+ */
 router.get('/categories/show/:type', ctrl.getCategoriesByType);
 router.get('/categories/show',       ctrl.getShowCategories);
 router.get('/categories/:id',        ctrl.getSingleCategory);
@@ -72,7 +233,16 @@ router.get('/categories',            ctrl.getAllCategories);
 // Brands
 // ---------------------------------------------------------------------------
 
-// Static brand routes before /:id
+/**
+ * @swagger
+ * /api/v1/store/brands/active:
+ *   get:
+ *     summary: List active brands
+ *     tags: [Store Products]
+ *     responses:
+ *       200:
+ *         description: Active brand list
+ */
 router.get('/brands/active', ctrl.getActiveBrands);
 router.get('/brands/:id',    ctrl.getSingleBrand);
 router.get('/brands',        ctrl.getAllBrands);
@@ -81,34 +251,186 @@ router.get('/brands',        ctrl.getAllBrands);
 // Coupons
 // ---------------------------------------------------------------------------
 
-// /coupons/validate must precede /coupons/:id to avoid matching 'validate' as id
+/**
+ * @swagger
+ * /api/v1/store/coupons/validate:
+ *   post:
+ *     summary: Validate a coupon code at checkout
+ *     tags: [Store Products]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [couponCode]
+ *             properties:
+ *               couponCode:
+ *                 type: string
+ *               orderTotal:
+ *                 type: number
+ *               productType:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Coupon is valid
+ *       400:
+ *         description: Coupon is invalid or expired
+ */
 router.post('/coupons/validate', ctrl.validateCoupon);
 router.get('/coupons/:id',       ctrl.getCouponById);
 router.get('/coupons',           ctrl.getAllCoupons);
 
 // ---------------------------------------------------------------------------
 // Vendors — Phase 4 (public storefront)
-// Note: /vendors must be before /vendors/:slug to avoid Express matching
-// 'vendors' as a slug when the path is exactly /vendors.
 // ---------------------------------------------------------------------------
 
+/**
+ * @swagger
+ * /api/v1/store/vendors:
+ *   get:
+ *     summary: List public vendor profiles
+ *     tags: [Store Products]
+ *     responses:
+ *       200:
+ *         description: Vendor list
+ */
 router.get('/vendors',        ctrl.listVendors);
+
+/**
+ * @swagger
+ * /api/v1/store/vendors/{slug}:
+ *   get:
+ *     summary: Get vendor by slug
+ *     tags: [Store Products]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Vendor profile
+ *       404:
+ *         description: Not found
+ */
 router.get('/vendors/:slug',  ctrl.getVendorBySlug);
 
 // ---------------------------------------------------------------------------
 // CMS — Phase 2
 // ---------------------------------------------------------------------------
 
+/**
+ * @swagger
+ * /api/v1/store/pages/{slug}:
+ *   get:
+ *     summary: Get published CMS page by slug
+ *     tags: [Store CMS]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: CMS page with blocks
+ *       404:
+ *         description: Not found
+ */
 router.get('/pages/:slug',      storeCmsCtrl.getPageBySlug);
+
+/**
+ * @swagger
+ * /api/v1/store/menus/{location}:
+ *   get:
+ *     summary: Get active menu by location
+ *     tags: [Store CMS]
+ *     parameters:
+ *       - in: path
+ *         name: location
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Menu with items
+ */
 router.get('/menus/:location',  storeCmsCtrl.getMenuByLocation);
+
+/**
+ * @swagger
+ * /api/v1/store/banners:
+ *   get:
+ *     summary: Get active banners
+ *     tags: [Store CMS]
+ *     responses:
+ *       200:
+ *         description: Active banner list
+ */
 router.get('/banners',          storeCmsCtrl.getActiveBanners);
 
-// Blog: /blog/featured must be before /blog/:slug
+/**
+ * @swagger
+ * /api/v1/store/blog:
+ *   get:
+ *     summary: List published blog posts
+ *     tags: [Store Blog]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: tag
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Blog post list
+ */
 router.get('/blog/featured',    storeCmsCtrl.getFeaturedBlogPosts);
+
+/**
+ * @swagger
+ * /api/v1/store/blog/{slug}:
+ *   get:
+ *     summary: Get published blog post by slug
+ *     tags: [Store Blog]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Blog post
+ *       404:
+ *         description: Not found
+ */
 router.get('/blog/:slug',       storeCmsCtrl.getBlogPostBySlug);
 router.get('/blog',             storeCmsCtrl.listPublishedBlogPosts);
 
-// Public settings — replaces /settings/public stub
+/**
+ * @swagger
+ * /api/v1/store/settings:
+ *   get:
+ *     summary: Get public site settings (theme, contact, social)
+ *     tags: [Store CMS]
+ *     responses:
+ *       200:
+ *         description: Public settings object
+ */
 router.get('/settings',         storeCmsCtrl.getPublicSettings);
 
 module.exports = router;
