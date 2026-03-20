@@ -15,18 +15,63 @@ import PrdDetailsLoader from "@/components/loader/prd-details-loader";
 import OrderStatusTimeline from "@/components/orders/OrderStatusTimeline";
 import OrderTrackingCard from "@/components/orders/OrderTrackingCard";
 
+/**
+ * Group cart items by vendor name.
+ * Returns a plain object keyed by vendor name with item arrays as values.
+ * Items without vendor info are grouped under "Shofy".
+ *
+ * @param {Array} items
+ * @returns {Record<string, Array>}
+ */
+function groupItemsByVendor(items) {
+  if (!items || items.length === 0) return {};
+  const groups = {};
+  items.forEach((item) => {
+    const vendorName =
+      item.vendor?.vendorProfile?.storeName || item.vendorName || 'Shofy';
+    if (!groups[vendorName]) groups[vendorName] = [];
+    groups[vendorName].push(item);
+  });
+  return groups;
+}
+
+/**
+ * Render a single cart row — shared by both the flat and grouped layouts.
+ */
+function OrderItemRow({ item, index }) {
+  return (
+    <tr>
+      <td>{index + 1}</td>
+      <td>
+        {item.title}
+        {item.selectedVariant && (
+          <div style={{ fontSize: '11px', color: '#888' }}>
+            {item.selectedVariant.color && `Color: ${item.selectedVariant.color}`}
+            {item.selectedVariant.size && ` / Size: ${item.selectedVariant.size}`}
+          </div>
+        )}
+      </td>
+      <td>{item.orderQuantity}</td>
+      <td>${item.price}</td>
+      <td>${item.price * item.orderQuantity}</td>
+    </tr>
+  );
+}
 
 const SingleOrder = ({ params }) => {
   const orderId = params.id;
   const printRef = useRef();
   const { data: order, isError, isLoading } = useGetUserOrderByIdQuery(orderId);
   let content = null;
+
   if (isLoading) {
     content = <PrdDetailsLoader loading={isLoading} />;
   }
+
   if (isError) {
     content = <ErrorMsg msg="There was an error" />;
   }
+
   if (!isLoading && !isError) {
     const {
       name,
@@ -48,6 +93,11 @@ const SingleOrder = ({ params }) => {
       estimatedDelivery,
     } = order.order;
 
+    const items = cart || [];
+    const vendorGroups = groupItemsByVendor(items);
+    const vendorNames = Object.keys(vendorGroups);
+    const isMultiVendor = vendorNames.length > 1;
+
     content = (
       <>
         <section className="invoice__area pt-120 pb-120">
@@ -63,6 +113,18 @@ const SingleOrder = ({ params }) => {
                 </div>
               </div>
             </div>
+
+            {/* Multi-vendor notice */}
+            {isMultiVendor && (
+              <div className="row mb-20">
+                <div className="col-xl-12">
+                  <div className="alert alert-info" style={{ fontSize: '13px' }}>
+                    Your order contains items from multiple sellers. Each seller will ship
+                    their items separately, so you may receive multiple deliveries.
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="row mb-40">
               {/* Order Status Timeline */}
@@ -84,7 +146,10 @@ const SingleOrder = ({ params }) => {
 
               {/* Invoice */}
               <div className="col-lg-7">
-                <div ref={printRef} className="invoice__wrapper grey-bg-2 pt-40 pb-40 pl-40 pr-40 tp-invoice-print-wrapper">
+                <div
+                  ref={printRef}
+                  className="invoice__wrapper grey-bg-2 pt-40 pb-40 pl-40 pr-40 tp-invoice-print-wrapper"
+                >
                   <div className="invoice__header-wrapper border-2 border-bottom border-white mb-40">
                     <div className="row">
                       <div className="col-xl-12">
@@ -106,6 +171,7 @@ const SingleOrder = ({ params }) => {
                       </div>
                     </div>
                   </div>
+
                   <div className="invoice__customer mb-30">
                     <div className="row">
                       <div className="col-md-6 col-sm-8">
@@ -122,7 +188,8 @@ const SingleOrder = ({ params }) => {
                             <strong>Invoice ID:</strong> #{invoice}
                           </p>
                           <p className="mb-0">
-                            <strong>Date:</strong> {dayjs(createdAt).format("MMMM D, YYYY")}
+                            <strong>Date:</strong>{' '}
+                            {dayjs(createdAt).format('MMMM D, YYYY')}
                           </p>
                           <p className="mb-0">
                             <strong>Status:</strong>{' '}
@@ -130,9 +197,13 @@ const SingleOrder = ({ params }) => {
                               className="badge"
                               style={{
                                 backgroundColor:
-                                  status === 'delivered' ? '#16a34a' :
-                                  status === 'cancel' || status === 'cancelled' ? '#dc2626' :
-                                  status === 'shipped' ? '#2563eb' : '#821F40',
+                                  status === 'delivered'
+                                    ? '#16a34a'
+                                    : status === 'cancel' || status === 'cancelled'
+                                    ? '#dc2626'
+                                    : status === 'shipped'
+                                    ? '#2563eb'
+                                    : '#821F40',
                                 fontSize: '11px',
                               }}
                             >
@@ -143,38 +214,70 @@ const SingleOrder = ({ params }) => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Order items — grouped by vendor when multiple vendors present */}
                   <div className="invoice__order-table pt-30 pb-30 pl-40 pr-40 bg-white mb-30">
-                    <table className="table">
-                      <thead className="table-light">
-                        <tr>
-                          <th scope="col">SL</th>
-                          <th scope="col">Product Name</th>
-                          <th scope="col">Quantity</th>
-                          <th scope="col">Item Price</th>
-                          <th scope="col">Amount</th>
-                        </tr>
-                      </thead>
-                      <tbody className="table-group-divider">
-                        {cart.map((item, i) => (
-                          <tr key={i}>
-                            <td>{i + 1}</td>
-                            <td>
-                              {item.title}
-                              {item.selectedVariant && (
-                                <div style={{ fontSize: '11px', color: '#888' }}>
-                                  {item.selectedVariant.color && `Color: ${item.selectedVariant.color}`}
-                                  {item.selectedVariant.size && ` / Size: ${item.selectedVariant.size}`}
-                                </div>
-                              )}
-                            </td>
-                            <td>{item.orderQuantity}</td>
-                            <td>${item.price}</td>
-                            <td>${item.price * item.orderQuantity}</td>
+                    {isMultiVendor ? (
+                      vendorNames.map((vendorName) => {
+                        const vendorItems = vendorGroups[vendorName];
+                        const vendorSubtotal = vendorItems.reduce(
+                          (sum, item) =>
+                            sum +
+                            (item.subtotal ||
+                              item.price * (item.quantity || item.orderQuantity || 1)),
+                          0
+                        );
+                        return (
+                          <div key={vendorName} className="mb-20">
+                            <h6
+                              className="mb-10"
+                              style={{ fontSize: '13px', color: '#555', fontWeight: 600 }}
+                            >
+                              Sold by: {vendorName}
+                            </h6>
+                            <table className="table table-sm mb-5">
+                              <thead className="table-light">
+                                <tr>
+                                  <th scope="col">SL</th>
+                                  <th scope="col">Product Name</th>
+                                  <th scope="col">Qty</th>
+                                  <th scope="col">Price</th>
+                                  <th scope="col">Amount</th>
+                                </tr>
+                              </thead>
+                              <tbody className="table-group-divider">
+                                {vendorItems.map((item, i) => (
+                                  <OrderItemRow key={i} item={item} index={i} />
+                                ))}
+                              </tbody>
+                            </table>
+                            <div className="text-end" style={{ fontSize: '12px', color: '#666' }}>
+                              Subtotal: ${vendorSubtotal.toFixed(2)}
+                            </div>
+                            <hr style={{ borderColor: '#eee', margin: '10px 0' }} />
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <table className="table">
+                        <thead className="table-light">
+                          <tr>
+                            <th scope="col">SL</th>
+                            <th scope="col">Product Name</th>
+                            <th scope="col">Quantity</th>
+                            <th scope="col">Item Price</th>
+                            <th scope="col">Amount</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="table-group-divider">
+                          {items.map((item, i) => (
+                            <OrderItemRow key={i} item={item} index={i} />
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
                   </div>
+
                   <div className="invoice__total pt-40 pb-10 alert-success pl-40 pr-40 mb-30">
                     <div className="row">
                       <div className="col-lg-3 col-md-4">
@@ -220,7 +323,7 @@ const SingleOrder = ({ params }) => {
                       >
                         <span className="mr-5">
                           <i className="fa-regular fa-print"></i>
-                        </span>{" "}
+                        </span>{' '}
                         Print
                       </button>
                     )}
@@ -235,6 +338,7 @@ const SingleOrder = ({ params }) => {
       </>
     );
   }
+
   return (
     <>
       <Wrapper>

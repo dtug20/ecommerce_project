@@ -1,8 +1,10 @@
+const dayjs = require('dayjs');
 const { secret } = require("../config/secret");
-// const stripe = require("stripe")(secret.stripe_key); // STRIPE DISABLED
 const Order = require("../model/Order");
 const Coupon = require("../model/Coupon");
 const { emitOrderCreated, emitOrderUpdated } = require("../utils/socketEmitter");
+const PaymentService = require("../services/paymentService");
+const { sendTemplatedEmail } = require("../utils/emailService");
 
 // create-payment-intent - DISABLED (Stripe removed)
 exports.paymentIntent = async (req, res, next) => {
@@ -17,12 +19,15 @@ exports.paymentIntent = async (req, res, next) => {
     next(error)
   }
 };
+
 // addOrder — whitelist fields and enforce authenticated user
 exports.addOrder = async (req, res, next) => {
   try {
-    const { cart, name, address, email, contact, city, country, zipCode,
-            subTotal, shippingCost, discount, totalAmount, shippingOption,
-            cardInfo, paymentIntent, paymentMethod, orderNote } = req.body;
+    const {
+      cart, name, address, email, contact, city, country, zipCode,
+      subTotal, shippingCost, discount, totalAmount, shippingOption,
+      cardInfo, paymentIntent, paymentMethod, orderNote,
+    } = req.body;
 
     // Validate required fields
     if (!cart || !name || !totalAmount || !paymentMethod) {
@@ -32,11 +37,19 @@ exports.addOrder = async (req, res, next) => {
       });
     }
 
-    // Stripe verification disabled - only COD payment supported
-    if (paymentMethod !== "COD") {
+    // Process payment via PaymentService
+    const paymentResult = await PaymentService.processPayment(
+      { totalAmount, cart, name, email },
+      paymentMethod,
+      req.body.paymentData || {}
+    );
+
+    // For unimplemented gateways (VNPay, MoMo, Stripe) that return success:false,
+    // reject the order rather than create it with a failed payment status
+    if (!paymentResult.success && !['COD', 'bank-transfer'].includes(paymentMethod)) {
       return res.status(400).json({
         status: "fail",
-        error: "Only Cash on Delivery payment method is supported",
+        error: paymentResult.error || "Payment processing failed",
       });
     }
 
@@ -64,7 +77,6 @@ exports.addOrder = async (req, res, next) => {
           coupon.perUserLimit == null || userUsage < coupon.perUserLimit;
 
         if (withinDates && withinUsageLimit && withinPerUserLimit) {
-          // Increment usage atomically
           await Coupon.findByIdAndUpdate(coupon._id, {
             $inc: { usageCount: 1 },
             $push: {
@@ -80,27 +92,46 @@ exports.addOrder = async (req, res, next) => {
     }
 
     const orderItems = await Order.create({
-      user: req.user._id, // enforce authenticated user, not client-supplied
+      user: req.user._id,
       cart, name, address, email, contact, city, country, zipCode,
       subTotal, shippingCost, discount: resolvedDiscount, totalAmount, shippingOption,
       cardInfo, paymentIntent, paymentMethod, orderNote,
-      status: "pending", // always start as pending
+      status: "pending",
+      paymentGateway: paymentResult.paymentGateway || paymentMethod.toLowerCase(),
+      paymentStatus: paymentResult.paymentStatus || 'unpaid',
+      transactionId: paymentResult.transactionId || null,
     });
 
     // Emit real-time update
     emitOrderCreated(orderItems);
 
+    // Fire-and-forget order confirmation email
+    sendTemplatedEmail('order-confirmation', email, {
+      customerName: name,
+      orderNumber: orderItems.orderNumber || `#${orderItems.invoice}`,
+      orderTotal: `$${totalAmount}`,
+      orderDate: dayjs().format('YYYY-MM-DD'),
+      itemsHtml: (cart || [])
+        .map(
+          (item) =>
+            `<li>${item.title} x${item.orderQuantity || item.quantity || 1} — $${item.price}</li>`
+        )
+        .join(''),
+      shippingAddress: `${address}, ${city}, ${country} ${zipCode}`,
+    }).catch((err) => console.error('[email] order-confirmation send error:', err.message));
+
     res.status(200).json({
       success: true,
       message: "Order added successfully",
       order: orderItems,
+      ...(paymentResult.bankDetails && { bankDetails: paymentResult.bankDetails }),
       ...(appliedCoupon && { appliedCoupon }),
     });
-  }
-  catch (error) {
-    next(error)
+  } catch (error) {
+    next(error);
   }
 };
+
 // get Orders
 exports.getOrders = async (req, res, next) => {
   try {
@@ -109,21 +140,20 @@ exports.getOrders = async (req, res, next) => {
       success: true,
       data: orderItems,
     });
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
-    next(error)
+    next(error);
   }
 };
-// get Orders
+
+// get single Order
 exports.getSingleOrder = async (req, res, next) => {
   try {
     const orderItem = await Order.findById(req.params.id).populate('user');
     res.status(200).json(orderItem);
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
-    next(error)
+    next(error);
   }
 };
 
@@ -135,18 +165,17 @@ exports.updateOrderStatus = async (req, res, next) => {
       { $set: { status: newStatus } },
       { new: true }
     ).populate('user');
-    
+
     // Emit real-time update
     emitOrderUpdated(updatedOrder);
-    
+
     res.status(200).json({
       success: true,
       message: 'Status updated successfully',
-      data: updatedOrder
+      data: updatedOrder,
     });
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
-    next(error)
+    next(error);
   }
 };

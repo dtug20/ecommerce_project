@@ -24,10 +24,11 @@ const ShopArea = ({ all_products, products, otherProps }) => {
     setCountOfPage(pageCount);
   };
 
-  // max price
-  const maxPrice = all_products.reduce((max, product) => {
+  // max price — ensure at least 1 so the Range slider doesn't break
+  const computedMax = all_products.reduce((max, product) => {
     return product.price > max ? product.price : max;
   }, 0);
+  const maxPrice = Math.max(computedMax, priceFilterValues.priceValue[1], 1);
   return (
     <>
       <section className="tp-shop-area pb-120">

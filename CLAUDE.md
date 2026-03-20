@@ -107,6 +107,77 @@ Anonymous users: localStorage only (existing behavior preserved). Authenticated 
 ### Review Moderation Flow
 User submits review → status set to `pending` → admin sees in CRM Review Moderation page → approves/rejects → only `approved` reviews shown on storefront. Admin can reply to reviews (shown below comment on storefront). `isVerifiedPurchase` badge shown for users who purchased the product.
 
+## Phase 4 Status (Complete)
+
+**What changed:**
+
+### Backend — Multi-Vendor Marketplace
+
+- **Payout model** created (`backend/model/Payout.js`) — vendor payout tracking with status, bank details snapshot, processed-by audit trail
+- **Vendor self-service controller** (`controller/v1/vendor.controller.js` — 16 exports): profile CRUD, product CRUD (ownership enforced), order listing (other vendor items redacted), analytics (summary/revenue/top-products with period filters), payout request (validates available balance)
+- **Admin vendor management** (`controller/v1/admin.vendor.controller.js` — 11 exports): list/filter vendors, approve (changes role to 'vendor'), reject (with reason), suspend (blocks user), update commission rate, process payouts, view vendor products/orders/payouts
+- **Vendor application** in `user.controller.js` — `POST /api/v1/user/vendor/apply` creates `vendorProfile` subdocument with `verificationStatus: 'pending'`
+- **Store-facing vendor endpoints** — `GET /api/v1/store/vendors` (approved list), `GET /api/v1/store/vendors/:slug` (public profile with product count, avg rating)
+- **Product vendor populate** — `getAllProducts` and `getProduct` now populate `vendor` field with `storeName` and `storeSlug` for "Sold by" badge
+- **Order items `fulfillmentStatus`** — added to Order model items subdocument (enum: pending/packed/shipped/delivered)
+- **User `vendorProfile.rejectionReason`** — added to User model for admin rejection feedback
+
+### Backend — Analytics
+
+- **Analytics controller** (`controller/v1/analytics.controller.js` — 8 exports): `getDashboard` (KPIs with $facet aggregation + period comparisons), `getSalesReport`, `getRevenue` (grouped by day/week/month), `getTopProducts` (handles both items[] and legacy cart[]), `getTopCategories`, `getCustomerGrowth`, `getVendorPerformance`, `getRecentOrders`
+- Replaces legacy analytics endpoints in admin routes with new aggregation-based versions
+
+### Backend — Email Templates
+
+- **Email template controller** (`controller/v1/email-template.controller.js` — 5 exports): list, get, update, preview (with sample data per template type), test send
+- **Email renderer** (`utils/emailRenderer.js`) — `{{variable}}` merge tag replacement
+- **Email service** (`utils/emailService.js`) — `sendTemplatedEmail(slug, recipient, data, language)` loads template from DB, renders, sends via nodemailer. Graceful no-op when nodemailer not installed
+- **9 default templates** seeded via `backend/seeds/email-templates.seed.js` (order-confirmation, order-shipped, order-delivered, order-cancelled, welcome, password-reset, vendor-application, vendor-approved, low-stock-alert)
+- **Email hooks** — order creation sends order-confirmation; status changes send shipped/delivered/cancelled emails (fire-and-forget)
+
+### Backend — Activity Log
+
+- **Activity log controller** (`controller/v1/activityLog.controller.js` — 2 exports): paginated list with filters, CSV export via streaming cursor
+- **Activity log middleware** (`middleware/activityLog.js`) — `logActivity(action, resourceType)` intercepts `res.json`, creates log entry on success (fire-and-forget). Applied to product/category/order/user/vendor/CMS write operations in admin routes
+
+### Backend — Payment Gateways
+
+- **Payment service** (`services/paymentService.js`) — `processPayment(order, method, paymentData)` dispatches to COD, bank-transfer, vnpay, momo, stripe. COD and bank-transfer fully functional; VNPay/MoMo/Stripe return graceful "not yet implemented"
+- **Payment webhooks** (`routes/v1/payment.js`) — public stub endpoints at `/api/v1/auth/payment/{vnpay,momo,stripe}/*` returning 200 OK
+- **Order controller updated** — removed hardcoded COD-only check, uses PaymentService, sets `paymentGateway`/`paymentStatus`/`transactionId` on orders, returns `bankDetails` for bank-transfer method
+
+### CRM — New Pages
+
+- **Vendor Management** (`VendorsPage.tsx`) — stats cards, paginated table with approve/reject/suspend/commission actions, detail drawer with Products/Orders/Payouts tabs
+- **Enhanced Analytics Dashboard** — 6 stats cards (monthly revenue, pending orders, out of stock — clickable), revenue chart with period selector (7d/30d/12m), top products bar chart, customer growth area chart
+- **Email Template Editor** (`EmailTemplatesPage.tsx`) — grouped template list, editor modal with variable insertion, preview panel (desktop/mobile toggle), test email send
+- **Activity Log** (`ActivityLogPage.tsx`) — filterable table (action/resource type/date range), detail drawer with JSON viewer, CSV export
+- **CRM proxy routes** added: `/api/vendors`, `/api/analytics`, `/api/email-templates`, `/api/activity-log` in `crm/server.js`
+- **Sidebar** — Vendors entry (between Users and Reviews), Activity Log entry (at bottom)
+
+### Frontend — Shopping Experience
+
+- **Vendor store page** (`pages/vendor/[slug].jsx`) — SSR page with banner, logo, store info, product grid
+- **Vendor badge** — "Sold by: {storeName}" on product detail page and product cards (fashion, electronics)
+- **Become a Vendor** (`components/my-account/vendor-application.jsx`) — application form in profile tab, handles pending/rejected/approved states
+- **Payment method selector** (`components/checkout/checkout-payment-methods.jsx`) — radio list of enabled gateways from settings, bank transfer details display, VNPay/MoMo "coming soon" notice
+- **Multi-vendor order display** — order detail groups items by vendor with subtotals, shows "multiple sellers" shipping notice
+- **RTK Query** — added `Vendor` tag, `getVendorBySlug`, `getVendorsList`, `applyForVendor` endpoints
+
+### Vendor Lifecycle Flow
+User applies via profile → admin sees in CRM Vendor Management → approves (sets role to 'vendor') → vendor accesses `/api/v1/vendor/*` endpoints → creates products (auto-sets vendor ref) → receives orders → manages fulfillment → requests payouts → admin processes payouts.
+
+### Payment Gateway Status
+- **COD**: fully functional (existing)
+- **Bank Transfer**: functional — returns bank details from SiteSettings, order created with `paymentStatus: 'unpaid'`
+- **VNPay/MoMo/Stripe**: stubs with graceful error response, webhook endpoints ready, integration instructions in code comments
+
+### Email System
+- nodemailer is optional — install via `cd backend && npm install nodemailer`
+- Templates must be seeded: `node backend/seeds/email-templates.seed.js`
+- All email sends are fire-and-forget (never block API responses)
+- Supports EN/VI bilingual templates
+
 ## Commands
 
 ### Setup

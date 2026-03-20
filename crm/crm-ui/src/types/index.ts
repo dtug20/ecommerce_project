@@ -370,6 +370,121 @@ export interface SiteSettings {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Vendor
+// ---------------------------------------------------------------------------
+
+export interface VendorProfile {
+  storeName?: string;
+  storeSlug?: string;
+  storeLogo?: string;
+  storeBanner?: string;
+  storeDescription?: string;
+  commissionRate: number;
+  bankInfo?: Record<string, unknown>;
+  verificationStatus: 'pending' | 'approved' | 'rejected' | 'suspended';
+  rejectionReason?: string;
+}
+
+export interface Vendor extends User {
+  vendorProfile?: VendorProfile;
+}
+
+export interface VendorStats {
+  total: number;
+  pending: number;
+  approved: number;
+  rejected: number;
+  suspended: number;
+}
+
+export interface Payout {
+  _id: string;
+  vendor: string | { _id: string; name: string };
+  amount: number;
+  currency: string;
+  status: 'pending' | 'processing' | 'paid' | 'rejected';
+  bankDetails?: Record<string, unknown>;
+  transactionRef?: string;
+  requestedAt: string;
+  processedAt?: string;
+  processedBy?: string;
+  note?: string;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Activity Log
+// ---------------------------------------------------------------------------
+
+export interface ActivityLogEntry {
+  _id: string;
+  actor: { id: string; name: string; role: string; type: string };
+  action: string;
+  resource: { type: string; id?: string; name?: string };
+  details?: Record<string, unknown>;
+  ipAddress?: string;
+  userAgent?: string;
+  timestamp: string;
+}
+
+// ---------------------------------------------------------------------------
+// Email Template
+// ---------------------------------------------------------------------------
+
+export interface EmailTemplate {
+  _id: string;
+  name: string;
+  slug: string;
+  type: string;
+  subject: string;
+  subjectVi?: string;
+  body: string;
+  bodyVi?: string;
+  variables: string[];
+  status: 'active' | 'inactive';
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Analytics
+// ---------------------------------------------------------------------------
+
+export interface DashboardAnalytics {
+  todayRevenue: number;
+  yesterdayRevenue: number;
+  monthRevenue: number;
+  totalRevenue: number;
+  todayOrders: number;
+  pendingOrders: number;
+  totalProducts: number;
+  outOfStockCount: number;
+  lowStockCount: number;
+  totalUsers: number;
+  revenueChange: number;
+}
+
+export interface RevenueDataPoint {
+  _id: string;
+  revenue: number;
+  orders: number;
+}
+
+export interface TopProduct {
+  _id: string;
+  title: string;
+  image: string;
+  totalSold: number;
+  totalRevenue: number;
+}
+
+export interface CustomerGrowthPoint {
+  _id: string;
+  count: number;
+}
+
 export interface Coupon {
   _id: string;
   title: string;

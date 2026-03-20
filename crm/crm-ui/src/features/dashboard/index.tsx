@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   Row,
@@ -7,12 +9,18 @@ import {
   Table,
   Tag,
   Typography,
+  Button,
+  Space,
 } from 'antd';
 import {
   ShoppingOutlined,
   ShoppingCartOutlined,
   TeamOutlined,
-  TagsOutlined,
+  DollarOutlined,
+  ClockCircleOutlined,
+  WarningOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
 } from '@ant-design/icons';
 import {
   LineChart,
@@ -26,12 +34,20 @@ import {
   Pie,
   Cell,
   Legend,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
 } from 'recharts';
 import type { ColumnsType } from 'antd/es/table';
-import { productsApi, ordersApi, usersApi, categoriesApi } from '@/services/api';
+import {
+  productsApi,
+  ordersApi,
+  analyticsApi,
+} from '@/services/api';
 import { formatCurrency, formatDate } from '@/hooks/useFormatters';
 import StatusBadge from '@/components/commons/StatusBadge';
-import type { Order, Product, MonthlyStats } from '@/types/index';
+import type { Order, Product, MonthlyStats, RevenueDataPoint } from '@/types/index';
 
 const { Title, Text } = Typography;
 
@@ -68,14 +84,14 @@ const recentOrderColumns: ColumnsType<Order> = [
   {
     title: 'Order #',
     key: 'orderNumber',
+    width: 90,
     render: (_: unknown, record: Order) =>
       record.invoice != null ? `#${record.invoice}` : (record.orderNumber ?? '—'),
   },
   {
     title: 'Customer',
     key: 'customer',
-    render: (_: unknown, record: Order) =>
-      record.user?.name ?? record.name ?? '—',
+    render: (_: unknown, record: Order) => record.user?.name ?? record.name ?? '—',
     ellipsis: true,
   },
   {
@@ -123,6 +139,7 @@ const lowStockColumns: ColumnsType<Product> = [
   {
     title: 'Status',
     key: 'stockStatus',
+    width: 110,
     render: (_: unknown, record: Product) => {
       if (record.quantity === 0) {
         return <Tag color="error">Out of Stock</Tag>;
@@ -133,65 +150,121 @@ const lowStockColumns: ColumnsType<Product> = [
 ];
 
 // ---------------------------------------------------------------------------
+// Revenue period type
+// ---------------------------------------------------------------------------
+
+type RevenuePeriod = '7d' | '30d' | '12m';
+
+interface PeriodConfig {
+  label: string;
+  groupBy: 'day' | 'month';
+}
+
+const PERIOD_CONFIG: Record<RevenuePeriod, PeriodConfig> = {
+  '7d': { label: '7 Days', groupBy: 'day' },
+  '30d': { label: '30 Days', groupBy: 'day' },
+  '12m': { label: '12 Months', groupBy: 'month' },
+};
+
+// ---------------------------------------------------------------------------
 // Main Dashboard component
 // ---------------------------------------------------------------------------
 
 export default function Dashboard() {
-  // ----- Stats queries -----
+  const navigate = useNavigate();
+  const [revenuePeriod, setRevenuePeriod] = useState<RevenuePeriod>('30d');
 
-  const { data: productStatsData, isLoading: loadingProductStats } = useQuery({
-    queryKey: ['productStats'],
-    queryFn: () => productsApi.getStats(),
+  // ----- Analytics query (new unified endpoint) -----
+
+  const { data: analyticsData, isLoading: loadingAnalytics } = useQuery({
+    queryKey: ['dashboardAnalytics'],
+    queryFn: () => analyticsApi.getDashboard(),
+    staleTime: 1000 * 60 * 2,
   });
+
+  // ----- Revenue chart query -----
+
+  const { data: revenueData, isLoading: loadingRevenue } = useQuery({
+    queryKey: ['analyticsRevenue', revenuePeriod],
+    queryFn: () =>
+      analyticsApi.getRevenue({ groupBy: PERIOD_CONFIG[revenuePeriod].groupBy }),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // ----- Top products query -----
+
+  const { data: topProductsData } = useQuery({
+    queryKey: ['analyticsTopProducts'],
+    queryFn: () => analyticsApi.getTopProducts({ sortBy: 'revenue', period: '30d' }),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // ----- Customer growth query -----
+
+  const { data: customerGrowthData } = useQuery({
+    queryKey: ['analyticsCustomerGrowth'],
+    queryFn: () => analyticsApi.getCustomerGrowth({ groupBy: 'month', period: '6m' }),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // ----- Recent orders from analytics -----
+
+  const { data: recentOrdersAnalyticsData, isLoading: loadingRecentOrders } = useQuery({
+    queryKey: ['analyticsRecentOrders'],
+    queryFn: () => analyticsApi.getRecentOrders(),
+    staleTime: 1000 * 60 * 2,
+  });
+
+  // ----- Fallback: order stats from legacy endpoint for pie chart -----
 
   const { data: orderStatsData, isLoading: loadingOrderStats } = useQuery({
     queryKey: ['orderStats'],
     queryFn: () => ordersApi.getStats(),
   });
 
-  const { data: userStatsData, isLoading: loadingUserStats } = useQuery({
-    queryKey: ['userStats'],
-    queryFn: () => usersApi.getStats(),
-  });
-
-  const { data: categoryStatsData, isLoading: loadingCategoryStats } = useQuery({
-    queryKey: ['categoryStats'],
-    queryFn: () => categoriesApi.getStats(),
-  });
-
-  // ----- Recent orders query -----
-
-  const { data: recentOrdersData, isLoading: loadingRecentOrders } = useQuery({
-    queryKey: ['recentOrders'],
-    queryFn: () =>
-      ordersApi.getAll({ limit: 5, sort: '-createdAt' }),
-  });
-
-  // ----- Low stock products query -----
+  // ----- Low stock products -----
 
   const { data: lowStockData, isLoading: loadingLowStock } = useQuery({
     queryKey: ['lowStockProducts'],
     queryFn: () =>
-      productsApi.getAll({ 'quantity[lte]': 10, limit: 5 } as Parameters<typeof productsApi.getAll>[0]),
+      productsApi.getAll({
+        'quantity[lte]': 10,
+        limit: 5,
+      } as Parameters<typeof productsApi.getAll>[0]),
   });
 
   // ----- Derived data -----
 
-  const productStats = productStatsData?.data;
+  const analytics = analyticsData?.data;
   const orderStats = orderStatsData?.data;
-  const userStats = userStatsData?.data;
-  const categoryStats = categoryStatsData?.data;
-  const recentOrders: Order[] = recentOrdersData?.data ?? [];
-  const lowStockProducts: Product[] = lowStockData?.data ?? [];
 
-  // Monthly sales chart data
-  const monthlySalesData = (orderStats?.monthlyStats ?? []).map((stat: MonthlyStats) => ({
-    name: monthLabel(stat),
-    revenue: stat.totalRevenue,
-    orders: stat.totalOrders,
+  // Revenue chart: prefer analytics endpoint, fall back to legacy monthly stats
+  const rawRevenueData = revenueData?.data;
+  const revenueChartData: RevenueDataPoint[] = Array.isArray(rawRevenueData)
+    ? rawRevenueData
+    : (orderStats?.monthlyStats ?? []).map((stat: MonthlyStats) => ({
+        _id: monthLabel(stat),
+        revenue: stat.totalRevenue ?? stat.totalOrders ?? 0,
+        orders: stat.totalOrders ?? 0,
+      }));
+
+  const chartData = revenueChartData.map((pt) => ({
+    name: pt._id,
+    revenue: pt.revenue ?? 0,
+    orders: pt.orders ?? 0,
   }));
 
-  // Pie chart data
+  const topProducts = Array.isArray(topProductsData?.data) ? topProductsData.data : [];
+  const rawGrowth = customerGrowthData?.data;
+  const customerGrowth = (Array.isArray(rawGrowth) ? rawGrowth : []).map((pt) => ({
+    name: pt._id,
+    count: pt.count,
+  }));
+
+  const recentOrders: Order[] = Array.isArray(recentOrdersAnalyticsData?.data) ? recentOrdersAnalyticsData.data : [];
+  const lowStockProducts: Product[] = Array.isArray(lowStockData?.data) ? lowStockData.data : [];
+
+  // Pie chart data from order stats
   const pieData = [
     { name: 'Pending', value: orderStats?.pendingOrders ?? 0, color: PIE_COLORS.pending },
     { name: 'Processing', value: orderStats?.processingOrders ?? 0, color: PIE_COLORS.processing },
@@ -199,6 +272,10 @@ export default function Dashboard() {
     { name: 'Delivered', value: orderStats?.deliveredOrders ?? 0, color: PIE_COLORS.delivered },
     { name: 'Cancelled', value: orderStats?.cancelledOrders ?? 0, color: PIE_COLORS.cancelled },
   ].filter((entry) => entry.value > 0);
+
+  // Revenue change indicator
+  const revenueChange = analytics?.revenueChange ?? 0;
+  const revenueUp = revenueChange >= 0;
 
   // ---------------------------------------------------------------------------
   // Render
@@ -211,163 +288,201 @@ export default function Dashboard() {
       </Title>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 1. Stats Cards Row                                                   */}
+      {/* 1. Stats Cards Row (6 cards)                                         */}
       {/* ------------------------------------------------------------------ */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} md={12} xl={6}>
-          <Card loading={loadingProductStats} hoverable>
+        {/* Total Products */}
+        <Col xs={24} sm={12} xl={4}>
+          <Card loading={loadingAnalytics} hoverable>
             <Statistic
               title="Total Products"
-              value={productStats?.totalProducts ?? 0}
+              value={analytics?.totalProducts ?? 0}
               prefix={<ShoppingOutlined style={{ color: '#a42c48' }} />}
-              valueStyle={{ color: '#a42c48' }}
+              valueStyle={{ color: '#a42c48', fontSize: 22 }}
             />
           </Card>
         </Col>
 
-        <Col xs={24} md={12} xl={6}>
-          <Card loading={loadingOrderStats} hoverable>
+        {/* Total Orders */}
+        <Col xs={24} sm={12} xl={4}>
+          <Card loading={loadingAnalytics} hoverable>
             <Statistic
               title="Total Orders"
-              value={orderStats?.totalOrders ?? 0}
+              value={analytics?.todayOrders ?? orderStats?.totalOrders ?? 0}
               prefix={<ShoppingCartOutlined style={{ color: '#007bff' }} />}
-              valueStyle={{ color: '#007bff' }}
+              valueStyle={{ color: '#007bff', fontSize: 22 }}
             />
           </Card>
         </Col>
 
-        <Col xs={24} md={12} xl={6}>
-          <Card loading={loadingUserStats} hoverable>
+        {/* Monthly Revenue */}
+        <Col xs={24} sm={12} xl={4}>
+          <Card loading={loadingAnalytics} hoverable>
+            <Statistic
+              title="Monthly Revenue"
+              value={analytics?.monthRevenue ?? 0}
+              formatter={(val) => formatCurrency(Number(val))}
+              prefix={<DollarOutlined style={{ color: '#28a745' }} />}
+              valueStyle={{ color: '#28a745', fontSize: 22 }}
+              suffix={
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: revenueUp ? '#52c41a' : '#ff4d4f',
+                    marginLeft: 4,
+                  }}
+                >
+                  {revenueUp ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
+                  {Math.abs(revenueChange).toFixed(1)}%
+                </Text>
+              }
+            />
+          </Card>
+        </Col>
+
+        {/* Total Users */}
+        <Col xs={24} sm={12} xl={4}>
+          <Card loading={loadingAnalytics} hoverable>
             <Statistic
               title="Total Users"
-              value={userStats?.totalUsers ?? 0}
+              value={analytics?.totalUsers ?? 0}
               prefix={<TeamOutlined style={{ color: '#28a745' }} />}
-              valueStyle={{ color: '#28a745' }}
+              valueStyle={{ color: '#28a745', fontSize: 22 }}
             />
           </Card>
         </Col>
 
-        <Col xs={24} md={12} xl={6}>
-          <Card loading={loadingCategoryStats} hoverable>
+        {/* Pending Orders */}
+        <Col xs={24} sm={12} xl={4}>
+          <Card
+            loading={loadingAnalytics}
+            hoverable
+            onClick={() => navigate('/orders?status=pending')}
+            style={{ cursor: 'pointer' }}
+          >
             <Statistic
-              title="Total Categories"
-              value={categoryStats?.totalCategories ?? 0}
-              prefix={<TagsOutlined style={{ color: '#ffc107' }} />}
-              valueStyle={{ color: '#ffc107' }}
+              title="Pending Orders"
+              value={analytics?.pendingOrders ?? orderStats?.pendingOrders ?? 0}
+              prefix={<ClockCircleOutlined style={{ color: '#ffc107' }} />}
+              valueStyle={{ color: '#ffc107', fontSize: 22 }}
+            />
+          </Card>
+        </Col>
+
+        {/* Out of Stock */}
+        <Col xs={24} sm={12} xl={4}>
+          <Card
+            loading={loadingAnalytics}
+            hoverable
+            onClick={() => navigate('/products?status=out-of-stock')}
+            style={{ cursor: 'pointer' }}
+          >
+            <Statistic
+              title="Out of Stock"
+              value={analytics?.outOfStockCount ?? 0}
+              prefix={<WarningOutlined style={{ color: '#dc3545' }} />}
+              valueStyle={{ color: '#dc3545', fontSize: 22 }}
             />
           </Card>
         </Col>
       </Row>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 2. Recent Orders + Low Stock Products                                */}
+      {/* 2. Revenue Chart                                                     */}
       {/* ------------------------------------------------------------------ */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        {/* Recent Orders */}
-        <Col xs={24} lg={12}>
+        <Col xs={24}>
           <Card
-            title="Recent Orders"
+            title="Revenue Overview"
+            loading={loadingRevenue}
             extra={
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                Last 5 orders
-              </Text>
+              <Space size={4}>
+                {(['7d', '30d', '12m'] as RevenuePeriod[]).map((period) => (
+                  <Button
+                    key={period}
+                    size="small"
+                    type={revenuePeriod === period ? 'primary' : 'default'}
+                    onClick={() => setRevenuePeriod(period)}
+                  >
+                    {PERIOD_CONFIG[period].label}
+                  </Button>
+                ))}
+              </Space>
             }
           >
-            <Table<Order>
-              dataSource={recentOrders}
-              columns={recentOrderColumns}
-              rowKey="_id"
-              loading={loadingRecentOrders}
-              expandable={{ childrenColumnName: '__children' }}
-              pagination={false}
-              size="small"
-              scroll={{ x: 500 }}
-            />
-          </Card>
-        </Col>
-
-        {/* Low Stock Products */}
-        <Col xs={24} lg={12}>
-          <Card
-            title="Low Stock Products"
-            extra={
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                Qty &le; 10
-              </Text>
-            }
-          >
-            <Table<Product>
-              dataSource={lowStockProducts}
-              columns={lowStockColumns}
-              rowKey="_id"
-              loading={loadingLowStock}
-              expandable={{ childrenColumnName: '__children' }}
-              pagination={false}
-              size="small"
-              scroll={{ x: 400 }}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* 4. Charts Row                                                        */}
-      {/* ------------------------------------------------------------------ */}
-      <Row gutter={[16, 16]}>
-        {/* Monthly Sales Line Chart */}
-        <Col xs={24} lg={12}>
-          <Card title="Monthly Sales Revenue" loading={loadingOrderStats}>
-            {monthlySalesData.length === 0 ? (
+            {chartData.length === 0 ? (
               <div
                 style={{
-                  height: 300,
+                  height: 280,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
-                <Text type="secondary">No monthly data available</Text>
+                <Text type="secondary">No revenue data available</Text>
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart
-                  data={monthlySalesData}
-                  margin={{ top: 8, right: 16, left: 16, bottom: 8 }}
-                >
+              <ResponsiveContainer width="100%" height={280}>
+                <LineChart data={chartData} margin={{ top: 8, right: 24, left: 16, bottom: 8 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fontSize: 11 }}
-                    tickLine={false}
-                  />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} tickLine={false} />
                   <YAxis
-                    tickFormatter={(value: number) => formatCurrency(value)}
+                    yAxisId="revenue"
+                    orientation="left"
+                    tickFormatter={(v: number) => formatCurrency(v)}
                     tick={{ fontSize: 11 }}
                     tickLine={false}
                     axisLine={false}
-                    width={80}
+                    width={88}
+                  />
+                  <YAxis
+                    yAxisId="orders"
+                    orientation="right"
+                    tick={{ fontSize: 11 }}
+                    tickLine={false}
+                    axisLine={false}
+                    width={40}
                   />
                   <Tooltip
-                    formatter={(value) => {
-                      return [formatCurrency(Number(value)), 'Revenue'];
+                    formatter={(value, name) => {
+                      if (name === 'revenue') return [formatCurrency(Number(value)), 'Revenue'];
+                      return [Number(value), 'Orders'];
                     }}
                     labelStyle={{ fontWeight: 600 }}
                   />
+                  <Legend formatter={(v) => <span style={{ fontSize: 12 }}>{v}</span>} />
                   <Line
+                    yAxisId="revenue"
                     type="monotone"
                     dataKey="revenue"
                     stroke="#a42c48"
                     strokeWidth={2.5}
-                    dot={{ r: 4, fill: '#a42c48', strokeWidth: 0 }}
-                    activeDot={{ r: 6 }}
+                    dot={{ r: 3, fill: '#a42c48', strokeWidth: 0 }}
+                    activeDot={{ r: 5 }}
                     name="revenue"
+                  />
+                  <Line
+                    yAxisId="orders"
+                    type="monotone"
+                    dataKey="orders"
+                    stroke="#007bff"
+                    strokeWidth={2}
+                    dot={{ r: 3, fill: '#007bff', strokeWidth: 0 }}
+                    activeDot={{ r: 5 }}
+                    strokeDasharray="4 2"
+                    name="orders"
                   />
                 </LineChart>
               </ResponsiveContainer>
             )}
           </Card>
         </Col>
+      </Row>
 
+      {/* ------------------------------------------------------------------ */}
+      {/* 3. Pie + Top Products                                                */}
+      {/* ------------------------------------------------------------------ */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         {/* Order Status Pie Chart */}
         <Col xs={24} lg={12}>
           <Card title="Order Status Distribution" loading={loadingOrderStats}>
@@ -410,6 +525,166 @@ export default function Dashboard() {
                 </PieChart>
               </ResponsiveContainer>
             )}
+          </Card>
+        </Col>
+
+        {/* Top Selling Products */}
+        <Col xs={24} lg={12}>
+          <Card title="Top Selling Products (30 Days)">
+            {topProducts.length === 0 ? (
+              <div
+                style={{
+                  height: 300,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Text type="secondary">No product data available</Text>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={topProducts.map((p) => ({
+                    name:
+                      p.title.length > 20 ? `${p.title.slice(0, 20)}…` : p.title,
+                    revenue: p.totalRevenue,
+                    sold: p.totalSold,
+                  }))}
+                  layout="vertical"
+                  margin={{ top: 8, right: 24, left: 8, bottom: 8 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis
+                    type="number"
+                    tickFormatter={(v: number) => formatCurrency(v)}
+                    tick={{ fontSize: 11 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    tick={{ fontSize: 11 }}
+                    tickLine={false}
+                    width={130}
+                  />
+                  <Tooltip
+                    formatter={(value, name) => {
+                      if (name === 'revenue') return [formatCurrency(Number(value)), 'Revenue'];
+                      return [Number(value), 'Units Sold'];
+                    }}
+                  />
+                  <Bar dataKey="revenue" fill="#a42c48" radius={[0, 4, 4, 0]} name="revenue" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </Card>
+        </Col>
+      </Row>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* 4. Recent Orders + Customer Growth                                   */}
+      {/* ------------------------------------------------------------------ */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        {/* Recent Orders */}
+        <Col xs={24} lg={12}>
+          <Card
+            title="Recent Orders"
+            extra={
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                Last 10 orders
+              </Text>
+            }
+          >
+            <Table<Order>
+              dataSource={recentOrders}
+              columns={recentOrderColumns}
+              rowKey="_id"
+              loading={loadingRecentOrders}
+              expandable={{ childrenColumnName: '__children' }}
+              pagination={false}
+              size="small"
+              scroll={{ x: 500 }}
+            />
+          </Card>
+        </Col>
+
+        {/* Customer Growth */}
+        <Col xs={24} lg={12}>
+          <Card title="Customer Growth (6 Months)">
+            {customerGrowth.length === 0 ? (
+              <div
+                style={{
+                  height: 300,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Text type="secondary">No customer data available</Text>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart
+                  data={customerGrowth}
+                  margin={{ top: 8, right: 16, left: 16, bottom: 8 }}
+                >
+                  <defs>
+                    <linearGradient id="colorGrowth" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#28a745" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#28a745" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} tickLine={false} />
+                  <YAxis
+                    tick={{ fontSize: 11 }}
+                    tickLine={false}
+                    axisLine={false}
+                    width={40}
+                  />
+                  <Tooltip formatter={(v) => [Number(v), 'New Users']} />
+                  <Area
+                    type="monotone"
+                    dataKey="count"
+                    stroke="#28a745"
+                    strokeWidth={2.5}
+                    fill="url(#colorGrowth)"
+                    dot={{ r: 4, fill: '#28a745', strokeWidth: 0 }}
+                    activeDot={{ r: 6 }}
+                    name="count"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </Card>
+        </Col>
+      </Row>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* 5. Low Stock Products                                                */}
+      {/* ------------------------------------------------------------------ */}
+      <Row gutter={[16, 16]}>
+        <Col xs={24}>
+          <Card
+            title="Low Stock Products"
+            extra={
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                Qty &le; 10
+              </Text>
+            }
+          >
+            <Table<Product>
+              dataSource={lowStockProducts}
+              columns={lowStockColumns}
+              rowKey="_id"
+              loading={loadingLowStock}
+              expandable={{ childrenColumnName: '__children' }}
+              pagination={false}
+              size="small"
+              scroll={{ x: 400 }}
+            />
           </Card>
         </Col>
       </Row>

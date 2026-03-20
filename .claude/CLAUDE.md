@@ -1,6 +1,7 @@
 # Shofy E-commerce Platform
 
 ## Architecture
+
 - 3 separate repos: `shofy-api/`, `shofy-crm/`, `shofy-storefront/`
 - Database: MongoDB (single instance)
   - Current: 2 databases (shofy, shofy_ecommerce) — migrating to 1
@@ -11,6 +12,7 @@
 - CRM UI: Vite + React 19 + TypeScript + Ant Design 6 (port 3001)
 
 ## Tech Stack Constraints
+
 - Keep MongoDB (no PostgreSQL migration)
 - Keep Bootstrap 5 for storefront (modernize, don't replace)
 - Keep Ant Design 6 for CRM
@@ -19,6 +21,7 @@
 - 3 separate repos (not monorepo)
 
 ## Coding Standards
+
 - TypeScript for all new code
 - Use Mongoose for all DB operations
 - API follows RESTful conventions: /api/v1/admin/*, /api/v1/store/*, /api/v1/vendor/*
@@ -27,14 +30,17 @@
 - Storefront uses Redux Toolkit + RTK Query
 
 ## Key Models (Current)
+
 Brand, Category, Product, Coupon, Order, User, Review, Admin
 
 ## Key Models (New — to be added)
-SiteSetting, Page, ContentBlock, Menu, MenuItem, Banner, 
-Announcement, BlogPost, Vendor, VendorPayout, Wishlist, 
+
+SiteSetting, Page, ContentBlock, Menu, MenuItem, Banner
+Announcement, BlogPost, Vendor, VendorPayout, Wishlist
 EmailTemplate, ActivityLog
 
 ## Forbidden Patterns
+
 - No hard-coded content on storefront — everything from API/CMS
 - No direct DB access from frontend — always through API
 - No `any` type in TypeScript (use proper types)

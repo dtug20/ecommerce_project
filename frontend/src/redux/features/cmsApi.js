@@ -162,6 +162,30 @@ export const cmsApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+
+    // Vendor store
+    getVendorBySlug: builder.query({
+      query: (slug) => `/api/v1/store/vendors/${slug}`,
+      providesTags: ['Vendor'],
+    }),
+    getVendorsList: builder.query({
+      query: (params = {}) => {
+        const searchParams = new URLSearchParams();
+        if (params.page) searchParams.set('page', params.page);
+        if (params.limit) searchParams.set('limit', params.limit);
+        return `/api/v1/store/vendors?${searchParams.toString()}`;
+      },
+      providesTags: ['Vendor'],
+    }),
+
+    // Vendor application
+    applyForVendor: builder.mutation({
+      query: (data) => ({
+        url: '/api/v1/user/vendor/apply',
+        method: 'POST',
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -192,4 +216,8 @@ export const {
   // Coupons
   useGetCheckoutCouponsQuery,
   useValidateCouponMutation,
+  // Vendors
+  useGetVendorBySlugQuery,
+  useGetVendorsListQuery,
+  useApplyForVendorMutation,
 } = cmsApi;

@@ -45,6 +45,10 @@ const useCheckoutSubmit = () => {
   const [isCheckoutSubmit, setIsCheckoutSubmit] = useState(false);
   // coupon apply message
   const [couponApplyMsg, setCouponApplyMsg] = useState("");
+  // payment method selector
+  const [paymentMethod, setPaymentMethod] = useState('cod');
+  // bank transfer details returned by the backend after order save
+  const [bankDetails, setBankDetails] = useState(null);
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -198,10 +202,16 @@ const useCheckoutSubmit = () => {
     setValue("orderNote", shipping_info.orderNote);
   }, [user, setValue, shipping_info, router]);
 
-  // submitHandler — COD only
+  // submitHandler
   const submitHandler = async (data) => {
     dispatch(set_shipping(data));
     setIsCheckoutSubmit(true);
+    setBankDetails(null);
+
+    // Normalise method key: the selector stores lower-case keys; the backend
+    // expects "COD" for cash-on-delivery and the literal value for others.
+    const normalisedMethod =
+      paymentMethod === 'cod' || paymentMethod === 'COD' ? 'COD' : paymentMethod;
 
     let orderInfo = {
       name: `${data.firstName} ${data.lastName}`,
@@ -214,7 +224,7 @@ const useCheckoutSubmit = () => {
       shippingOption: data.shippingOption,
       status: "Pending",
       cart: cart_products,
-      paymentMethod: "COD",
+      paymentMethod: normalisedMethod,
       subTotal: total,
       shippingCost: shippingCost,
       discount: discountAmount,
@@ -228,6 +238,14 @@ const useCheckoutSubmit = () => {
     }).then(res => {
       if (res?.error) {
         setIsCheckoutSubmit(false);
+      } else if (res.data?.bankDetails) {
+        // Bank-transfer flow: surface bank details on the order page
+        setBankDetails(res.data.bankDetails);
+        setIsCheckoutSubmit(false);
+        localStorage.removeItem("cart_products");
+        localStorage.removeItem("couponInfo");
+        notifySuccess("Order placed! Please complete the bank transfer.");
+        router.push(`/order/${res.data?.order?._id}`);
       } else {
         localStorage.removeItem("cart_products");
         localStorage.removeItem("couponInfo");
@@ -259,6 +277,9 @@ const useCheckoutSubmit = () => {
     handleSubmit,
     cartTotal,
     couponApplyMsg,
+    paymentMethod,
+    setPaymentMethod,
+    bankDetails,
   };
 };
 

@@ -54,6 +54,11 @@ const ProfileNavTab = () => {
           title="Address Book"
           icon="fa-regular fa-location-dot"
         />
+        <SingleNav
+          id="vendor"
+          title="Become a Vendor"
+          icon="fa-regular fa-store"
+        />
       </div>
     </nav>
   );

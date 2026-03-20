@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 // internal
 import useCartInfo from "@/hooks/use-cart-info";
 import ErrorMsg from "../common/error-msg";
+import CheckoutPaymentMethods from "./checkout-payment-methods";
 
 const CheckoutOrderArea = ({ checkoutData }) => {
   const {
@@ -17,7 +18,10 @@ const CheckoutOrderArea = ({ checkoutData }) => {
     showCard,
     setShowCard,
     shippingCost,
-    discountAmount
+    discountAmount,
+    paymentMethod,
+    setPaymentMethod,
+    bankDetails,
   } = checkoutData;
   const { cart_products } = useSelector((state) => state.cart);
   const { total } = useCartInfo();
@@ -109,23 +113,11 @@ const CheckoutOrderArea = ({ checkoutData }) => {
           </li>
         </ul>
       </div>
-      <div className="tp-checkout-payment">
-        {/* STRIPE DISABLED - Card payment removed */}
-        <div className="tp-checkout-payment-item">
-          <input
-            {...register(`payment`, {
-              required: `Payment Option is required!`,
-            })}
-            type="radio"
-            id="cod"
-            name="payment"
-            value="COD"
-            defaultChecked
-          />
-          <label htmlFor="cod">Cash on Delivery (Only available option)</label>
-          <ErrorMsg msg={errors?.payment?.message} />
-        </div>
-      </div>
+      <CheckoutPaymentMethods
+        selectedMethod={paymentMethod || 'cod'}
+        onMethodChange={setPaymentMethod}
+        bankDetails={bankDetails}
+      />
 
       <div className="tp-checkout-btn-wrapper">
         <button

@@ -106,6 +106,7 @@ const userSchema = mongoose.Schema(
         enum: ["pending", "approved", "rejected", "suspended"],
         default: "pending",
       },
+      rejectionReason: { type: String },
     },
   },
   {

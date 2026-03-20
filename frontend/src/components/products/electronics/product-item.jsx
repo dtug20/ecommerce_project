@@ -12,7 +12,7 @@ import { add_cart_product } from "@/redux/features/cartSlice";
 import useWishlist from "@/hooks/use-wishlist";
 
 const ProductItem = ({ product, offer_style = false }) => {
-  const { _id, img, category, title, reviews, price, discount,status,offerDate } = product || {};
+  const { _id, img, category, title, reviews, price, discount, status, offerDate, vendor } = product || {};
 
   const { cart_products } = useSelector((state) => state.cart);
   const { wishlist } = useSelector((state) => state.wishlist);
@@ -141,6 +141,19 @@ const ProductItem = ({ product, offer_style = false }) => {
               <span className="tp-product-price new-price">${parseFloat(price).toFixed(2)}</span>
             )}
           </div>
+          {vendor?.vendorProfile?.storeName && vendor?.vendorProfile?.storeSlug && (
+            <div className="tp-product-vendor-badge mt-5">
+              <small className="text-muted" style={{ fontSize: '11px' }}>
+                Sold by{' '}
+                <Link
+                  href={`/vendor/${vendor.vendorProfile.storeSlug}`}
+                  style={{ color: '#821F40' }}
+                >
+                  {vendor.vendorProfile.storeName}
+                </Link>
+              </small>
+            </div>
+          )}
           {offer_style && (
             <div className="tp-product-countdown">
               <div className="tp-product-countdown-inner">

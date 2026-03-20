@@ -133,6 +133,11 @@ const orderSchema = new mongoose.Schema(
         size: { type: String },
         subtotal: { type: Number, required: true },
         vendorCommission: { type: Number },
+        fulfillmentStatus: {
+          type: String,
+          enum: ['pending', 'packed', 'shipped', 'delivered'],
+          default: 'pending',
+        },
       },
     ],
   },

@@ -1,41 +1,58 @@
 'use strict';
 
 /**
- * Vendor routes — v1  (Phase 4)
+ * Vendor routes — v1
  *
- * All endpoints are stubs. Authentication + vendor-role check are applied at
- * the v1 index level before these routes are reached.
+ * All endpoints require a valid JWT with role 'vendor'. Authentication and
+ * vendor-role authorization are applied at the v1 index level before these
+ * routes are reached.
  */
 
 const express = require('express');
 const router = express.Router();
-const respond = require('../../../utils/respond');
-
-const NOT_IMPLEMENTED = (req, res) =>
-  respond.error(res, 'NOT_IMPLEMENTED', 'This endpoint is not yet implemented', 501);
+const ctrl = require('../../../controller/v1/vendor.controller');
 
 // ---------------------------------------------------------------------------
-// Vendor products
+// Profile
 // ---------------------------------------------------------------------------
 
-router.get('/products',       NOT_IMPLEMENTED);
-router.post('/products',      NOT_IMPLEMENTED);
-router.patch('/products/:id', NOT_IMPLEMENTED);
-router.delete('/products/:id', NOT_IMPLEMENTED);
+router.get('/profile',   ctrl.getProfile);
+router.patch('/profile', ctrl.updateProfile);
 
 // ---------------------------------------------------------------------------
-// Vendor orders
+// Products
 // ---------------------------------------------------------------------------
 
-router.get('/orders',               NOT_IMPLEMENTED);
-router.get('/orders/:id',           NOT_IMPLEMENTED);
-router.patch('/orders/:id/status',  NOT_IMPLEMENTED);
+router.get('/products',        ctrl.getProducts);
+router.get('/products/:id',    ctrl.getProductById);
+router.post('/products',       ctrl.createProduct);
+router.patch('/products/:id',  ctrl.updateProduct);
+router.delete('/products/:id', ctrl.deleteProduct);
 
 // ---------------------------------------------------------------------------
-// Vendor dashboard & payouts
+// Orders
 // ---------------------------------------------------------------------------
 
-router.get('/dashboard', NOT_IMPLEMENTED);
-router.get('/payouts',   NOT_IMPLEMENTED);
+router.get('/orders',                                  ctrl.getOrders);
+router.get('/orders/:id',                              ctrl.getOrderById);
+router.patch('/orders/:orderId/items/:itemId/status',  ctrl.updateItemStatus);
+
+// ---------------------------------------------------------------------------
+// Analytics
+// ---------------------------------------------------------------------------
+
+// Static analytics routes before any parameterised route
+router.get('/analytics/summary',      ctrl.getSummary);
+router.get('/analytics/revenue',      ctrl.getRevenue);
+router.get('/analytics/top-products', ctrl.getTopProducts);
+
+// ---------------------------------------------------------------------------
+// Payouts
+// ---------------------------------------------------------------------------
+
+// /payouts/request must precede /payouts/:id to avoid matching 'request' as id
+router.post('/payouts/request', ctrl.requestPayout);
+router.get('/payouts/:id',      ctrl.getPayoutById);
+router.get('/payouts',          ctrl.getPayouts);
 
 module.exports = router;

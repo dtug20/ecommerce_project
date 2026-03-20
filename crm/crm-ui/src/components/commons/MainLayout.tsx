@@ -21,6 +21,7 @@ import {
   GiftOutlined,
   PictureOutlined,
   StarOutlined,
+  AuditOutlined,
 } from '@ant-design/icons';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import useAppStore from '@/stores/appStore';
@@ -44,6 +45,7 @@ const FLAT_NAV: FlatNavItem[] = [
   { key: '/categories', label: 'Categories', path: '/categories' },
   { key: '/orders', label: 'Orders', path: '/orders' },
   { key: '/users', label: 'Users', path: '/users' },
+  { key: '/vendors', label: 'Vendors', path: '/vendors' },
   { key: '/reviews', label: 'Reviews', path: '/reviews' },
   { key: '/coupons', label: 'Coupons', path: '/coupons' },
   { key: '/cms/pages', label: 'Pages', path: '/cms/pages' },
@@ -55,6 +57,7 @@ const FLAT_NAV: FlatNavItem[] = [
   { key: '/settings/payment', label: 'Payment', path: '/settings/payment' },
   { key: '/settings/shipping', label: 'Shipping', path: '/settings/shipping' },
   { key: '/settings/email-templates', label: 'Email Templates', path: '/settings/email-templates' },
+  { key: '/activity-log', label: 'Activity Log', path: '/activity-log' },
 ];
 
 function resolveSelectedKey(pathname: string): string {
@@ -112,6 +115,11 @@ const MENU_ITEMS: ItemType[] = [
     label: 'Users',
   },
   {
+    key: '/vendors',
+    icon: <ShopOutlined />,
+    label: 'Vendors',
+  },
+  {
     key: '/reviews',
     icon: <StarOutlined />,
     label: 'Reviews',
@@ -144,11 +152,15 @@ const MENU_ITEMS: ItemType[] = [
       { key: '/settings/email-templates', icon: <MailOutlined />, label: 'Email Templates' },
     ],
   },
+  {
+    key: '/activity-log',
+    icon: <AuditOutlined />,
+    label: 'Activity Log',
+  },
 ];
 
 // Suppress unused import warnings for icons only used in labels
 void NotificationOutlined;
-void ShopOutlined;
 
 // ---------------------------------------------------------------------------
 // Component

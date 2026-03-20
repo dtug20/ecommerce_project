@@ -13,7 +13,7 @@ import { handleModalClose } from '@/redux/features/productModalSlice';
 import useWishlist from '@/hooks/use-wishlist';
 
 const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBottom = false, selectedVariant = null }) => {
-  const { sku, img, title, imageURLs, category, description, discount, price, status, reviews, tags, offerDate } = productItem || {};
+  const { sku, img, title, imageURLs, category, description, discount, price, status, reviews, tags, offerDate, vendor } = productItem || {};
   const [ratingVal, setRatingVal] = useState(0);
   const [textMore, setTextMore] = useState(false);
   const dispatch = useDispatch();
@@ -92,6 +92,20 @@ const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBott
       <p>{textMore ? description : `${description.substring(0, 100)}...`}
         <span onClick={() => setTextMore(!textMore)}>{textMore ? 'See less' : 'See more'}</span>
       </p>
+
+      {/* vendor badge */}
+      {vendor?.vendorProfile?.storeName && vendor?.vendorProfile?.storeSlug && (
+        <div className="tp-product-vendor mb-10">
+          <span className="text-muted" style={{ fontSize: '13px' }}>Sold by: </span>
+          <Link
+            href={`/vendor/${vendor.vendorProfile.storeSlug}`}
+            className="tp-product-vendor-link"
+            style={{ fontSize: '13px', color: '#821F40', fontWeight: 500 }}
+          >
+            {vendor.vendorProfile.storeName}
+          </Link>
+        </div>
+      )}
 
       {/* price — shows variant price when selected */}
       <div className="tp-product-details-price-wrapper mb-20">

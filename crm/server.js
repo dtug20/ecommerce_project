@@ -107,6 +107,12 @@ app.use('/api/coupons', apiProtect, require('./routes/coupon.routes'));
 // Phase 3 — Reviews
 app.use('/api/reviews', apiProtect, require('./routes/review.routes'));
 
+// Phase 4 — Vendors, Analytics, Email Templates, Activity Log
+app.use('/api/vendors', apiProtect, require('./routes/vendor.routes'));
+app.use('/api/analytics', apiProtect, require('./routes/analytics.routes'));
+app.use('/api/email-templates', apiProtect, require('./routes/email-template.routes'));
+app.use('/api/activity-log', apiProtect, require('./routes/activity-log.routes'));
+
 // ─── Page Routes (React SPA, protected by Keycloak) ─────────
 
 const spaRoutes = ['/', '/products', '/categories', '/orders', '/users'];

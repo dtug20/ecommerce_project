@@ -18,6 +18,15 @@ import type {
   SiteSettings,
   Coupon,
   Review,
+  Vendor,
+  VendorStats,
+  Payout,
+  ActivityLogEntry,
+  EmailTemplate,
+  DashboardAnalytics,
+  RevenueDataPoint,
+  TopProduct,
+  CustomerGrowthPoint,
 } from '@/types/index';
 
 // Axios instance with relative baseURL — proxied by Vite to the CRM backend
@@ -352,6 +361,123 @@ export const reviewsApi = {
 
   delete: (id: string) =>
     api.delete<ApiResponse<null>>(`/api/reviews/${id}`).then((r) => r.data),
+};
+
+// ---------------------------------------------------------------------------
+// Vendors
+// ---------------------------------------------------------------------------
+
+export const vendorsApi = {
+  getAll: (params?: { page?: number; limit?: number; status?: string; search?: string }) =>
+    api.get<ApiResponse<Vendor[]>>('/api/vendors', { params }).then((r) => r.data),
+
+  getStats: () =>
+    api.get<ApiResponse<VendorStats>>('/api/vendors/stats').then((r) => r.data),
+
+  getById: (id: string) =>
+    api.get<ApiResponse<Vendor>>(`/api/vendors/${id}`).then((r) => r.data),
+
+  getProducts: (id: string, params?: { page?: number; limit?: number }) =>
+    api.get<ApiResponse<Product[]>>(`/api/vendors/${id}/products`, { params }).then((r) => r.data),
+
+  getOrders: (id: string, params?: { page?: number; limit?: number }) =>
+    api.get<ApiResponse<Order[]>>(`/api/vendors/${id}/orders`, { params }).then((r) => r.data),
+
+  getPayouts: (id: string, params?: { page?: number; limit?: number }) =>
+    api.get<ApiResponse<Payout[]>>(`/api/vendors/${id}/payouts`, { params }).then((r) => r.data),
+
+  approve: (id: string) =>
+    api.patch<ApiResponse<Vendor>>(`/api/vendors/${id}/approve`).then((r) => r.data),
+
+  reject: (id: string, reason: string) =>
+    api.patch<ApiResponse<Vendor>>(`/api/vendors/${id}/reject`, { reason }).then((r) => r.data),
+
+  suspend: (id: string) =>
+    api.patch<ApiResponse<Vendor>>(`/api/vendors/${id}/suspend`).then((r) => r.data),
+
+  updateCommission: (id: string, commissionRate: number) =>
+    api.patch<ApiResponse<Vendor>>(`/api/vendors/${id}/commission`, { commissionRate }).then((r) => r.data),
+
+  processPayout: (
+    vendorId: string,
+    payoutId: string,
+    data: { transactionRef: string; note?: string }
+  ) =>
+    api
+      .post<ApiResponse<Payout>>(`/api/vendors/${vendorId}/payouts/${payoutId}/process`, data)
+      .then((r) => r.data),
+};
+
+// ---------------------------------------------------------------------------
+// Analytics
+// ---------------------------------------------------------------------------
+
+export const analyticsApi = {
+  getDashboard: () =>
+    api.get<ApiResponse<DashboardAnalytics>>('/api/analytics').then((r) => r.data),
+
+  getRevenue: (params: { groupBy: string; startDate?: string; endDate?: string }) =>
+    api
+      .get<ApiResponse<RevenueDataPoint[]>>('/api/analytics/revenue', { params })
+      .then((r) => r.data),
+
+  getTopProducts: (params?: { sortBy?: string; period?: string }) =>
+    api
+      .get<ApiResponse<TopProduct[]>>('/api/analytics/top-products', { params })
+      .then((r) => r.data),
+
+  getCustomerGrowth: (params?: { groupBy?: string; period?: string }) =>
+    api
+      .get<ApiResponse<CustomerGrowthPoint[]>>('/api/analytics/customer-growth', { params })
+      .then((r) => r.data),
+
+  getRecentOrders: () =>
+    api.get<ApiResponse<Order[]>>('/api/analytics/recent-orders').then((r) => r.data),
+};
+
+// ---------------------------------------------------------------------------
+// Email Templates
+// ---------------------------------------------------------------------------
+
+export const emailTemplatesApi = {
+  getAll: () =>
+    api.get<ApiResponse<EmailTemplate[]>>('/api/email-templates').then((r) => r.data),
+
+  getById: (id: string) =>
+    api.get<ApiResponse<EmailTemplate>>(`/api/email-templates/${id}`).then((r) => r.data),
+
+  update: (id: string, data: Partial<EmailTemplate>) =>
+    api.patch<ApiResponse<EmailTemplate>>(`/api/email-templates/${id}`, data).then((r) => r.data),
+
+  preview: (id: string) =>
+    api
+      .post<ApiResponse<{ html: string; subject: string }>>(`/api/email-templates/${id}/preview`)
+      .then((r) => r.data),
+
+  sendTest: (id: string, recipient: string) =>
+    api
+      .post<ApiResponse<null>>(`/api/email-templates/${id}/test`, { recipient })
+      .then((r) => r.data),
+};
+
+// ---------------------------------------------------------------------------
+// Activity Log
+// ---------------------------------------------------------------------------
+
+export const activityLogApi = {
+  getAll: (params?: {
+    page?: number;
+    limit?: number;
+    action?: string;
+    resourceType?: string;
+    actorId?: string;
+    startDate?: string;
+    endDate?: string;
+  }) =>
+    api.get<ApiResponse<ActivityLogEntry[]>>('/api/activity-log', { params }).then((r) => r.data),
+
+  exportCsv: (params?: Record<string, string>) =>
+    api.get('/api/activity-log/export', { params, responseType: 'blob' }).then((r) => r.data),
 };
 
 export default api;

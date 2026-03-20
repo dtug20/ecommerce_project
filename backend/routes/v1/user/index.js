@@ -51,4 +51,10 @@ router.put('/addresses/:id',           ctrl.updateAddress);
 router.patch('/addresses/:id/default', ctrl.setDefaultAddress);
 router.delete('/addresses/:id',        ctrl.deleteAddress);
 
+// ---------------------------------------------------------------------------
+// Vendor application
+// ---------------------------------------------------------------------------
+
+router.post('/vendor/apply', ctrl.applyForVendor);
+
 module.exports = router;

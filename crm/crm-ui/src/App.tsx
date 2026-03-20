@@ -13,6 +13,12 @@ const UsersPage = lazy(() => import('@/features/users/UsersPage'));
 // New: Reviews
 const ReviewsPage = lazy(() => import('@/features/reviews/ReviewsPage'));
 
+// Phase 4: Vendors
+const VendorsPage = lazy(() => import('@/features/vendors/VendorsPage'));
+
+// Phase 4: Activity Log
+const ActivityLogPage = lazy(() => import('@/features/activity-log/ActivityLogPage'));
+
 // New: Coupons
 const CouponsPage = lazy(() => import('@/features/coupons/CouponsPage'));
 
@@ -76,6 +82,12 @@ export default function App() {
 
           {/* Reviews */}
           <Route path="/reviews" element={<SuspenseRoute><ReviewsPage /></SuspenseRoute>} />
+
+          {/* Vendors */}
+          <Route path="/vendors" element={<SuspenseRoute><VendorsPage /></SuspenseRoute>} />
+
+          {/* Activity Log */}
+          <Route path="/activity-log" element={<SuspenseRoute><ActivityLogPage /></SuspenseRoute>} />
 
           {/* Coupons */}
           <Route path="/coupons" element={<SuspenseRoute><CouponsPage /></SuspenseRoute>} />

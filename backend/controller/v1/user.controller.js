@@ -18,6 +18,25 @@ const Reviews = require('../../model/Review');
 const Products = require('../../model/Products');
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Generate a URL-safe slug from a string.
+ * @param {string} title
+ * @returns {string}
+ */
+const toSlug = (title) =>
+  title
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[\s_]+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+
+// ---------------------------------------------------------------------------
 // Profile
 // ---------------------------------------------------------------------------
 
@@ -291,6 +310,79 @@ exports.setDefaultAddress = async (req, res, next) => {
     await user.save();
 
     return respond.success(res, user.addresses, 'Default address updated');
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Vendor application
+// ---------------------------------------------------------------------------
+
+/**
+ * POST /api/v1/user/vendor/apply
+ * Apply to become a vendor. Authenticated users only.
+ * Body: { storeName, storeDescription, bankInfo }
+ */
+exports.applyForVendor = async (req, res, next) => {
+  try {
+    const { storeName, storeDescription, bankInfo } = req.body;
+
+    if (!storeName || !storeName.trim()) {
+      return respond.error(res, 'MISSING_FIELDS', 'storeName is required', 400);
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return respond.notFound(res, 'USER_NOT_FOUND', 'User not found');
+    }
+
+    // Prevent re-application if already pending or approved
+    const existingStatus = user.vendorProfile?.verificationStatus;
+    if (existingStatus === 'pending') {
+      return respond.error(
+        res,
+        'APPLICATION_ALREADY_PENDING',
+        'You already have a pending vendor application',
+        409
+      );
+    }
+    if (existingStatus === 'approved') {
+      return respond.error(
+        res,
+        'ALREADY_A_VENDOR',
+        'Your vendor account is already approved',
+        409
+      );
+    }
+
+    const storeSlug = toSlug(storeName.trim());
+
+    user.vendorProfile = {
+      storeName: storeName.trim(),
+      storeSlug,
+      storeDescription: storeDescription || '',
+      bankInfo: bankInfo || null,
+      verificationStatus: 'pending',
+      commissionRate: 10,
+    };
+
+    await user.save();
+
+    if (global.io) {
+      global.io.emit('vendor:application', {
+        userId: user._id,
+        name: user.name,
+        email: user.email,
+        storeName: storeName.trim(),
+      });
+    }
+
+    return respond.created(
+      res,
+      { vendorProfile: user.vendorProfile },
+      'Vendor application submitted successfully. Awaiting admin review.'
+    );
   } catch (err) {
     next(err);
   }

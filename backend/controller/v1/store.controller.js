@@ -15,6 +15,7 @@ const Product = require('../../model/Products');
 const categoryServices = require('../../services/category.service');
 const brandService = require('../../services/brand.service');
 const Brand = require('../../model/Brand');
+const User = require('../../model/User');
 const Coupon = require('../../model/Coupon');
 const Reviews = require('../../model/Review');
 const { getPaginationParams, buildPagination } = require('../../utils/pagination');
@@ -115,7 +116,8 @@ exports.getAllProducts = async (req, res, next) => {
         .populate({
           path: 'reviews',
           populate: { path: 'userId', select: 'name' },
-        }),
+        })
+        .populate('vendor', 'name vendorProfile.storeName vendorProfile.storeSlug'),
     ]);
 
     const pagination = buildPagination(page, limit, totalItems);
@@ -162,11 +164,13 @@ exports.searchProducts = async (req, res, next) => {
  */
 exports.getProduct = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id).populate({
-      path: 'reviews',
-      match: { status: 'approved' },
-      populate: { path: 'userId', select: 'name imageURL' },
-    });
+    const product = await Product.findById(req.params.id)
+      .populate({
+        path: 'reviews',
+        match: { status: 'approved' },
+        populate: { path: 'userId', select: 'name imageURL' },
+      })
+      .populate('vendor', 'name vendorProfile.storeName vendorProfile.storeSlug');
     if (!product) {
       return respond.notFound(res, 'PRODUCT_NOT_FOUND', 'Product not found');
     }
@@ -557,6 +561,124 @@ exports.getCouponById = async (req, res, next) => {
       return respond.notFound(res, 'COUPON_NOT_FOUND', 'Coupon not found');
     }
     return respond.success(res, data, 'Coupon retrieved successfully');
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Vendors (public storefront)
+// ---------------------------------------------------------------------------
+
+/**
+ * GET /api/v1/store/vendors
+ * Paginated list of approved vendors with public store info.
+ */
+exports.listVendors = async (req, res, next) => {
+  try {
+    const { page, limit, skip, sortBy, sortOrder } = getPaginationParams(req.query);
+
+    const filter = {
+      role: 'vendor',
+      'vendorProfile.verificationStatus': 'approved',
+    };
+
+    const sortObj = { [sortBy]: sortOrder === 'asc' ? 1 : -1 };
+
+    const [totalItems, vendors] = await Promise.all([
+      User.countDocuments(filter),
+      User.find(filter)
+        .sort(sortObj)
+        .skip(skip)
+        .limit(limit)
+        .select('name vendorProfile.storeName vendorProfile.storeSlug vendorProfile.storeLogo vendorProfile.storeDescription createdAt')
+        .lean(),
+    ]);
+
+    // Attach product count for each vendor
+    const vendorIds = vendors.map((v) => v._id);
+    const productCounts = await Product.aggregate([
+      { $match: { vendor: { $in: vendorIds } } },
+      { $group: { _id: '$vendor', count: { $sum: 1 } } },
+    ]);
+    const countMap = {};
+    for (const entry of productCounts) {
+      countMap[entry._id.toString()] = entry.count;
+    }
+
+    const enriched = vendors.map((v) => ({
+      ...v,
+      productCount: countMap[v._id.toString()] || 0,
+    }));
+
+    const pagination = buildPagination(page, limit, totalItems);
+    return respond.paginated(res, enriched, pagination, 'Vendors retrieved successfully');
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * GET /api/v1/store/vendors/:slug
+ * Public vendor store page by storeSlug.
+ */
+exports.getVendorBySlug = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+
+    const vendor = await User.findOne({
+      'vendorProfile.storeSlug': slug,
+      'vendorProfile.verificationStatus': 'approved',
+    })
+      .select('name vendorProfile.storeName vendorProfile.storeSlug vendorProfile.storeLogo vendorProfile.storeBanner vendorProfile.storeDescription createdAt')
+      .lean();
+
+    if (!vendor) {
+      return respond.notFound(res, 'VENDOR_NOT_FOUND', 'Vendor store not found');
+    }
+
+    // Aggregate product count and average rating from approved reviews
+    const vendorId = new mongoose.Types.ObjectId(vendor._id);
+
+    const [productCount, ratingAgg] = await Promise.all([
+      Product.countDocuments({ vendor: vendorId }),
+      Product.aggregate([
+        { $match: { vendor: vendorId } },
+        { $lookup: { from: 'reviews', localField: '_id', foreignField: 'productId', as: 'reviews' } },
+        { $unwind: { path: '$reviews', preserveNullAndEmptyArrays: true } },
+        { $match: { $or: [{ 'reviews.status': 'approved' }, { reviews: null }] } },
+        {
+          $group: {
+            _id: null,
+            avgRating: { $avg: '$reviews.rating' },
+            totalReviews: {
+              $sum: { $cond: [{ $ifNull: ['$reviews._id', false] }, 1, 0] },
+            },
+          },
+        },
+      ]),
+    ]);
+
+    const avgRating = ratingAgg[0]?.avgRating
+      ? parseFloat(ratingAgg[0].avgRating.toFixed(1))
+      : 0;
+    const totalReviews = ratingAgg[0]?.totalReviews || 0;
+
+    return respond.success(
+      res,
+      {
+        vendor: {
+          ...vendor,
+          memberSince: vendor.createdAt,
+        },
+        stats: {
+          productCount,
+          avgRating,
+          totalReviews,
+        },
+      },
+      'Vendor store retrieved successfully'
+    );
   } catch (err) {
     next(err);
   }

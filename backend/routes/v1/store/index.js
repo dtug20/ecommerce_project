@@ -87,6 +87,15 @@ router.get('/coupons/:id',       ctrl.getCouponById);
 router.get('/coupons',           ctrl.getAllCoupons);
 
 // ---------------------------------------------------------------------------
+// Vendors — Phase 4 (public storefront)
+// Note: /vendors must be before /vendors/:slug to avoid Express matching
+// 'vendors' as a slug when the path is exactly /vendors.
+// ---------------------------------------------------------------------------
+
+router.get('/vendors',        ctrl.listVendors);
+router.get('/vendors/:slug',  ctrl.getVendorBySlug);
+
+// ---------------------------------------------------------------------------
 // CMS — Phase 2
 // ---------------------------------------------------------------------------
 

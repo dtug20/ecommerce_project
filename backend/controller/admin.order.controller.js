@@ -1,6 +1,8 @@
+const dayjs = require('dayjs');
 const Order = require('../model/Order');
 const Product = require('../model/Products');
 const User = require('../model/User');
+const { sendTemplatedEmail } = require('../utils/emailService');
 
 /**
  * Carrier → base tracking URL map.
@@ -250,6 +252,39 @@ exports.updateOrderStatus = async (req, res, next) => {
     await order.save();
 
     if (global.io) global.io.emit('order:updated', order);
+
+    // ── Fire-and-forget email notifications ──────────────────────────────
+    const orderRef = order.orderNumber || `#${order.invoice}`;
+
+    if (status === 'shipped') {
+      sendTemplatedEmail('order-shipped', order.email, {
+        customerName: order.name,
+        orderNumber: orderRef,
+        trackingNumber: order.trackingNumber || '',
+        carrier: order.carrier || '',
+        trackingUrl: order.trackingUrl || '',
+        estimatedDelivery: order.estimatedDelivery
+          ? dayjs(order.estimatedDelivery).format('YYYY-MM-DD')
+          : '',
+      }).catch((err) => console.error('[email] order-shipped send error:', err.message));
+    }
+
+    if (status === 'delivered') {
+      sendTemplatedEmail('order-delivered', order.email, {
+        customerName: order.name,
+        orderNumber: orderRef,
+        deliveredDate: dayjs().format('YYYY-MM-DD'),
+      }).catch((err) => console.error('[email] order-delivered send error:', err.message));
+    }
+
+    if (status === 'cancelled' || status === 'cancel') {
+      sendTemplatedEmail('order-cancelled', order.email, {
+        customerName: order.name,
+        orderNumber: orderRef,
+        cancellationReason: note || 'No reason provided',
+      }).catch((err) => console.error('[email] order-cancelled send error:', err.message));
+    }
+    // ─────────────────────────────────────────────────────────────────────
 
     res.json({ success: true, data: order, message: `Order status updated to ${status}` });
   } catch (error) {

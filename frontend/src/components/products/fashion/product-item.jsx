@@ -11,7 +11,7 @@ import { add_to_compare } from "@/redux/features/compareSlice";
 import useWishlist from "@/hooks/use-wishlist";
 
 const ProductItem = ({ product, style_2 = false }) => {
-  const { _id, img, category, title, reviews, price, discount, tags, status } = product || {};
+  const { _id, img, category, title, reviews, price, discount, tags, status, vendor } = product || {};
   const [ratingVal, setRatingVal] = useState(0);
   const { cart_products } = useSelector((state) => state.cart);
   const { wishlist } = useSelector((state) => state.wishlist);
@@ -141,6 +141,19 @@ const ProductItem = ({ product, style_2 = false }) => {
             </span>
           )}
         </div>
+        {vendor?.vendorProfile?.storeName && vendor?.vendorProfile?.storeSlug && (
+          <div className="tp-product-vendor-badge mt-5">
+            <small className="text-muted" style={{ fontSize: '11px' }}>
+              Sold by{' '}
+              <Link
+                href={`/vendor/${vendor.vendorProfile.storeSlug}`}
+                style={{ color: '#821F40' }}
+              >
+                {vendor.vendorProfile.storeName}
+              </Link>
+            </small>
+          </div>
+        )}
       </div>
     </div>
   );
