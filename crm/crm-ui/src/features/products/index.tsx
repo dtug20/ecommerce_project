@@ -21,7 +21,6 @@ import {
   Cascader,
   Tabs,
   Space,
-  ColorPicker,
   Empty,
 } from 'antd';
 import type { TableProps } from 'antd';
@@ -684,7 +683,7 @@ function ProductModal({ open, editingProduct, categories, onClose }: ProductModa
             </Col>
           </Row>
 
-          <Divider orientation="left" style={{ fontSize: 13 }}>Shipping & Physical</Divider>
+          <Divider style={{ fontSize: 13 }}>Shipping &amp; Physical</Divider>
           <Row gutter={12}>
             <Col xs={24} sm={6}>
               <Form.Item name="weight" label="Weight (g)">

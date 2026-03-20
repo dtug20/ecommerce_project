@@ -17,7 +17,6 @@ import {
   Card,
   Statistic,
   Tooltip,
-  Checkbox,
   Descriptions,
   Divider,
   Image,
@@ -41,8 +40,6 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
-import type { RangePickerProps } from 'antd/es/date-picker';
-
 import { reviewsApi } from '@/services/api';
 import type { Review } from '@/types';
 import PageHeader from '@/components/commons/PageHeader';
@@ -316,7 +313,7 @@ export default function ReviewsPage() {
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [committedSearch, setCommittedSearch] = useState('');
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [dateRange, setDateRange] = useState<[string, string] | null>(null);
+  const [, setDateRange] = useState<[string, string] | null>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
   // Modal states
