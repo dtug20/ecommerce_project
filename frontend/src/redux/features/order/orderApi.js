@@ -7,7 +7,7 @@ export const authApi = apiSlice.injectEndpoints({
     // createPaymentIntent
     createPaymentIntent: builder.mutation({
       query: (data) => ({
-        url: "/api/order/create-payment-intent",
+        url: "/api/v1/user/orders/payment-intent",
         method: "POST",
         body: data,
       }),
@@ -25,7 +25,7 @@ export const authApi = apiSlice.injectEndpoints({
     // saveOrder
     saveOrder: builder.mutation({
       query: (data) => ({
-        url: "/api/order/saveOrder",
+        url: "/api/v1/user/orders",
         method: "POST",
         body: data,
       }),
@@ -46,13 +46,13 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     // getUserOrders
     getUserOrders: builder.query({
-      query: () => `/api/user-order`,
+      query: () => `/api/v1/user/orders`,
       providesTags:["UserOrders"],
       keepUnusedDataFor: 600,
     }),
-    // getUserOrders
+    // getUserOrderById
     getUserOrderById: builder.query({
-      query: (id) => `/api/user-order/${id}`,
+      query: (id) => `/api/v1/user/orders/${id}`,
       providesTags: (result, error, arg) => [{ type: "UserOrder", id: arg }],
       keepUnusedDataFor: 600,
     }),

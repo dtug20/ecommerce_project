@@ -4,7 +4,7 @@ export const brandApi = apiSlice.injectEndpoints({
   overrideExisting:true,
   endpoints: (builder) => ({
     getActiveBrands: builder.query({
-      query: () => `/api/brand/active`
+      query: () => `/api/v1/store/brands/active`
     }),
   }),
 });
