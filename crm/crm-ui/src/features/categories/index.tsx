@@ -39,7 +39,6 @@ import {
   ApartmentOutlined,
   TagsOutlined,
   EyeInvisibleOutlined,
-  AppstoreOutlined,
   StarOutlined,
   FolderOutlined,
   CalendarOutlined,

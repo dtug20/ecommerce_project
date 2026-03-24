@@ -11,7 +11,6 @@ import {
   Popconfirm,
   Image,
   Typography,
-  Badge,
   Row,
   Col,
   Divider,
@@ -40,7 +39,6 @@ import {
   InboxOutlined,
   StarOutlined,
   StopOutlined,
-  DollarOutlined,
   TagOutlined,
   CalendarOutlined,
   BarcodeOutlined,
@@ -51,7 +49,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 import { productsApi, categoriesApi } from '@/services/api';
-import api from '@/services/api';
 import ImageUpload from '@/components/commons/ImageUpload';
 import type { Product, Category, ProductVariant, ProductSeo, ProductStats } from '@/types';
 import { formatCurrency, formatDate } from '@/hooks/useFormatters';
@@ -551,10 +548,8 @@ function SeoTab({ form, slug }: SeoTabProps) {
 
 function ProductDetail({
   product,
-  onEdit,
 }: {
   product: Product;
-  onEdit: () => void;
 }) {
   const stockStatus = getStockStatus(product.quantity ?? 0);
   const hasDiscount = (product.discount ?? 0) > 0;
@@ -1064,7 +1059,7 @@ function ProductDrawer({ open, editingProduct, categories, onClose }: ProductDra
             <Switch checkedChildren="Yes" unCheckedChildren="No" />
           </Form.Item>
 
-          <Divider orientation="left" orientationMargin={0} style={{ fontSize: 13, color: '#8c8c8c' }}>
+          <Divider titlePlacement="left" styles={{ content: { margin: 0 } }} style={{ fontSize: 13, color: '#8c8c8c' }}>
             Attributes
           </Divider>
 
@@ -1086,7 +1081,7 @@ function ProductDrawer({ open, editingProduct, categories, onClose }: ProductDra
             </Col>
           </Row>
 
-          <Divider orientation="left" orientationMargin={0} style={{ fontSize: 13, color: '#8c8c8c' }}>
+          <Divider titlePlacement="left" styles={{ content: { margin: 0 } }} style={{ fontSize: 13, color: '#8c8c8c' }}>
             Shipping & Physical
           </Divider>
 
@@ -1602,11 +1597,6 @@ export default function ProductsPage() {
         {viewingProduct && (
           <ProductDetail
             product={viewingProduct}
-            onEdit={() => {
-              const product = viewingProduct;
-              handleCloseView();
-              handleOpenEdit(product);
-            }}
           />
         )}
       </Drawer>
