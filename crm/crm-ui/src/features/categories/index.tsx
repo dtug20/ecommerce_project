@@ -17,7 +17,6 @@ import {
   Row,
   Col,
   Tooltip,
-  Upload,
   Tree,
   Card,
   Statistic,
@@ -50,10 +49,10 @@ import toast from 'react-hot-toast';
 import type { TableProps } from 'antd';
 import type { Category, CategoryStats } from '@/types';
 import { categoriesApi } from '@/services/api';
-import api from '@/services/api';
 import { formatDate } from '@/hooks/useFormatters';
 import StatusBadge from '@/components/commons/StatusBadge';
 import PageHeader from '@/components/commons/PageHeader';
+import ImageUpload from '@/components/commons/ImageUpload';
 
 const { TextArea } = Input;
 const { Text, Title } = Typography;
@@ -975,57 +974,10 @@ export default function CategoriesPage() {
           requiredMark="optional"
         >
           {/* Image upload at top */}
-          <Form.Item name="img" hidden>
-            <Input />
-          </Form.Item>
           <div style={{ marginBottom: 24, textAlign: 'center' }}>
-            <Upload
-              name="image"
-              listType="picture-card"
-              showUploadList={false}
-              style={{ width: '100%' }}
-              customRequest={async (options) => {
-                const { file, onSuccess, onError } = options;
-                const formData = new FormData();
-                formData.append('image', file as Blob);
-                try {
-                  const res = await api.post('/api/v1/admin/media/upload', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                  });
-                  const url = res.data?.data?.url;
-                  if (url) {
-                    form.setFieldsValue({ img: url });
-                    if (onSuccess) onSuccess('ok');
-                    toast.success('Image uploaded');
-                  } else {
-                    throw new Error('No URL returned');
-                  }
-                } catch (err: any) {
-                  if (onError) onError(err);
-                  toast.error('Upload failed');
-                }
-              }}
-            >
-              <Form.Item dependencies={['img']} noStyle>
-                {() => {
-                  const imgUrl = form.getFieldValue('img');
-                  return imgUrl ? (
-                    <img
-                      src={imgUrl}
-                      alt="category"
-                      style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 8 }}
-                    />
-                  ) : (
-                    <div>
-                      <PictureOutlined style={{ fontSize: 24, color: '#bfbfbf' }} />
-                      <div style={{ marginTop: 8, color: '#8c8c8c', fontSize: 13 }}>
-                        Upload Image
-                      </div>
-                    </div>
-                  );
-                }}
-              </Form.Item>
-            </Upload>
+            <Form.Item name="img" noStyle>
+              <ImageUpload placeholder="Upload Category Image" />
+            </Form.Item>
           </div>
 
           <Divider style={{ margin: '0 0 16px' }} />

@@ -16,6 +16,9 @@ const reviewCtrl = require('../../../controller/v1/review.controller');
 const Category = require('../../../model/Category');
 const respond = require('../../../utils/respond');
 
+const { validate } = require('../../../middleware/validate');
+const { trackOrder: trackOrderSchema } = require('../../../validations/order.validation');
+
 const NOT_IMPLEMENTED = (req, res) =>
   respond.error(res, 'NOT_IMPLEMENTED', 'This endpoint is not yet implemented', 501);
 
@@ -316,6 +319,37 @@ router.get('/vendors',        ctrl.listVendors);
  *         description: Not found
  */
 router.get('/vendors/:slug',  ctrl.getVendorBySlug);
+
+// ---------------------------------------------------------------------------
+// Order Tracking (public)
+// ---------------------------------------------------------------------------
+
+/**
+ * @swagger
+ * /api/v1/store/orders/track:
+ *   post:
+ *     summary: Track an order by ID and billing email (public, no auth)
+ *     tags: [Store Orders]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [orderId, email]
+ *             properties:
+ *               orderId:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Order tracking info
+ *       404:
+ *         description: No matching order found
+ */
+router.post('/orders/track', validate(trackOrderSchema), ctrl.trackOrder);
 
 // ---------------------------------------------------------------------------
 // CMS — Phase 2

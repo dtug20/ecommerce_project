@@ -1,65 +1,67 @@
 import React from "react";
-import Image from "next/image";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
-// internal
 import ErrorMsg from "@/components/common/error-msg";
 import { useGetActiveBrandsQuery } from "@/redux/features/brandApi";
 import { handleFilterSidebarClose } from "@/redux/features/shop-filter-slice";
-import ShopBrandLoader from "@/components/loader/shop/shop-brand-loader";
 
-const ProductBrand = ({setCurrPage,shop_right=false}) => {
+const ProductBrand = ({ setCurrPage }) => {
   const { data: brands, isError, isLoading } = useGetActiveBrandsQuery();
   const router = useRouter();
   const dispatch = useDispatch();
-  // handle brand route 
+
   const handleBrandRoute = (brand) => {
     setCurrPage(1);
-    router.push(
-      `/${shop_right?'shop-right-sidebar':'shop'}?brand=${brand
-        .toLowerCase()
-        .replace("&", "")
-        .split(" ")
-        .join("-")}`
-    )
+    const slug = brand.toLowerCase().replace("&", "").split(" ").join("-");
+    router.push(`/shop?brand=${slug}`);
     dispatch(handleFilterSidebarClose());
-  }
-  // decide what to render
+  };
+
   let content = null;
 
   if (isLoading) {
-    content = <ShopBrandLoader loading={isLoading}/>;
-  } else if (!isLoading && isError) {
+    content = (
+      <div className="cl-shop__brand-grid">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="cl-skeleton cl-skeleton--line" style={{ height: 18 }} />
+        ))}
+      </div>
+    );
+  } else if (isError) {
     content = <ErrorMsg msg="There was an error" />;
-  } else if (!isLoading && !isError && brands?.result?.length === 0) {
+  } else if (!brands?.result?.length) {
     content = <ErrorMsg msg="No Brands found!" />;
-  } else if (!isLoading && !isError && brands?.result?.length > 0) {
-    const all_brands = brands.result;
-    const sortedBrands = all_brands.slice().sort((a, b) => b.products.length - a.products.length);
-    const brand_items = sortedBrands.slice(0,6);
-    
-    content = brand_items.map((b) => (
-      <div key={b._id} className="tp-shop-widget-brand-item">
-        <a
-          onClick={() => handleBrandRoute(b.name)}
-          style={{ cursor: "pointer" }}
-        >
-          <Image src={b.logo} alt="brand" width={60} height={50} />
-        </a>
+  } else {
+    const activeBrand = router.query.brand || '';
+    const sortedBrands = brands.result
+      .slice()
+      .sort((a, b) => b.products.length - a.products.length);
+
+    content = (
+      <div className="cl-shop__brand-grid">
+        {sortedBrands.map((b) => {
+          const slug = b.name.toLowerCase().replace("&", "").split(" ").join("-");
+          const isActive = activeBrand === slug;
+          return (
+            <label key={b._id} className="cl-shop__brand-item">
+              <input
+                type="checkbox"
+                checked={isActive}
+                onChange={() => handleBrandRoute(b.name)}
+              />
+              {b.name}
+            </label>
+          );
+        })}
       </div>
-    ));
+    );
   }
+
   return (
-    <>
-      <div className="tp-shop-widget mb-50">
-        <h3 className="tp-shop-widget-title">Popular Brands</h3>
-        <div className="tp-shop-widget-content ">
-          <div className="tp-shop-widget-brand-list d-flex align-items-center justify-content-between flex-wrap">
-            {content}
-          </div>
-        </div>
-      </div>
-    </>
+    <div className="cl-shop__widget">
+      <h3 className="cl-shop__widget-title">Popular Brands</h3>
+      {content}
+    </div>
   );
 };
 

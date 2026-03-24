@@ -2,22 +2,36 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
+import dayjs from 'dayjs';
 
 const CliconBlogCard = ({ blog }) => {
   const { t } = useTranslation();
-  const { img, author, date, comments, title, sm_desc, id } = blog || {};
+
+  // Support both API shape (BlogPost model) and legacy blog-data.js shape
+  const title = blog?.title;
+  const slug = blog?.slug;
+  const image = blog?.featuredImage || blog?.img;
+  const authorName = blog?.author?.name || blog?.author;
+  const date = blog?.publishedAt
+    ? dayjs(blog.publishedAt).format('DD MMMM, YYYY')
+    : blog?.date;
+  const excerpt = blog?.excerpt || blog?.sm_desc;
+  const views = blog?.views;
+
+  const href = slug ? `/blog/${slug}` : `/blog-details/${blog?.id}`;
 
   return (
     <article className="cl-blog-card" data-testid="cl-blog-card">
       <div className="cl-blog-card__image">
-        <Link href={`/blog-details/${id}`} tabIndex={-1} aria-hidden="true">
-          {img ? (
+        <Link href={href} tabIndex={-1} aria-hidden="true">
+          {image ? (
             <Image
-              src={img}
+              src={image}
               alt={title || t('blog.image_alt', 'Blog image')}
               width={400}
               height={250}
               style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+              unoptimized
             />
           ) : (
             <div className="cl-blog-card__no-img" />
@@ -27,13 +41,13 @@ const CliconBlogCard = ({ blog }) => {
 
       <div className="cl-blog-card__body">
         <div className="cl-blog-card__meta">
-          {author && (
+          {authorName && (
             <span className="cl-blog-card__meta-item">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
-              {author}
+              {authorName}
             </span>
           )}
           {date && (
@@ -47,26 +61,27 @@ const CliconBlogCard = ({ blog }) => {
               {date}
             </span>
           )}
-          {typeof comments === 'number' && (
+          {typeof views === 'number' && (
             <span className="cl-blog-card__meta-item">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
               </svg>
-              {comments} {t('blog.comments', 'Comments')}
+              {views}
             </span>
           )}
         </div>
 
         <h3 className="cl-blog-card__title">
-          <Link href={`/blog-details/${id}`}>{title}</Link>
+          <Link href={href}>{title}</Link>
         </h3>
 
-        {sm_desc && (
-          <p className="cl-blog-card__excerpt">{sm_desc}</p>
+        {excerpt && (
+          <p className="cl-blog-card__excerpt">{excerpt}</p>
         )}
 
         <Link
-          href={`/blog-details/${id}`}
+          href={href}
           className="cl-blog-card__readmore"
           data-testid="cl-blog-card-readmore"
         >

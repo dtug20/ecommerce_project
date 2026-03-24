@@ -1,8 +1,8 @@
 import React from "react";
-// internal
+import { useTranslation } from "react-i18next";
 import SEO from "@/components/seo";
-import HeaderTwo from "@/layout/headers/header-2";
-import Footer from "@/layout/footers/footer";
+import HeaderClicon from "@/layout/headers/header-clicon";
+import FooterClicon from "@/layout/footers/footer-clicon";
 import Wrapper from "@/layout/wrapper";
 import ErrorMsg from "@/components/common/error-msg";
 import ProductDetailsBreadcrumb from "@/components/breadcrumb/product-details-breadcrumb";
@@ -14,13 +14,14 @@ const API_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:7001";
 
 const ProductDetailsPage = ({ product, relatedProducts, error }) => {
+  const { t } = useTranslation();
   if (error || !product) {
     return (
       <Wrapper>
         <SEO pageTitle="Product Not Found" noindex />
-        <HeaderTwo style_2={true} />
+        <HeaderClicon />
         <ErrorMsg msg="Product not found or could not be loaded." />
-        <Footer primary_style={true} />
+        <FooterClicon />
       </Wrapper>
     );
   }
@@ -47,16 +48,22 @@ const ProductDetailsPage = ({ product, relatedProducts, error }) => {
       />
       <JsonLd data={productJsonLd(product, siteUrl)} />
       <JsonLd data={breadcrumbJsonLd(breadcrumbs, siteUrl)} />
-      <HeaderTwo style_2={true} />
+      <HeaderClicon />
       <ProductDetailsBreadcrumb
-        category={product.category?.name || ""}
-        title={product.title}
+        links={[
+          { label: t('breadcrumb.home'), href: '/' },
+          { label: t('breadcrumb.shopGrid'), href: '/shop' },
+          ...(product.category?.name
+            ? [{ label: product.category.name, href: `/shop?category=${product.category.name}` }]
+            : []),
+          { label: product.title },
+        ]}
       />
       <ProductDetailsArea
         productItem={product}
         relatedProducts={relatedProducts}
       />
-      <Footer primary_style={true} />
+      <FooterClicon />
     </Wrapper>
   );
 };

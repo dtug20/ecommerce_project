@@ -2,13 +2,15 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
+import useCurrency from '@/hooks/use-currency';
 
 const CliconProductSmRow = ({ product }) => {
   const { t } = useTranslation();
+  const { formatPrice } = useCurrency();
   const { _id, img, title, price, discount } = product || {};
 
   const discountedPrice =
-    discount > 0 ? (price - (price * discount) / 100).toFixed(2) : null;
+    discount > 0 ? price - (price * discount) / 100 : null;
 
   return (
     <Link
@@ -33,11 +35,11 @@ const CliconProductSmRow = ({ product }) => {
         <p className="cl-product-sm-row__title">{title}</p>
         <div className="cl-product-sm-row__price">
           <span className="cl-product-sm-row__price--current">
-            ${discountedPrice ?? price?.toFixed(2) ?? '0.00'}
+            {formatPrice(discountedPrice ?? price ?? 0)}
           </span>
           {discountedPrice && (
             <span className="cl-product-sm-row__price--old">
-              ${price?.toFixed(2)}
+              {formatPrice(price)}
             </span>
           )}
         </div>

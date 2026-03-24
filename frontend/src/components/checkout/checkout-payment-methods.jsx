@@ -1,47 +1,50 @@
+import { useTranslation } from 'react-i18next';
 import { useGetSettingsQuery } from '@/redux/features/cmsApi';
 
-/**
- * Map of known payment gateway keys to display metadata.
- * Keys are lower-cased to normalise comparison.
- */
-const PAYMENT_METHODS = {
-  cod: {
-    label: 'Cash on Delivery',
-    description: 'Pay when you receive your order',
-  },
-  'bank-transfer': {
-    label: 'Bank Transfer',
-    description: 'Transfer to our bank account',
-  },
-  vnpay: {
-    label: 'VNPay',
-    description: "You'll be redirected to VNPay to complete payment",
-  },
-  momo: {
-    label: 'MoMo',
-    description: "You'll be redirected to MoMo to complete payment",
-  },
-  stripe: {
-    label: 'Credit / Debit Card',
-    description: 'Pay securely with your card via Stripe',
-  },
+const PAYMENT_ICONS = {
+  cod: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="1" x2="12" y2="23" />
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
+  ),
+  'bank-transfer': (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="M2 10h20" />
+    </svg>
+  ),
+  vnpay: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 7l10 10L22 7" />
+    </svg>
+  ),
+  momo: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 8v8M8 12h8" />
+    </svg>
+  ),
+  stripe: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+      <line x1="1" y1="10" x2="23" y2="10" />
+    </svg>
+  ),
 };
 
-/**
- * CheckoutPaymentMethods
- *
- * Reads enabled payment gateways from site settings (CMS) and renders
- * a radio list. Falls back to COD-only when settings are unavailable.
- *
- * @param {object}   props
- * @param {string}   props.selectedMethod   - Currently selected gateway key
- * @param {Function} props.onMethodChange   - Called with new gateway key on change
- * @param {object}   [props.bankDetails]    - Bank info shown when bank-transfer is selected
- */
+const PAYMENT_LABEL_KEYS = {
+  cod: 'checkout.cashOnDelivery',
+  'bank-transfer': 'checkout.bankTransfer',
+  vnpay: 'VNPay',
+  momo: 'MoMo',
+  stripe: 'checkout.creditCard',
+};
+
 const CheckoutPaymentMethods = ({ selectedMethod, onMethodChange, bankDetails }) => {
+  const { t } = useTranslation();
   const { data: settingsData } = useGetSettingsQuery();
 
-  // Normalise keys to lower-case for consistent lookup
   const rawGateways = settingsData?.data?.payment?.enabledGateways;
   const enabledGateways =
     Array.isArray(rawGateways) && rawGateways.length > 0
@@ -50,81 +53,120 @@ const CheckoutPaymentMethods = ({ selectedMethod, onMethodChange, bankDetails })
 
   const isComingSoon = (gateway) => gateway === 'vnpay' || gateway === 'momo';
 
-  return (
-    <div className="tp-checkout-payment">
-      <h3 className="tp-checkout-place-title">Payment Method</h3>
+  const getLabel = (gateway) => {
+    const key = PAYMENT_LABEL_KEYS[gateway];
+    if (!key) return gateway;
+    // VNPay and MoMo are brand names, not translatable
+    if (gateway === 'vnpay' || gateway === 'momo') return key;
+    return t(key);
+  };
 
-      <div className="tp-checkout-payment-options">
+  return (
+    <div className="cl-checkout__card">
+      <h3 className="cl-checkout__section-title">{t('checkout.paymentOption')}</h3>
+
+      <div className="cl-checkout__payment-options">
         {enabledGateways.map((gateway) => {
-          const method = PAYMENT_METHODS[gateway];
-          if (!method) return null;
+          const icon = PAYMENT_ICONS[gateway];
+          if (!icon) return null;
 
           const inputId = `payment-${gateway}`;
+          const isActive = selectedMethod === gateway;
 
           return (
-            <div key={gateway} className="tp-checkout-payment-item mb-15">
+            <label
+              key={gateway}
+              htmlFor={inputId}
+              className={`cl-checkout__payment-item${isActive ? ' cl-checkout__payment-item--active' : ''}`}
+            >
+              <div className="cl-checkout__payment-icon">
+                {icon}
+              </div>
+              <span className="cl-checkout__payment-label">{getLabel(gateway)}</span>
               <input
                 type="radio"
                 name="paymentMethod"
                 id={inputId}
                 value={gateway}
-                checked={selectedMethod === gateway}
+                checked={isActive}
                 onChange={() => onMethodChange(gateway)}
-                className="form-check-input"
-                style={{ marginRight: '8px', cursor: 'pointer' }}
               />
-              <label
-                htmlFor={inputId}
-                className="form-check-label"
-                style={{ cursor: 'pointer', userSelect: 'none' }}
-              >
-                <strong>{method.label}</strong>
-                <small className="d-block text-muted" style={{ fontSize: '12px' }}>
-                  {method.description}
-                </small>
-              </label>
-            </div>
+            </label>
           );
         })}
       </div>
 
+      {/* Card details for stripe/credit card */}
+      {selectedMethod === 'stripe' && (
+        <div className="cl-checkout__card-details">
+          <div className="cl-checkout__form-row">
+            <div className="cl-checkout__form-group">
+              <label className="cl-checkout__label">{t('checkout.nameOnCard')}</label>
+              <input
+                type="text"
+                className="cl-checkout__input"
+                placeholder={t('checkout.nameOnCard')}
+              />
+            </div>
+          </div>
+          <div className="cl-checkout__form-row">
+            <div className="cl-checkout__form-group">
+              <label className="cl-checkout__label">{t('checkout.cardNumber')}</label>
+              <input
+                type="text"
+                className="cl-checkout__input"
+                placeholder={t('checkout.cardNumber')}
+              />
+            </div>
+          </div>
+          <div className="cl-checkout__form-row">
+            <div className="cl-checkout__form-group">
+              <label className="cl-checkout__label">{t('checkout.expireDate')}</label>
+              <input
+                type="text"
+                className="cl-checkout__input"
+                placeholder="DD/YY"
+              />
+            </div>
+            <div className="cl-checkout__form-group">
+              <label className="cl-checkout__label">CVC</label>
+              <input
+                type="text"
+                className="cl-checkout__input"
+                placeholder="CVC"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Bank transfer details */}
       {selectedMethod === 'bank-transfer' && (
-        <div className="alert alert-info mt-15" style={{ fontSize: '13px' }}>
-          <h6 className="mb-10" style={{ fontWeight: 600 }}>Bank Transfer Details</h6>
+        <div className="cl-checkout__bank-info">
+          <h6>{t('checkout.bankTransferDetails')}</h6>
           {bankDetails?.bankName ? (
             <>
-              <p className="mb-5">
-                <strong>Bank:</strong> {bankDetails.bankName}
-              </p>
+              <p><strong>{t('checkout.bankLabel')}</strong> {bankDetails.bankName}</p>
               {bankDetails.accountNumber && (
-                <p className="mb-5">
-                  <strong>Account:</strong> {bankDetails.accountNumber}
-                </p>
+                <p><strong>{t('checkout.accountLabel')}</strong> {bankDetails.accountNumber}</p>
               )}
               {bankDetails.accountName && (
-                <p className="mb-5">
-                  <strong>Name:</strong> {bankDetails.accountName}
-                </p>
+                <p><strong>{t('checkout.nameLabel')}</strong> {bankDetails.accountName}</p>
               )}
             </>
           ) : (
-            <p className="mb-5">
-              Please contact us for bank transfer details.
-            </p>
+            <p>{t('checkout.bankContactUs')}</p>
           )}
-          <p className="mb-0 text-muted" style={{ fontSize: '12px' }}>
-            Please transfer the exact order amount and use your order number as the payment
-            reference. Your order will be confirmed once payment is received.
+          <p className="cl-checkout__bank-note">
+            {t('checkout.bankNote')}
           </p>
         </div>
       )}
 
       {/* Coming-soon notice for VNPay / MoMo */}
       {isComingSoon(selectedMethod) && (
-        <div className="alert alert-warning mt-15" style={{ fontSize: '13px' }}>
-          <strong>Coming soon.</strong> This payment method is not yet available. Please select
-          Cash on Delivery or Bank Transfer instead.
+        <div className="cl-checkout__coming-soon">
+          <strong>{t('checkout.comingSoon')}</strong> {t('checkout.comingSoonMsg')}
         </div>
       )}
     </div>

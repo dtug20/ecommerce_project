@@ -8,71 +8,86 @@ import { useGetWishlistQuery, useRemoveFromWishlistMutation, useClearWishlistMut
 import { remove_wishlist_product } from '@/redux/features/wishlist-slice';
 import { add_cart_product } from '@/redux/features/cartSlice';
 import { notifySuccess, notifyError } from '@/utils/toast';
+import useCurrency from '@/hooks/use-currency';
 
 // Server-side wishlist item for authenticated users
 const ServerWishlistItem = ({ item, onRemove }) => {
   const { t } = useTranslation();
+  const { formatPrice } = useCurrency();
   const dispatch = useDispatch();
   const { cart_products } = useSelector((state) => state.cart);
   const product = item.product || item;
-  const { _id, img, title, price, status } = product;
+  const { _id, img, title, price, discount, status } = product;
   const isAddedToCart = cart_products.some((p) => p._id === _id);
+  const isOutOfStock = status === 'out-of-stock';
+  const hasDiscount = discount > 0;
+  const displayPrice = hasDiscount ? price - (price * discount) / 100 : price;
 
   const handleAddToCart = () => {
     dispatch(add_cart_product(product));
   };
 
   return (
-    <tr>
-      <td className="tp-cart-img">
-        <Link href={`/product-details/${_id}`}>
-          {img && (
-            <img
-              src={img}
-              alt={title}
-              width={70}
-              height={100}
-              style={{ objectFit: 'cover' }}
-            />
+    <tr className="cl-wishlist__row">
+      <td className="cl-wishlist__td">
+        <div className="cl-wishlist__product">
+          <Link href={`/product-details/${_id}`} className="cl-wishlist__img">
+            {img && <img src={img} alt={title} />}
+          </Link>
+          <Link href={`/product-details/${_id}`} className="cl-wishlist__product-name">
+            {title}
+          </Link>
+        </div>
+      </td>
+      <td className="cl-wishlist__td">
+        <div className="cl-wishlist__price">
+          {hasDiscount && (
+            <span className="cl-wishlist__price-old">
+              {formatPrice(price)}
+            </span>
           )}
-        </Link>
+          <span className="cl-wishlist__price-current">
+            {formatPrice(displayPrice)}
+          </span>
+        </div>
       </td>
-      <td className="tp-cart-title">
-        <Link href={`/product-details/${_id}`}>{title}</Link>
-      </td>
-      <td className="tp-cart-price">
-        <span>${typeof price === 'number' ? price.toFixed(2) : price}</span>
-      </td>
-      <td className="tp-cart-stock">
-        <span className={`badge ${status === 'out-of-stock' ? 'bg-danger' : 'bg-success'}`}>
-          {status === 'out-of-stock' ? t('product.outOfStock') : t('wishlist.inStock')}
+      <td className="cl-wishlist__td">
+        <span className={`cl-wishlist__stock ${isOutOfStock ? 'cl-wishlist__stock--out-of-stock' : 'cl-wishlist__stock--in-stock'}`}>
+          {isOutOfStock ? t('product.outOfStock') : t('wishlist.inStock')}
         </span>
       </td>
-      <td className="tp-cart-add-to-cart">
-        {isAddedToCart ? (
-          <Link href="/cart" className="tp-btn tp-btn-2 tp-btn-blue">
-            {t('wishlist.viewCart')}
-          </Link>
-        ) : (
+      <td className="cl-wishlist__td">
+        <div className="cl-wishlist__actions">
+          {isAddedToCart ? (
+            <Link href="/cart" className="cl-wishlist__view-cart-btn">
+              {t('wishlist.viewCart')}
+            </Link>
+          ) : (
+            <button
+              onClick={handleAddToCart}
+              type="button"
+              disabled={isOutOfStock}
+              className="cl-wishlist__add-btn"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5.33333 14.6667C5.7 14.6667 6 14.3667 6 14C6 13.6333 5.7 13.3333 5.33333 13.3333C4.96667 13.3333 4.66667 13.6333 4.66667 14C4.66667 14.3667 4.96667 14.6667 5.33333 14.6667Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12.6667 14.6667C13.0333 14.6667 13.3333 14.3667 13.3333 14C13.3333 13.6333 13.0333 13.3333 12.6667 13.3333C12.3 13.3333 12 13.6333 12 14C12 14.3667 12.3 14.6667 12.6667 14.6667Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M1.33333 1.33334H2.66667L4.47333 9.59334C4.54222 9.90002 4.71251 10.1731 4.95587 10.3695C5.19922 10.566 5.50139 10.6733 5.81333 10.6733H12.3267C12.6386 10.6733 12.9408 10.566 13.1841 10.3695C13.4275 10.1731 13.5978 9.90002 13.6667 9.59334L14.7267 4.66668H3.33333" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {t('compare.addToCart')}
+            </button>
+          )}
           <button
-            onClick={handleAddToCart}
+            onClick={() => onRemove(_id, title)}
+            className="cl-wishlist__remove-btn"
             type="button"
-            disabled={status === 'out-of-stock'}
-            className="tp-btn tp-btn-2 tp-btn-blue"
+            title={t('compare.remove')}
           >
-            {t('compare.addToCart')}
+            <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 3L3 9M3 3L9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </button>
-        )}
-      </td>
-      <td className="tp-cart-action">
-        <button
-          onClick={() => onRemove(_id, title)}
-          className="tp-cart-action-btn"
-          type="button"
-        >
-          <span>&#10005;</span>
-          <span> {t('compare.remove')}</span>
-        </button>
+        </div>
       </td>
     </tr>
   );
@@ -113,136 +128,92 @@ const WishlistArea = () => {
     }
   };
 
-  // Render server-side wishlist for authenticated users
-  if (isAuthenticated) {
-    if (serverLoading) {
-      return (
-        <section className="tp-cart-area pb-120">
-          <div className="container">
-            <div className="text-center pt-50">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
+  // --- Loading ---
+  if (isAuthenticated && serverLoading) {
+    return (
+      <section className="cl-wishlist__section">
+        <div className="container">
+          <div className="cl-wishlist__loading">
+            <div className="spinner-border" role="status">
+              <span className="visually-hidden">Loading...</span>
             </div>
           </div>
-        </section>
-      );
-    }
-
-    return (
-      <section className="tp-cart-area pb-120">
-        <div className="container">
-          {serverItems.length === 0 && (
-            <div className="text-center pt-50">
-              <h3>{t('wishlist.noItems')}</h3>
-              <Link href="/shop" className="tp-cart-checkout-btn mt-20">
-                {t('cart.continueShopping')}
-              </Link>
-            </div>
-          )}
-          {serverItems.length > 0 && (
-            <div className="row">
-              <div className="col-xl-12">
-                <div className="tp-cart-list mb-45 mr-30">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th colSpan="2" className="tp-cart-header-product">{t('compare.product')}</th>
-                        <th className="tp-cart-header-price">{t('product.price')}</th>
-                        <th>{t('wishlist.stock')}</th>
-                        <th>{t('wishlist.action')}</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {serverItems.map((item, i) => (
-                        <ServerWishlistItem
-                          key={item._id || i}
-                          item={item}
-                          onRemove={handleServerRemove}
-                        />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <div className="tp-cart-bottom">
-                  <div className="row align-items-end">
-                    <div className="col-xl-6 col-md-4">
-                      <div className="tp-cart-update d-flex gap-3">
-                        <Link href="/cart" className="tp-cart-update-btn">
-                          {t('wishlist.goToCart')}
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={handleServerClear}
-                          className="tp-cart-update-btn"
-                          style={{ backgroundColor: '#f5f5f5', color: '#333' }}
-                        >
-                          {t('wishlist.clearWishlist')}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </section>
     );
   }
 
-  // Anonymous users: localStorage/Redux wishlist
-  return (
-    <>
-      <section className="tp-cart-area pb-120">
+  // Determine items list
+  const items = isAuthenticated ? serverItems : wishlist;
+
+  // --- Empty State ---
+  if (items.length === 0) {
+    return (
+      <section className="cl-wishlist__section">
         <div className="container">
-          {wishlist.length === 0 && (
-            <div className="text-center pt-50">
-              <h3>{t('wishlist.noItems')}</h3>
-              <Link href="/shop" className="tp-cart-checkout-btn mt-20">
+          <div className="cl-wishlist__card">
+            <div className="cl-wishlist__empty">
+              <h3 className="cl-wishlist__empty-title">{t('wishlist.noItems')}</h3>
+              <Link href="/shop" className="cl-wishlist__empty-link">
                 {t('cart.continueShopping')}
               </Link>
             </div>
-          )}
-          {wishlist.length > 0 && (
-            <div className="row">
-              <div className="col-xl-12">
-                <div className="tp-cart-list mb-45 mr-30">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th colSpan="2" className="tp-cart-header-product">{t('compare.product')}</th>
-                        <th className="tp-cart-header-price">{t('product.price')}</th>
-                        <th className="tp-cart-header-quantity">{t('product.quantity')}</th>
-                        <th>{t('wishlist.action')}</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {wishlist.map((item, i) => (
-                        <WishlistItem key={i} product={item} />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <div className="tp-cart-bottom">
-                  <div className="row align-items-end">
-                    <div className="col-xl-6 col-md-4">
-                      <div className="tp-cart-update">
-                        <Link href="/cart" className="tp-cart-update-btn">
-                          {t('wishlist.goToCart')}
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       </section>
-    </>
+    );
+  }
+
+  return (
+    <section className="cl-wishlist__section">
+      <div className="container">
+        <div className="cl-wishlist__card">
+          <h2 className="cl-wishlist__title">{t('wishlist.title', 'Wishlist')}</h2>
+
+          <div className="cl-wishlist__table-wrap">
+            <table className="cl-wishlist__table">
+              <thead className="cl-wishlist__thead">
+                <tr>
+                  <th className="cl-wishlist__th">{t('compare.product', 'PRODUCTS')}</th>
+                  <th className="cl-wishlist__th">{t('product.price', 'PRICE')}</th>
+                  <th className="cl-wishlist__th">{t('wishlist.stock', 'STOCK STATUS')}</th>
+                  <th className="cl-wishlist__th cl-wishlist__th--actions">{t('wishlist.action', 'ACTIONS')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {isAuthenticated
+                  ? serverItems.map((item, i) => (
+                      <ServerWishlistItem
+                        key={item._id || i}
+                        item={item}
+                        onRemove={handleServerRemove}
+                      />
+                    ))
+                  : wishlist.map((item, i) => (
+                      <WishlistItem key={item._id || i} product={item} />
+                    ))
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div className="cl-wishlist__bottom">
+            <Link href="/cart" className="cl-wishlist__bottom-btn">
+              {t('wishlist.goToCart', 'Go To Cart')}
+            </Link>
+            {isAuthenticated && (
+              <button
+                type="button"
+                onClick={handleServerClear}
+                className="cl-wishlist__bottom-btn--secondary"
+              >
+                {t('wishlist.clearWishlist', 'Clear Wishlist')}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 };
 

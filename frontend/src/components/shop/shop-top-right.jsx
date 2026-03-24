@@ -1,36 +1,39 @@
 import React from "react";
 import { useDispatch } from "react-redux";
-// internal
-import { Filter } from "@/svg";
-import NiceSelect from "@/ui/nice-select";
-import {handleFilterSidebarOpen } from "@/redux/features/shop-filter-slice";
+import { handleFilterSidebarOpen } from "@/redux/features/shop-filter-slice";
 
-const ShopTopRight = ({selectHandleFilter}) => {
-  const dispatch = useDispatch()
+const SORT_OPTIONS = [
+  { value: 'Default Sorting', label: 'Most Popular' },
+  { value: 'Low to High', label: 'Price: Low to High' },
+  { value: 'High to Low', label: 'Price: High to Low' },
+  { value: 'New Added', label: 'Newest' },
+];
+
+const ShopTopRight = ({ selectHandleFilter }) => {
+  const dispatch = useDispatch();
+
   return (
-    <div className="tp-shop-top-right d-sm-flex align-items-center justify-content-xl-end">
-      <div className="tp-shop-top-select">
-        <NiceSelect
-          options={[
-            { value: "Default Sorting", text: "Default Sorting" },
-            { value: "Low to High", text: "Low to High" },
-            { value: "High to Low", text: "High to Low" },
-            { value: "New Added", text: "New Added" },
-            { value: "On Sale", text: "On Sale" },
-          ]}
-          defaultCurrent={0}
-          onChange={selectHandleFilter}
-          name="Default Sorting"
-        />
+    <div className="cl-shop__topbar-right">
+      <div className="cl-shop__topbar-sort">
+        <label>Sort by:</label>
+        <select
+          onChange={(e) => selectHandleFilter(e)}
+          defaultValue="Default Sorting"
+        >
+          {SORT_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
       </div>
-      <div className="tp-shop-top-filter">
-        <button onClick={()=> dispatch(handleFilterSidebarOpen())} type="button" className="tp-filter-btn">
-          <span>
-            <Filter />
-          </span>
-          {" "}Filter
-        </button>
-      </div>
+      <button
+        type="button"
+        className="cl-shop__topbar-filter-btn"
+        onClick={() => dispatch(handleFilterSidebarOpen())}
+      >
+        <i className="fa-solid fa-sliders" /> Filter
+      </button>
     </div>
   );
 };

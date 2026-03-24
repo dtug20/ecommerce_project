@@ -2,10 +2,6 @@ import React from 'react';
 import { useGetCheckoutCouponsQuery } from '@/redux/features/cmsApi';
 import dayjs from 'dayjs';
 
-/**
- * Shows available coupons with "Apply" buttons in the checkout page.
- * onApplyCoupon(code) is called when the user clicks Apply on a coupon card.
- */
 const CheckoutCouponSuggestions = ({ onApplyCoupon }) => {
   const { data, isLoading, isError } = useGetCheckoutCouponsQuery();
 
@@ -13,7 +9,6 @@ const CheckoutCouponSuggestions = ({ onApplyCoupon }) => {
   const coupons = Array.isArray(raw) ? raw : [];
   const now = dayjs();
 
-  // Filter to active, non-expired coupons only
   const activeCoupons = coupons.filter((c) => {
     const notExpired = !c.endTime || now.isBefore(dayjs(c.endTime));
     const started = !c.startTime || now.isAfter(dayjs(c.startTime));
@@ -23,66 +18,39 @@ const CheckoutCouponSuggestions = ({ onApplyCoupon }) => {
   if (isLoading || isError || activeCoupons.length === 0) return null;
 
   return (
-    <div className="tp-checkout-verify-item mb-20">
-      <p className="tp-checkout-verify-reveal-btn">
-        <span>Available Coupons</span>
-      </p>
-      <div className="tp-checkout-coupon">
-        <div className="row g-2">
-          {activeCoupons.map((coupon) => (
-            <div key={coupon._id || coupon.couponCode} className="col-md-6">
-              <div
-                style={{
-                  padding: '10px 14px',
-                  border: '1px dashed #821F40',
-                  borderRadius: '6px',
-                  backgroundColor: '#fff5f7',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <div>
-                  <p className="mb-0 fw-bold" style={{ fontSize: '13px', color: '#821F40' }}>
-                    {coupon.couponCode}
+    <div className="cl-checkout__coupon-suggestions">
+      <p className="cl-checkout__coupon-suggestions-title">Available Coupons</p>
+      <div className="row g-2">
+        {activeCoupons.map((coupon) => (
+          <div key={coupon._id || coupon.couponCode} className="col-md-6">
+            <div className="cl-checkout__coupon-card">
+              <div className="coupon-info">
+                <p className="coupon-code">{coupon.couponCode}</p>
+                <p className="coupon-desc">
+                  {coupon.discountPercentage}% off
+                  {coupon.minimumAmount > 0
+                    ? ` on orders over $${coupon.minimumAmount}`
+                    : ''}
+                </p>
+                {coupon.productType && (
+                  <p className="coupon-meta">On: {coupon.productType}</p>
+                )}
+                {coupon.endTime && (
+                  <p className="coupon-meta">
+                    Expires: {dayjs(coupon.endTime).format('MMM D, YYYY')}
                   </p>
-                  <p className="mb-0" style={{ fontSize: '12px', color: '#555' }}>
-                    {coupon.discountPercentage}% off
-                    {coupon.minimumAmount > 0 ? ` on orders over $${coupon.minimumAmount}` : ''}
-                  </p>
-                  {coupon.productType && (
-                    <p className="mb-0" style={{ fontSize: '11px', color: '#888' }}>
-                      On: {coupon.productType}
-                    </p>
-                  )}
-                  {coupon.endTime && (
-                    <p className="mb-0" style={{ fontSize: '11px', color: '#888' }}>
-                      Expires: {dayjs(coupon.endTime).format('MMM D, YYYY')}
-                    </p>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onApplyCoupon(coupon.couponCode)}
-                  style={{
-                    padding: '5px 12px',
-                    backgroundColor: '#821F40',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    flexShrink: 0,
-                    marginLeft: '8px',
-                  }}
-                >
-                  Apply
-                </button>
+                )}
               </div>
+              <button
+                type="button"
+                onClick={() => onApplyCoupon(coupon.couponCode)}
+                className="coupon-apply-btn"
+              >
+                Apply
+              </button>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );

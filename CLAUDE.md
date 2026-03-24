@@ -473,3 +473,5 @@ Admin: `admin@shofy.com` / `password123`, Staff: `staff@shofy.com` / `password12
 - Product creation auto-pushes product ID to brand.products and category.products arrays
 - Review creation requires the user to have purchased the product (validated via Order aggregation)
 - Cart, wishlist, compare, coupon info, and shipping info are all persisted to localStorage on the frontend
+- **i18n (mandatory):** All visible UI text in the frontend must use `t("namespace.key")` from `useTranslation()`. Add corresponding keys to both `frontend/src/locales/en/common.json` and `frontend/src/locales/vi/common.json`. Never hardcode user-facing strings. Existing namespaces: header, nav, footer, product, shop, cart, checkout, auth, common, compare, wishlist, search, error, hero, features, deals, categories.
+- **Multi-currency (mandatory):** Never hardcode `$` or any currency symbol in price displays. Use a currency formatting utility that respects the user's selected currency. All price displays must go through the formatter.

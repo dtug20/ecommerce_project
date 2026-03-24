@@ -94,14 +94,14 @@ const CliconNavBar = () => {
 
           {/* Nav links — matching Figma layout */}
           <nav className="cl-nav-bar__links">
-            <Link href="/profile">
-              <i className="far fa-map-marker-alt"></i> Track Order
+            <Link href="/track-order">
+              <i className="far fa-map-marker-alt"></i> {t("nav.trackOrder")}
             </Link>
             <Link href="/compare">
-              <i className="far fa-arrows-repeat"></i> Compare
+              <i className="far fa-arrows-repeat"></i> {t("nav.compare")}
             </Link>
             <Link href="/contact">
-              <i className="far fa-headset"></i> Customer Support
+              <i className="far fa-headset"></i> {t("nav.customerSupport")}
             </Link>
             <Link href="/blog">
               <i className="far fa-newspaper"></i> {t("nav.blog")}

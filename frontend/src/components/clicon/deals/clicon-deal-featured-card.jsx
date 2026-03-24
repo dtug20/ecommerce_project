@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { add_cart_product } from '@/redux/features/cartSlice';
 import { handleProductModal } from '@/redux/features/productModalSlice';
+import useCurrency from '@/hooks/use-currency';
 
 // ---------------------------------------------------------------------------
 // Star rating row
@@ -38,6 +39,7 @@ function StarRating({ reviews = [] }) {
 const CliconDealFeaturedCard = ({ product }) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const { formatPrice } = useCurrency();
 
   if (!product) return null;
 
@@ -108,9 +110,9 @@ const CliconDealFeaturedCard = ({ product }) => {
         </h2>
 
         <div className="cl-deal-featured__price-row">
-          <span className="cl-deal-featured__price-current">${discountedPrice}</span>
+          <span className="cl-deal-featured__price-current">{formatPrice(discountedPrice)}</span>
           {discount > 0 && (
-            <span className="cl-deal-featured__price-old">${price.toFixed(2)}</span>
+            <span className="cl-deal-featured__price-old">{formatPrice(price)}</span>
           )}
         </div>
 

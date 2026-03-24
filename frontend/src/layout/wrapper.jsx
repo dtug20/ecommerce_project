@@ -10,6 +10,7 @@ import {
 } from "@/redux/features/cartSlice";
 import { get_wishlist_products } from "@/redux/features/wishlist-slice";
 import { get_compare_products } from "@/redux/features/compareSlice";
+import { hydrateCurrency } from "@/redux/features/currencySlice";
 import { useGetSettingsQuery } from "@/redux/features/cmsApi";
 
 const Wrapper = ({ children }) => {
@@ -23,6 +24,7 @@ const Wrapper = ({ children }) => {
     dispatch(get_wishlist_products());
     dispatch(get_compare_products());
     dispatch(initialOrderQuantity());
+    dispatch(hydrateCurrency());
   }, [dispatch]);
 
   // Apply theme CSS variables from CMS settings

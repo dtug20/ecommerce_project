@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { add_cart_product } from '@/redux/features/cartSlice';
 import { add_to_wishlist } from '@/redux/features/wishlist-slice';
 import { handleProductModal } from '@/redux/features/productModalSlice';
+import useCurrency from '@/hooks/use-currency';
 
 // ---------------------------------------------------------------------------
 // Star rating sub-component
@@ -58,6 +59,7 @@ function ProductBadge({ discount, quantity, featured, tags }) {
 const CliconDealProductCard = ({ product }) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const { formatPrice } = useCurrency();
 
   if (!product) return null;
 
@@ -150,9 +152,9 @@ const CliconDealProductCard = ({ product }) => {
           <Link href={`/product-details/${_id}`}>{title}</Link>
         </h3>
         <div className="cl-deal-card__price-row">
-          <span className="cl-price-current">${discountedPrice}</span>
+          <span className="cl-price-current">{formatPrice(discountedPrice)}</span>
           {discount > 0 && (
-            <span className="cl-price-old">${price.toFixed(2)}</span>
+            <span className="cl-price-old">{formatPrice(price)}</span>
           )}
         </div>
       </div>

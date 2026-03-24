@@ -120,19 +120,25 @@ const useCheckoutSubmit = () => {
     try {
       const result = await validateCouponMutation({
         couponCode,
-        total,
-        productTypes: cart_products.map((p) => p.productType).filter(Boolean),
+        orderAmount: total,
+        productType: cart_products.map((p) => p.productType).filter(Boolean)[0] || '',
+        userId: user?._id,
       }).unwrap();
 
-      if (result?.valid && result?.coupon) {
-        const coupon = result.coupon;
+      if (result?.valid) {
         setCouponApplyMsg(
-          `Your Coupon ${coupon.couponCode} is Applied on ${coupon.productType} productType!`
+          `Your Coupon ${result.couponCode || couponCode} is Applied!`
         );
-        setMinimumAmount(coupon.minimumAmount || 0);
-        setDiscountProductType(coupon.productType || '');
-        setDiscountPercentage(coupon.discountPercentage || 0);
-        dispatch(set_coupon(coupon));
+        setMinimumAmount(0);
+        setDiscountProductType(result.productType || '');
+        setDiscountPercentage(result.discountPercentage || 0);
+        dispatch(set_coupon({
+          couponCode: result.couponCode || couponCode,
+          discountPercentage: result.discountPercentage,
+          discountAmount: result.discountAmount,
+          title: result.title,
+          productType: result.productType || '',
+        }));
         setTimeout(() => {
           if (couponRef.current) couponRef.current.value = "";
           setCouponApplyMsg("");

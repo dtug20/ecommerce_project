@@ -179,6 +179,7 @@ orderSchema.index({ createdAt: -1 });
 orderSchema.index({ "items.vendor": 1 }, { sparse: true });
 orderSchema.index({ trackingNumber: 1 }, { sparse: true });
 orderSchema.index({ parentOrder: 1 }, { sparse: true });
+orderSchema.index({ email: 1, invoice: 1 });
 
 const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);
 module.exports = Order;

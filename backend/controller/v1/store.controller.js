@@ -18,6 +18,7 @@ const Brand = require('../../model/Brand');
 const User = require('../../model/User');
 const Coupon = require('../../model/Coupon');
 const Reviews = require('../../model/Review');
+const Order = require('../../model/Order');
 const { getPaginationParams, buildPagination } = require('../../utils/pagination');
 
 // ---------------------------------------------------------------------------
@@ -679,6 +680,51 @@ exports.getVendorBySlug = async (req, res, next) => {
       },
       'Vendor store retrieved successfully'
     );
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Order Tracking (public)
+// ---------------------------------------------------------------------------
+
+/**
+ * POST /api/v1/store/orders/track
+ * Public endpoint — look up an order by ID + billing email.
+ */
+exports.trackOrder = async (req, res, next) => {
+  try {
+    const { orderId, email } = req.body;
+
+    // Build query: try invoice (numeric), then ObjectId, then orderNumber
+    const query = { email: { $regex: new RegExp(`^${email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } };
+
+    const trimmed = orderId.trim();
+    if (/^\d+$/.test(trimmed)) {
+      query.invoice = Number(trimmed);
+    } else if (mongoose.Types.ObjectId.isValid(trimmed)) {
+      query._id = trimmed;
+    } else {
+      query.orderNumber = trimmed;
+    }
+
+    const safeFields = 'invoice orderNumber status statusHistory trackingNumber carrier trackingUrl estimatedDelivery createdAt shippedAt deliveredAt totalAmount paymentMethod name';
+
+    const order = await Order.findOne(query).select(safeFields).lean();
+
+    if (!order) {
+      return respond.error(res, 'NOT_FOUND', 'No order found matching this ID and email.', 404);
+    }
+
+    // Get item count without loading full cart/items arrays
+    const countResult = await Order.aggregate([
+      { $match: { _id: order._id } },
+      { $project: { count: { $max: [{ $size: { $ifNull: ['$items', []] } }, { $size: { $ifNull: ['$cart', []] } }] } } },
+    ]);
+    const itemCount = countResult[0]?.count || 0;
+
+    return respond.success(res, { ...order, itemCount }, 'Order found');
   } catch (err) {
     next(err);
   }

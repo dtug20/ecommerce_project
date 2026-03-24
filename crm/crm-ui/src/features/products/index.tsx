@@ -25,7 +25,6 @@ import {
   Drawer,
   Flex,
   Progress,
-  Upload,
   Avatar,
 } from 'antd';
 import type { TableProps } from 'antd';
@@ -53,6 +52,7 @@ import toast from 'react-hot-toast';
 
 import { productsApi, categoriesApi } from '@/services/api';
 import api from '@/services/api';
+import ImageUpload from '@/components/commons/ImageUpload';
 import type { Product, Category, ProductVariant, ProductSeo, ProductStats } from '@/types';
 import { formatCurrency, formatDate } from '@/hooks/useFormatters';
 import StatusBadge from '@/components/commons/StatusBadge';
@@ -975,54 +975,8 @@ function ProductDrawer({ open, editingProduct, categories, onClose }: ProductDra
       children: (
         <>
           {/* Image upload */}
-          <Form.Item name="img" hidden>
-            <Input />
-          </Form.Item>
-          <Form.Item label="Product Image">
-            <Upload
-              name="image"
-              listType="picture-card"
-              showUploadList={false}
-              customRequest={async (options) => {
-                const { file, onSuccess, onError } = options;
-                const formData = new FormData();
-                formData.append('image', file as Blob);
-                try {
-                  const res = await api.post('/api/v1/admin/media/upload', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                  });
-                  const url = res.data?.data?.url;
-                  if (url) {
-                    form.setFieldsValue({ img: url });
-                    if (onSuccess) onSuccess('ok');
-                    toast.success('Image uploaded');
-                  } else {
-                    throw new Error('No URL returned');
-                  }
-                } catch (err: any) {
-                  if (onError) onError(err);
-                  toast.error('Upload failed');
-                }
-              }}
-            >
-              <Form.Item dependencies={['img']} noStyle>
-                {() => {
-                  const imgUrl = form.getFieldValue('img');
-                  return imgUrl ? (
-                    <img
-                      src={imgUrl}
-                      alt="product"
-                      style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 8 }}
-                    />
-                  ) : (
-                    <div>
-                      <PictureOutlined style={{ fontSize: 24, color: '#bfbfbf' }} />
-                      <div style={{ marginTop: 8, color: '#8c8c8c', fontSize: 13 }}>Upload</div>
-                    </div>
-                  );
-                }}
-              </Form.Item>
-            </Upload>
+          <Form.Item name="img" label="Product Image">
+            <ImageUpload placeholder="Upload Product Image" />
           </Form.Item>
 
           <Form.Item

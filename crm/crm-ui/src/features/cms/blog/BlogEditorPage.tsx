@@ -26,6 +26,7 @@ import dayjs from 'dayjs';
 
 import { blogApi } from '@/services/api';
 import type { BlogPost } from '@/types';
+import ImageUpload from '@/components/commons/ImageUpload';
 
 const { Title, Text } = Typography;
 const { Panel } = Collapse;
@@ -347,24 +348,13 @@ export default function BlogEditorPage() {
             />
 
             <Card title="Featured Image" size="small" style={{ marginBottom: 12 }}>
-              <Input
+              <ImageUpload
                 value={featuredImage}
-                onChange={(e) => setFeaturedImage(e.target.value)}
-                placeholder="https://example.com/image.jpg"
+                onChange={(url) => setFeaturedImage(url)}
+                placeholder="Upload Featured Image"
+                width="100%"
+                height={160}
               />
-              {featuredImage && (
-                <img
-                  src={featuredImage}
-                  alt="Featured"
-                  style={{
-                    width: '100%',
-                    marginTop: 8,
-                    borderRadius: 4,
-                    objectFit: 'cover',
-                    maxHeight: 160,
-                  }}
-                />
-              )}
             </Card>
 
             <Card title="Category" size="small" style={{ marginBottom: 12 }}>

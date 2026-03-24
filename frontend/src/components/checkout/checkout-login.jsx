@@ -8,17 +8,11 @@ const CheckoutLogin = () => {
   if (keycloak.authenticated) return null;
 
   return (
-    <div className="tp-checkout-verify-item">
-      <p className="tp-checkout-verify-reveal">
-        Returning customer?{" "}
-        <button
-          onClick={handleLogin}
-          type="button"
-          className="tp-checkout-login-form-reveal-btn"
-        >
-          Click here to login
-        </button>
-      </p>
+    <div className="cl-checkout__login-prompt">
+      Returning customer?{" "}
+      <button onClick={handleLogin} type="button">
+        Click here to login
+      </button>
     </div>
   );
 };

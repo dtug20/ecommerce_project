@@ -15,15 +15,21 @@ import {
   Col,
   Card,
   Empty,
+  Form,
+  DatePicker,
+  Tag,
 } from 'antd';
 import {
   SearchOutlined,
   EyeOutlined,
   DownOutlined,
   ClearOutlined,
+  CarryOutOutlined,
+  SendOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import dayjs from 'dayjs';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import type { MenuProps } from 'antd';
 
@@ -33,8 +39,6 @@ import { formatCurrency, formatDate } from '@/hooks/useFormatters';
 import StatusBadge from '@/components/commons/StatusBadge';
 import PageHeader from '@/components/commons/PageHeader';
 import useAppStore from '@/stores/appStore';
-import { Tag } from 'antd';
-import { CarryOutOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -98,6 +102,16 @@ function getCartItems(order: Order): OrderItem[] {
 // Order Detail Modal
 // ---------------------------------------------------------------------------
 
+const CARRIER_OPTIONS = [
+  { value: 'dhl', label: 'DHL' },
+  { value: 'fedex', label: 'FedEx' },
+  { value: 'ups', label: 'UPS' },
+  { value: 'usps', label: 'USPS' },
+  { value: 'ghtk', label: 'GHTK' },
+  { value: 'ghn', label: 'GHN' },
+  { value: 'viettelpost', label: 'ViettelPost' },
+];
+
 interface OrderDetailModalProps {
   order: Order | null;
   open: boolean;
@@ -107,6 +121,8 @@ interface OrderDetailModalProps {
   isShipper: boolean;
   onTakeOrder?: (id: string) => void;
   isTaking?: boolean;
+  onTrackingUpdate?: (orderId: string, data: Record<string, unknown>) => void;
+  isUpdatingTracking?: boolean;
 }
 
 function OrderDetailModal({
@@ -118,7 +134,11 @@ function OrderDetailModal({
   isShipper,
   onTakeOrder,
   isTaking,
+  onTrackingUpdate,
+  isUpdatingTracking,
 }: OrderDetailModalProps) {
+  const [trackingForm] = Form.useForm();
+
   if (!order) return null;
 
   const items = getCartItems(order);
@@ -297,6 +317,70 @@ function OrderDetailModal({
           </Descriptions>
         </Col>
       </Row>
+
+      {/* Shipping & Tracking */}
+      {!isShipper && (
+        <>
+          <Divider style={{ marginTop: 0 }} />
+          <Typography.Title level={5} style={{ marginBottom: 12 }}>
+            Shipping &amp; Tracking
+          </Typography.Title>
+          <Form
+            form={trackingForm}
+            layout="vertical"
+            initialValues={{
+              carrier: order.carrier || undefined,
+              trackingNumber: order.trackingNumber || '',
+              trackingUrl: order.trackingUrl || '',
+              estimatedDelivery: order.estimatedDelivery ? dayjs(order.estimatedDelivery) : undefined,
+            }}
+            onFinish={(values) => {
+              const payload: Record<string, unknown> = {};
+              if (values.carrier) payload.carrier = values.carrier;
+              if (values.trackingNumber) payload.trackingNumber = values.trackingNumber;
+              if (values.trackingUrl) payload.trackingUrl = values.trackingUrl;
+              if (values.estimatedDelivery) payload.estimatedDelivery = values.estimatedDelivery.toISOString();
+              onTrackingUpdate?.(order._id, payload);
+            }}
+          >
+            <Row gutter={16}>
+              <Col xs={24} md={12}>
+                <Form.Item label="Carrier" name="carrier">
+                  <Select
+                    placeholder="Select carrier"
+                    options={CARRIER_OPTIONS}
+                    allowClear
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12}>
+                <Form.Item label="Tracking Number" name="trackingNumber">
+                  <Input placeholder="e.g. 1Z999AA10123456784" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12}>
+                <Form.Item label="Tracking URL (optional)" name="trackingUrl">
+                  <Input placeholder="Auto-generated if left blank" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12}>
+                <Form.Item label="Estimated Delivery" name="estimatedDelivery">
+                  <DatePicker style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Button
+              type="primary"
+              htmlType="submit"
+              icon={<SendOutlined />}
+              loading={isUpdatingTracking}
+              style={{ marginBottom: 8 }}
+            >
+              Save Tracking Info
+            </Button>
+          </Form>
+        </>
+      )}
 
       <Divider style={{ marginTop: 0 }} />
 
@@ -488,6 +572,27 @@ export default function OrdersPage() {
 
   const handleTakeOrder = (id: string) => {
     takeOrderMutation.mutate(id);
+  };
+
+  // ---------------------------------------------------------------------------
+  // Mutation — update tracking info
+  // ---------------------------------------------------------------------------
+
+  const updateTrackingMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) =>
+      ordersApi.updateTracking(id, data as Parameters<typeof ordersApi.updateTracking>[1]),
+    onSuccess: (_, variables) => {
+      toast.success('Tracking info updated');
+      void queryClient.invalidateQueries({ queryKey: ['orders'] });
+      void queryClient.invalidateQueries({ queryKey: ['order', variables.id] });
+    },
+    onError: () => {
+      toast.error('Failed to update tracking info');
+    },
+  });
+
+  const handleTrackingUpdate = (orderId: string, data: Record<string, unknown>) => {
+    updateTrackingMutation.mutate({ id: orderId, data });
   };
 
   // ---------------------------------------------------------------------------
@@ -804,6 +909,8 @@ export default function OrdersPage() {
         isShipper={isShipper}
         onTakeOrder={handleTakeOrder}
         isTaking={takeOrderMutation.isPending}
+        onTrackingUpdate={handleTrackingUpdate}
+        isUpdatingTracking={updateTrackingMutation.isPending}
       />
     </div>
   );

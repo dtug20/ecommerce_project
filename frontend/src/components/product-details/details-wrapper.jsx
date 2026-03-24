@@ -1,46 +1,56 @@
 import React, { useEffect, useState } from 'react';
-import { Rating } from 'react-simple-star-rating';
 import { useDispatch, useSelector } from 'react-redux';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
-// internal
-import { AskQuestion, CompareTwo, WishlistTwo } from '@/svg';
-import DetailsBottomInfo from './details-bottom-info';
-import ProductDetailsCountdown from './product-details-countdown';
-import ProductQuantity from './product-quantity';
 import { add_cart_product } from '@/redux/features/cartSlice';
 import { add_to_compare } from '@/redux/features/compareSlice';
 import { handleModalClose } from '@/redux/features/productModalSlice';
+import { increment, decrement } from '@/redux/features/cartSlice';
 import useWishlist from '@/hooks/use-wishlist';
+import useCurrency from '@/hooks/use-currency';
+import ProductVariantSelector from './product-variant-selector';
 
-const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBottom = false, selectedVariant = null }) => {
+const DetailsWrapper = ({
+  productItem,
+  handleImageActive,
+  activeImg,
+  detailsBottom = false,
+  selectedVariant = null,
+  variants = [],
+  onVariantSelected,
+}) => {
   const { t } = useTranslation();
-  const { sku, img, title, imageURLs, category, description, discount, price, status, reviews, tags, offerDate, vendor } = productItem || {};
+  const { formatPrice } = useCurrency();
+  const {
+    sku, img, title, imageURLs, category, description, discount, price,
+    status, reviews, tags, offerDate, vendor, brand,
+  } = productItem || {};
   const [ratingVal, setRatingVal] = useState(0);
-  const [textMore, setTextMore] = useState(false);
   const dispatch = useDispatch();
   const { wishlist } = useSelector((state) => state.wishlist);
+  const { orderQuantity } = useSelector((state) => state.cart);
   const isAddedToWishlist = wishlist.some((item) => item._id === productItem?._id);
   const { handleWishlistProduct: handleWishlistHook } = useWishlist();
 
   useEffect(() => {
     if (reviews && reviews.length > 0) {
-      const rating =
-        reviews.reduce((acc, review) => acc + review.rating, 0) /
-        reviews.length;
+      const rating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
       setRatingVal(rating);
     } else {
       setRatingVal(0);
     }
   }, [reviews]);
 
-  // Resolve display values: use variant data when a variant is selected
   const displayPrice = selectedVariant?.price ?? price;
   const displayStatus = selectedVariant
     ? (selectedVariant.stock > 0 ? 'in-stock' : 'out-of-stock')
     : status;
+  const isOutOfStock = displayStatus === 'out-of-stock';
 
-  // handle add product — includes variant info when selected
+  const discountedPrice = discount > 0
+    ? (Number(price) - (Number(price) * Number(discount)) / 100).toFixed(2)
+    : null;
+
   const handleAddProduct = () => {
     const productToAdd = selectedVariant
       ? {
@@ -52,7 +62,6 @@ const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBott
             price: selectedVariant.price,
             stock: selectedVariant.stock,
           },
-          // Override price and img if variant provides them
           price: selectedVariant.price ?? price,
           img: selectedVariant.image || img,
         }
@@ -60,141 +69,171 @@ const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBott
     dispatch(add_cart_product(productToAdd));
   };
 
-  // handle wishlist product (uses shared hook for auth-aware sync)
   const handleWishlistProduct = (prd) => {
     handleWishlistHook(prd, isAddedToWishlist);
   };
 
-  // handle compare product
   const handleCompareProduct = (prd) => {
     dispatch(add_to_compare(prd));
   };
 
+  const reviewCount = reviews?.length || 0;
+
   return (
-    <div className="tp-product-details-wrapper">
-      <div className="tp-product-details-category">
-        <span>{category?.name}</span>
+    <div className="cl-pd__info">
+      {/* 1. Rating */}
+      <div className="cl-pd__rating">
+        {Array.from({ length: 5 }, (_, i) => (
+          <span key={i} className={i < Math.round(ratingVal) ? 'cl-star' : 'cl-star cl-star--empty'}>
+            &#9733;
+          </span>
+        ))}
+        <span className="cl-pd__rating-text">
+          <strong>{ratingVal.toFixed(1)} Star Rating</strong> ({reviewCount.toLocaleString()} User feedback)
+        </span>
       </div>
-      <h3 className="tp-product-details-title">{title}</h3>
 
-      {/* inventory details */}
-      <div className="tp-product-details-inventory d-flex align-items-center mb-10">
-        <div className="tp-product-details-stock mb-10">
-          <span>{displayStatus}</span>
+      {/* 2. Title */}
+      <h2 className="cl-pd__title">{title}</h2>
+
+      {/* 3. Meta row */}
+      <div className="cl-pd__meta">
+        <div className="cl-pd__meta-item">
+          Sku: <span>{selectedVariant?.sku || sku || 'N/A'}</span>
         </div>
-        <div className="tp-product-details-rating-wrapper d-flex align-items-center mb-10">
-          <div className="tp-product-details-rating">
-            <Rating allowFraction size={16} initialValue={ratingVal} readonly={true} />
-          </div>
-          <div className="tp-product-details-reviews">
-            <span>({reviews && reviews.length > 0 ? reviews.length : 0} {t('product.reviews')})</span>
-          </div>
+        <div className="cl-pd__meta-item">
+          Availability:{' '}
+          <span className={`cl-pd__meta-badge cl-pd__meta-badge--${isOutOfStock ? 'out-of-stock' : 'in-stock'}`}>
+            {isOutOfStock ? 'Out of Stock' : 'In Stock'}
+          </span>
         </div>
+        {brand && (
+          <div className="cl-pd__meta-item">
+            Brand: <span>{typeof brand === 'object' ? brand.name : brand}</span>
+          </div>
+        )}
+        {category?.name && (
+          <div className="cl-pd__meta-item">
+            Category: <span>{category.name}</span>
+          </div>
+        )}
       </div>
-      <p>{textMore ? description : `${(description || '').substring(0, 100)}...`}
-        <span onClick={() => setTextMore(!textMore)}>{textMore ? t('product.seeLess') : t('product.seeMore')}</span>
-      </p>
 
-      {/* vendor badge */}
+      {/* 4. Price */}
+      <div className="cl-pd__price">
+        {selectedVariant ? (
+          <span className="cl-pd__price-current">
+            {formatPrice(displayPrice)}
+          </span>
+        ) : discountedPrice ? (
+          <>
+            <span className="cl-pd__price-current">{formatPrice(discountedPrice)}</span>
+            <span className="cl-pd__price-old">{formatPrice(price)}</span>
+            <span className="cl-pd__price-discount">{discount}% OFF</span>
+          </>
+        ) : (
+          <span className="cl-pd__price-current">{formatPrice(price)}</span>
+        )}
+      </div>
+
+      {/* 5. Vendor badge */}
       {vendor?.vendorProfile?.storeName && vendor?.vendorProfile?.storeSlug && (
-        <div className="tp-product-vendor mb-10">
-          <span className="text-muted" style={{ fontSize: '13px' }}>{t('product.soldBy')} </span>
-          <Link
-            href={`/vendor/${vendor.vendorProfile.storeSlug}`}
-            className="tp-product-vendor-link"
-            style={{ fontSize: '13px', color: '#821F40', fontWeight: 500 }}
-          >
+        <div className="cl-pd__vendor">
+          {t('product.soldBy')}{' '}
+          <Link href={`/vendor/${vendor.vendorProfile.storeSlug}`}>
             {vendor.vendorProfile.storeName}
           </Link>
         </div>
       )}
 
-      {/* price — shows variant price when selected */}
-      <div className="tp-product-details-price-wrapper mb-20">
-        {selectedVariant ? (
-          <span className="tp-product-details-price new-price">
-            ${typeof displayPrice === 'number' ? displayPrice.toFixed(2) : displayPrice}
-          </span>
-        ) : discount > 0 ? (
-          <>
-            <span className="tp-product-details-price old-price">${price}</span>
-            <span className="tp-product-details-price new-price">
-              {" "}${(Number(price) - (Number(price) * Number(discount)) / 100).toFixed(2)}
-            </span>
-          </>
-        ) : (
-          <span className="tp-product-details-price new-price">${price.toFixed(2)}</span>
-        )}
-      </div>
+      {/* 6. Variant selectors */}
+      {variants && variants.length > 0 && (
+        <ProductVariantSelector
+          variants={variants}
+          onVariantSelected={onVariantSelected}
+        />
+      )}
 
-      {/* Legacy color variations (only shown when product has no variants array) */}
-      {!selectedVariant && imageURLs.some(item => item?.color && item?.color?.name) && (
-        <div className="tp-product-details-variation">
-          <div className="tp-product-details-variation-item">
-            <h4 className="tp-product-details-variation-title">Color :</h4>
-            <div className="tp-product-details-variation-list">
-              {imageURLs.map((item, i) => (
-                <button onClick={() => handleImageActive(item)} key={i} type="button"
-                  className={`color tp-color-variation-btn ${item.img === activeImg ? "active" : ""}`}>
-                  <span
-                    data-bg-color={`${item.color.clrCode}`}
-                    style={{ backgroundColor: `${item.color.clrCode}` }}
-                  ></span>
-                  {item.color && item.color.name && (
-                    <span className="tp-color-variation-tootltip">
-                      {item.color.name}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
+      {/* Legacy color variations (when no variants array) */}
+      {!selectedVariant && !variants?.length && imageURLs?.some(item => item?.color?.name) && (
+        <div className="cl-pd__color-swatches">
+          <span className="cl-pd__color-swatches-label">Color</span>
+          <div className="cl-pd__color-swatches-list">
+            {imageURLs.map((item, i) => (
+              <button
+                key={i}
+                type="button"
+                className={`cl-pd__color-swatch${item.img === activeImg ? ' cl-pd__color-swatch--active' : ''}`}
+                onClick={() => handleImageActive(item)}
+                title={item.color?.name}
+              >
+                <span style={{ backgroundColor: item.color?.clrCode }} />
+              </button>
+            ))}
           </div>
         </div>
       )}
 
-      {/* if ProductDetailsCountdown true start */}
-      {offerDate?.endDate && <ProductDetailsCountdown offerExpiryTime={offerDate?.endDate} />}
-      {/* if ProductDetailsCountdown true end */}
-
-      {/* actions */}
-      <div className="tp-product-details-action-wrapper">
-        <h3 className="tp-product-details-action-title">{t('product.quantity')}</h3>
-        <div className="tp-product-details-action-item-wrapper d-sm-flex align-items-center">
-          {/* product quantity */}
-          <ProductQuantity />
-          {/* product quantity */}
-          <div className="tp-product-details-add-to-cart mb-15 w-100">
-            <button
-              onClick={handleAddProduct}
-              disabled={displayStatus === 'out-of-stock'}
-              className="tp-product-details-add-to-cart-btn w-100"
-            >
-              {t('product.addToCart')}
-            </button>
-          </div>
+      {/* 7. Quantity + Buttons */}
+      <div className="cl-pd__actions">
+        <div className="cl-pd__quantity">
+          <button type="button" onClick={() => dispatch(decrement())}>&#8722;</button>
+          <input type="text" readOnly value={String(orderQuantity).padStart(2, '0')} />
+          <button type="button" onClick={() => dispatch(increment())}>+</button>
         </div>
+        <button
+          type="button"
+          className="cl-pd__add-to-cart-btn"
+          onClick={handleAddProduct}
+          disabled={isOutOfStock}
+        >
+          <i className="fa-solid fa-cart-shopping" /> ADD TO CART
+        </button>
         <Link href="/cart" onClick={() => dispatch(handleModalClose())}>
-          <button className="tp-product-details-buy-now-btn w-100">{t('product.buyNow')}</button>
+          <button type="button" className="cl-pd__buy-now-btn">
+            BUY NOW
+          </button>
         </Link>
       </div>
-      {/* product-details-action-sm start */}
-      <div className="tp-product-details-action-sm">
-        <button disabled={displayStatus === 'out-of-stock'} onClick={() => handleCompareProduct(productItem)} type="button" className="tp-product-details-action-sm-btn">
-          <CompareTwo />
-          {t('product.addToCompare')}
-        </button>
-        <button disabled={displayStatus === 'out-of-stock'} onClick={() => handleWishlistProduct(productItem)} type="button" className="tp-product-details-action-sm-btn">
-          <WishlistTwo />
+
+      {/* 8. Secondary actions */}
+      <div className="cl-pd__secondary-actions">
+        <button
+          type="button"
+          className="cl-pd__secondary-action"
+          disabled={isOutOfStock}
+          onClick={() => handleWishlistProduct(productItem)}
+        >
+          <i className={`fa-${isAddedToWishlist ? 'solid' : 'regular'} fa-heart`} />
           {t('product.addToWishlist')}
         </button>
-        <button type="button" className="tp-product-details-action-sm-btn">
-          <AskQuestion />
-          {t('product.askQuestion')}
+        <button
+          type="button"
+          className="cl-pd__secondary-action"
+          disabled={isOutOfStock}
+          onClick={() => handleCompareProduct(productItem)}
+        >
+          <i className="fa-solid fa-arrows-rotate" />
+          {t('product.addToCompare')}
         </button>
+        <div className="cl-pd__secondary-action">
+          Share product:
+          <div className="cl-pd__share-icons">
+            <a href="#" aria-label="Copy link"><i className="fa-regular fa-copy" /></a>
+            <a href="#" aria-label="Share on Facebook"><i className="fa-brands fa-facebook-f" /></a>
+            <a href="#" aria-label="Share on Twitter"><i className="fa-brands fa-twitter" /></a>
+            <a href="#" aria-label="Share on Pinterest"><i className="fa-brands fa-pinterest-p" /></a>
+          </div>
+        </div>
       </div>
-      {/* product-details-action-sm end */}
 
-      {detailsBottom && <DetailsBottomInfo category={category?.name} sku={selectedVariant?.sku || sku} tag={tags[0]} />}
+      {/* 9. Safe checkout bar */}
+      <div className="cl-pd__safe-checkout">
+        <p className="cl-pd__safe-checkout-title">100% Guarantee Safe Checkout</p>
+        <div className="cl-pd__safe-checkout-icons">
+          <img src="/assets/img/product/icons/payment-option.png" alt="Payment methods" />
+        </div>
+      </div>
     </div>
   );
 };

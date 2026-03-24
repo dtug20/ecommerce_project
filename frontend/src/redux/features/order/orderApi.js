@@ -56,6 +56,14 @@ export const authApi = apiSlice.injectEndpoints({
       providesTags: (result, error, arg) => [{ type: "UserOrder", id: arg }, "UserOrder"],
       keepUnusedDataFor: 600,
     }),
+    // trackOrder (public — no auth required)
+    trackOrder: builder.mutation({
+      query: (data) => ({
+        url: "/api/v1/store/orders/track",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -64,4 +72,5 @@ export const {
   useSaveOrderMutation,
   useGetUserOrderByIdQuery,
   useGetUserOrdersQuery,
+  useTrackOrderMutation,
 } = authApi;

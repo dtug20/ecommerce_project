@@ -1,24 +1,29 @@
 import React from 'react';
+import Link from 'next/link';
 
-const ShopBreadcrumb = ({title,subtitle}) => {
+const ShopBreadcrumb = ({ links = [] }) => {
   return (
-    <>
-      <section className="breadcrumb__area include-bg pt-100 pb-50">
-        <div className="container">
-          <div className="row">
-            <div className="col-xxl-12">
-              <div className="breadcrumb__content p-relative z-index-1">
-                <h3 className="breadcrumb__title">{title}</h3>
-                <div className="breadcrumb__list">
-                  <span><a href="#">Home</a></span>
-                  <span>{subtitle}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </>
+    <nav className="cl-breadcrumb">
+      <div className="container">
+        <ol className="cl-breadcrumb__list">
+          {links.map((item, i) => {
+            const isLast = i === links.length - 1;
+            return (
+              <React.Fragment key={i}>
+                {i > 0 && <li className="cl-breadcrumb__separator">&gt;</li>}
+                <li className={`cl-breadcrumb__item${isLast ? ' cl-breadcrumb__item--active' : ''}`}>
+                  {item.href && !isLast ? (
+                    <Link href={item.href}>{item.label}</Link>
+                  ) : (
+                    item.label
+                  )}
+                </li>
+              </React.Fragment>
+            );
+          })}
+        </ol>
+      </div>
+    </nav>
   );
 };
 

@@ -1,0 +1,269 @@
+@use '../../utils' as *;
+
+// ============================================================
+// Clicon Wishlist Page Styles
+// BEM: .cl-wishlist, .cl-wishlist__*
+// ============================================================
+
+.cl-wishlist {
+  &__section {
+    @include cl-section;
+    padding-bottom: var(--cl-spacing-3xl);
+  }
+
+  &__card {
+    background-color: var(--cl-bg-white);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-sm);
+    padding: var(--cl-spacing-lg);
+    font-family: var(--cl-ff-body);
+  }
+
+  &__title {
+    font-family: var(--cl-ff-heading);
+    font-size: var(--cl-fs-h3);
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+    margin: 0 0 var(--cl-spacing-lg);
+  }
+
+  // --- Table ---
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+
+    @media (max-width: 991px) {
+      min-width: 780px;
+    }
+  }
+
+  &__table-wrap {
+    @media (max-width: 991px) {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+
+  &__thead {
+    background-color: var(--cl-bg-gray);
+  }
+
+  &__th {
+    padding: 10px var(--cl-spacing-md);
+    font-size: var(--cl-fs-caption);
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-secondary);
+    text-transform: uppercase;
+    text-align: left;
+    white-space: nowrap;
+    border: none;
+
+    &--actions {
+      text-align: center;
+    }
+  }
+
+  // --- Table Row ---
+  &__row {
+    border-bottom: 1px solid var(--cl-border);
+    transition: background-color var(--cl-transition-fast);
+
+    &:hover {
+      background-color: rgba(#F2F4F5, 0.5);
+    }
+  }
+
+  &__td {
+    padding: var(--cl-spacing-md);
+    vertical-align: middle;
+  }
+
+  // --- Product Cell ---
+  &__product {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-spacing-md);
+    min-width: 280px;
+  }
+
+  &__img {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    border-radius: var(--cl-radius-sm);
+    overflow: hidden;
+    background-color: var(--cl-bg-gray);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__product-name {
+    font-size: var(--cl-fs-body);
+    font-weight: var(--cl-fw-regular);
+    color: var(--cl-text-heading);
+    line-height: var(--cl-lh-normal);
+    text-decoration: none;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    &:hover {
+      color: var(--cl-primary);
+    }
+  }
+
+  // --- Price ---
+  &__price {
+    white-space: nowrap;
+  }
+
+  &__price-current {
+    font-size: var(--cl-fs-body);
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+  }
+
+  &__price-old {
+    font-size: var(--cl-fs-body-sm);
+    font-weight: var(--cl-fw-regular);
+    color: var(--cl-text-secondary);
+    text-decoration: line-through;
+    margin-right: 6px;
+  }
+
+  // --- Stock Status ---
+  &__stock {
+    font-size: var(--cl-fs-body-sm);
+    font-weight: var(--cl-fw-semibold);
+    text-transform: uppercase;
+    white-space: nowrap;
+
+    &--in-stock {
+      color: var(--cl-success);
+    }
+
+    &--out-of-stock {
+      color: var(--cl-error);
+    }
+  }
+
+  // --- Actions Cell ---
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-spacing-sm);
+    justify-content: center;
+  }
+
+  &__add-btn {
+    @include cl-btn-primary;
+    padding: 8px 16px;
+    font-size: var(--cl-fs-body-sm);
+    border-radius: var(--cl-radius-sm);
+    white-space: nowrap;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  &__view-cart-btn {
+    @include cl-btn-outlined;
+    padding: 8px 16px;
+    font-size: var(--cl-fs-body-sm);
+    border-radius: var(--cl-radius-sm);
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  &__remove-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-full);
+    color: var(--cl-text-secondary);
+    cursor: pointer;
+    transition: all var(--cl-transition-fast);
+    flex-shrink: 0;
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    &:hover {
+      background-color: var(--cl-error);
+      border-color: var(--cl-error);
+      color: var(--cl-text-white);
+    }
+  }
+
+  // --- Bottom Actions ---
+  &__bottom {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-spacing-md);
+    margin-top: var(--cl-spacing-lg);
+    padding-top: var(--cl-spacing-lg);
+    border-top: 1px solid var(--cl-border);
+  }
+
+  &__bottom-btn {
+    @include cl-btn-primary;
+    padding: 10px 24px;
+    font-size: var(--cl-fs-body);
+    text-decoration: none;
+  }
+
+  &__bottom-btn--secondary {
+    @include cl-btn-outlined;
+    padding: 10px 24px;
+    font-size: var(--cl-fs-body);
+  }
+
+  // --- Empty State ---
+  &__empty {
+    text-align: center;
+    padding: var(--cl-spacing-3xl) var(--cl-spacing-lg);
+  }
+
+  &__empty-title {
+    font-family: var(--cl-ff-heading);
+    font-size: var(--cl-fs-h3);
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+    margin-bottom: var(--cl-spacing-md);
+  }
+
+  &__empty-link {
+    @include cl-btn-primary;
+    display: inline-flex;
+    margin-top: var(--cl-spacing-md);
+    text-decoration: none;
+  }
+
+  // --- Loading ---
+  &__loading {
+    text-align: center;
+    padding: var(--cl-spacing-3xl) 0;
+
+    .spinner-border {
+      color: var(--cl-primary);
+    }
+  }
+}

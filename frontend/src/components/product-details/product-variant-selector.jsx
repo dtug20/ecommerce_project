@@ -1,18 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
-/**
- * ProductVariantSelector handles products with a `variants` array.
- * Each variant has: { sku, color, colorCode, size, price, stock, images }
- *
- * When a valid color+size combination is selected, it calls:
- *   onVariantSelected({ sku, color, colorCode, size, price, stock, image })
- * When selection is cleared or incomplete, it calls onVariantSelected(null).
- */
 const ProductVariantSelector = ({ variants = [], onVariantSelected }) => {
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedMemory, setSelectedMemory] = useState(null);
+  const [selectedStorage, setSelectedStorage] = useState(null);
 
-  // Derive unique colors and sizes from the variants array
+  // Derive unique colors
   const uniqueColors = [];
   const colorMap = {};
   variants.forEach((v) => {
@@ -24,7 +18,7 @@ const ProductVariantSelector = ({ variants = [], onVariantSelected }) => {
     }
   });
 
-  // Sizes available for the selected color (or all sizes if no color selected)
+  // Derive unique sizes for selected color
   const availableSizes = [];
   const sizeSet = new Set();
   variants.forEach((v) => {
@@ -36,13 +30,21 @@ const ProductVariantSelector = ({ variants = [], onVariantSelected }) => {
     }
   });
 
-  // Find matching variant when both color and size are selected
+  // Derive unique memory options (conditional)
+  const uniqueMemory = [...new Set(variants.map(v => v.memory).filter(Boolean))];
+
+  // Derive unique storage options (conditional)
+  const uniqueStorage = [...new Set(variants.map(v => v.storage).filter(Boolean))];
+
+  // Find matching variant
   useEffect(() => {
     if (selectedColor && selectedSize) {
       const match = variants.find((v) => {
         const colorKey = v.color || v.colorName || '';
         const size = v.size || '';
-        return colorKey === selectedColor && size === selectedSize;
+        const memMatch = !uniqueMemory.length || !selectedMemory || v.memory === selectedMemory;
+        const storMatch = !uniqueStorage.length || !selectedStorage || v.storage === selectedStorage;
+        return colorKey === selectedColor && size === selectedSize && memMatch && storMatch;
       });
       if (match) {
         onVariantSelected({
@@ -60,9 +62,9 @@ const ProductVariantSelector = ({ variants = [], onVariantSelected }) => {
     } else {
       onVariantSelected(null);
     }
-  }, [selectedColor, selectedSize, variants, onVariantSelected]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedColor, selectedSize, selectedMemory, selectedStorage, variants, onVariantSelected]);
 
-  // Reset size when color changes
   const handleColorSelect = (colorName) => {
     setSelectedColor(colorName === selectedColor ? null : colorName);
     setSelectedSize(null);
@@ -71,99 +73,82 @@ const ProductVariantSelector = ({ variants = [], onVariantSelected }) => {
   if (!variants || variants.length === 0) return null;
 
   return (
-    <div className="tp-product-details-variation">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cl-spacing-md)' }}>
       {/* Color swatches */}
       {uniqueColors.length > 0 && (
-        <div className="tp-product-details-variation-item">
-          <h4 className="tp-product-details-variation-title">
-            Color: <span style={{ fontWeight: 400 }}>{selectedColor || 'Select color'}</span>
-          </h4>
-          <div className="tp-product-details-variation-list">
+        <div className="cl-pd__color-swatches">
+          <span className="cl-pd__color-swatches-label">Color</span>
+          <div className="cl-pd__color-swatches-list">
             {uniqueColors.map((color, i) => (
               <button
                 key={i}
                 type="button"
                 title={color.name}
                 onClick={() => handleColorSelect(color.name)}
-                className={`color tp-color-variation-btn ${selectedColor === color.name ? 'active' : ''}`}
-                style={{ position: 'relative' }}
+                className={`cl-pd__color-swatch${selectedColor === color.name ? ' cl-pd__color-swatch--active' : ''}`}
               >
-                <span
-                  style={{
-                    backgroundColor: color.code,
-                    display: 'block',
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '50%',
-                    border: selectedColor === color.name ? '2px solid #821F40' : '2px solid #ddd',
-                  }}
-                />
-                <span className="tp-color-variation-tootltip">{color.name}</span>
+                <span style={{ backgroundColor: color.code }} />
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* Size buttons */}
+      {/* Size dropdown */}
       {availableSizes.length > 0 && (
-        <div className="tp-product-details-variation-item mt-10">
-          <h4 className="tp-product-details-variation-title">
-            Size: <span style={{ fontWeight: 400 }}>{selectedSize || 'Select size'}</span>
-          </h4>
-          <div className="tp-product-details-variation-list">
+        <div className="cl-pd__select">
+          <span className="cl-pd__select-label">Size</span>
+          <select
+            value={selectedSize || ''}
+            onChange={(e) => setSelectedSize(e.target.value || null)}
+          >
+            <option value="">Select Size</option>
             {availableSizes.map((size, i) => {
-              // Check if this size is available for the selected color
               const isAvailable = variants.some((v) => {
                 const colorKey = v.color || v.colorName || '';
-                return (!selectedColor || colorKey === selectedColor) && v.size === size && (v.stock > 0);
+                return (!selectedColor || colorKey === selectedColor) && v.size === size && v.stock > 0;
               });
               return (
-                <button
-                  key={i}
-                  type="button"
-                  disabled={!isAvailable}
-                  onClick={() => setSelectedSize(size === selectedSize ? null : size)}
-                  className={`tp-size-variation-btn ${selectedSize === size ? 'active' : ''} ${!isAvailable ? 'disabled' : ''}`}
-                  style={{
-                    padding: '4px 12px',
-                    marginRight: '6px',
-                    border: selectedSize === size ? '2px solid #821F40' : '1px solid #ddd',
-                    borderRadius: '4px',
-                    backgroundColor: !isAvailable ? '#f5f5f5' : selectedSize === size ? '#821F40' : '#fff',
-                    color: !isAvailable ? '#999' : selectedSize === size ? '#fff' : '#333',
-                    cursor: isAvailable ? 'pointer' : 'not-allowed',
-                    fontSize: '13px',
-                  }}
-                >
-                  {size}
-                </button>
+                <option key={i} value={size} disabled={!isAvailable}>
+                  {size}{!isAvailable ? ' (Out of Stock)' : ''}
+                </option>
               );
             })}
-          </div>
+          </select>
         </div>
       )}
 
-      {/* Stock status for selected variant */}
-      {selectedColor && selectedSize && (() => {
-        const match = variants.find((v) => {
-          const colorKey = v.color || v.colorName || '';
-          return colorKey === selectedColor && v.size === selectedSize;
-        });
-        if (!match) return null;
-        return (
-          <div className="mt-10">
-            <span className={`badge ${match.stock > 0 ? 'bg-success' : 'bg-danger'}`}>
-              {match.stock > 0 ? `${match.stock} in stock` : 'Out of stock'}
-            </span>
-            {match.sku && (
-              <span className="ms-2 text-muted" style={{ fontSize: '12px' }}>
-                SKU: {match.sku}
-              </span>
-            )}
-          </div>
-        );
-      })()}
+      {/* Memory dropdown (conditional) */}
+      {uniqueMemory.length > 0 && (
+        <div className="cl-pd__select">
+          <span className="cl-pd__select-label">Memory</span>
+          <select
+            value={selectedMemory || ''}
+            onChange={(e) => setSelectedMemory(e.target.value || null)}
+          >
+            <option value="">Select Memory</option>
+            {uniqueMemory.map((mem, i) => (
+              <option key={i} value={mem}>{mem}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* Storage dropdown (conditional) */}
+      {uniqueStorage.length > 0 && (
+        <div className="cl-pd__select">
+          <span className="cl-pd__select-label">Storage</span>
+          <select
+            value={selectedStorage || ''}
+            onChange={(e) => setSelectedStorage(e.target.value || null)}
+          >
+            <option value="">Select Storage</option>
+            {uniqueStorage.map((stor, i) => (
+              <option key={i} value={stor}>{stor}</option>
+            ))}
+          </select>
+        </div>
+      )}
     </div>
   );
 };

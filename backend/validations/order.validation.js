@@ -43,4 +43,9 @@ const createOrder = Joi.object({
   user: Joi.string().allow('', null).optional(),
 }).options({ stripUnknown: true });
 
-module.exports = { createOrder };
+const trackOrder = Joi.object({
+  orderId: Joi.string().trim().required().label('Order ID'),
+  email: Joi.string().trim().email({ tlds: { allow: false } }).required().label('Billing Email'),
+}).options({ stripUnknown: true });
+
+module.exports = { createOrder, trackOrder };

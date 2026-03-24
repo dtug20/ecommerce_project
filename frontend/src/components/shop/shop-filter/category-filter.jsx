@@ -1,71 +1,68 @@
 import React from "react";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
-// internal
 import ErrorMsg from "@/components/common/error-msg";
 import { useGetShowCategoryQuery } from "@/redux/features/categoryApi";
 import { handleFilterSidebarClose } from "@/redux/features/shop-filter-slice";
-import ShopCategoryLoader from "@/components/loader/shop/shop-category-loader";
 
-const CategoryFilter = ({setCurrPage,shop_right=false}) => {
+const CategoryFilter = ({ setCurrPage }) => {
   const { data: categories, isLoading, isError } = useGetShowCategoryQuery();
   const router = useRouter();
   const dispatch = useDispatch();
 
-  // handle category route
   const handleCategoryRoute = (title) => {
     setCurrPage(1);
-    router.push(
-      `/${shop_right?'shop-right-sidebar':'shop'}?category=${title
-        .toLowerCase()
-        .replace("&", "")
-        .split(" ")
-        .join("-")}`
-        )
+    const slug = title.toLowerCase().replace("&", "").split(" ").join("-");
+    router.push(`/shop?category=${slug}`);
     dispatch(handleFilterSidebarClose());
-  }
-  // decide what to render
+  };
+
   let content = null;
 
   if (isLoading) {
-    content = <ShopCategoryLoader loading={isLoading}/>;
-  }
-  if (!isLoading && isError) {
+    content = (
+      <ul className="cl-shop__category-list">
+        {[...Array(6)].map((_, i) => (
+          <li key={i} className="cl-shop__category-item">
+            <div className="cl-skeleton cl-skeleton--line" style={{ width: '100%', height: 16 }} />
+          </li>
+        ))}
+      </ul>
+    );
+  } else if (isError) {
     content = <ErrorMsg msg="There was an error" />;
-  }
-  if (!isLoading && !isError && categories?.result?.length === 0) {
+  } else if (!categories?.result?.length) {
     content = <ErrorMsg msg="No Category found!" />;
+  } else {
+    const activeSlug = router.query.category || '';
+    content = (
+      <ul className="cl-shop__category-list">
+        {categories.result.map((item) => {
+          const slug = item.parent.toLowerCase().replace("&", "").split(" ").join("-");
+          const isActive = activeSlug === slug;
+          return (
+            <li key={item._id}>
+              <label className={`cl-shop__category-item${isActive ? ' cl-shop__category-item--active' : ''}`}>
+                <input
+                  type="radio"
+                  name="category"
+                  checked={isActive}
+                  onChange={() => handleCategoryRoute(item.parent)}
+                />
+                {item.parent}
+              </label>
+            </li>
+          );
+        })}
+      </ul>
+    );
   }
-  if (!isLoading && !isError && categories?.result?.length > 0) {
-    const category_items = categories.result;
-    content = category_items.map((item) => (
-      <li key={item._id}>
-        <a
-          onClick={() => handleCategoryRoute(item.parent)}
-          style={{ cursor: "pointer" }}
-          className={
-            router.query.category ===
-            item.parent.toLowerCase().replace("&", "").split(" ").join("-")
-              ? "active"
-              : ""
-          }
-        >
-          {item.parent} <span>{item.products.length}</span>
-        </a>
-      </li>
-    ));
-  }
+
   return (
-    <>
-      <div className="tp-shop-widget mb-50">
-        <h3 className="tp-shop-widget-title">Categories</h3>
-        <div className="tp-shop-widget-content">
-          <div className="tp-shop-widget-categories">
-            <ul>{content}</ul>
-          </div>
-        </div>
-      </div>
-    </>
+    <div className="cl-shop__widget">
+      <h3 className="cl-shop__widget-title">Category</h3>
+      {content}
+    </div>
   );
 };
 

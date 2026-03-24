@@ -72,7 +72,7 @@ const FooterClicon = () => {
                   <li><Link href="/cart">{t("header.cart")}</Link></li>
                   <li><Link href="/wishlist">{t("header.wishlist")}</Link></li>
                   <li><Link href="/compare">Compare</Link></li>
-                  <li><Link href="/profile">Track Order</Link></li>
+                  <li><Link href="/track-order">Track Order</Link></li>
                   <li><Link href="/contact">Customer Help</Link></li>
                 </ul>
               </div>

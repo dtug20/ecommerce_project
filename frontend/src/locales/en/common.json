@@ -19,7 +19,10 @@
     "shop": "Shop",
     "coupons": "Coupons",
     "contact": "Contact",
-    "blog": "Blog"
+    "blog": "Blog",
+    "trackOrder": "Track Order",
+    "compare": "Compare",
+    "customerSupport": "Customer Support"
   },
   "footer": {
     "description": "We are a dynamic team of full stack developers and designers crafting high-quality web applications",
@@ -81,7 +84,19 @@
     "categories": "Categories",
     "brands": "Brands",
     "colors": "Colors",
-    "resetFilters": "Reset Filters"
+    "resetFilters": "Reset Filters",
+    "activeFilters": "Active Filters:",
+    "resultsFound": "{{count}} Results found.",
+    "searchPlaceholder": "Search for anything...",
+    "popularTags": "Popular Tags",
+    "filterCategory": "Category",
+    "filterBrand": "Brand",
+    "filterTag": "Tag",
+    "filterMinPrice": "Min Price",
+    "filterMaxPrice": "Max Price",
+    "filterSearch": "Search",
+    "filterColor": "Color",
+    "shopGrid": "Shop Grid"
   },
   "cart": {
     "title": "Shopping Cart",
@@ -115,7 +130,31 @@
     "placeOrder": "Place Order",
     "paymentMethod": "Payment Method",
     "cashOnDelivery": "Cash on Delivery",
-    "creditCard": "Credit/Debit Card"
+    "creditCard": "Credit/Debit Card",
+    "orderSummary": "Order Summary",
+    "subTotal": "Sub-total",
+    "shipping": "Shipping",
+    "free": "Free",
+    "discount": "Discount",
+    "tax": "Tax",
+    "total": "Total",
+    "processing": "Processing...",
+    "paymentOption": "Payment Option",
+    "bankTransfer": "Bank Transfer",
+    "bankTransferDetails": "Bank Transfer Details",
+    "bankLabel": "Bank:",
+    "accountLabel": "Account:",
+    "nameLabel": "Name:",
+    "bankContactUs": "Please contact us for bank transfer details.",
+    "bankNote": "Please transfer the exact order amount and use your order number as the payment reference. Your order will be confirmed once payment is received.",
+    "comingSoon": "Coming soon.",
+    "comingSoonMsg": "This payment method is not yet available. Please select Cash on Delivery or Bank Transfer instead.",
+    "nameOnCard": "Name on Card",
+    "cardNumber": "Card Number",
+    "expireDate": "Expire Date",
+    "noItemsInCart": "No items found in cart to checkout",
+    "loginPrompt": "Returning customer?",
+    "clickHereToLogin": "Click here to login"
   },
   "auth": {
     "login": "Login",
@@ -157,7 +196,14 @@
     "price": "Price",
     "addToCart": "Add to Cart",
     "rating": "Rating",
-    "remove": "Remove"
+    "remove": "Remove",
+    "customerFeedback": "Customer feedback:",
+    "soldBy": "Sold by:",
+    "brand": "Brand:",
+    "model": "Model:",
+    "stockStatus": "Stock status:",
+    "size": "Size:",
+    "weight": "Weight:"
   },
   "wishlist": {
     "title": "Wishlist",
@@ -167,7 +213,10 @@
     "action": "Action",
     "viewCart": "View Cart",
     "goToCart": "Go To Cart",
-    "clearWishlist": "Clear Wishlist"
+    "clearWishlist": "Clear Wishlist",
+    "outOfStock": "Out of Stock",
+    "addToCart": "Add to Cart",
+    "productName": "Product Name"
   },
   "search": {
     "title": "Search Products",
@@ -222,5 +271,43 @@
     "title": "Shop with Categories",
     "noCategories": "No categories found.",
     "loading": "Loading categories..."
+  },
+  "trackOrder": {
+    "title": "Track Order",
+    "desc": "To track your order please enter your order ID in the input field below and press the \"Track Order\" button. This was given to you on your receipt and in the confirmation email you should have received.",
+    "orderId": "Order ID",
+    "orderIdPlaceholder": "ID...",
+    "billingEmail": "Billing Email",
+    "emailPlaceholder": "Email address",
+    "helperText": "Order ID that we sent to you in your email address.",
+    "trackBtn": "TRACK ORDER",
+    "tracking": "TRACKING...",
+    "fillBothFields": "Please fill in both fields.",
+    "noOrderFound": "No order found matching this ID and email.",
+    "products": "Products",
+    "orderPlacedIn": "Order Placed in",
+    "deliveredOn": "Order delivered on",
+    "expectedArrival": "Order expected arrival",
+    "orderActivity": "Order Activity",
+    "stepPlaced": "Order Placed",
+    "stepPackaging": "Packaging",
+    "stepOnTheRoad": "On The Road",
+    "stepDelivered": "Delivered",
+    "activityDelivered": "Your order has been delivered. Thank you for shopping!",
+    "activityShipped": "Your order has been shipped and is on the way.",
+    "activityProcessing": "Your order is being packed and prepared for shipping.",
+    "activityConfirmed": "Your order has been confirmed and verified.",
+    "activityPending": "Your order has been placed successfully.",
+    "activityCancelled": "Your order has been cancelled.",
+    "statusChanged": "Order status changed to {{status}}"
+  },
+  "breadcrumb": {
+    "home": "Home",
+    "pages": "Pages",
+    "trackOrder": "Track Order",
+    "details": "Details",
+    "shoppingCart": "Shopping Cart",
+    "myAccount": "My Account",
+    "shopGrid": "Shop Grid"
   }
 }

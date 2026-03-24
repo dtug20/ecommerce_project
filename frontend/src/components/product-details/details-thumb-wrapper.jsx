@@ -1,66 +1,100 @@
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import PopupVideo from "../common/popup-video";
 
 const DetailsThumbWrapper = ({
   imageURLs,
   handleImageActive,
   activeImg,
-  imgWidth = 416,
-  imgHeight = 480,
+  imgWidth = 580,
+  imgHeight = 580,
   videoId = false,
   status
 }) => {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const thumbsRef = useRef(null);
+
+  const scrollThumbs = (direction) => {
+    if (thumbsRef.current) {
+      const scrollAmount = direction === 'left' ? -100 : 100;
+      thumbsRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
   return (
     <>
-      <div className="tp-product-details-thumb-wrapper tp-tab d-sm-flex">
-        <nav>
-          <div className="nav nav-tabs flex-sm-column">
-            {imageURLs?.map((item, i) => (
-              <button
-                key={i}
-                className={`nav-link ${item.img === activeImg ? "active" : ""}`}
-                onClick={() => handleImageActive(item)}
-              >
-                <Image
-                  src={item.img}
-                  alt="image"
-                  width={78}
-                  height={100}
-                  style={{ width: "100%", height: "100%" }}
-                />
-              </button>
-            ))}
-          </div>
-        </nav>
-        <div className="tab-content m-img">
-          <div className="tab-pane fade show active">
-            <div className="tp-product-details-nav-main-thumb p-relative">
-              <Image
-                src={activeImg}
-                alt="product img"
-                width={imgWidth}
-                height={imgHeight}
-              />
-              <div className="tp-product-badge">
-                {status === 'out-of-stock' && <span className="product-hot">out-stock</span>}
-              </div>
-              {videoId && (
-                <div
-                  onClick={() => setIsVideoOpen(true)}
-                  className="tp-product-details-thumb-video"
-                >
-                  <a className="tp-product-details-thumb-video-btn cursor-pointer popup-video">
-                    <i className="fas fa-play"></i>
-                  </a>
-                </div>
-              )}
+      <div className="cl-pd__gallery">
+        {/* Main image */}
+        <div className="cl-pd__gallery-main">
+          <Image
+            src={activeImg}
+            alt="product img"
+            width={imgWidth}
+            height={imgHeight}
+            style={{ maxWidth: '100%', height: 'auto', objectFit: 'contain' }}
+            unoptimized
+          />
+          {status === 'out-of-stock' && (
+            <div className="cl-pd__gallery-badge">
+              <span className="cl-badge cl-badge--soldout">Out of Stock</span>
             </div>
-          </div>
+          )}
+          {videoId && (
+            <button
+              type="button"
+              className="cl-pd__gallery-video-btn"
+              onClick={() => setIsVideoOpen(true)}
+              aria-label="Play video"
+            >
+              <i className="fas fa-play" />
+            </button>
+          )}
         </div>
+
+        {/* Horizontal thumbnail strip */}
+        {imageURLs && imageURLs.length > 0 && (
+          <div className="cl-pd__gallery-thumbs">
+            <button
+              type="button"
+              className="cl-pd__gallery-arrow"
+              onClick={() => scrollThumbs('left')}
+              aria-label="Previous thumbnails"
+            >
+              <i className="fa-solid fa-chevron-left" />
+            </button>
+
+            <div className="cl-pd__gallery-thumbs-list" ref={thumbsRef}>
+              {imageURLs.map((item, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className={`cl-pd__gallery-thumb${item.img === activeImg ? ' cl-pd__gallery-thumb--active' : ''}`}
+                  onClick={() => handleImageActive(item)}
+                >
+                  <Image
+                    src={item.img}
+                    alt={`thumbnail ${i + 1}`}
+                    width={80}
+                    height={80}
+                    style={{ objectFit: 'contain' }}
+                    unoptimized
+                  />
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              className="cl-pd__gallery-arrow"
+              onClick={() => scrollThumbs('right')}
+              aria-label="Next thumbnails"
+            >
+              <i className="fa-solid fa-chevron-right" />
+            </button>
+          </div>
+        )}
       </div>
-      {/* modal popup start */}
+
       {videoId && (
         <PopupVideo
           isVideoOpen={isVideoOpen}
@@ -68,7 +102,6 @@ const DetailsThumbWrapper = ({
           videoId={videoId}
         />
       )}
-      {/* modal popup end */}
     </>
   );
 };

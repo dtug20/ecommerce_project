@@ -1,49 +1,33 @@
-import { GridTab, ListTab } from "@/svg";
-import React from "react";
+import React, { useState, useCallback } from "react";
+import { useRouter } from "next/router";
+import { useTranslation } from "react-i18next";
 
-const ShopTopLeft = ({total,showing=9}) => {
+const ShopTopLeft = ({ handleFilterChange }) => {
+  const { t } = useTranslation();
+  const router = useRouter();
+  const [searchValue, setSearchValue] = useState(router.query.search || '');
+
+  const handleSearch = useCallback((e) => {
+    e.preventDefault();
+    if (handleFilterChange) {
+      handleFilterChange({ search: searchValue || undefined, page: 1 });
+    }
+  }, [searchValue, handleFilterChange]);
+
   return (
-    <>
-      <div className="tp-shop-top-left d-flex align-items-center ">
-        <div className="tp-shop-top-tab tp-tab">
-          <ul className="nav nav-tabs" id="productTab" role="tablist">
-            <li className="nav-item" role="presentation">
-              <button
-                className="nav-link active"
-                id="grid-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#grid-tab-pane"
-                type="button"
-                role="tab"
-                aria-controls="grid-tab-pane"
-                aria-selected="true"
-                tabIndex={-1}
-              >
-                <GridTab />
-              </button>
-            </li>
-            <li className="nav-item" role="presentation">
-              <button
-                className="nav-link"
-                id="list-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#list-tab-pane"
-                type="button"
-                role="tab"
-                aria-controls="list-tab-pane"
-                aria-selected="false"
-                tabIndex={-1}
-              >
-                <ListTab />
-              </button>
-            </li>
-          </ul>
-        </div>
-        <div className="tp-shop-top-result">
-          <p>Showing 1–{showing} of {total} results</p>
-        </div>
-      </div>
-    </>
+    <div className="cl-shop__topbar-search">
+      <form onSubmit={handleSearch}>
+        <input
+          type="text"
+          placeholder={t('shop.searchPlaceholder')}
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+        />
+        <button type="submit" className="cl-shop__topbar-search-icon">
+          <i className="fa-solid fa-magnifying-glass" />
+        </button>
+      </form>
+    </div>
   );
 };
 

@@ -32,6 +32,7 @@ import dayjs from 'dayjs';
 import { bannersApi } from '@/services/api';
 import type { Banner } from '@/types';
 import PageHeader from '@/components/commons/PageHeader';
+import ImageUpload from '@/components/commons/ImageUpload';
 
 const { Text } = Typography;
 
@@ -305,8 +306,8 @@ function BannerModal({ open, editing, onClose }: BannerModalProps) {
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item name="content_image" label="Image URL">
-          <Input placeholder="https://example.com/banner.jpg" />
+        <Form.Item name="content_image" label="Banner Image">
+          <ImageUpload placeholder="Upload Banner Image" width={300} height={180} />
         </Form.Item>
 
         {/* 3. Scheduling */}

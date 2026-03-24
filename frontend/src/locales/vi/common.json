@@ -19,7 +19,10 @@
     "shop": "Cửa hàng",
     "coupons": "Mã giảm giá",
     "contact": "Liên hệ",
-    "blog": "Bài viết"
+    "blog": "Bài viết",
+    "trackOrder": "Theo dõi đơn hàng",
+    "compare": "So sánh",
+    "customerSupport": "Hỗ trợ khách hàng"
   },
   "footer": {
     "description": "Chúng tôi là đội ngũ năng động gồm các lập trình viên full stack và nhà thiết kế, chuyên xây dựng ứng dụng web chất lượng cao",
@@ -81,7 +84,19 @@
     "categories": "Danh mục",
     "brands": "Thương hiệu",
     "colors": "Màu sắc",
-    "resetFilters": "Xóa bộ lọc"
+    "resetFilters": "Xóa bộ lọc",
+    "activeFilters": "Bộ lọc đang dùng:",
+    "resultsFound": "Tìm thấy {{count}} kết quả.",
+    "searchPlaceholder": "Tìm kiếm...",
+    "popularTags": "Thẻ phổ biến",
+    "filterCategory": "Danh mục",
+    "filterBrand": "Thương hiệu",
+    "filterTag": "Thẻ",
+    "filterMinPrice": "Giá thấp nhất",
+    "filterMaxPrice": "Giá cao nhất",
+    "filterSearch": "Tìm kiếm",
+    "filterColor": "Màu sắc",
+    "shopGrid": "Lưới sản phẩm"
   },
   "cart": {
     "title": "Giỏ hàng",
@@ -115,7 +130,31 @@
     "placeOrder": "Đặt hàng",
     "paymentMethod": "Phương thức thanh toán",
     "cashOnDelivery": "Thanh toán khi nhận hàng",
-    "creditCard": "Thẻ tín dụng/Ghi nợ"
+    "creditCard": "Thẻ tín dụng/Ghi nợ",
+    "orderSummary": "Tổng quan đơn hàng",
+    "subTotal": "Tạm tính",
+    "shipping": "Vận chuyển",
+    "free": "Miễn phí",
+    "discount": "Giảm giá",
+    "tax": "Thuế",
+    "total": "Tổng cộng",
+    "processing": "Đang xử lý...",
+    "paymentOption": "Phương thức thanh toán",
+    "bankTransfer": "Chuyển khoản",
+    "bankTransferDetails": "Thông tin chuyển khoản",
+    "bankLabel": "Ngân hàng:",
+    "accountLabel": "Số tài khoản:",
+    "nameLabel": "Tên TK:",
+    "bankContactUs": "Vui lòng liên hệ để biết thông tin chuyển khoản.",
+    "bankNote": "Vui lòng chuyển đúng số tiền và ghi mã đơn hàng. Đơn hàng sẽ được xác nhận khi nhận được thanh toán.",
+    "comingSoon": "Sắp ra mắt.",
+    "comingSoonMsg": "Phương thức thanh toán này chưa khả dụng. Vui lòng chọn Thanh toán khi nhận hàng hoặc Chuyển khoản.",
+    "nameOnCard": "Tên trên thẻ",
+    "cardNumber": "Số thẻ",
+    "expireDate": "Ngày hết hạn",
+    "noItemsInCart": "Không có sản phẩm trong giỏ hàng",
+    "loginPrompt": "Khách hàng cũ?",
+    "clickHereToLogin": "Nhấn để đăng nhập"
   },
   "auth": {
     "login": "Đăng nhập",
@@ -157,7 +196,14 @@
     "price": "Giá",
     "addToCart": "Thêm vào giỏ",
     "rating": "Đánh giá",
-    "remove": "Xóa"
+    "remove": "Xóa",
+    "customerFeedback": "Phản hồi khách hàng:",
+    "soldBy": "Bán bởi:",
+    "brand": "Thương hiệu:",
+    "model": "Mẫu:",
+    "stockStatus": "Tình trạng:",
+    "size": "Kích cỡ:",
+    "weight": "Trọng lượng:"
   },
   "wishlist": {
     "title": "Yêu thích",
@@ -167,7 +213,10 @@
     "action": "Thao tác",
     "viewCart": "Xem giỏ hàng",
     "goToCart": "Đến giỏ hàng",
-    "clearWishlist": "Xóa danh sách yêu thích"
+    "clearWishlist": "Xóa danh sách yêu thích",
+    "outOfStock": "Hết hàng",
+    "addToCart": "Thêm vào giỏ",
+    "productName": "Tên sản phẩm"
   },
   "search": {
     "title": "Tìm kiếm sản phẩm",
@@ -222,5 +271,43 @@
     "title": "Mua Sắm Theo Danh Mục",
     "noCategories": "Không tìm thấy danh mục.",
     "loading": "Đang tải danh mục..."
+  },
+  "trackOrder": {
+    "title": "Theo Dõi Đơn Hàng",
+    "desc": "Để theo dõi đơn hàng, vui lòng nhập mã đơn hàng vào ô bên dưới và nhấn nút \"Theo dõi đơn hàng\". Mã này được gửi trong email xác nhận đơn hàng của bạn.",
+    "orderId": "Mã đơn hàng",
+    "orderIdPlaceholder": "Mã...",
+    "billingEmail": "Email thanh toán",
+    "emailPlaceholder": "Địa chỉ email",
+    "helperText": "Mã đơn hàng đã được gửi đến email của bạn.",
+    "trackBtn": "THEO DÕI ĐƠN HÀNG",
+    "tracking": "ĐANG TÌM...",
+    "fillBothFields": "Vui lòng điền đầy đủ thông tin.",
+    "noOrderFound": "Không tìm thấy đơn hàng khớp với mã và email này.",
+    "products": "Sản phẩm",
+    "orderPlacedIn": "Đơn hàng đặt ngày",
+    "deliveredOn": "Đơn hàng đã giao ngày",
+    "expectedArrival": "Dự kiến giao hàng",
+    "orderActivity": "Hoạt động đơn hàng",
+    "stepPlaced": "Đã đặt hàng",
+    "stepPackaging": "Đóng gói",
+    "stepOnTheRoad": "Đang vận chuyển",
+    "stepDelivered": "Đã giao",
+    "activityDelivered": "Đơn hàng đã được giao. Cảm ơn bạn!",
+    "activityShipped": "Đơn hàng đã được gửi đi.",
+    "activityProcessing": "Đơn hàng đang được đóng gói.",
+    "activityConfirmed": "Đơn hàng đã được xác nhận.",
+    "activityPending": "Đơn hàng đã được đặt thành công.",
+    "activityCancelled": "Đơn hàng đã bị hủy.",
+    "statusChanged": "Trạng thái đơn hàng đã thay đổi thành {{status}}"
+  },
+  "breadcrumb": {
+    "home": "Trang chủ",
+    "pages": "Trang",
+    "trackOrder": "Theo dõi đơn hàng",
+    "details": "Chi tiết",
+    "shoppingCart": "Giỏ hàng",
+    "myAccount": "Tài khoản",
+    "shopGrid": "Lưới sản phẩm"
   }
 }

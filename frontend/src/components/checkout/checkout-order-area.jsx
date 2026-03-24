@@ -1,131 +1,105 @@
-import { useState } from "react";
-// import { CardElement } from "@stripe/react-stripe-js"; // STRIPE DISABLED
+import Image from "next/image";
 import { useSelector } from "react-redux";
-// internal
+import { useTranslation } from "react-i18next";
 import useCartInfo from "@/hooks/use-cart-info";
-import ErrorMsg from "../common/error-msg";
-import CheckoutPaymentMethods from "./checkout-payment-methods";
+import useCurrency from "@/hooks/use-currency";
 
 const CheckoutOrderArea = ({ checkoutData }) => {
+  const { t } = useTranslation();
+  const { formatPrice, currency } = useCurrency();
   const {
-    handleShippingCost,
     cartTotal = 0,
-    stripe,
     isCheckoutSubmit,
-    clientSecret,
-    register,
-    errors,
-    showCard,
-    setShowCard,
     shippingCost,
     discountAmount,
-    paymentMethod,
-    setPaymentMethod,
-    bankDetails,
   } = checkoutData;
   const { cart_products } = useSelector((state) => state.cart);
   const { total } = useCartInfo();
+
+  // Helper to get product thumbnail
+  const getThumb = (item) => {
+    if (item.img) return item.img;
+    if (item.image) return item.image;
+    if (item.imageURLs?.[0]?.img) return item.imageURLs[0].img;
+    if (item.imageURLs?.[0]?.color_img) return item.imageURLs[0].color_img;
+    return '/assets/img/product/placeholder.png';
+  };
+
   return (
-    <div className="tp-checkout-place white-bg">
-      <h3 className="tp-checkout-place-title">Your Order</h3>
+    <div className="cl-checkout__summary-wrap">
+      <div className="cl-checkout__summary">
+        <h3 className="cl-checkout__summary-title">{t('checkout.orderSummary')}</h3>
 
-      <div className="tp-order-info-list">
-        <ul>
-          {/*  header */}
-          <li className="tp-order-info-list-header">
-            <h4>Product</h4>
-            <h4>Total</h4>
-          </li>
-
-          {/*  item list */}
+        {/* Product list */}
+        <div className="cl-checkout__summary-items">
           {cart_products.map((item) => (
-            <li key={item._id} className="tp-order-info-list-desc">
-              <p>
-                {item.title} <span> x {item.orderQuantity}</span>
-              </p>
-              <span>${item.price.toFixed(2)}</span>
-            </li>
-          ))}
-
-          {/*  shipping */}
-          <li className="tp-order-info-list-shipping">
-            <span>Shipping</span>
-            <div className="tp-order-info-list-shipping-item d-flex flex-column align-items-end">
-              <span>
-                <input
-                  {...register(`shippingOption`, {
-                    required: `Shipping Option is required!`,
-                  })}
-                  id="flat_shipping"
-                  type="radio"
-                  name="shippingOption"
+            <div key={item._id} className="cl-checkout__summary-item">
+              <div className="cl-checkout__summary-thumb">
+                <Image
+                  src={getThumb(item)}
+                  alt={item.title}
+                  width={60}
+                  height={60}
+                  style={{ objectFit: 'contain' }}
+                  unoptimized
                 />
-                <label
-                  onClick={() => handleShippingCost(60)}
-                  htmlFor="flat_shipping"
-                >
-                  Delivery: Today Cost :<span>$60.00</span>
-                </label>
-                <ErrorMsg msg={errors?.shippingOption?.message} />
-              </span>
-              <span>
-                <input
-                  {...register(`shippingOption`, {
-                    required: `Shipping Option is required!`,
-                  })}
-                  id="flat_rate"
-                  type="radio"
-                  name="shippingOption"
-                />
-                <label
-                  onClick={() => handleShippingCost(20)}
-                  htmlFor="flat_rate"
-                >
-                  Delivery: 7 Days Cost: <span>$20.00</span>
-                </label>
-                <ErrorMsg msg={errors?.shippingOption?.message} />
-              </span>
+              </div>
+              <div className="cl-checkout__summary-item-info">
+                <p className="item-title">{item.title}</p>
+                <p className="item-qty">
+                  {item.orderQuantity} x{" "}
+                  <span>{formatPrice(item.price)}</span>
+                </p>
+              </div>
             </div>
-          </li>
+          ))}
+        </div>
 
-           {/*  subtotal */}
-           <li className="tp-order-info-list-subtotal">
-            <span>Subtotal</span>
-            <span>${total.toFixed(2)}</span>
-          </li>
+        {/* Cost breakdown */}
+        <div className="cl-checkout__summary-row">
+          <span className="label">{t('checkout.subTotal')}</span>
+          <span className="value">{formatPrice(total)}</span>
+        </div>
 
-           {/*  shipping cost */}
-           <li className="tp-order-info-list-subtotal">
-            <span>Shipping Cost</span>
-            <span>${shippingCost.toFixed(2)}</span>
-          </li>
+        <div className="cl-checkout__summary-row">
+          <span className="label">{t('checkout.shipping')}</span>
+          <span className={shippingCost === 0 ? "value--free" : "value"}>
+            {shippingCost === 0 ? t('checkout.free') : formatPrice(shippingCost)}
+          </span>
+        </div>
 
-           {/* discount */}
-           <li className="tp-order-info-list-subtotal">
-            <span>Discount</span>
-            <span>${discountAmount.toFixed(2)}</span>
-          </li>
+        <div className="cl-checkout__summary-row">
+          <span className="label">{t('checkout.discount')}</span>
+          <span className="value">{formatPrice(discountAmount)}</span>
+        </div>
 
-          {/* total */}
-          <li className="tp-order-info-list-total">
-            <span>Total</span>
-            <span>${parseFloat(cartTotal).toFixed(2)}</span>
-          </li>
-        </ul>
-      </div>
-      <CheckoutPaymentMethods
-        selectedMethod={paymentMethod || 'cod'}
-        onMethodChange={setPaymentMethod}
-        bankDetails={bankDetails}
-      />
+        <div className="cl-checkout__summary-row">
+          <span className="label">{t('checkout.tax')}</span>
+          <span className="value">{formatPrice(0)}</span>
+        </div>
 
-      <div className="tp-checkout-btn-wrapper">
+        {/* Total */}
+        <div className="cl-checkout__summary-total">
+          <span>{t('checkout.total')}</span>
+          <span>
+            {formatPrice(cartTotal)}
+            <span className="total-currency">{currency}</span>
+          </span>
+        </div>
+
+        {/* Place Order button */}
         <button
           type="submit"
           disabled={isCheckoutSubmit}
-          className="tp-checkout-btn w-100"
+          className="cl-checkout__place-order-btn"
         >
-          Place Order
+          {isCheckoutSubmit ? t('checkout.processing') : t('checkout.placeOrder').toUpperCase()}
+          {!isCheckoutSubmit && (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+          )}
         </button>
       </div>
     </div>

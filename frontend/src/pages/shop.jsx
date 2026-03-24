@@ -1,17 +1,19 @@
 import React, { useState, useCallback } from "react";
 import { useRouter } from "next/router";
+import { useTranslation } from "react-i18next";
 import SEO from "@/components/seo";
 import Wrapper from "@/layout/wrapper";
-import HeaderTwo from "@/layout/headers/header-2";
+import HeaderClicon from "@/layout/headers/header-clicon";
 import ShopBreadcrumb from "@/components/breadcrumb/shop-breadcrumb";
 import ShopArea from "@/components/shop/shop-area";
 import ErrorMsg from "@/components/common/error-msg";
-import Footer from "@/layout/footers/footer";
+import FooterClicon from "@/layout/footers/footer-clicon";
 import ShopFilterOffCanvas from "@/components/common/shop-filter-offcanvas";
 import ShopLoader from "@/components/loader/shop/shop-loader";
 import { useGetFilteredProductsQuery } from "@/redux/features/cmsApi";
 
 const ShopPage = ({ query }) => {
+  const { t } = useTranslation();
   const router = useRouter();
   const [selectValue, setSelectValue] = useState(query.sort || "");
 
@@ -27,6 +29,8 @@ const ShopPage = ({ query }) => {
     ...(query.minPrice && { minPrice: query.minPrice }),
     ...(query.maxPrice && { maxPrice: query.maxPrice }),
     ...(query.productType && { productType: query.productType }),
+    ...(query.tag && { tag: query.tag }),
+    ...(query.search && { search: query.search }),
     ...(query.sort && query.sort !== 'Default Sorting'
       ? {
           sortBy:
@@ -40,12 +44,10 @@ const ShopPage = ({ query }) => {
 
   const { data: productsData, isError, isLoading } = useGetFilteredProductsQuery(apiParams);
 
-  // Push filter changes to URL query params with shallow routing so the
-  // page does not fully reload but getServerSideProps runs on next navigation
+  // Push filter changes to URL query params with shallow routing
   const handleFilterChange = useCallback(
     (newFilters) => {
       const currentQuery = { ...router.query, ...newFilters };
-      // Remove falsy/empty values to keep the URL clean
       Object.keys(currentQuery).forEach((key) => {
         if (!currentQuery[key]) delete currentQuery[key];
       });
@@ -57,8 +59,9 @@ const ShopPage = ({ query }) => {
   );
 
   const selectHandleFilter = (e) => {
-    setSelectValue(e.value);
-    handleFilterChange({ sort: e.value, page: 1 });
+    const val = e.target ? e.target.value : e.value;
+    setSelectValue(val);
+    handleFilterChange({ sort: val, page: 1 });
   };
 
   const otherProps = {
@@ -73,7 +76,19 @@ const ShopPage = ({ query }) => {
     selectHandleFilter,
     currPage: parseInt(query.page) || 1,
     setCurrPage: (page) => handleFilterChange({ page }),
+    handleFilterChange,
+    totalProducts: productsData?.total || productsData?.data?.length || 0,
   };
+
+  // Build breadcrumb links
+  const breadcrumbLinks = [
+    { label: t('breadcrumb.home'), href: '/' },
+    { label: t('shop.title'), href: '/shop' },
+    { label: t('breadcrumb.shopGrid'), href: '/shop' },
+  ];
+  if (query.category) {
+    breadcrumbLinks.push({ label: query.category });
+  }
 
   let content = null;
 
@@ -110,10 +125,10 @@ const ShopPage = ({ query }) => {
         description="Browse our full product catalog — electronics, fashion, beauty and more"
         url="/shop"
       />
-      <HeaderTwo style_2={true} />
-      <ShopBreadcrumb title="Shop Grid" subtitle="Shop Grid" />
+      <HeaderClicon />
+      <ShopBreadcrumb links={breadcrumbLinks} />
       {content}
-      <Footer primary_style={true} />
+      <FooterClicon />
     </Wrapper>
   );
 };

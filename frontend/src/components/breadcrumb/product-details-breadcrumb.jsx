@@ -1,26 +1,29 @@
 import React from 'react';
-import { SmDot } from '@/svg';
+import Link from 'next/link';
 
-const ProductDetailsBreadcrumb = ({category,title}) => {
+const ProductDetailsBreadcrumb = ({ links = [] }) => {
   return (
-    <section className="breadcrumb__area breadcrumb__style-2 include-bg pt-50 pb-20">
-    <div className="container">
-       <div className="row">
-          <div className="col-xxl-12">
-             <div className="breadcrumb__content p-relative z-index-1">
-                <div className="breadcrumb__list has-icon">
-                   <span className="breadcrumb-icon">
-                      <SmDot/>{" "}
-                   </span>
-                   <span><a href="#">Home</a></span>
-                   <span><a href="#">{category}</a></span>
-                   <span>{title}</span>
-                </div>
-             </div>
-          </div>
-       </div>
-    </div>
- </section>
+    <nav className="cl-breadcrumb">
+      <div className="container">
+        <ol className="cl-breadcrumb__list">
+          {links.map((item, i) => {
+            const isLast = i === links.length - 1;
+            return (
+              <React.Fragment key={i}>
+                {i > 0 && <li className="cl-breadcrumb__separator">&gt;</li>}
+                <li className={`cl-breadcrumb__item${isLast ? ' cl-breadcrumb__item--active' : ''}`}>
+                  {item.href && !isLast ? (
+                    <Link href={item.href}>{item.label}</Link>
+                  ) : (
+                    item.label
+                  )}
+                </li>
+              </React.Fragment>
+            );
+          })}
+        </ol>
+      </div>
+    </nav>
   );
 };
 

@@ -1,13 +1,17 @@
 import React from 'react';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
-import blogData from '@/data/blog-data';
+import { useGetBlogPostsQuery } from '@/redux/features/cmsApi';
 import CliconBlogCard from './clicon-blog-card';
 
 const CliconBlogArea = () => {
   const { t } = useTranslation();
-  // Use the first 3 electronics blog entries
-  const blogs = blogData.filter((b) => b.blog === 'electronics').slice(0, 3);
+  const { data, isLoading } = useGetBlogPostsQuery({ limit: 3, featured: 'true' });
+
+  const posts = data?.data || [];
+
+  if (isLoading) return null;
+  if (!posts.length) return null;
 
   return (
     <section className="cl-blog-area" data-testid="cl-blog-area">
@@ -25,9 +29,9 @@ const CliconBlogArea = () => {
         </div>
 
         <div className="row g-4">
-          {blogs.map((blog) => (
-            <div key={blog.id} className="col-xl-4 col-md-6">
-              <CliconBlogCard blog={blog} />
+          {posts.map((post) => (
+            <div key={post._id} className="col-xl-4 col-md-6">
+              <CliconBlogCard blog={post} />
             </div>
           ))}
         </div>

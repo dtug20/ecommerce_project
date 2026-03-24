@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { PaginationNext, PaginationPrev } from "@/svg";
+import { useEffect } from "react";
 
 const Pagination = ({
   items = [],
@@ -24,39 +23,40 @@ const Pagination = ({
     paginatedData(items, pageStart, countOfPage);
   }, [items, pageStart, countOfPage]);
 
+  if (totalPage <= 1) return null;
+
   return (
-    <nav>
-      {totalPage > 1 && (
-        <ul>
-          <li>
-            <button
-              onClick={() => setPage(currPage - 1)}
-              className={`tp-pagination-prev prev page-numbers ${
-                currPage === 1 && "disabled"
-              }`}
-            >
-              <PaginationPrev />
-            </button>
-          </li>
+    <nav className="cl-shop__pagination">
+      <button
+        type="button"
+        className="cl-shop__page-btn cl-shop__page-btn--arrow"
+        onClick={() => setPage(currPage - 1)}
+        disabled={currPage === 1}
+        aria-label="Previous page"
+      >
+        <i className="fa-solid fa-chevron-left" />
+      </button>
 
-          {Array.from({ length: totalPage }, (_, i) => i + 1).map((n) => (
-            <li key={n} onClick={() => setPage(n)}>
-              <span className={`${currPage === n ? "current" : ""}`}>{n}</span>
-            </li>
-          ))}
+      {Array.from({ length: totalPage }, (_, i) => i + 1).map((n) => (
+        <button
+          key={n}
+          type="button"
+          className={`cl-shop__page-btn${currPage === n ? ' cl-shop__page-btn--active' : ''}`}
+          onClick={() => setPage(n)}
+        >
+          {String(n).padStart(2, '0')}
+        </button>
+      ))}
 
-          <li>
-            <button
-              onClick={() => setPage(currPage + 1)}
-              className={`next page-numbers ${
-                currPage === totalPage ? "disabled" : ""
-              }`}
-            >
-              <PaginationNext />
-            </button>
-          </li>
-        </ul>
-      )}
+      <button
+        type="button"
+        className="cl-shop__page-btn cl-shop__page-btn--arrow"
+        onClick={() => setPage(currPage + 1)}
+        disabled={currPage === totalPage}
+        aria-label="Next page"
+      >
+        <i className="fa-solid fa-chevron-right" />
+      </button>
     </nav>
   );
 };
