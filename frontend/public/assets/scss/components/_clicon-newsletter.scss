@@ -1,0 +1,117 @@
+@use '../utils' as *;
+
+// ============================================================
+// Clicon Newsletter SCSS
+// ============================================================
+
+.cl-newsletter {
+  @include cl-section;
+  background: linear-gradient(135deg, #1b6392 0%, #0d3d5e 100%);
+  font-family: var(--cl-ff-body);
+
+  &__inner {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
+
+  &__title {
+    font-family: var(--cl-ff-heading);
+    font-size: clamp(22px, 3vw, var(--cl-fs-h1));
+    font-weight: var(--cl-fw-bold);
+    color: var(--cl-text-white);
+    margin: 0;
+    line-height: var(--cl-lh-tight);
+  }
+
+  &__subtitle {
+    font-size: var(--cl-fs-body);
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    max-width: 460px;
+    line-height: var(--cl-lh-relaxed);
+  }
+
+  &__form {
+    width: 100%;
+    max-width: 500px;
+  }
+
+  &__input-wrap {
+    display: flex;
+    gap: 0;
+    border-radius: var(--cl-radius-sm);
+    overflow: hidden;
+    box-shadow: var(--cl-shadow-lg);
+  }
+
+  &__input {
+    flex: 1;
+    min-width: 0;
+    padding: 14px 18px;
+    font-family: var(--cl-ff-body);
+    font-size: var(--cl-fs-body);
+    color: var(--cl-text-heading);
+    background-color: var(--cl-bg-white);
+    border: none;
+    outline: none;
+
+    &::placeholder {
+      color: var(--cl-text-secondary);
+    }
+  }
+
+  &__btn {
+    @include cl-btn-primary;
+    border-radius: 0;
+    white-space: nowrap;
+    padding: 14px 24px;
+    font-size: var(--cl-fs-body-sm);
+    border: none;
+
+    &:disabled {
+      opacity: 0.75;
+      cursor: not-allowed;
+    }
+  }
+
+  &__brands {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  &__brand-logo {
+    font-size: var(--cl-fs-h5);
+    font-weight: var(--cl-fw-bold);
+    color: rgba(255, 255, 255, 0.45);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: color var(--cl-transition-fast);
+
+    &:hover {
+      color: rgba(255, 255, 255, 0.75);
+    }
+  }
+
+  @media (max-width: 575px) {
+    &__input-wrap {
+      flex-direction: column;
+    }
+
+    &__btn {
+      border-radius: 0 0 var(--cl-radius-sm) var(--cl-radius-sm);
+    }
+
+    &__brands {
+      gap: 16px;
+    }
+  }
+}

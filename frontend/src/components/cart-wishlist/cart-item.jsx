@@ -30,7 +30,7 @@ const CartItem = ({product}) => {
       {/* img */}
       <td className="tp-cart-img">
         <Link href={`/product-details/${_id}`}>
-          <Image src={img} alt="product img" width={70} height={100} />
+          {img ? <Image src={img} alt={title || "product"} width={70} height={100} /> : <div style={{width:70,height:100,backgroundColor:'var(--tp-gray-100)'}} />}
         </Link>
       </td>
       {/* title */}
@@ -44,18 +44,18 @@ const CartItem = ({product}) => {
       {/* quantity */}
       <td className="tp-cart-quantity">
         <div className="tp-product-quantity mt-10 mb-10">
-          <span onClick={()=> handleDecrement(product)} className="tp-cart-minus">
+          <span onClick={()=> handleDecrement(product)} className="tp-cart-minus" role="button" aria-label="Decrease quantity">
             <Minus />
           </span>
-          <input className="tp-cart-input" type="text" value={orderQuantity} readOnly />
-          <span onClick={()=> handleAddProduct(product)} className="tp-cart-plus">
+          <input className="tp-cart-input" type="text" value={orderQuantity} readOnly aria-label="Product quantity" />
+          <span onClick={()=> handleAddProduct(product)} className="tp-cart-plus" role="button" aria-label="Increase quantity">
             <Plus />
           </span>
         </div>
       </td>
       {/* action */}
       <td className="tp-cart-action">
-        <button onClick={()=> handleRemovePrd({title,id:_id})} className="tp-cart-action-btn">
+        <button onClick={()=> handleRemovePrd({title,id:_id})} className="tp-cart-action-btn" aria-label={`Remove ${title}`}>
           <Close />
           <span>{" "}Remove</span>
         </button>

@@ -1,0 +1,555 @@
+@use '../../utils' as *;
+
+// ============================================================
+// Clicon Products SCSS
+// Featured Products, Product Section With Promo, Product Columns
+// ============================================================
+
+// ---- Deal Card (used in grids) ----
+.cl-deal-card {
+  @include cl-card;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--cl-ff-body);
+
+  &__image {
+    position: relative;
+    background-color: var(--cl-bg-gray);
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+
+    &:hover .cl-deal-card__actions {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  &__no-img {
+    width: 100%;
+    height: 180px;
+    background-color: var(--cl-border);
+    border-radius: var(--cl-radius-sm);
+  }
+
+  &__badge {
+    @include cl-badge-base;
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 2;
+
+    &--sale {
+      @include cl-badge-sale;
+    }
+
+    &--soldout {
+      @include cl-badge-soldout;
+    }
+
+    &--hot {
+      @include cl-badge-hot;
+    }
+  }
+
+  &__actions {
+    @include cl-card-actions;
+  }
+
+  &__action-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--cl-bg-white);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-full);
+    color: var(--cl-text-body);
+    cursor: pointer;
+    transition: all var(--cl-transition-fast);
+
+    &:hover:not(:disabled) {
+      background-color: var(--cl-primary);
+      border-color: var(--cl-primary);
+      color: var(--cl-text-white);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  &__body {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+  }
+
+  &__rating {
+    @include cl-rating;
+  }
+
+  &__title {
+    font-size: var(--cl-fs-body);
+    font-weight: var(--cl-fw-medium);
+    color: var(--cl-text-heading);
+    line-height: var(--cl-lh-normal);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin: 0;
+
+    a {
+      color: inherit;
+      text-decoration: none;
+
+      &:hover {
+        color: var(--cl-primary);
+      }
+    }
+  }
+
+  &__price {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    &--current {
+      @include cl-price-current;
+    }
+
+    &--old {
+      @include cl-price-old;
+    }
+  }
+}
+
+// ---- Featured Products Section ----
+.cl-featured {
+  @include cl-section;
+  background-color: var(--cl-bg-white);
+
+  &__promo {
+    background: linear-gradient(160deg, #0f3460 0%, #1b1f2a 100%);
+    border-radius: var(--cl-radius-md);
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    min-height: 480px;
+
+    &-tag {
+      @include cl-badge-deal;
+      align-self: flex-start;
+    }
+
+    &-discount {
+      font-size: 28px;
+      font-weight: var(--cl-fw-bold);
+      color: var(--cl-primary);
+      margin: 0;
+    }
+
+    &-title {
+      font-family: var(--cl-ff-heading);
+      font-size: var(--cl-fs-h3);
+      font-weight: var(--cl-fw-bold);
+      color: var(--cl-text-white);
+      margin: 0;
+      line-height: var(--cl-lh-tight);
+    }
+
+    &-note {
+      font-size: var(--cl-fs-body-sm);
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0;
+    }
+
+    &-btn {
+      @include cl-btn-primary;
+      align-self: flex-start;
+    }
+
+    &-images {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    &-img-item {
+      height: 90px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: var(--cl-radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+
+      img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+      }
+    }
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  &__tabs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+
+  &__tab {
+    padding: 7px 16px;
+    font-family: var(--cl-ff-body);
+    font-size: var(--cl-fs-body-sm);
+    font-weight: var(--cl-fw-medium);
+    color: var(--cl-text-body);
+    background: transparent;
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-sm);
+    cursor: pointer;
+    transition: all var(--cl-transition-fast);
+    white-space: nowrap;
+
+    &:hover,
+    &--active {
+      background-color: var(--cl-primary);
+      border-color: var(--cl-primary);
+      color: var(--cl-text-white);
+    }
+  }
+
+  &__browse {
+    @include cl-browse-link;
+    white-space: nowrap;
+    margin-left: auto;
+    text-decoration: none;
+  }
+
+  &__grid {
+    // grid is handled by Bootstrap row/col
+  }
+
+  &__loading {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+
+    @media (max-width: 991px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (max-width: 575px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  &__skeleton {
+    height: 260px;
+    background: linear-gradient(90deg, var(--cl-bg-gray) 25%, #e8ebec 50%, var(--cl-bg-gray) 75%);
+    background-size: 200% 100%;
+    animation: cl-shimmer 1.2s infinite;
+    border-radius: var(--cl-radius-sm);
+  }
+
+  &__empty {
+    color: var(--cl-text-secondary);
+    font-size: var(--cl-fs-body);
+    padding: 40px 0;
+    text-align: center;
+  }
+}
+
+// ---- Product Section With Promo ----
+.cl-product-section {
+  @include cl-section;
+  background-color: var(--cl-bg-gray);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--cl-border);
+  }
+
+  &__title {
+    @include cl-section-title;
+    margin-right: auto;
+  }
+
+  &__tabs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &__tab {
+    padding: 6px 14px;
+    font-family: var(--cl-ff-body);
+    font-size: var(--cl-fs-caption);
+    font-weight: var(--cl-fw-medium);
+    color: var(--cl-text-body);
+    background: transparent;
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-sm);
+    cursor: pointer;
+    transition: all var(--cl-transition-fast);
+
+    &:hover,
+    &--active {
+      background-color: var(--cl-primary);
+      border-color: var(--cl-primary);
+      color: var(--cl-text-white);
+    }
+  }
+
+  &__browse {
+    @include cl-browse-link;
+    text-decoration: none;
+  }
+
+  &__promo {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+  }
+
+  &__promo-card {
+    background-color: var(--cl-bg-white);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-md);
+    padding: 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__promo-label {
+    @include cl-badge-deal;
+    align-self: flex-start;
+    margin: 0;
+  }
+
+  &__promo-name {
+    font-family: var(--cl-ff-heading);
+    font-size: var(--cl-fs-h4);
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__promo-price {
+    @include cl-price-current;
+    font-size: var(--cl-fs-h3);
+    margin: 0;
+  }
+
+  &__promo-btn {
+    @include cl-btn-primary;
+    align-self: flex-start;
+    font-size: var(--cl-fs-caption);
+    padding: 8px 16px;
+    text-decoration: none;
+  }
+
+  &__discount-banner {
+    background: linear-gradient(135deg, var(--cl-primary) 0%, #e8741f 100%);
+    border-radius: var(--cl-radius-md);
+    padding: 20px 24px;
+    text-align: center;
+  }
+
+  &__discount-tag {
+    font-size: var(--cl-fs-h3);
+    font-weight: var(--cl-fw-bold);
+    color: var(--cl-text-white);
+    margin: 0 0 4px;
+  }
+
+  &__discount-label {
+    font-size: var(--cl-fs-body-sm);
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+  }
+
+  &__skeleton {
+    height: 260px;
+    background: linear-gradient(90deg, var(--cl-bg-white) 25%, #e8ebec 50%, var(--cl-bg-white) 75%);
+    background-size: 200% 100%;
+    animation: cl-shimmer 1.2s infinite;
+    border-radius: var(--cl-radius-sm);
+  }
+
+  &__empty {
+    color: var(--cl-text-secondary);
+    font-size: var(--cl-fs-body);
+    padding: 40px 0;
+    text-align: center;
+  }
+}
+
+// ---- Product Columns ----
+.cl-product-columns {
+  @include cl-section;
+  background-color: var(--cl-bg-white);
+
+  &__col {
+    height: 100%;
+  }
+
+  &__heading {
+    font-family: var(--cl-ff-heading);
+    font-size: var(--cl-fs-h5);
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--cl-primary);
+    display: flex;
+    align-items: center;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 16px;
+      background-color: var(--cl-primary);
+      border-radius: 2px;
+      margin-right: 8px;
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__skeleton {
+    height: 60px;
+    background: linear-gradient(90deg, var(--cl-bg-gray) 25%, #e8ebec 50%, var(--cl-bg-gray) 75%);
+    background-size: 200% 100%;
+    animation: cl-shimmer 1.2s infinite;
+    border-radius: var(--cl-radius-sm);
+  }
+
+  &__empty {
+    color: var(--cl-text-secondary);
+    font-size: var(--cl-fs-caption);
+    padding: 8px 0;
+  }
+}
+
+// ---- Product Small Row ----
+.cl-product-sm-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  padding: 8px;
+  border-radius: var(--cl-radius-sm);
+  border: 1px solid transparent;
+  transition: all var(--cl-transition-fast);
+
+  &:hover {
+    border-color: var(--cl-border);
+    box-shadow: var(--cl-shadow-sm);
+  }
+
+  &__image {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    background-color: var(--cl-bg-gray);
+    border-radius: var(--cl-radius-sm);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: var(--cl-border);
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    font-family: var(--cl-ff-body);
+    font-size: var(--cl-fs-body-sm);
+    font-weight: var(--cl-fw-medium);
+    color: var(--cl-text-heading);
+    margin: 0 0 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: var(--cl-lh-normal);
+    transition: color var(--cl-transition-fast);
+  }
+
+  &:hover &__title {
+    color: var(--cl-primary);
+  }
+
+  &__price {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    &--current {
+      @include cl-price-current;
+      font-size: var(--cl-fs-body-sm);
+    }
+
+    &--old {
+      @include cl-price-old;
+      font-size: var(--cl-fs-caption);
+    }
+  }
+}
+
+// ---- Shared Keyframes ----
+@keyframes cl-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

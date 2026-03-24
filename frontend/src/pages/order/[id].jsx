@@ -72,7 +72,7 @@ const SingleOrder = ({ params }) => {
     content = <ErrorMsg msg="There was an error" />;
   }
 
-  if (!isLoading && !isError) {
+  if (!isLoading && !isError && order?.order) {
     const {
       name,
       country,
@@ -82,7 +82,7 @@ const SingleOrder = ({ params }) => {
       createdAt,
       cart,
       shippingCost,
-      discount,
+      discount = 0,
       totalAmount,
       paymentMethod,
       status,
@@ -158,7 +158,7 @@ const SingleOrder = ({ params }) => {
                             <div className="col-md-4 col-sm-6">
                               <div className="invoice__left">
                                 <Image src={logo} alt="logo" />
-                                <p>2879 Elk Creek Road <br /> Stone Mountain, Georgia</p>
+                                <p>Shofy E-commerce <br /> Ho Chi Minh City, Vietnam</p>
                               </div>
                             </div>
                             <div className="col-md-8 col-sm-6">
@@ -302,7 +302,7 @@ const SingleOrder = ({ params }) => {
                         <div className="invoice__total-ammount mb-30">
                           <h5 className="mb-0">Total Amount</h5>
                           <p className="tp-font-medium text-danger">
-                            <strong>${parseInt(totalAmount).toFixed(2)}</strong>
+                            <strong>${parseFloat(totalAmount).toFixed(2)}</strong>
                           </p>
                         </div>
                       </div>

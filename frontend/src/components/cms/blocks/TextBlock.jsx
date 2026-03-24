@@ -1,7 +1,8 @@
 import React from 'react';
+import DOMPurify from 'isomorphic-dompurify';
 
 const TextBlock = ({ settings = {}, title, subtitle }) => {
-  const content = settings.content || '';
+  const content = settings.content ? DOMPurify.sanitize(settings.content) : '';
 
   if (!content && !title) {
     return null;

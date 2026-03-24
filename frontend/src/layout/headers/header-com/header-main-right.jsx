@@ -1,11 +1,10 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
-import Image from "next/image";
 import { useTranslation } from "react-i18next";
 // internal
 import useCartInfo from "@/hooks/use-cart-info";
-import { CartTwo, Compare, Menu, User, Wishlist } from "@/svg";
+import { CartTwo, Compare, Menu, Wishlist } from "@/svg";
 import { openCartMini } from "@/redux/features/cartSlice";
 
 const HeaderMainRight = ({ setIsCanvasOpen }) => {
@@ -16,56 +15,33 @@ const HeaderMainRight = ({ setIsCanvasOpen }) => {
   const dispatch = useDispatch()
   return (
     <div className="tp-header-main-right d-flex align-items-center justify-content-end">
-      <div className="tp-header-login d-none d-lg-block">
-        <div className="d-flex align-items-center">
-          <div className="tp-header-login-icon">
-            <span>
-              {userInfo?.imageURL ? (
-                <Link href="/profile">
-                  <Image
-                    src={userInfo.imageURL}
-                    alt="user img"
-                    width={35}
-                    height={35}
-                  />
-                </Link>
-              ) : userInfo?.name ? (
-                <Link href="/profile">
-                  <h2 className="text-uppercase login_text">
-                    {userInfo?.name[0]}
-                  </h2>
-                </Link>
-              ) : (
-                <User />
-              )}
-            </span>
-          </div>
-          <div className="tp-header-login-content d-none d-xl-block">
-            {!userInfo?.name && (
-              <Link href="/login">
-                <span>{t("header.hello")}</span>
-              </Link>
-            )}
-            {userInfo?.name && <span>{t("header.helloName", { name: userInfo.name })}</span>}
-            <div className="tp-header-login-title">
-              {!userInfo?.name && <Link href="/login">{t("header.signIn")}</Link>}
-              {userInfo?.name && <Link href="/profile">{t("header.yourAccount")}</Link>}
-            </div>
-          </div>
+      <div className="tp-header-action d-flex align-items-center">
+        {/* user */}
+        <div className="tp-header-action-item d-none d-lg-block">
+          {userInfo?.name ? (
+            <Link href="/profile" className="tp-header-user-link">
+              {t("header.helloName", { name: userInfo.name })}
+            </Link>
+          ) : (
+            <Link href="/login" className="tp-header-user-link">
+              {t("header.login")}
+            </Link>
+          )}
         </div>
-      </div>
-      <div className="tp-header-action d-flex align-items-center ml-50">
+        {/* compare */}
         <div className="tp-header-action-item d-none d-lg-block">
           <Link href="/compare" className="tp-header-action-btn">
             <Compare />
           </Link>
         </div>
+        {/* wishlist */}
         <div className="tp-header-action-item d-none d-lg-block">
           <Link href="/wishlist" className="tp-header-action-btn">
             <Wishlist />
             <span className="tp-header-action-badge">{wishlist.length}</span>
           </Link>
         </div>
+        {/* cart */}
         <div className="tp-header-action-item">
           <button
             onClick={() => dispatch(openCartMini())}
@@ -76,6 +52,7 @@ const HeaderMainRight = ({ setIsCanvasOpen }) => {
             <span className="tp-header-action-badge">{quantity}</span>
           </button>
         </div>
+        {/* mobile menu */}
         <div className="tp-header-action-item d-lg-none">
           <button
             onClick={() => setIsCanvasOpen(true)}

@@ -1,0 +1,88 @@
+@use '../utils' as *;
+
+// ============================================================
+// Clicon Features Bar — Phase 4
+// BEM: .cl-features-bar, .cl-feature-item
+// ============================================================
+
+.cl-features-bar {
+  font-family: var(--cl-ff-body);
+  padding: var(--cl-spacing-lg) 0;
+  border-top: 1px solid var(--cl-border);
+  border-bottom: 1px solid var(--cl-border);
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--cl-spacing-lg);
+  }
+
+  &__divider {
+    display: none;
+    width: 1px;
+    height: 40px;
+    background-color: var(--cl-border);
+    flex-shrink: 0;
+
+    @media (min-width: 768px) {
+      display: block;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Single feature item
+// ---------------------------------------------------------------------------
+.cl-feature-item {
+  display: flex;
+  align-items: center;
+  gap: var(--cl-spacing-md);
+  flex: 1;
+  min-width: 200px;
+
+  // On mobile: 2-column grid
+  @media (max-width: 575px) {
+    flex-basis: calc(50% - var(--cl-spacing-md));
+    min-width: 0;
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--cl-radius-full);
+    background-color: var(--cl-bg-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cl-primary);
+    font-size: 20px;
+    transition: background-color var(--cl-transition-normal), color var(--cl-transition-normal);
+
+    .cl-feature-item:hover & {
+      background-color: var(--cl-primary);
+      color: var(--cl-text-white);
+    }
+  }
+
+  &__text {
+    flex: 1;
+  }
+
+  &__title {
+    font-size: var(--cl-fs-body);
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+    margin: 0 0 2px;
+    line-height: var(--cl-lh-tight);
+  }
+
+  &__subtitle {
+    font-size: var(--cl-fs-caption);
+    color: var(--cl-text-secondary);
+    margin: 0;
+    line-height: var(--cl-lh-normal);
+  }
+}

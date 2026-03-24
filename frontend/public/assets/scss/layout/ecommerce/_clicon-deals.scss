@@ -1,0 +1,434 @@
+@use '../../utils' as *;
+
+// ============================================================
+// Clicon Best Deals — Phase 5
+// BEM: .cl-deals, .cl-deal-card, .cl-deal-featured
+// ============================================================
+
+// ---------------------------------------------------------------------------
+// Section wrapper
+// ---------------------------------------------------------------------------
+.cl-deals {
+  @include cl-section;
+  background-color: var(--cl-bg-white);
+
+  // ---------------------------------------------------------------------------
+  // Header row: title + countdown + browse link
+  // ---------------------------------------------------------------------------
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--cl-spacing-md);
+    margin-bottom: var(--cl-spacing-xl);
+    padding-bottom: var(--cl-spacing-lg);
+    border-bottom: 1px solid var(--cl-border);
+  }
+
+  &__header-left {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--cl-spacing-lg);
+  }
+
+  &__title {
+    @include cl-section-title;
+    margin: 0;
+  }
+
+  &__browse-link {
+    @include cl-browse-link;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Countdown timer
+  // ---------------------------------------------------------------------------
+  &__countdown {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-spacing-sm);
+  }
+
+  &__countdown-label {
+    font-size: var(--cl-fs-body-sm);
+    font-weight: var(--cl-fw-medium);
+    color: var(--cl-text-secondary);
+    white-space: nowrap;
+  }
+
+  &__countdown-units {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &__countdown-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--cl-text-heading);
+    color: var(--cl-text-white);
+    border-radius: var(--cl-radius-sm);
+    padding: 4px 8px;
+    min-width: 38px;
+    line-height: 1;
+  }
+
+  &__countdown-value {
+    font-size: var(--cl-fs-h5);
+    font-weight: var(--cl-fw-bold);
+    line-height: 1;
+  }
+
+  &__countdown-unit-label {
+    font-size: 9px;
+    font-weight: var(--cl-fw-medium);
+    text-transform: uppercase;
+    margin-top: 2px;
+    opacity: 0.8;
+  }
+
+  &__countdown-sep {
+    font-size: var(--cl-fs-h5);
+    font-weight: var(--cl-fw-bold);
+    color: var(--cl-text-heading);
+    line-height: 1;
+  }
+
+  // States
+  &__error,
+  &__empty {
+    padding: var(--cl-spacing-xl);
+    text-align: center;
+    color: var(--cl-text-secondary);
+    font-size: var(--cl-fs-body);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Deal grid card (small)
+// ---------------------------------------------------------------------------
+.cl-deal-card {
+  @include cl-card;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  &__image-wrap {
+    position: relative;
+    background-color: var(--cl-bg-gray);
+    aspect-ratio: 1 / 0.85;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    img {
+      transition: transform var(--cl-transition-slow);
+    }
+
+    .cl-deal-card:hover & img {
+      transform: scale(1.04);
+    }
+  }
+
+  &__no-img {
+    width: 100%;
+    height: 100%;
+    background-color: var(--cl-bg-gray);
+  }
+
+  &__badge-wrap {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 2;
+  }
+
+  // Badges use the mixin utility classes
+  .cl-badge {
+    @include cl-badge-base;
+
+    &--hot     { @include cl-badge-hot;      }
+    &--sale    { @include cl-badge-sale;     }
+    &--soldout { @include cl-badge-soldout;  }
+    &--deal    { @include cl-badge-deal;     }
+  }
+
+  // Hover actions column on right side
+  &__actions {
+    @include cl-card-actions;
+  }
+
+  .cl-deal-card:hover &__actions {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  &__action-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--cl-bg-white);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-full);
+    color: var(--cl-text-body);
+    cursor: pointer;
+    transition: all var(--cl-transition-fast);
+    font-size: 13px;
+
+    &:hover {
+      background-color: var(--cl-primary);
+      border-color: var(--cl-primary);
+      color: var(--cl-text-white);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+
+      &:hover {
+        background-color: var(--cl-bg-white);
+        border-color: var(--cl-border);
+        color: var(--cl-text-body);
+      }
+    }
+  }
+
+  &__body {
+    padding: var(--cl-spacing-sm) var(--cl-spacing-sm) var(--cl-spacing-md);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__rating {
+    @include cl-rating;
+  }
+
+  &__title {
+    font-size: var(--cl-fs-body-sm);
+    font-weight: var(--cl-fw-medium);
+    color: var(--cl-text-heading);
+    margin: 0;
+    line-height: var(--cl-lh-normal);
+    // 2-line clamp
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      transition: color var(--cl-transition-fast);
+
+      &:hover {
+        color: var(--cl-primary);
+      }
+    }
+  }
+
+  &__price-row {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-spacing-sm);
+    flex-wrap: wrap;
+    margin-top: auto;
+  }
+
+  .cl-price-current {
+    @include cl-price-current;
+  }
+
+  .cl-price-old {
+    @include cl-price-old;
+  }
+
+  // Skeleton variant
+  &--skeleton {
+    border-color: transparent;
+    box-shadow: none;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Deal featured card (large, left column)
+// ---------------------------------------------------------------------------
+.cl-deal-featured {
+  @include cl-card;
+  padding: var(--cl-spacing-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cl-spacing-lg);
+  height: 100%;
+
+  &__image-wrap {
+    background-color: var(--cl-bg-gray);
+    border-radius: var(--cl-radius-sm);
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      max-height: 100%;
+      width: auto;
+      max-width: 100%;
+      transition: transform var(--cl-transition-slow);
+    }
+
+    .cl-deal-featured:hover & img {
+      transform: scale(1.03);
+    }
+  }
+
+  &__no-img {
+    width: 100%;
+    height: 240px;
+    background-color: var(--cl-bg-gray);
+    border-radius: var(--cl-radius-sm);
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-spacing-sm);
+    flex: 1;
+  }
+
+  &__rating {
+    @include cl-rating;
+  }
+
+  &__title {
+    font-family: var(--cl-ff-heading);
+    font-size: var(--cl-fs-h4);
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+    margin: 0;
+    line-height: var(--cl-lh-tight);
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      transition: color var(--cl-transition-fast);
+
+      &:hover {
+        color: var(--cl-primary);
+      }
+    }
+  }
+
+  &__price-row {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-spacing-sm);
+    flex-wrap: wrap;
+  }
+
+  &__price-current {
+    font-size: var(--cl-fs-h3);
+    font-weight: var(--cl-fw-bold);
+    color: var(--cl-primary);
+  }
+
+  &__price-old {
+    @include cl-price-old;
+    font-size: var(--cl-fs-body);
+  }
+
+  &__desc {
+    font-size: var(--cl-fs-body-sm);
+    color: var(--cl-text-body);
+    line-height: var(--cl-lh-relaxed);
+    margin: 0;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-spacing-sm);
+    margin-top: auto;
+  }
+
+  &__cart-btn {
+    @include cl-btn-primary;
+    flex: 1;
+    justify-content: center;
+
+    &:disabled {
+      background-color: var(--cl-text-secondary);
+      cursor: not-allowed;
+
+      &:hover {
+        background-color: var(--cl-text-secondary);
+      }
+    }
+  }
+
+  &__quickview-btn {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--cl-bg-gray);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-sm);
+    color: var(--cl-text-body);
+    cursor: pointer;
+    transition: all var(--cl-transition-fast);
+    font-size: 16px;
+    flex-shrink: 0;
+
+    &:hover {
+      background-color: var(--cl-primary);
+      border-color: var(--cl-primary);
+      color: var(--cl-text-white);
+    }
+  }
+
+  // Skeleton variant
+  &--skeleton {
+    border-color: transparent;
+    box-shadow: none;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Shared skeleton utilities (used in deals + categories)
+// ---------------------------------------------------------------------------
+.cl-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: cl-shimmer 1.4s infinite linear;
+  border-radius: var(--cl-radius-sm);
+
+  &--rect {
+    width: 100%;
+    display: block;
+  }
+
+  &--line {
+    height: 14px;
+    display: block;
+  }
+
+  &--circle {
+    border-radius: var(--cl-radius-full);
+    display: block;
+  }
+}
+
+@keyframes cl-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}

@@ -112,10 +112,10 @@ const ProductItem = ({ product, style_2 = false }) => {
       </div>
       <div className="tp-product-content-2 pt-15">
         <div className="tp-product-tag-2">
-          {tags.map((t, i) => (
+          {(tags || []).map((t, i) => (
             <a key={i} href="#">
               {t}
-              {i < tags.length - 1 && ","}
+              {i < (tags || []).length - 1 && ","}
             </a>
           ))}
         </div>
@@ -129,10 +129,10 @@ const ProductItem = ({ product, style_2 = false }) => {
           {discount > 0 ? (
             <>
               <span className="tp-product-price-2 new-price">
-                ${price.toFixed(2)}{" "}
+                ${(Number(price) - (Number(price) * Number(discount)) / 100).toFixed(2)}{" "}
               </span>
               <span className="tp-product-price-2 old-price">
-                {" "}${(Number(price) - (Number(price) * Number(discount)) / 100).toFixed(2)}
+                {" "}${price.toFixed(2)}
               </span>
             </>
           ) : (

@@ -1,4 +1,5 @@
 import React from "react";
+import DOMPurify from "isomorphic-dompurify";
 import SEO from "@/components/seo";
 import HeaderTwo from "@/layout/headers/header-2";
 import Wrapper from "@/layout/wrapper";
@@ -82,7 +83,7 @@ export default function BlogPostPage({ post }) {
                   <h3 className="tp-postbox-title mb-20">{post.title}</h3>
                   <div
                     className="tp-postbox-text"
-                    dangerouslySetInnerHTML={{ __html: post.content }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content || '') }}
                   />
                   {post.tags && post.tags.length > 0 && (
                     <div className="tp-postbox-tags mt-30">

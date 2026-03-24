@@ -77,12 +77,12 @@ const Footer = ({ style_2 = false, style_3 = false, primary_style = false }) => 
                   <h4 className="tp-footer-widget-title">{t('footer.myAccount')}</h4>
                   <div className="tp-footer-widget-content">
                     <ul>
-                      <li><a href="#">{t('footer.trackOrders')}</a></li>
-                      <li><a href="#">{t('footer.shipping')}</a></li>
-                      <li><a href="#">{t('footer.wishlist')}</a></li>
-                      <li><a href="#">{t('footer.myAccount')}</a></li>
-                      <li><a href="#">{t('footer.orderHistory')}</a></li>
-                      <li><a href="#">{t('footer.returns')}</a></li>
+                      <li><Link href="/profile">{t('footer.trackOrders')}</Link></li>
+                      <li><Link href="/shop">{t('footer.shipping')}</Link></li>
+                      <li><Link href="/wishlist">{t('footer.wishlist')}</Link></li>
+                      <li><Link href="/profile">{t('footer.myAccount')}</Link></li>
+                      <li><Link href="/profile">{t('footer.orderHistory')}</Link></li>
+                      <li><Link href="/contact">{t('footer.returns')}</Link></li>
                     </ul>
                   </div>
                 </div>
@@ -92,12 +92,12 @@ const Footer = ({ style_2 = false, style_3 = false, primary_style = false }) => 
                   <h4 className="tp-footer-widget-title">{t('footer.information')}</h4>
                   <div className="tp-footer-widget-content">
                     <ul>
-                      <li><a href="#">{t('footer.ourStory')}</a></li>
-                      <li><a href="#">{t('footer.careers')}</a></li>
-                      <li><a href="#">{t('footer.privacyPolicy')}</a></li>
-                      <li><a href="#">{t('footer.termsConditions')}</a></li>
-                      <li><a href="#">{t('footer.latestNews')}</a></li>
-                      <li><a href="#">{t('footer.contactUs')}</a></li>
+                      <li><Link href="/contact">{t('footer.ourStory')}</Link></li>
+                      <li><Link href="/contact">{t('footer.careers')}</Link></li>
+                      <li><Link href="/contact">{t('footer.privacyPolicy')}</Link></li>
+                      <li><Link href="/contact">{t('footer.termsConditions')}</Link></li>
+                      <li><Link href="/blog">{t('footer.latestNews')}</Link></li>
+                      <li><Link href="/contact">{t('footer.contactUs')}</Link></li>
                     </ul>
                   </div>
                 </div>
@@ -149,9 +149,7 @@ const Footer = ({ style_2 = false, style_3 = false, primary_style = false }) => 
                 <div className="col-md-6">
                   <div className="tp-footer-copyright">
                     <p>
-                      {t('footer.copyright', { year: new Date().getFullYear() })} | Next js
-                      Template by
-                      <Link href="/"> &hearts;</Link>.
+                      &copy; {new Date().getFullYear()} Shofy. {t('footer.allRightsReserved')}
                     </p>
                   </div>
                 </div>

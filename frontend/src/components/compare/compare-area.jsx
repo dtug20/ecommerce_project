@@ -3,11 +3,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { Rating } from "react-simple-star-rating";
+import { useTranslation } from "react-i18next";
 // internal
 import { add_cart_product } from "@/redux/features/cartSlice";
 import { remove_compare_product } from "@/redux/features/compareSlice";
 
 const CompareArea = () => {
+  const { t } = useTranslation();
   const { compareItems } = useSelector((state) => state.compare);
   const dispatch = useDispatch();
 
@@ -28,9 +30,9 @@ const CompareArea = () => {
             <div className="col-xl-12">
               {compareItems.length === 0 && (
                 <div className="text-center pt-50">
-                  <h3>No Compare Items Found</h3>
+                  <h3>{t('compare.noItems')}</h3>
                   <Link href="/shop" className="tp-cart-checkout-btn mt-20">
-                    Continue Shipping
+                    {t('cart.continueShopping')}
                   </Link>
                 </div>
               )}
@@ -39,16 +41,20 @@ const CompareArea = () => {
                   <table className="table">
                     <tbody>
                       <tr>
-                        <th>Product</th>
+                        <th>{t('compare.product')}</th>
                         {compareItems.map(item => (
                           <td key={item._id} className="">
                             <div className="tp-compare-thumb">
-                              <Image
-                                src={item.img}
-                                alt="compare"
-                                width={205}
-                                height={176}
-                              />
+                              {item.img ? (
+                                <Image
+                                  src={item.img}
+                                  alt={item.title || "compare"}
+                                  width={205}
+                                  height={176}
+                                />
+                              ) : (
+                                <div style={{ width: 205, height: 176, backgroundColor: '#f3f4f6' }} />
+                              )}
                               <h4 className="tp-compare-product-title">
                                 <Link href={`/product-details/${item._id}`}>
                                   {item.title}
@@ -60,13 +66,12 @@ const CompareArea = () => {
                       </tr>
                       {/* Description */}
                       <tr>
-                        <th>Description</th>
+                        <th>{t('compare.description')}</th>
                         {compareItems.map(item => (
                           <td key={item._id}>
                             <div className="tp-compare-desc">
                               <p>
-                                Lorem ipsum dolor sit amet consectetur adipisicing
-                                elit. Ad, distinctio.
+                                {(item.description || '').substring(0, 100) || 'No description available.'}
                               </p>
                             </div>
                           </td>
@@ -74,23 +79,23 @@ const CompareArea = () => {
                       </tr>
                       {/* Price */}
                       <tr>
-                        <th>Price</th>
+                        <th>{t('compare.price')}</th>
                         {compareItems.map(item => (
                           <td key={item._id}>
                             <div className="tp-compare-price">
-                              <span>${item.price.toFixed(2)}</span>
+                              <span>${(item.price || 0).toFixed(2)}</span>
                             </div>
                           </td>
                         ))}
                       </tr>
                       {/* Add to cart*/}
                       <tr>
-                        <th>Add to cart</th>
+                        <th>{t('compare.addToCart')}</th>
                         {compareItems.map(item => (
                           <td key={item._id}>
                             <div className="tp-compare-add-to-cart">
                               <button onClick={() => handleAddProduct(item)} type="button" className="tp-btn">
-                                Add to Cart
+                                {t('compare.addToCart')}
                               </button>
                             </div>
                           </td>
@@ -98,14 +103,14 @@ const CompareArea = () => {
                       </tr>
                       {/* Rating */}
                       <tr>
-                        <th>Rating</th>
+                        <th>{t('compare.rating')}</th>
                         {compareItems.map(item => (
                           <td key={item._id}>
                             <div className="tp-compare-rating">
                               <Rating
                                 allowFraction
                                 size={16}
-                                initialValue={item.reviews.length > 0 ? item.reviews.reduce((acc, review) => acc + review.rating, 0) / item.reviews.length : 0}
+                                initialValue={item.reviews?.length > 0 ? item.reviews.reduce((acc, review) => acc + review.rating, 0) / item.reviews.length : 0}
                                 readonly={true}
                               />
                             </div>
@@ -114,7 +119,7 @@ const CompareArea = () => {
                       </tr>
                       {/* Remove */}
                       <tr>
-                        <th>Remove</th>
+                        <th>{t('compare.remove')}</th>
                         {compareItems.map(item => (
                           <td key={item._id}>
                             <div className="tp-compare-remove">

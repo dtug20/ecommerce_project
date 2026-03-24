@@ -38,7 +38,8 @@
     "contactUs": "Liên hệ",
     "talkToUs": "Liên hệ với chúng tôi",
     "gotQuestions": "Có câu hỏi? Gọi cho chúng tôi",
-    "copyright": "© {{year}} Bảo lưu mọi quyền"
+    "copyright": "© {{year}} Bảo lưu mọi quyền",
+    "allRightsReserved": "Bảo lưu mọi quyền."
   },
   "product": {
     "addToCart": "Thêm vào giỏ",
@@ -64,7 +65,11 @@
     "category": "Danh mục",
     "brand": "Thương hiệu",
     "tags": "Nhãn",
-    "sku": "Mã SP"
+    "sku": "Mã SP",
+    "seeMore": "Xem thêm",
+    "seeLess": "Rút gọn",
+    "soldBy": "Bán bởi:",
+    "askQuestion": "Đặt câu hỏi"
   },
   "shop": {
     "title": "Cửa hàng",
@@ -90,7 +95,8 @@
     "applyCoupon": "Áp dụng",
     "proceedToCheckout": "Tiến hành thanh toán",
     "remove": "Xóa",
-    "update": "Cập nhật giỏ hàng"
+    "update": "Cập nhật giỏ hàng",
+    "clearCart": "Xóa giỏ hàng"
   },
   "checkout": {
     "title": "Thanh toán",
@@ -142,5 +148,79 @@
   "language": {
     "en": "English",
     "vi": "Tiếng Việt"
+  },
+  "compare": {
+    "title": "So sánh sản phẩm",
+    "noItems": "Không có sản phẩm nào để so sánh",
+    "product": "Sản phẩm",
+    "description": "Mô tả",
+    "price": "Giá",
+    "addToCart": "Thêm vào giỏ",
+    "rating": "Đánh giá",
+    "remove": "Xóa"
+  },
+  "wishlist": {
+    "title": "Yêu thích",
+    "noItems": "Chưa có sản phẩm yêu thích",
+    "inStock": "Còn hàng",
+    "stock": "Tồn kho",
+    "action": "Thao tác",
+    "viewCart": "Xem giỏ hàng",
+    "goToCart": "Đến giỏ hàng",
+    "clearWishlist": "Xóa danh sách yêu thích"
+  },
+  "search": {
+    "title": "Tìm kiếm sản phẩm",
+    "sortByPrice": "Sắp xếp theo giá",
+    "priceLowHigh": "Giá thấp đến cao",
+    "priceHighLow": "Giá cao đến thấp",
+    "loadMore": "Xem thêm",
+    "showingResults": "Hiển thị 1-{{count}} trong {{total}} kết quả",
+    "noMatch": "Xin lỗi, không tìm thấy kết quả phù hợp"
+  },
+  "error": {
+    "title": "Không tìm thấy trang",
+    "message": "Trang bạn tìm kiếm không tồn tại.",
+    "backHome": "Về trang chủ"
+  },
+  "hero": {
+    "shopNow": "MUA NGAY",
+    "slide1Subtitle": "Bắt đầu chỉ từ",
+    "slide1Title": "Bộ Sưu Tập Trang Trí Nhà Đẹp Nhất",
+    "slide1Desc": "Thiết kế độc đáo và chất lượng cao cấp cho không gian sống của bạn.",
+    "slide2Subtitle": "Giảm tới 40%",
+    "slide2Title": "Khám Phá Điện Tử Mới Nhất",
+    "slide2Desc": "Thiết bị và công nghệ hàng đầu với giá không thể tốt hơn.",
+    "slide3Subtitle": "Mùa mới",
+    "slide3Title": "Xu Hướng Thời Trang — Mua Ngay",
+    "slide3Desc": "Phong cách mới cho mọi mùa — khám phá những sản phẩm mới nhất.",
+    "promo1Name": "iPhone 14 Pro",
+    "promo1Subtitle": "Điện thoại Apple",
+    "promo2Name": "Tai nghe Sony",
+    "promo2Subtitle": "Âm thanh không dây"
+  },
+  "features": {
+    "delivery": "Giao Hàng Nhanh",
+    "deliverySub": "Giao hàng trong 24 giờ",
+    "return": "Đổi Trả 24 Giờ",
+    "returnSub": "Hoàn tiền 100%",
+    "secure": "Thanh Toán An Toàn",
+    "secureSub": "Tiền của bạn được bảo đảm",
+    "support": "Hỗ Trợ 24/7",
+    "supportSub": "Liên hệ/nhắn tin trực tiếp"
+  },
+  "deals": {
+    "title": "Ưu Đãi Tốt Nhất",
+    "browseAll": "Xem Tất Cả Sản Phẩm",
+    "ends": "Kết thúc sau:",
+    "addToCart": "THÊM VÀO GIỎ",
+    "quickView": "Xem Nhanh",
+    "noDeals": "Hiện không có ưu đãi nào.",
+    "loading": "Đang tải ưu đãi..."
+  },
+  "categories": {
+    "title": "Mua Sắm Theo Danh Mục",
+    "noCategories": "Không tìm thấy danh mục.",
+    "loading": "Đang tải danh mục..."
   }
 }

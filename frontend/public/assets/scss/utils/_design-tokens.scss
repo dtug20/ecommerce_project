@@ -1,0 +1,100 @@
+// ============================================================
+// Shofy Design System Tokens
+// Extended CSS custom properties for the redesigned storefront
+// ============================================================
+
+:root {
+  // === BRAND (CMS-overridable via JS from SiteSettings API) ===
+  --tp-theme-primary: #a42c48;
+  --tp-theme-secondary: #821f38;
+  --tp-theme-accent: #0989FF;
+
+  // === NEUTRALS ===
+  --tp-gray-50: #f9fafb;
+  --tp-gray-100: #f3f4f6;
+  --tp-gray-200: #e5e7eb;
+  --tp-gray-300: #d1d5db;
+  --tp-gray-400: #9ca3af;
+  --tp-gray-500: #6b7280;
+  --tp-gray-600: #4b5563;
+  --tp-gray-700: #374151;
+  --tp-gray-800: #1f2937;
+  --tp-gray-900: #111827;
+
+  // === SEMANTIC ===
+  --tp-success: #22c55e;
+  --tp-error: #ef4444;
+  --tp-warning: #f59e0b;
+  --tp-info: #3b82f6;
+
+  // === TYPOGRAPHY ===
+  --tp-ff-body: 'Jost', sans-serif;
+  --tp-ff-heading: 'Jost', sans-serif;
+
+  --tp-fs-h1: 36px;
+  --tp-fs-h2: 30px;
+  --tp-fs-h3: 24px;
+  --tp-fs-h4: 20px;
+  --tp-fs-h5: 18px;
+  --tp-fs-h6: 16px;
+  --tp-fs-body: 15px;
+  --tp-fs-body-sm: 13px;
+  --tp-fs-caption: 12px;
+  --tp-fs-overline: 11px;
+
+  --tp-lh-tight: 1.2;
+  --tp-lh-normal: 1.5;
+  --tp-lh-relaxed: 1.7;
+
+  --tp-fw-regular: 400;
+  --tp-fw-medium: 500;
+  --tp-fw-semibold: 600;
+  --tp-fw-bold: 700;
+
+  // === SPACING ===
+  --tp-spacing-xs: 4px;
+  --tp-spacing-sm: 8px;
+  --tp-spacing-md: 16px;
+  --tp-spacing-lg: 24px;
+  --tp-spacing-xl: 32px;
+  --tp-spacing-2xl: 48px;
+  --tp-spacing-3xl: 64px;
+
+  // === SHAPES ===
+  --tp-radius-sm: 4px;
+  --tp-radius-md: 8px;
+  --tp-radius-lg: 12px;
+  --tp-radius-xl: 16px;
+  --tp-radius-full: 9999px;
+
+  --tp-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --tp-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --tp-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --tp-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+
+  // === TRANSITIONS ===
+  --tp-transition-fast: 150ms ease;
+  --tp-transition-normal: 300ms ease-out;
+  --tp-transition-slow: 500ms ease-out;
+
+  // === Z-INDEX SCALE ===
+  --tp-z-dropdown: 100;
+  --tp-z-sticky: 200;
+  --tp-z-fixed: 300;
+  --tp-z-modal-backdrop: 400;
+  --tp-z-modal: 500;
+  --tp-z-popover: 600;
+  --tp-z-tooltip: 700;
+}
+
+// === RESPONSIVE TYPOGRAPHY ===
+@media (max-width: 767px) {
+  :root {
+    --tp-fs-h1: 28px;
+    --tp-fs-h2: 24px;
+    --tp-fs-h3: 20px;
+    --tp-fs-h4: 18px;
+    --tp-fs-h5: 16px;
+    --tp-fs-h6: 15px;
+  }
+}

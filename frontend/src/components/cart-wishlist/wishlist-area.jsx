@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import keycloak from '@/lib/keycloak';
 import WishlistItem from './wishlist-item';
 import { useGetWishlistQuery, useRemoveFromWishlistMutation, useClearWishlistMutation } from '@/redux/features/cmsApi';
@@ -10,6 +11,7 @@ import { notifySuccess, notifyError } from '@/utils/toast';
 
 // Server-side wishlist item for authenticated users
 const ServerWishlistItem = ({ item, onRemove }) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { cart_products } = useSelector((state) => state.cart);
   const product = item.product || item;
@@ -43,13 +45,13 @@ const ServerWishlistItem = ({ item, onRemove }) => {
       </td>
       <td className="tp-cart-stock">
         <span className={`badge ${status === 'out-of-stock' ? 'bg-danger' : 'bg-success'}`}>
-          {status === 'out-of-stock' ? 'Out of Stock' : 'In Stock'}
+          {status === 'out-of-stock' ? t('product.outOfStock') : t('wishlist.inStock')}
         </span>
       </td>
       <td className="tp-cart-add-to-cart">
         {isAddedToCart ? (
           <Link href="/cart" className="tp-btn tp-btn-2 tp-btn-blue">
-            View Cart
+            {t('wishlist.viewCart')}
           </Link>
         ) : (
           <button
@@ -58,7 +60,7 @@ const ServerWishlistItem = ({ item, onRemove }) => {
             disabled={status === 'out-of-stock'}
             className="tp-btn tp-btn-2 tp-btn-blue"
           >
-            Add To Cart
+            {t('compare.addToCart')}
           </button>
         )}
       </td>
@@ -69,7 +71,7 @@ const ServerWishlistItem = ({ item, onRemove }) => {
           type="button"
         >
           <span>&#10005;</span>
-          <span> Remove</span>
+          <span> {t('compare.remove')}</span>
         </button>
       </td>
     </tr>
@@ -77,6 +79,7 @@ const ServerWishlistItem = ({ item, onRemove }) => {
 };
 
 const WishlistArea = () => {
+  const { t } = useTranslation();
   const isAuthenticated = keycloak.authenticated;
   const { wishlist } = useSelector((state) => state.wishlist);
   const dispatch = useDispatch();
@@ -95,7 +98,7 @@ const WishlistArea = () => {
   const handleServerRemove = async (productId, title) => {
     try {
       await removeFromWishlist(productId).unwrap();
-      notifyError(`${title} removed from wishlist`);
+      notifySuccess(`${title} removed from wishlist`);
     } catch {
       notifyError('Failed to remove item');
     }
@@ -131,9 +134,9 @@ const WishlistArea = () => {
         <div className="container">
           {serverItems.length === 0 && (
             <div className="text-center pt-50">
-              <h3>Your wishlist is empty</h3>
+              <h3>{t('wishlist.noItems')}</h3>
               <Link href="/shop" className="tp-cart-checkout-btn mt-20">
-                Continue Shopping
+                {t('cart.continueShopping')}
               </Link>
             </div>
           )}
@@ -144,10 +147,10 @@ const WishlistArea = () => {
                   <table className="table">
                     <thead>
                       <tr>
-                        <th colSpan="2" className="tp-cart-header-product">Product</th>
-                        <th className="tp-cart-header-price">Price</th>
-                        <th>Stock</th>
-                        <th>Action</th>
+                        <th colSpan="2" className="tp-cart-header-product">{t('compare.product')}</th>
+                        <th className="tp-cart-header-price">{t('product.price')}</th>
+                        <th>{t('wishlist.stock')}</th>
+                        <th>{t('wishlist.action')}</th>
                         <th></th>
                       </tr>
                     </thead>
@@ -167,7 +170,7 @@ const WishlistArea = () => {
                     <div className="col-xl-6 col-md-4">
                       <div className="tp-cart-update d-flex gap-3">
                         <Link href="/cart" className="tp-cart-update-btn">
-                          Go To Cart
+                          {t('wishlist.goToCart')}
                         </Link>
                         <button
                           type="button"
@@ -175,7 +178,7 @@ const WishlistArea = () => {
                           className="tp-cart-update-btn"
                           style={{ backgroundColor: '#f5f5f5', color: '#333' }}
                         >
-                          Clear Wishlist
+                          {t('wishlist.clearWishlist')}
                         </button>
                       </div>
                     </div>
@@ -196,9 +199,9 @@ const WishlistArea = () => {
         <div className="container">
           {wishlist.length === 0 && (
             <div className="text-center pt-50">
-              <h3>Your wishlist is empty</h3>
+              <h3>{t('wishlist.noItems')}</h3>
               <Link href="/shop" className="tp-cart-checkout-btn mt-20">
-                Continue Shopping
+                {t('cart.continueShopping')}
               </Link>
             </div>
           )}
@@ -209,10 +212,10 @@ const WishlistArea = () => {
                   <table className="table">
                     <thead>
                       <tr>
-                        <th colSpan="2" className="tp-cart-header-product">Product</th>
-                        <th className="tp-cart-header-price">Price</th>
-                        <th className="tp-cart-header-quantity">Quantity</th>
-                        <th>Action</th>
+                        <th colSpan="2" className="tp-cart-header-product">{t('compare.product')}</th>
+                        <th className="tp-cart-header-price">{t('product.price')}</th>
+                        <th className="tp-cart-header-quantity">{t('product.quantity')}</th>
+                        <th>{t('wishlist.action')}</th>
                         <th></th>
                       </tr>
                     </thead>
@@ -228,7 +231,7 @@ const WishlistArea = () => {
                     <div className="col-xl-6 col-md-4">
                       <div className="tp-cart-update">
                         <Link href="/cart" className="tp-cart-update-btn">
-                          Go To Cart
+                          {t('wishlist.goToCart')}
                         </Link>
                       </div>
                     </div>

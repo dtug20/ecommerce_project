@@ -1,0 +1,102 @@
+// ============================================================
+// Clicon Design System Tokens
+// Adapted from the Clicon Figma template for homepage redesign
+// Uses `--cl-` prefix to avoid collision with Shofy `--tp-` tokens
+// ============================================================
+
+:root {
+  // === BRAND COLORS ===
+  --cl-primary: #FA8232;
+  --cl-primary-hover: #E8741F;
+  --cl-secondary: #2DA5F3;
+
+  // === HEADER / FOOTER ===
+  --cl-header-bg: #1B6392;
+  --cl-header-bg-dark: #143E59;
+  --cl-footer-bg: #191C1F;
+  --cl-footer-text: #77878F;
+
+  // === TEXT ===
+  --cl-text-heading: #191C1F;
+  --cl-text-body: #475156;
+  --cl-text-secondary: #77878F;
+  --cl-text-white: #FFFFFF;
+
+  // === BORDERS / BG ===
+  --cl-border: #E4E7E9;
+  --cl-bg-gray: #F2F4F5;
+  --cl-bg-white: #FFFFFF;
+
+  // === SEMANTIC ===
+  --cl-success: #2DB224;
+  --cl-error: #EE5858;
+  --cl-warning: #EFD33D;
+  --cl-info: #2DA5F3;
+
+  // === BADGE COLORS ===
+  --cl-badge-hot: #FA8232;
+  --cl-badge-sale: #2DB224;
+  --cl-badge-soldout: #191C1F;
+  --cl-badge-deal: #2DA5F3;
+  --cl-badge-discount: #EFD33D;
+
+  // === TYPOGRAPHY ===
+  --cl-ff-body: 'Public Sans', sans-serif;
+  --cl-ff-heading: 'Public Sans', sans-serif;
+
+  --cl-fs-h1: 32px;
+  --cl-fs-h2: 24px;
+  --cl-fs-h3: 20px;
+  --cl-fs-h4: 18px;
+  --cl-fs-h5: 16px;
+  --cl-fs-h6: 14px;
+  --cl-fs-body: 14px;
+  --cl-fs-body-sm: 13px;
+  --cl-fs-caption: 12px;
+
+  --cl-fw-regular: 400;
+  --cl-fw-medium: 500;
+  --cl-fw-semibold: 600;
+  --cl-fw-bold: 700;
+
+  --cl-lh-tight: 1.2;
+  --cl-lh-normal: 1.5;
+  --cl-lh-relaxed: 1.7;
+
+  // === SPACING ===
+  --cl-spacing-xs: 4px;
+  --cl-spacing-sm: 8px;
+  --cl-spacing-md: 16px;
+  --cl-spacing-lg: 24px;
+  --cl-spacing-xl: 32px;
+  --cl-spacing-2xl: 48px;
+  --cl-spacing-3xl: 72px;
+
+  // === CONTAINER ===
+  --cl-container: 1200px;
+
+  // === SHAPES ===
+  --cl-radius-sm: 3px;
+  --cl-radius-md: 6px;
+  --cl-radius-lg: 10px;
+  --cl-radius-full: 9999px;
+
+  --cl-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --cl-shadow-md: 0 3px 10px rgba(0, 0, 0, 0.08);
+  --cl-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  // === TRANSITIONS ===
+  --cl-transition-fast: 150ms ease;
+  --cl-transition-normal: 200ms ease;
+  --cl-transition-slow: 300ms ease;
+}
+
+// === RESPONSIVE TYPOGRAPHY ===
+@media (max-width: 767px) {
+  :root {
+    --cl-fs-h1: 24px;
+    --cl-fs-h2: 20px;
+    --cl-fs-h3: 18px;
+    --cl-fs-h4: 16px;
+  }
+}

@@ -14,7 +14,7 @@ export const apiSlice = createApi({
           headers.set("Authorization", `Bearer ${keycloak.token}`);
         }
       } catch (error) {
-        console.error("Error preparing auth header:", error);
+        // Auth header preparation failed — request will proceed unauthenticated
       }
       return headers;
     },

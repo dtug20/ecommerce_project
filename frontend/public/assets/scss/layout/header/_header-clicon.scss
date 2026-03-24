@@ -1,0 +1,602 @@
+@use '../../utils' as *;
+
+// ============================================================
+// Clicon Header Styles
+// 4-tier: Announcement → Welcome → Main → Nav
+// ============================================================
+
+// --- Tier 1: Announcement Bar ---
+.cl-announcement {
+  background-color: #1B1B1B;
+  padding: 10px 0;
+  font-family: var(--cl-ff-body);
+  position: relative;
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+
+  &__content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    font-size: 16px;
+  }
+
+  &__highlight {
+    background-color: var(--cl-warning);
+    color: #1B1B1B;
+    padding: 2px 10px;
+    font-weight: var(--cl-fw-bold);
+    border-radius: 3px;
+  }
+
+  &__text {
+    font-weight: var(--cl-fw-bold);
+  }
+
+  &__deal {
+    font-size: 14px;
+    strong {
+      font-size: 28px;
+      font-weight: var(--cl-fw-bold);
+    }
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--cl-primary);
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: var(--cl-radius-sm);
+    font-size: 13px;
+    font-weight: var(--cl-fw-bold);
+    text-transform: uppercase;
+    transition: background-color var(--cl-transition-normal);
+
+    &:hover {
+      background-color: var(--cl-primary-hover);
+      color: #fff;
+    }
+  }
+
+  &__close {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity var(--cl-transition-fast);
+    padding: 4px;
+
+    &:hover { opacity: 1; }
+  }
+
+  @media #{$sm, $xs} {
+    &__deal strong { font-size: 20px; }
+    &__btn { display: none; }
+  }
+}
+
+// --- Tier 2: Welcome Bar ---
+.cl-welcome-bar {
+  background-color: var(--cl-header-bg);
+  padding: 8px 0;
+  font-family: var(--cl-ff-body);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__text {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    margin: 0;
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  &__socials {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+
+    a {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      transition: color var(--cl-transition-fast);
+
+      &:hover { color: #fff; }
+    }
+  }
+
+  &__dropdown {
+    position: relative;
+
+    &-toggle {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 13px;
+      font-family: var(--cl-ff-body);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0;
+      border-left: 1px solid rgba(255, 255, 255, 0.2);
+      padding-left: 12px;
+
+      i { font-size: 10px; }
+    }
+
+    &-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: #fff;
+      border-radius: var(--cl-radius-md);
+      box-shadow: var(--cl-shadow-lg);
+      min-width: 120px;
+      padding: 6px 0;
+      z-index: 200;
+      list-style: none;
+      margin: 6px 0 0;
+
+      li a {
+        display: block;
+        padding: 6px 16px;
+        font-size: 13px;
+        color: var(--cl-text-body);
+        cursor: pointer;
+        transition: background-color var(--cl-transition-fast);
+
+        &:hover {
+          background-color: var(--cl-bg-gray);
+          color: var(--cl-primary);
+        }
+      }
+    }
+  }
+
+  @media #{$md, $sm, $xs} {
+    display: none;
+  }
+}
+
+// --- Tier 3: Main Header ---
+.cl-main-header {
+  background-color: var(--cl-header-bg);
+  padding: 20px 0;
+  font-family: var(--cl-ff-body);
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+
+  &__logo {
+    flex-shrink: 0;
+
+    img {
+      filter: brightness(0) invert(1);
+    }
+  }
+
+  &__search {
+    flex: 1;
+    min-width: 0;
+
+    @media #{$sm, $xs} {
+      display: none;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+}
+
+// Search form
+.cl-search-form {
+  position: relative;
+  width: 100%;
+
+  &__input {
+    width: 100%;
+    height: 48px;
+    padding: 0 52px 0 20px;
+    border: none;
+    border-radius: var(--cl-radius-sm);
+    font-size: 14px;
+    font-family: var(--cl-ff-body);
+    color: var(--cl-text-body);
+    background-color: #fff;
+    outline: none;
+
+    &::placeholder {
+      color: var(--cl-text-secondary);
+    }
+  }
+
+  &__btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--cl-primary);
+    border: none;
+    border-radius: 0 var(--cl-radius-sm) var(--cl-radius-sm) 0;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color var(--cl-transition-normal);
+
+    &:hover {
+      background-color: var(--cl-primary-hover);
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  // Smaller variant for sticky header
+  &--sm &__input {
+    height: 40px;
+    font-size: 13px;
+  }
+  &--sm &__btn {
+    width: 40px;
+  }
+}
+
+// Header icon button
+.cl-header-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  border-radius: var(--cl-radius-full);
+  transition: background-color var(--cl-transition-fast);
+  text-decoration: none;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+
+  &--dark {
+    color: var(--cl-text-heading);
+    &:hover {
+      background-color: var(--cl-bg-gray);
+      color: var(--cl-primary);
+    }
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  &__badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    background-color: var(--cl-primary);
+    color: #fff;
+    font-size: 10px;
+    font-weight: var(--cl-fw-bold);
+    font-family: var(--cl-ff-body);
+    border-radius: var(--cl-radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+}
+
+// --- Tier 4: Nav Bar ---
+.cl-nav-bar {
+  background-color: #fff;
+  border-bottom: 1px solid var(--cl-border);
+  font-family: var(--cl-ff-body);
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  &__category {
+    position: relative;
+    flex-shrink: 0;
+
+    &-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--cl-primary);
+      color: #fff;
+      padding: 12px 20px;
+      border: none;
+      border-radius: var(--cl-radius-sm);
+      font-size: 14px;
+      font-weight: var(--cl-fw-semibold);
+      font-family: var(--cl-ff-body);
+      cursor: pointer;
+      transition: background-color var(--cl-transition-normal);
+      white-space: nowrap;
+
+      &:hover {
+        background-color: var(--cl-primary-hover);
+      }
+
+      svg {
+        width: 18px;
+        height: 14px;
+        color: #fff;
+      }
+
+      i { font-size: 10px; }
+    }
+
+  }
+
+  &__links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+
+    a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 12px;
+      font-size: 14px;
+      color: var(--cl-text-body);
+      white-space: nowrap;
+      transition: color var(--cl-transition-fast);
+
+      i {
+        font-size: 14px;
+        color: var(--cl-text-secondary);
+        transition: color var(--cl-transition-fast);
+      }
+
+      &:hover {
+        color: var(--cl-primary);
+        i { color: var(--cl-primary); }
+      }
+    }
+  }
+
+  &__phone {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-left: auto;
+    font-size: 14px;
+    white-space: nowrap;
+
+    i {
+      color: var(--cl-text-heading);
+    }
+
+    a {
+      color: var(--cl-text-heading);
+      font-weight: var(--cl-fw-medium);
+
+      &:hover { color: var(--cl-primary); }
+    }
+  }
+}
+
+// --- Category Dropdown (with sub-menu on hover) ---
+.cl-cat-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 270px;
+  background: #fff;
+  border: 1px solid var(--cl-border);
+  border-top: none;
+  border-radius: 0 0 var(--cl-radius-md) var(--cl-radius-md);
+  box-shadow: var(--cl-shadow-lg);
+  z-index: 200;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: all 0.2s ease;
+
+  &--open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  &__list {
+    list-style: none;
+    padding: 8px 0;
+    margin: 0;
+  }
+
+  &__item {
+    position: relative;
+
+    &--has-sub:hover > .cl-cat-dropdown__sub {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+
+    &--has-sub:hover > .cl-cat-dropdown__link {
+      color: var(--cl-primary);
+      background-color: var(--cl-bg-gray);
+    }
+  }
+
+  &__link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-family: var(--cl-ff-body);
+    color: var(--cl-text-body);
+    transition: all 0.15s ease;
+    text-decoration: none;
+
+    &:hover {
+      color: var(--cl-primary);
+      background-color: var(--cl-bg-gray);
+    }
+
+    span {
+      flex: 1;
+    }
+  }
+
+  &__icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  &__arrow {
+    font-size: 10px;
+    color: var(--cl-text-secondary);
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+  }
+
+  &__item--has-sub:hover &__arrow {
+    color: var(--cl-primary);
+  }
+
+  // --- Sub-menu (flyout on hover) ---
+  &__sub {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    min-width: 220px;
+    background: #fff;
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-md);
+    box-shadow: var(--cl-shadow-lg);
+    list-style: none;
+    padding: 8px 0;
+    margin: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(8px);
+    transition: all 0.2s ease;
+    z-index: 201;
+  }
+
+  &__sub-item {
+    // no special styles needed
+  }
+
+  &__sub-link {
+    display: block;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-family: var(--cl-ff-body);
+    color: var(--cl-text-body);
+    text-decoration: none;
+    transition: all 0.15s ease;
+
+    &:hover {
+      color: var(--cl-primary);
+      background-color: var(--cl-bg-gray);
+    }
+  }
+}
+
+// --- Sticky Header ---
+.cl-sticky-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  box-shadow: var(--cl-shadow-md);
+  z-index: 999;
+  transform: translateY(-100%);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+
+  &--active {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 0;
+  }
+
+  &__logo {
+    flex-shrink: 0;
+  }
+
+  &__search {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+}

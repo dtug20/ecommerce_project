@@ -6,8 +6,12 @@ import en from "@/locales/en/common.json";
 import vi from "@/locales/vi/common.json";
 
 if (!i18n.isInitialized) {
+  // Only attach LanguageDetector on client side — it accesses localStorage
+  // which crashes during SSR and in Safari Private Browsing
+  if (typeof window !== 'undefined') {
+    i18n.use(LanguageDetector);
+  }
   i18n
-    .use(LanguageDetector)
     .use(initReactI18next)
     .init({
       resources: {

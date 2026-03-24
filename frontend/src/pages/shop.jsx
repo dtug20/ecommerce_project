@@ -19,8 +19,9 @@ const ShopPage = ({ query }) => {
   const apiParams = {
     page: query.page || 1,
     limit: 20,
-    ...(query.category && { category: query.category }),
-    ...(query.subCategory && { category: query.subCategory }),
+    ...(query.subCategory
+      ? { category: query.subCategory }
+      : query.category && { category: query.category }),
     ...(query.brand && { brand: query.brand }),
     ...(query.color && { color: query.color }),
     ...(query.minPrice && { minPrice: query.minPrice }),

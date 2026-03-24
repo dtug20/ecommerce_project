@@ -19,152 +19,123 @@ export const initSocket = (store) => {
   });
 
   socket.on('connect', () => {
-    console.log('[Socket.io] Connected:', socket.id);
+    // connected
   });
 
   socket.on('disconnect', () => {
-    console.log('[Socket.io] Disconnected');
   });
 
   // Product events
   socket.on('product:created', (data) => {
-    console.log('[Socket.io] Product created:', data);
     if (invalidateCallbacks.product) invalidateCallbacks.product();
   });
 
   socket.on('product:updated', (data) => {
-    console.log('[Socket.io] Product updated:', data);
     if (invalidateCallbacks.product) invalidateCallbacks.product();
   });
 
   socket.on('product:deleted', (data) => {
-    console.log('[Socket.io] Product deleted:', data);
     if (invalidateCallbacks.product) invalidateCallbacks.product();
   });
 
   socket.on('products:refresh', () => {
-    console.log('[Socket.io] Products refresh');
     if (invalidateCallbacks.product) invalidateCallbacks.product();
   });
 
   // Category events
   socket.on('category:created', (data) => {
-    console.log('[Socket.io] Category created:', data);
     if (invalidateCallbacks.category) invalidateCallbacks.category();
   });
 
   socket.on('category:updated', (data) => {
-    console.log('[Socket.io] Category updated:', data);
     if (invalidateCallbacks.category) invalidateCallbacks.category();
   });
 
   socket.on('category:deleted', (data) => {
-    console.log('[Socket.io] Category deleted:', data);
     if (invalidateCallbacks.category) invalidateCallbacks.category();
   });
 
   socket.on('categories:refresh', () => {
-    console.log('[Socket.io] Categories refresh');
     if (invalidateCallbacks.category) invalidateCallbacks.category();
   });
 
   // Order events
   socket.on('order:created', (data) => {
-    console.log('[Socket.io] Order created:', data);
     if (invalidateCallbacks.order) invalidateCallbacks.order();
   });
 
   socket.on('order:updated', (data) => {
-    console.log('[Socket.io] Order updated:', data);
     if (invalidateCallbacks.order) invalidateCallbacks.order();
   });
 
   socket.on('order:deleted', (data) => {
-    console.log('[Socket.io] Order deleted:', data);
     if (invalidateCallbacks.order) invalidateCallbacks.order();
   });
 
   socket.on('orders:refresh', () => {
-    console.log('[Socket.io] Orders refresh');
     if (invalidateCallbacks.order) invalidateCallbacks.order();
   });
 
   // User events
   socket.on('user:created', (data) => {
-    console.log('[Socket.io] User created:', data);
     if (invalidateCallbacks.user) invalidateCallbacks.user();
   });
 
   socket.on('user:updated', (data) => {
-    console.log('[Socket.io] User updated:', data);
     if (invalidateCallbacks.user) invalidateCallbacks.user();
   });
 
   socket.on('user:deleted', (data) => {
-    console.log('[Socket.io] User deleted:', data);
     if (invalidateCallbacks.user) invalidateCallbacks.user();
   });
 
   socket.on('users:refresh', () => {
-    console.log('[Socket.io] Users refresh');
     if (invalidateCallbacks.user) invalidateCallbacks.user();
   });
 
   // CMS Page events
   socket.on('page:created', () => {
-    console.log('[Socket.io] Page created');
     if (invalidateCallbacks.page) invalidateCallbacks.page();
   });
   socket.on('page:updated', () => {
-    console.log('[Socket.io] Page updated');
     if (invalidateCallbacks.page) invalidateCallbacks.page();
   });
   socket.on('page:deleted', () => {
-    console.log('[Socket.io] Page deleted');
     if (invalidateCallbacks.page) invalidateCallbacks.page();
   });
 
   // Menu events
   socket.on('menu:updated', () => {
-    console.log('[Socket.io] Menu updated');
     if (invalidateCallbacks.menu) invalidateCallbacks.menu();
   });
 
   // Banner events
   socket.on('banner:created', () => {
-    console.log('[Socket.io] Banner created');
     if (invalidateCallbacks.banner) invalidateCallbacks.banner();
   });
   socket.on('banner:updated', () => {
-    console.log('[Socket.io] Banner updated');
     if (invalidateCallbacks.banner) invalidateCallbacks.banner();
   });
   socket.on('banner:deleted', () => {
-    console.log('[Socket.io] Banner deleted');
     if (invalidateCallbacks.banner) invalidateCallbacks.banner();
   });
 
   // Blog events
   socket.on('blog:created', () => {
-    console.log('[Socket.io] Blog post created');
     if (invalidateCallbacks.blog) invalidateCallbacks.blog();
   });
   socket.on('blog:published', () => {
-    console.log('[Socket.io] Blog post published');
     if (invalidateCallbacks.blog) invalidateCallbacks.blog();
   });
   socket.on('blog:updated', () => {
-    console.log('[Socket.io] Blog post updated');
     if (invalidateCallbacks.blog) invalidateCallbacks.blog();
   });
   socket.on('blog:deleted', () => {
-    console.log('[Socket.io] Blog post deleted');
     if (invalidateCallbacks.blog) invalidateCallbacks.blog();
   });
 
   // Settings events
   socket.on('settings:updated', () => {
-    console.log('[Socket.io] Settings updated');
     if (invalidateCallbacks.settings) invalidateCallbacks.settings();
   });
 

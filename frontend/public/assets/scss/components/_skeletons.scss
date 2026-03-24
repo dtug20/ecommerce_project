@@ -1,0 +1,83 @@
+// ============================================================
+// Loading Skeleton Patterns
+// Uses Bootstrap's placeholder-glow for consistency
+// ============================================================
+
+@keyframes tp-skeleton-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.tp-skeleton {
+  background-color: var(--tp-gray-100);
+  border-radius: var(--tp-radius-sm);
+  animation: tp-skeleton-pulse 1.5s ease-in-out infinite;
+
+  &--circle {
+    border-radius: 50%;
+  }
+
+  &--rounded {
+    border-radius: var(--tp-radius-md);
+  }
+}
+
+// Product card skeleton
+.tp-product-card-skeleton {
+  .tp-skeleton-image {
+    aspect-ratio: 1/1;
+    width: 100%;
+    background-color: var(--tp-gray-100);
+    border-radius: var(--tp-radius-md) var(--tp-radius-md) 0 0;
+    animation: tp-skeleton-pulse 1.5s ease-in-out infinite;
+  }
+
+  .tp-skeleton-body {
+    padding: var(--tp-spacing-md);
+  }
+
+  .tp-skeleton-line {
+    height: 14px;
+    background-color: var(--tp-gray-100);
+    border-radius: var(--tp-radius-sm);
+    margin-bottom: var(--tp-spacing-sm);
+    animation: tp-skeleton-pulse 1.5s ease-in-out infinite;
+
+    &--short { width: 40%; }
+    &--medium { width: 65%; }
+    &--long { width: 85%; }
+    &--full { width: 100%; }
+  }
+}
+
+// Blog card skeleton
+.tp-blog-card-skeleton {
+  .tp-skeleton-image {
+    aspect-ratio: 16/9;
+    width: 100%;
+    background-color: var(--tp-gray-100);
+    border-radius: var(--tp-radius-md) var(--tp-radius-md) 0 0;
+    animation: tp-skeleton-pulse 1.5s ease-in-out infinite;
+  }
+}
+
+// List skeleton (generic rows)
+.tp-list-skeleton {
+  .tp-skeleton-row {
+    display: flex;
+    align-items: center;
+    gap: var(--tp-spacing-md);
+    padding: var(--tp-spacing-md) 0;
+    border-bottom: 1px solid var(--tp-gray-100);
+
+    .tp-skeleton-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: var(--tp-gray-100);
+      flex-shrink: 0;
+      animation: tp-skeleton-pulse 1.5s ease-in-out infinite;
+    }
+  }
+}

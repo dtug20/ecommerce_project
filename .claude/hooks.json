@@ -1,0 +1,10 @@
+{
+  "hooks": [
+    {
+      "type": "afterEdit",
+      "pattern": "frontend/src/**/*.{js,jsx}",
+      "command": "cd frontend && npx eslint --no-error-on-unmatched-pattern --quiet ${file} 2>/dev/null || true",
+      "description": "Run ESLint on edited frontend files"
+    }
+  ]
+}

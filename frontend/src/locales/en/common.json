@@ -38,7 +38,8 @@
     "contactUs": "Contact Us",
     "talkToUs": "Talk To Us",
     "gotQuestions": "Got Questions? Call us",
-    "copyright": "© {{year}} All Rights Reserved"
+    "copyright": "© {{year}} All Rights Reserved",
+    "allRightsReserved": "All Rights Reserved."
   },
   "product": {
     "addToCart": "Add to Cart",
@@ -64,7 +65,11 @@
     "category": "Category",
     "brand": "Brand",
     "tags": "Tags",
-    "sku": "SKU"
+    "sku": "SKU",
+    "seeMore": "See more",
+    "seeLess": "See less",
+    "soldBy": "Sold by:",
+    "askQuestion": "Ask a question"
   },
   "shop": {
     "title": "Shop",
@@ -90,7 +95,8 @@
     "applyCoupon": "Apply Coupon",
     "proceedToCheckout": "Proceed to Checkout",
     "remove": "Remove",
-    "update": "Update Cart"
+    "update": "Update Cart",
+    "clearCart": "Clear Cart"
   },
   "checkout": {
     "title": "Checkout",
@@ -142,5 +148,79 @@
   "language": {
     "en": "English",
     "vi": "Tiếng Việt"
+  },
+  "compare": {
+    "title": "Compare Products",
+    "noItems": "No Compare Items Found",
+    "product": "Product",
+    "description": "Description",
+    "price": "Price",
+    "addToCart": "Add to Cart",
+    "rating": "Rating",
+    "remove": "Remove"
+  },
+  "wishlist": {
+    "title": "Wishlist",
+    "noItems": "No Wishlist Items Found",
+    "inStock": "In Stock",
+    "stock": "Stock",
+    "action": "Action",
+    "viewCart": "View Cart",
+    "goToCart": "Go To Cart",
+    "clearWishlist": "Clear Wishlist"
+  },
+  "search": {
+    "title": "Search Products",
+    "sortByPrice": "Sort By Price",
+    "priceLowHigh": "Price low to high",
+    "priceHighLow": "Price high to low",
+    "loadMore": "Load More",
+    "showingResults": "Showing 1-{{count}} of {{total}} results",
+    "noMatch": "Sorry, nothing matched your search terms"
+  },
+  "error": {
+    "title": "Page Not Found",
+    "message": "The page you are looking for does not exist.",
+    "backHome": "Back to Home"
+  },
+  "hero": {
+    "shopNow": "SHOP NOW",
+    "slide1Subtitle": "Starting at only",
+    "slide1Title": "Best Collection For Home Decoration",
+    "slide1Desc": "Exclusive design and premium quality furniture for your living space.",
+    "slide2Subtitle": "Up to 40% off",
+    "slide2Title": "Explore Our Latest Electronics",
+    "slide2Desc": "Top-rated gadgets and devices at unbeatable prices.",
+    "slide3Subtitle": "New Season",
+    "slide3Title": "Fashion Forward — Shop the Trend",
+    "slide3Desc": "Fresh styles for every season — discover the latest arrivals.",
+    "promo1Name": "iPhone 14 Pro",
+    "promo1Subtitle": "Apple Smartphone",
+    "promo2Name": "Sony Headphones",
+    "promo2Subtitle": "Wireless Audio"
+  },
+  "features": {
+    "delivery": "Fastest Delivery",
+    "deliverySub": "Delivery in 24/H",
+    "return": "24 Hours Return",
+    "returnSub": "100% money back guarantee",
+    "secure": "Secure Payment",
+    "secureSub": "Your money is safe",
+    "support": "Support 24/7",
+    "supportSub": "Live contact/message"
+  },
+  "deals": {
+    "title": "Best Deals",
+    "browseAll": "Browse All Products",
+    "ends": "Ends in:",
+    "addToCart": "ADD TO CART",
+    "quickView": "Quick View",
+    "noDeals": "No deals available right now.",
+    "loading": "Loading deals..."
+  },
+  "categories": {
+    "title": "Shop with Categories",
+    "noCategories": "No categories found.",
+    "loading": "Loading categories..."
   }
 }

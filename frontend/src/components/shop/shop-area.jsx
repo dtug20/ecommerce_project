@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Pagination from "@/ui/Pagination";
 import ProductItem from "../products/fashion/product-item";
 import CategoryFilter from "./shop-filter/category-filter";
@@ -17,6 +17,10 @@ const ShopArea = ({ all_products, products, otherProps }) => {
   const [filteredRows, setFilteredRows] = useState(products);
   const [pageStart, setPageStart] = useState(0);
   const [countOfPage, setCountOfPage] = useState(12);
+
+  useEffect(() => {
+    setFilteredRows(products);
+  }, [products]);
 
   const paginatedData = (items, startPage, pageCount) => {
     setFilteredRows(items);

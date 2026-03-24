@@ -10,7 +10,7 @@ import useCartInfo from '@/hooks/use-cart-info';
 import { openCartMini } from '@/redux/features/cartSlice';
 import HeaderTopRight from './header-com/header-top-right';
 import CartMiniSidebar from '@/components/common/cart-mini-sidebar';
-import { CartTwo, Compare, Facebook, Menu, PhoneTwo, Wishlist, Search } from '@/svg';
+import { CartTwo, Compare, Menu, PhoneTwo, Wishlist, Search } from '@/svg';
 import useSearchFormSubmit from '@/hooks/use-search-form-submit';
 import OffCanvas from '@/components/common/off-canvas';
 
@@ -31,17 +31,10 @@ const HeaderTwo = ({ style_2 = false }) => {
                 <div className="col-md-6">
                   <div className="tp-header-info d-flex align-items-center">
                     <div className="tp-header-info-item">
-                      <a href="#">
-                        <span>
-                          <Facebook />
-                        </span> 7500k Followers
-                      </a>
-                    </div>
-                    <div className="tp-header-info-item">
-                      <a href="tel:402-763-282-46">
+                      <a href="tel:+84-123-456-789">
                         <span>
                           <PhoneTwo />
-                        </span> +(880) 1622097651
+                        </span> Hotline: +84 123 456 789
                       </a>
                     </div>
                   </div>
@@ -125,7 +118,7 @@ const HeaderTwo = ({ style_2 = false }) => {
       {/* cart mini sidebar end */}
 
       {/* off canvas start */}
-      <OffCanvas isOffCanvasOpen={isOffCanvasOpen} setIsCanvasOpen={setIsCanvasOpen} categoryType="fashion" />
+      <OffCanvas isOffCanvasOpen={isOffCanvasOpen} setIsCanvasOpen={setIsCanvasOpen} />
       {/* off canvas end */}
     </>
   );

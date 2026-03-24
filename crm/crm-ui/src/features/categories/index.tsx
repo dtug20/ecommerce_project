@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Table,
@@ -6,11 +6,9 @@ import {
   Input,
   Select,
   Space,
-  Modal,
   Form,
   Switch,
   InputNumber,
-  Descriptions,
   Tag,
   Avatar,
   Badge,
@@ -22,6 +20,13 @@ import {
   Upload,
   Tree,
   Card,
+  Statistic,
+  Drawer,
+  Divider,
+  Flex,
+  Progress,
+  Empty,
+  Segmented,
 } from 'antd';
 import type { DataNode } from 'antd/es/tree';
 import {
@@ -29,10 +34,17 @@ import {
   EditOutlined,
   EyeOutlined,
   DeleteOutlined,
-  ClearOutlined,
+  SearchOutlined,
   PictureOutlined,
   TableOutlined,
   ApartmentOutlined,
+  TagsOutlined,
+  EyeInvisibleOutlined,
+  AppstoreOutlined,
+  StarOutlined,
+  FolderOutlined,
+  CalendarOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons';
 import toast from 'react-hot-toast';
 import type { TableProps } from 'antd';
@@ -44,6 +56,7 @@ import StatusBadge from '@/components/commons/StatusBadge';
 import PageHeader from '@/components/commons/PageHeader';
 
 const { TextArea } = Input;
+const { Text, Title } = Typography;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -65,7 +78,6 @@ interface CategoryFormValues {
 
 // ---------------------------------------------------------------------------
 // Hook: debounced state
-// Returns [inputValue, debouncedValue, setter]
 // ---------------------------------------------------------------------------
 
 function useDebouncedState(
@@ -91,80 +103,121 @@ function useDebouncedState(
 }
 
 // ---------------------------------------------------------------------------
+// Product type color map
+// ---------------------------------------------------------------------------
+
+const PRODUCT_TYPE_COLORS: Record<string, string> = {
+  fashion: 'magenta',
+  electronics: 'blue',
+  beauty: 'pink',
+  jewelry: 'gold',
+  other: 'default',
+};
+
+function getProductTypeColor(type: string): string {
+  return PRODUCT_TYPE_COLORS[type?.toLowerCase()] ?? 'default';
+}
+
+// ---------------------------------------------------------------------------
 // Sub-component: Category thumbnail
 // ---------------------------------------------------------------------------
 
-function CategoryImage({ src, alt }: { src?: string; alt: string }) {
+function CategoryImage({ src, alt, size = 48 }: { src?: string; alt: string; size?: number }) {
   if (src) {
     return (
       <Avatar
         shape="square"
-        size={48}
+        size={size}
         src={src}
         alt={alt}
-        style={{ objectFit: 'cover', borderRadius: 6 }}
+        style={{ objectFit: 'cover', borderRadius: 8, border: '1px solid #f0f0f0' }}
       />
     );
   }
   return (
     <Avatar
       shape="square"
-      size={48}
+      size={size}
       icon={<PictureOutlined />}
-      style={{ backgroundColor: '#f5f5f5', color: '#bfbfbf' }}
+      style={{ backgroundColor: '#fafafa', color: '#d9d9d9', borderRadius: 8, border: '1px solid #f0f0f0' }}
     />
   );
 }
 
 // ---------------------------------------------------------------------------
-// Main page
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Tree builder
+// Tree builder (enhanced)
 // ---------------------------------------------------------------------------
 
 function buildTreeData(
   categories: Category[],
   onEdit: (cat: Category) => void,
+  onView: (cat: Category) => void,
   onDelete: (id: string) => void,
 ): DataNode[] {
   return categories.map((cat) => {
+    const productCount = cat.products?.length ?? 0;
+
     const nodeTitle = (
-      <Space size={6}>
-        <Typography.Text strong>{cat.parent}</Typography.Text>
-        <Badge
-          count={cat.products?.length ?? 0}
-          showZero
-          style={{ backgroundColor: '#1677ff', fontSize: 10 }}
-        />
-        <StatusBadge status={cat.status} type="general" />
-        <Button
-          size="small"
-          type="text"
-          icon={<EditOutlined />}
-          onClick={(e) => { e.stopPropagation(); onEdit(cat); }}
-        />
-        <Popconfirm
-          title="Delete category?"
-          onConfirm={() => onDelete(cat._id)}
-          okText="Delete"
-          okButtonProps={{ danger: true }}
-        >
-          <Button
-            size="small"
-            type="text"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={(e) => e.stopPropagation()}
-          />
-        </Popconfirm>
-      </Space>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '8px 12px',
+          borderRadius: 8,
+          background: '#fafafa',
+          border: '1px solid #f0f0f0',
+          marginBottom: 4,
+          transition: 'all 0.2s',
+        }}
+      >
+        <Flex align="center" gap={12}>
+          <CategoryImage src={cat.img} alt={cat.parent} size={36} />
+          <div>
+            <Text strong style={{ fontSize: 14 }}>{cat.parent}</Text>
+            <div>
+              <Tag color={getProductTypeColor(cat.productType)} style={{ fontSize: 11, marginRight: 4 }}>
+                {cat.productType}
+              </Tag>
+              <Badge
+                count={productCount}
+                showZero
+                size="small"
+                style={{ backgroundColor: productCount > 0 ? '#1677ff' : '#d9d9d9', fontSize: 10 }}
+              />
+            </div>
+          </div>
+        </Flex>
+        <Space size={0}>
+          <StatusBadge status={cat.status} type="general" />
+          {cat.featured && <Tag color="gold" style={{ fontSize: 11 }}>Featured</Tag>}
+          <Tooltip title="View">
+            <Button size="small" type="text" icon={<EyeOutlined />} onClick={(e) => { e.stopPropagation(); onView(cat); }} />
+          </Tooltip>
+          <Tooltip title="Edit">
+            <Button size="small" type="text" icon={<EditOutlined />} onClick={(e) => { e.stopPropagation(); onEdit(cat); }} />
+          </Tooltip>
+          <Popconfirm
+            title="Delete this category?"
+            description="This action cannot be undone."
+            onConfirm={() => onDelete(cat._id)}
+            okText="Delete"
+            okButtonProps={{ danger: true }}
+          >
+            <Button size="small" type="text" danger icon={<DeleteOutlined />} onClick={(e) => e.stopPropagation()} />
+          </Popconfirm>
+        </Space>
+      </div>
     );
 
     const childNodes: DataNode[] = (cat.children ?? []).map((childName, idx) => ({
       key: `${cat._id}-child-${idx}`,
-      title: <Typography.Text style={{ fontSize: 13 }}>{childName}</Typography.Text>,
+      title: (
+        <div style={{ padding: '4px 12px', fontSize: 13, color: '#595959' }}>
+          <FolderOutlined style={{ marginRight: 6, color: '#bfbfbf' }} />
+          {childName}
+        </div>
+      ),
       isLeaf: true,
     }));
 
@@ -174,6 +227,202 @@ function buildTreeData(
       children: childNodes.length > 0 ? childNodes : undefined,
     };
   });
+}
+
+// ---------------------------------------------------------------------------
+// Stats cards component
+// ---------------------------------------------------------------------------
+
+function StatsCards({
+  categories,
+  productTypeStats,
+  loading,
+}: {
+  categories: Category[];
+  productTypeStats: { _id: string; count: number }[];
+  loading: boolean;
+}) {
+  const totalCategories = categories.length;
+  const visibleCount = categories.filter((c) => c.status === 'Show').length;
+  const hiddenCount = categories.filter((c) => c.status === 'Hide').length;
+  const featuredCount = categories.filter((c) => c.featured).length;
+
+  const cardStyle = {
+    borderRadius: 12,
+    height: '100%',
+  };
+
+  return (
+    <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+      <Col xs={12} sm={12} md={6}>
+        <Card style={cardStyle} loading={loading} size="small">
+          <Statistic
+            title={<Text type="secondary" style={{ fontSize: 13 }}>Total Categories</Text>}
+            value={totalCategories}
+            prefix={<TagsOutlined style={{ color: '#1677ff', fontSize: 20 }} />}
+            valueStyle={{ color: '#1677ff', fontWeight: 600 }}
+          />
+        </Card>
+      </Col>
+      <Col xs={12} sm={12} md={6}>
+        <Card style={cardStyle} loading={loading} size="small">
+          <Statistic
+            title={<Text type="secondary" style={{ fontSize: 13 }}>Visible</Text>}
+            value={visibleCount}
+            prefix={<EyeOutlined style={{ color: '#52c41a', fontSize: 20 }} />}
+            valueStyle={{ color: '#52c41a', fontWeight: 600 }}
+            suffix={
+              totalCategories > 0 ? (
+                <Text type="secondary" style={{ fontSize: 13 }}>
+                  / {totalCategories}
+                </Text>
+              ) : undefined
+            }
+          />
+          {totalCategories > 0 && (
+            <Progress
+              percent={Math.round((visibleCount / totalCategories) * 100)}
+              showInfo={false}
+              strokeColor="#52c41a"
+              size="small"
+              style={{ marginTop: 4 }}
+            />
+          )}
+        </Card>
+      </Col>
+      <Col xs={12} sm={12} md={6}>
+        <Card style={cardStyle} loading={loading} size="small">
+          <Statistic
+            title={<Text type="secondary" style={{ fontSize: 13 }}>Hidden</Text>}
+            value={hiddenCount}
+            prefix={<EyeInvisibleOutlined style={{ color: '#faad14', fontSize: 20 }} />}
+            valueStyle={{ color: '#faad14', fontWeight: 600 }}
+          />
+        </Card>
+      </Col>
+      <Col xs={12} sm={12} md={6}>
+        <Card style={cardStyle} loading={loading} size="small">
+          <Statistic
+            title={<Text type="secondary" style={{ fontSize: 13 }}>Featured</Text>}
+            value={featuredCount}
+            prefix={<StarOutlined style={{ color: '#eb2f96', fontSize: 20 }} />}
+            valueStyle={{ color: '#eb2f96', fontWeight: 600 }}
+          />
+          {productTypeStats.length > 0 && (
+            <div style={{ marginTop: 6 }}>
+              {productTypeStats.slice(0, 3).map((pt) => (
+                <Tag
+                  key={pt._id}
+                  color={getProductTypeColor(pt._id)}
+                  style={{ fontSize: 11, marginBottom: 2 }}
+                >
+                  {pt._id}: {pt.count}
+                </Tag>
+              ))}
+            </div>
+          )}
+        </Card>
+      </Col>
+    </Row>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Detail drawer content
+// ---------------------------------------------------------------------------
+
+function CategoryDetail({ category }: { category: Category }) {
+  const productCount = category.products?.length ?? 0;
+
+  return (
+    <div>
+      {/* Hero section */}
+      <Flex align="center" gap={16} style={{ marginBottom: 24 }}>
+        <CategoryImage src={category.img} alt={category.parent} size={80} />
+        <div>
+          <Title level={4} style={{ margin: 0 }}>{category.parent}</Title>
+          <Flex gap={6} style={{ marginTop: 6 }}>
+            <Tag color={getProductTypeColor(category.productType)}>{category.productType}</Tag>
+            <StatusBadge status={category.status} type="general" />
+            {category.featured && <Tag color="gold">Featured</Tag>}
+          </Flex>
+        </div>
+      </Flex>
+
+      <Divider style={{ margin: '16px 0' }} />
+
+      {/* Metrics */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col span={8}>
+          <Card size="small" style={{ textAlign: 'center', borderRadius: 8 }}>
+            <Statistic title="Products" value={productCount} valueStyle={{ fontSize: 20 }} />
+          </Card>
+        </Col>
+        <Col span={8}>
+          <Card size="small" style={{ textAlign: 'center', borderRadius: 8 }}>
+            <Statistic
+              title="Sub-categories"
+              value={category.children?.length ?? 0}
+              valueStyle={{ fontSize: 20 }}
+            />
+          </Card>
+        </Col>
+        <Col span={8}>
+          <Card size="small" style={{ textAlign: 'center', borderRadius: 8 }}>
+            <Statistic title="Sort Order" value={category.sortOrder ?? 0} valueStyle={{ fontSize: 20 }} />
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Description */}
+      {category.description && (
+        <div style={{ marginBottom: 20 }}>
+          <Text type="secondary" style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            Description
+          </Text>
+          <p style={{ marginTop: 4, color: '#595959' }}>{category.description}</p>
+        </div>
+      )}
+
+      {/* Sub-categories */}
+      {category.children && category.children.length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <Text type="secondary" style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            Sub-categories
+          </Text>
+          <div style={{ marginTop: 8 }}>
+            {category.children.map((child) => (
+              <Tag
+                key={child}
+                style={{ marginBottom: 6, padding: '4px 12px', borderRadius: 6, fontSize: 13 }}
+              >
+                <FolderOutlined style={{ marginRight: 4 }} />
+                {child}
+              </Tag>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <Divider style={{ margin: '16px 0' }} />
+
+      {/* Timestamps */}
+      <Flex vertical gap={8}>
+        <Flex align="center" gap={8}>
+          <CalendarOutlined style={{ color: '#bfbfbf' }} />
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            Created: {formatDate(category.createdAt)}
+          </Text>
+        </Flex>
+        <Flex align="center" gap={8}>
+          <CalendarOutlined style={{ color: '#bfbfbf' }} />
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            Updated: {formatDate(category.updatedAt)}
+          </Text>
+        </Flex>
+      </Flex>
+    </div>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -190,15 +439,15 @@ export default function CategoriesPage() {
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  // Filters — debounce only the search input
+  // Filters
   const [searchInput, debouncedSearch, setSearch] = useDebouncedState('', 300);
   const [statusFilter, setStatusFilter] = useState('');
   const [productTypeFilter, setProductTypeFilter] = useState('');
 
-  // Modal state
-  const [modalOpen, setModalOpen] = useState(false);
+  // Drawer state
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
   const [viewingCategory, setViewingCategory] = useState<Category | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -226,6 +475,13 @@ export default function CategoriesPage() {
     staleTime: 1000 * 60 * 10,
   });
 
+  const allCategoriesQuery = useQuery({
+    queryKey: ['categories', 'all'],
+    queryFn: () => categoriesApi.getAll({ limit: 500 }),
+    enabled: viewMode === 'tree',
+    staleTime: 1000 * 60 * 5,
+  });
+
   // ---------------------------------------------------------------------------
   // Mutations
   // ---------------------------------------------------------------------------
@@ -235,7 +491,7 @@ export default function CategoriesPage() {
     onSuccess: () => {
       toast.success('Category created successfully');
       queryClient.invalidateQueries({ queryKey: ['categories'] });
-      setModalOpen(false);
+      setDrawerOpen(false);
       form.resetFields();
     },
     onError: (error: Error) => {
@@ -249,7 +505,7 @@ export default function CategoriesPage() {
     onSuccess: () => {
       toast.success('Category updated successfully');
       queryClient.invalidateQueries({ queryKey: ['categories'] });
-      setModalOpen(false);
+      setDrawerOpen(false);
       setEditingCategory(null);
       form.resetFields();
     },
@@ -279,7 +535,7 @@ export default function CategoriesPage() {
     setEditingCategory(null);
     form.resetFields();
     form.setFieldsValue({ status: 'Show', featured: false, sortOrder: 0 });
-    setModalOpen(true);
+    setDrawerOpen(true);
   };
 
   const handleEditCategory = (category: Category) => {
@@ -297,12 +553,12 @@ export default function CategoriesPage() {
       sortOrder: category.sortOrder ?? 0,
       featured: category.featured ?? false,
     });
-    setModalOpen(true);
+    setDrawerOpen(true);
   };
 
   const handleViewCategory = (category: Category) => {
     setViewingCategory(category);
-    setViewModalOpen(true);
+    setDetailDrawerOpen(true);
   };
 
   const handleDeleteCategory = (id: string) => {
@@ -310,7 +566,7 @@ export default function CategoriesPage() {
     deleteMutation.mutate(id);
   };
 
-  const handleModalSubmit = async () => {
+  const handleDrawerSubmit = async () => {
     try {
       const values = await form.validateFields();
 
@@ -336,12 +592,12 @@ export default function CategoriesPage() {
         createMutation.mutate(payload);
       }
     } catch {
-      // Ant Design validation errors are shown inline — no further action needed
+      // Ant Design validation errors shown inline
     }
   };
 
-  const handleModalCancel = () => {
-    setModalOpen(false);
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
     setEditingCategory(null);
     form.resetFields();
   };
@@ -361,9 +617,15 @@ export default function CategoriesPage() {
     (statsQuery.data?.data as CategoryStats | undefined)?.productTypeStats ?? [];
 
   const categories: Category[] = categoriesQuery.data?.data ?? [];
+  const allCategories: Category[] = allCategoriesQuery.data?.data ?? [];
   const pagination = categoriesQuery.data?.pagination;
   const hasActiveFilters = Boolean(debouncedSearch || statusFilter || productTypeFilter);
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+  const treeData = useMemo(
+    () => buildTreeData(allCategories, handleEditCategory, handleViewCategory, handleDeleteCategory),
+    [allCategories],
+  );
 
   // ---------------------------------------------------------------------------
   // Table columns
@@ -371,72 +633,126 @@ export default function CategoriesPage() {
 
   const columns: TableProps<Category>['columns'] = [
     {
-      title: 'Image',
-      key: 'image',
-      width: 72,
+      title: 'Category',
+      key: 'category',
       render: (_: unknown, record: Category) => (
-        <CategoryImage src={record.img} alt={record.parent} />
+        <Flex align="center" gap={12}>
+          <CategoryImage src={record.img} alt={record.parent} />
+          <div>
+            <Flex align="center" gap={6}>
+              <Text strong style={{ fontSize: 14 }}>{record.parent}</Text>
+              {record.featured && (
+                <StarOutlined style={{ color: '#eb2f96', fontSize: 12 }} />
+              )}
+            </Flex>
+            {record.children && record.children.length > 0 && (
+              <div style={{ marginTop: 4 }}>
+                {record.children.slice(0, 3).map((child) => (
+                  <Tag
+                    key={child}
+                    style={{ fontSize: 11, marginBottom: 2, borderRadius: 4 }}
+                  >
+                    {child}
+                  </Tag>
+                ))}
+                {record.children.length > 3 && (
+                  <Tag style={{ fontSize: 11, marginBottom: 2, borderRadius: 4 }}>
+                    +{record.children.length - 3} more
+                  </Tag>
+                )}
+              </div>
+            )}
+          </div>
+        </Flex>
       ),
     },
     {
-      title: 'Name',
-      key: 'name',
-      render: (_: unknown, record: Category) => (
-        <div>
-          <Typography.Text strong>{record.parent}</Typography.Text>
-          {record.children && record.children.length > 0 && (
-            <div>
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                {record.children.join(', ')}
-              </Typography.Text>
-            </div>
-          )}
-        </div>
-      ),
-    },
-    {
-      title: 'Product Type',
+      title: 'Type',
       dataIndex: 'productType',
       key: 'productType',
-      render: (value: string) => <Tag color="blue">{value}</Tag>,
+      width: 120,
+      render: (value: string) => (
+        <Tag color={getProductTypeColor(value)} style={{ borderRadius: 4 }}>
+          {value}
+        </Tag>
+      ),
     },
     {
       title: 'Products',
       key: 'products',
-      width: 100,
+      width: 90,
       align: 'center',
-      render: (_: unknown, record: Category) => (
-        <Badge
-          count={record.products?.length ?? 0}
-          showZero
-          style={{ backgroundColor: '#1677ff' }}
-        />
-      ),
+      sorter: (a: Category, b: Category) =>
+        (a.products?.length ?? 0) - (b.products?.length ?? 0),
+      render: (_: unknown, record: Category) => {
+        const count = record.products?.length ?? 0;
+        return (
+          <Badge
+            count={count}
+            showZero
+            overflowCount={999}
+            style={{
+              backgroundColor: count > 0 ? '#1677ff' : '#f0f0f0',
+              color: count > 0 ? '#fff' : '#bfbfbf',
+              fontWeight: 600,
+            }}
+          />
+        );
+      },
     },
     {
       title: 'Status',
       key: 'status',
-      width: 100,
+      width: 90,
+      filters: [
+        { text: 'Show', value: 'Show' },
+        { text: 'Hide', value: 'Hide' },
+      ],
+      onFilter: (value, record) => record.status === value,
       render: (_: unknown, record: Category) => (
         <StatusBadge status={record.status} type="general" />
       ),
     },
     {
-      title: 'Created',
-      key: 'createdAt',
-      width: 170,
+      title: 'Sort',
+      key: 'sortOrder',
+      width: 70,
+      align: 'center',
+      sorter: (a: Category, b: Category) =>
+        (a.sortOrder ?? 0) - (b.sortOrder ?? 0),
       render: (_: unknown, record: Category) => (
-        <Typography.Text style={{ fontSize: 12 }} type="secondary">
-          {formatDate(record.createdAt)}
-        </Typography.Text>
+        <Text type="secondary" style={{ fontSize: 13 }}>
+          {record.sortOrder ?? 0}
+        </Text>
       ),
     },
     {
-      title: 'Actions',
-      key: 'actions',
-      width: 120,
+      title: 'Updated',
+      key: 'updatedAt',
+      width: 140,
       render: (_: unknown, record: Category) => (
-        <Space size={2}>
+        <Tooltip title={`Created: ${formatDate(record.createdAt)}`}>
+          <Text style={{ fontSize: 12 }} type="secondary">
+            {formatDate(record.updatedAt)}
+          </Text>
+        </Tooltip>
+      ),
+    },
+    {
+      title: '',
+      key: 'actions',
+      width: 110,
+      fixed: 'right',
+      render: (_: unknown, record: Category) => (
+        <Space size={0}>
+          <Tooltip title="View details">
+            <Button
+              type="text"
+              size="small"
+              icon={<EyeOutlined />}
+              onClick={() => handleViewCategory(record)}
+            />
+          </Tooltip>
           <Tooltip title="Edit">
             <Button
               type="text"
@@ -445,32 +761,21 @@ export default function CategoriesPage() {
               onClick={() => handleEditCategory(record)}
             />
           </Tooltip>
-          <Tooltip title="View">
+          <Popconfirm
+            title="Delete Category"
+            description="This action cannot be undone."
+            onConfirm={() => handleDeleteCategory(record._id)}
+            okText="Delete"
+            okButtonProps={{ danger: true }}
+          >
             <Button
               type="text"
               size="small"
-              icon={<EyeOutlined />}
-              onClick={() => handleViewCategory(record)}
+              danger
+              icon={<DeleteOutlined />}
+              loading={deletingId === record._id && deleteMutation.isPending}
             />
-          </Tooltip>
-          <Tooltip title="Delete">
-            <Popconfirm
-              title="Delete Category"
-              description="Are you sure you want to delete this category? This action cannot be undone."
-              onConfirm={() => handleDeleteCategory(record._id)}
-              okText="Delete"
-              okButtonProps={{ danger: true }}
-              cancelText="Cancel"
-            >
-              <Button
-                type="text"
-                size="small"
-                danger
-                icon={<DeleteOutlined />}
-                loading={deletingId === record._id && deleteMutation.isPending}
-              />
-            </Popconfirm>
-          </Tooltip>
+          </Popconfirm>
         </Space>
       ),
     },
@@ -480,39 +785,20 @@ export default function CategoriesPage() {
   // Render
   // ---------------------------------------------------------------------------
 
-  // Tree data derived from all loaded categories (no pagination for tree view)
-  const allCategoriesQuery = useQuery({
-    queryKey: ['categories', 'all'],
-    queryFn: () => categoriesApi.getAll({ limit: 500 }),
-    enabled: viewMode === 'tree',
-    staleTime: 1000 * 60 * 5,
-  });
-  const allCategories: Category[] = allCategoriesQuery.data?.data ?? [];
-  const treeData = buildTreeData(allCategories, handleEditCategory, handleDeleteCategory);
-
   return (
     <div>
-      {/* Page header */}
       <PageHeader
         title="Category Management"
         extra={
           <Space>
-            <Space.Compact>
-              <Tooltip title="Table view">
-                <Button
-                  icon={<TableOutlined />}
-                  type={viewMode === 'table' ? 'primary' : 'default'}
-                  onClick={() => setViewMode('table')}
-                />
-              </Tooltip>
-              <Tooltip title="Tree view">
-                <Button
-                  icon={<ApartmentOutlined />}
-                  type={viewMode === 'tree' ? 'primary' : 'default'}
-                  onClick={() => setViewMode('tree')}
-                />
-              </Tooltip>
-            </Space.Compact>
+            <Segmented
+              value={viewMode}
+              onChange={(val) => setViewMode(val as 'table' | 'tree')}
+              options={[
+                { value: 'table', icon: <TableOutlined />, label: 'Table' },
+                { value: 'tree', icon: <ApartmentOutlined />, label: 'Tree' },
+              ]}
+            />
             <Button type="primary" icon={<PlusOutlined />} onClick={handleAddCategory}>
               Add Category
             </Button>
@@ -520,43 +806,63 @@ export default function CategoriesPage() {
         }
       />
 
+      {/* Stats cards */}
+      <StatsCards
+        categories={viewMode === 'tree' ? allCategories : categories}
+        productTypeStats={productTypeStats}
+        loading={statsQuery.isLoading}
+      />
+
       {viewMode === 'tree' ? (
-        /* Tree View */
+        /* ---- Tree View ---- */
         <Card
-          loading={allCategoriesQuery.isLoading || allCategoriesQuery.isFetching}
-          style={{ minHeight: 300 }}
+          loading={allCategoriesQuery.isLoading}
+          style={{ borderRadius: 12 }}
+          styles={{ body: { padding: treeData.length === 0 ? 48 : 16 } }}
         >
           {treeData.length === 0 ? (
-            <Typography.Text type="secondary">No categories found</Typography.Text>
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="No categories found"
+            >
+              <Button type="primary" icon={<PlusOutlined />} onClick={handleAddCategory}>
+                Create First Category
+              </Button>
+            </Empty>
           ) : (
             <Tree
               treeData={treeData}
               defaultExpandAll
               blockNode
+              showLine={{ showLeafIcon: false }}
               style={{ fontSize: 14 }}
             />
           )}
         </Card>
       ) : (
         <>
-          {/* Filters row */}
-          <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
-            <Col xs={24} sm={12} md={8} lg={7}>
+          {/* ---- Filter bar ---- */}
+          <Card
+            size="small"
+            style={{ marginBottom: 16, borderRadius: 12 }}
+            styles={{ body: { padding: '12px 16px' } }}
+          >
+            <Flex gap={12} wrap="wrap" align="center">
               <Input
                 placeholder="Search categories..."
+                prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
                 value={searchInput}
                 onChange={(e) => {
                   setSearch(e.target.value);
                   setPage(1);
                 }}
                 allowClear
+                style={{ width: 260 }}
               />
-            </Col>
 
-            <Col xs={24} sm={12} md={5} lg={5}>
               <Select
-                style={{ width: '100%' }}
-                placeholder="All Statuses"
+                style={{ width: 140 }}
+                placeholder="Status"
                 value={statusFilter || undefined}
                 onChange={(val?: string) => {
                   setStatusFilter(val ?? '');
@@ -564,16 +870,14 @@ export default function CategoriesPage() {
                 }}
                 allowClear
                 options={[
-                  { label: 'Show', value: 'Show' },
-                  { label: 'Hide', value: 'Hide' },
+                  { label: 'Visible', value: 'Show' },
+                  { label: 'Hidden', value: 'Hide' },
                 ]}
               />
-            </Col>
 
-            <Col xs={24} sm={12} md={7} lg={7}>
               <Select
-                style={{ width: '100%' }}
-                placeholder="All Product Types"
+                style={{ width: 200 }}
+                placeholder="Product Type"
                 value={productTypeFilter || undefined}
                 onChange={(val?: string) => {
                   setProductTypeFilter(val ?? '');
@@ -586,130 +890,100 @@ export default function CategoriesPage() {
                   value: pt._id,
                 }))}
               />
-            </Col>
 
-            {hasActiveFilters && (
-              <Col xs={24} sm={12} md={4} lg={3}>
-                <Button
-                  icon={<ClearOutlined />}
-                  onClick={handleClearFilters}
-                  style={{ width: '100%' }}
-                >
-                  Clear
+              {hasActiveFilters && (
+                <Button type="link" onClick={handleClearFilters} style={{ padding: 0 }}>
+                  Clear filters
                 </Button>
-              </Col>
-            )}
-          </Row>
+              )}
 
-          {/* Categories table */}
-          <Table<Category>
-            rowKey="_id"
-            columns={columns}
-            dataSource={categories}
-            loading={categoriesQuery.isLoading || categoriesQuery.isFetching}
-            expandable={{ childrenColumnName: '__children' }}
-            pagination={{
-              current: page,
-              pageSize: limit,
-              total: pagination?.totalItems ?? 0,
-              showSizeChanger: false,
-              showTotal: (total) => `Total ${total} categories`,
-              onChange: (p) => setPage(p),
-            }}
-            scroll={{ x: 820 }}
-            size="middle"
-            locale={{ emptyText: 'No categories found' }}
-          />
+              <div style={{ flex: 1 }} />
+
+              <Text type="secondary" style={{ fontSize: 13 }}>
+                {pagination?.totalItems ?? 0} categories
+              </Text>
+            </Flex>
+          </Card>
+
+          {/* ---- Table ---- */}
+          <Card style={{ borderRadius: 12 }} styles={{ body: { padding: 0 } }}>
+            <Table<Category>
+              rowKey="_id"
+              columns={columns}
+              dataSource={categories}
+              loading={categoriesQuery.isLoading || categoriesQuery.isFetching}
+              expandable={{ childrenColumnName: '__children' }}
+              pagination={{
+                current: page,
+                pageSize: limit,
+                total: pagination?.totalItems ?? 0,
+                showSizeChanger: false,
+                showTotal: (total, range) => (
+                  <Text type="secondary" style={{ fontSize: 13 }}>
+                    {range[0]}-{range[1]} of {total}
+                  </Text>
+                ),
+                onChange: (p) => setPage(p),
+                style: { padding: '0 16px' },
+              }}
+              scroll={{ x: 820 }}
+              size="middle"
+              locale={{
+                emptyText: (
+                  <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description={hasActiveFilters ? 'No categories match your filters' : 'No categories yet'}
+                  >
+                    {!hasActiveFilters && (
+                      <Button type="primary" icon={<PlusOutlined />} onClick={handleAddCategory}>
+                        Create First Category
+                      </Button>
+                    )}
+                  </Empty>
+                ),
+              }}
+            />
+          </Card>
         </>
       )}
 
-      {/* Add / Edit Modal */}
-      <Modal
-        title={editingCategory ? 'Edit Category' : 'Add Category'}
-        open={modalOpen}
-        onOk={handleModalSubmit}
-        onCancel={handleModalCancel}
-        okText={editingCategory ? 'Update' : 'Create'}
-        confirmLoading={isSubmitting}
-        width={600}
-        destroyOnHidden
+      {/* ---- Create / Edit Drawer ---- */}
+      <Drawer
+        title={
+          <Flex align="center" gap={8}>
+            {editingCategory ? <EditOutlined /> : <PlusOutlined />}
+            <span>{editingCategory ? 'Edit Category' : 'New Category'}</span>
+          </Flex>
+        }
+        open={drawerOpen}
+        onClose={handleDrawerClose}
+        width={520}
+        destroyOnClose
+        extra={
+          <Space>
+            <Button onClick={handleDrawerClose}>Cancel</Button>
+            <Button type="primary" onClick={handleDrawerSubmit} loading={isSubmitting}>
+              {editingCategory ? 'Update' : 'Create'}
+            </Button>
+          </Space>
+        }
       >
         <Form
           form={form}
           layout="vertical"
           initialValues={{ status: 'Show', featured: false, sortOrder: 0 }}
-          style={{ marginTop: 8 }}
+          requiredMark="optional"
         >
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="parent"
-                label="Category Name"
-                rules={[{ required: true, message: 'Category name is required' }]}
-              >
-                <Input placeholder="e.g. Electronics" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="slug" label="Slug" tooltip="Auto-generated from name if left blank">
-                <Input placeholder="e.g. electronics" style={{ fontFamily: 'monospace' }} />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="productType"
-                label="Product Type"
-                rules={[{ required: true, message: 'Product type is required' }]}
-              >
-                <Select
-                  options={[
-                    { value: 'fashion', label: 'Fashion' },
-                    { value: 'electronics', label: 'Electronics' },
-                    { value: 'beauty', label: 'Beauty' },
-                    { value: 'jewelry', label: 'Jewelry' },
-                    { value: 'other', label: 'Other' },
-                  ]}
-                  placeholder="Select product type"
-                />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="parentCategory" label="Parent Category" tooltip="Optional — makes this a child of another category">
-                <Select
-                  allowClear
-                  showSearch={{ optionFilterProp: 'label' }}
-                  placeholder="None (top-level)"
-                  options={categories
-                    .filter((c) => !editingCategory || c._id !== editingCategory._id)
-                    .map((c) => ({ value: c._id, label: c.parent }))}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item name="icon" label="Icon Name" tooltip="Icon identifier (e.g. icon class name or emoji)">
-                <Input placeholder="e.g. laptop, shirt" />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Form.Item name="description" label="Description">
-            <TextArea rows={3} placeholder="Brief description of the category" />
-          </Form.Item>
-
+          {/* Image upload at top */}
           <Form.Item name="img" hidden>
-             <Input />
+            <Input />
           </Form.Item>
-          <Form.Item label="Category Image">
+          <div style={{ marginBottom: 24, textAlign: 'center' }}>
             <Upload
               name="image"
               listType="picture-card"
               showUploadList={false}
+              style={{ width: '100%' }}
               customRequest={async (options) => {
                 const { file, onSuccess, onError } = options;
                 const formData = new FormData();
@@ -722,7 +996,7 @@ export default function CategoriesPage() {
                   if (url) {
                     form.setFieldsValue({ img: url });
                     if (onSuccess) onSuccess('ok');
-                    toast.success('Image uploaded successfully');
+                    toast.success('Image uploaded');
                   } else {
                     throw new Error('No URL returned');
                   }
@@ -736,166 +1010,206 @@ export default function CategoriesPage() {
                 {() => {
                   const imgUrl = form.getFieldValue('img');
                   return imgUrl ? (
-                    <img src={imgUrl} alt="category" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    <img
+                      src={imgUrl}
+                      alt="category"
+                      style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 8 }}
+                    />
                   ) : (
                     <div>
-                      <PlusOutlined />
-                      <div style={{ marginTop: 8 }}>Upload</div>
+                      <PictureOutlined style={{ fontSize: 24, color: '#bfbfbf' }} />
+                      <div style={{ marginTop: 8, color: '#8c8c8c', fontSize: 13 }}>
+                        Upload Image
+                      </div>
                     </div>
                   );
                 }}
               </Form.Item>
             </Upload>
-          </Form.Item>
+          </div>
 
-          <Form.List name="children">
-            {(fields, { add, remove }) => (
-              <>
-                <div style={{ marginBottom: 8 }}>Sub-categories</div>
-                {fields.map((field) => (
-                  <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-                    <Form.Item
-                      {...field}
-                      rules={[{ required: true, message: 'Missing sub-category name' }]}
-                      style={{ margin: 0, width: 300 }}
-                    >
-                      <Input placeholder="Sub-category name" />
-                    </Form.Item>
-                    <Button danger icon={<DeleteOutlined />} size="small" onClick={() => remove(field.name)} />
-                  </Space>
-                ))}
-                <Form.Item>
-                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                    Add Sub-category
-                  </Button>
-                </Form.Item>
-              </>
-            )}
-          </Form.List>
+          <Divider style={{ margin: '0 0 16px' }} />
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="status" label="Status">
-                <Select
-                  options={[
-                    { label: 'Show', value: 'Show' },
-                    { label: 'Hide', value: 'Hide' },
-                  ]}
-                />
+              <Form.Item
+                name="parent"
+                label="Category Name"
+                rules={[{ required: true, message: 'Required' }]}
+              >
+                <Input placeholder="e.g. Electronics" />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="sortOrder" label="Sort Order">
-                <InputNumber style={{ width: '100%' }} min={0} placeholder="0" />
+              <Form.Item name="slug" label="Slug" tooltip="Auto-generated if blank">
+                <Input placeholder="e.g. electronics" style={{ fontFamily: 'monospace' }} />
               </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item name="featured" label="Featured" valuePropName="checked">
-            <Switch checkedChildren="Yes" unCheckedChildren="No" />
-          </Form.Item>
-        </Form>
-      </Modal>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="productType"
+                label="Product Type"
+                rules={[{ required: true, message: 'Required' }]}
+              >
+                <Select
+                  options={[
+                    { value: 'fashion', label: 'Fashion' },
+                    { value: 'electronics', label: 'Electronics' },
+                    { value: 'beauty', label: 'Beauty' },
+                    { value: 'jewelry', label: 'Jewelry' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                  placeholder="Select type"
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="parentCategory"
+                label="Parent Category"
+                tooltip="Makes this a child of another category"
+              >
+                <Select
+                  allowClear
+                  showSearch={{ optionFilterProp: 'label' }}
+                  placeholder="None (top-level)"
+                  options={categories
+                    .filter((c) => !editingCategory || c._id !== editingCategory._id)
+                    .map((c) => ({ value: c._id, label: c.parent }))}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
-      {/* View Category Modal */}
-      <Modal
-        title="Category Details"
-        open={viewModalOpen}
-        onCancel={() => {
-          setViewModalOpen(false);
+          <Form.Item name="icon" label="Icon Name" tooltip="Icon class or emoji">
+            <Input placeholder="e.g. laptop, shirt" />
+          </Form.Item>
+
+          <Form.Item name="description" label="Description">
+            <TextArea rows={3} placeholder="Brief description" showCount maxLength={500} />
+          </Form.Item>
+
+          <Divider style={{ margin: '8px 0 16px' }} />
+
+          {/* Sub-categories */}
+          <Form.List name="children">
+            {(fields, { add, remove }) => (
+              <>
+                <Flex justify="space-between" align="center" style={{ marginBottom: 12 }}>
+                  <Text strong style={{ fontSize: 14 }}>
+                    <FolderOutlined style={{ marginRight: 6 }} />
+                    Sub-categories
+                  </Text>
+                  <Button
+                    type="dashed"
+                    size="small"
+                    icon={<PlusOutlined />}
+                    onClick={() => add()}
+                  >
+                    Add
+                  </Button>
+                </Flex>
+                {fields.length === 0 && (
+                  <div
+                    style={{
+                      padding: '16px',
+                      textAlign: 'center',
+                      background: '#fafafa',
+                      borderRadius: 8,
+                      marginBottom: 12,
+                      border: '1px dashed #d9d9d9',
+                    }}
+                  >
+                    <Text type="secondary" style={{ fontSize: 13 }}>
+                      No sub-categories yet
+                    </Text>
+                  </div>
+                )}
+                {fields.map((field) => (
+                  <Flex key={field.key} gap={8} style={{ marginBottom: 8 }} align="start">
+                    <Form.Item
+                      {...field}
+                      rules={[{ required: true, message: 'Name required' }]}
+                      style={{ margin: 0, flex: 1 }}
+                    >
+                      <Input placeholder="Sub-category name" />
+                    </Form.Item>
+                    <Button
+                      type="text"
+                      danger
+                      icon={<DeleteOutlined />}
+                      size="small"
+                      onClick={() => remove(field.name)}
+                      style={{ marginTop: 4 }}
+                    />
+                  </Flex>
+                ))}
+              </>
+            )}
+          </Form.List>
+
+          <Divider style={{ margin: '8px 0 16px' }} />
+
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item name="status" label="Status">
+                <Select
+                  options={[
+                    { label: 'Visible', value: 'Show' },
+                    { label: 'Hidden', value: 'Hide' },
+                  ]}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item name="sortOrder" label="Sort Order">
+                <InputNumber style={{ width: '100%' }} min={0} placeholder="0" />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item name="featured" label="Featured" valuePropName="checked">
+                <Switch checkedChildren="Yes" unCheckedChildren="No" />
+              </Form.Item>
+            </Col>
+          </Row>
+        </Form>
+      </Drawer>
+
+      {/* ---- Detail Drawer ---- */}
+      <Drawer
+        title={
+          <Flex align="center" gap={8}>
+            <InfoCircleOutlined />
+            <span>Category Details</span>
+          </Flex>
+        }
+        open={detailDrawerOpen}
+        onClose={() => {
+          setDetailDrawerOpen(false);
           setViewingCategory(null);
         }}
-        footer={
-          <Button
-            onClick={() => {
-              setViewModalOpen(false);
-              setViewingCategory(null);
-            }}
-          >
-            Close
-          </Button>
+        width={440}
+        destroyOnClose
+        extra={
+          viewingCategory && (
+            <Button
+              type="primary"
+              icon={<EditOutlined />}
+              onClick={() => {
+                setDetailDrawerOpen(false);
+                handleEditCategory(viewingCategory);
+              }}
+            >
+              Edit
+            </Button>
+          )
         }
-        width={600}
-        destroyOnHidden
       >
-        {viewingCategory && (
-          <div style={{ marginTop: 8 }}>
-            {viewingCategory.img && (
-              <div style={{ marginBottom: 16 }}>
-                <img
-                  src={viewingCategory.img}
-                  alt={viewingCategory.parent}
-                  style={{
-                    maxWidth: 120,
-                    maxHeight: 120,
-                    borderRadius: 8,
-                    objectFit: 'cover',
-                    border: '1px solid #f0f0f0',
-                  }}
-                />
-              </div>
-            )}
-
-            <Descriptions column={2} bordered size="small">
-              <Descriptions.Item label="Name" span={2}>
-                <Typography.Text strong>{viewingCategory.parent}</Typography.Text>
-              </Descriptions.Item>
-
-              <Descriptions.Item label="Product Type">
-                <Tag color="blue">{viewingCategory.productType}</Tag>
-              </Descriptions.Item>
-
-              <Descriptions.Item label="Status">
-                <StatusBadge status={viewingCategory.status} type="general" />
-              </Descriptions.Item>
-
-              <Descriptions.Item label="Products">
-                <Badge
-                  count={viewingCategory.products?.length ?? 0}
-                  showZero
-                  style={{ backgroundColor: '#1677ff' }}
-                />
-              </Descriptions.Item>
-
-              <Descriptions.Item label="Sort Order">
-                {viewingCategory.sortOrder ?? 0}
-              </Descriptions.Item>
-
-              <Descriptions.Item label="Featured" span={2}>
-                {viewingCategory.featured ? (
-                  <Tag color="gold">Yes</Tag>
-                ) : (
-                  <Tag color="default">No</Tag>
-                )}
-              </Descriptions.Item>
-
-              {viewingCategory.children && viewingCategory.children.length > 0 && (
-                <Descriptions.Item label="Sub-categories" span={2}>
-                  <Space wrap>
-                    {viewingCategory.children.map((child) => (
-                      <Tag key={child}>{child}</Tag>
-                    ))}
-                  </Space>
-                </Descriptions.Item>
-              )}
-
-              {viewingCategory.description && (
-                <Descriptions.Item label="Description" span={2}>
-                  {viewingCategory.description}
-                </Descriptions.Item>
-              )}
-
-              <Descriptions.Item label="Created" span={2}>
-                {formatDate(viewingCategory.createdAt)}
-              </Descriptions.Item>
-
-              <Descriptions.Item label="Last Updated" span={2}>
-                {formatDate(viewingCategory.updatedAt)}
-              </Descriptions.Item>
-            </Descriptions>
-          </div>
-        )}
-      </Modal>
+        {viewingCategory && <CategoryDetail category={viewingCategory} />}
+      </Drawer>
     </div>
   );
 }

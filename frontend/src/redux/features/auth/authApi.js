@@ -20,7 +20,7 @@ export const authApi = apiSlice.injectEndpoints({
             })
           );
         } catch (err) {
-          console.error("[Auth] Failed to sync user profile:", err);
+          // Failed to sync user profile — user can still browse
         }
       },
     }),

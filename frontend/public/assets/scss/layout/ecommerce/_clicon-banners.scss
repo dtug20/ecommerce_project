@@ -1,0 +1,283 @@
+@use '../../utils' as *;
+
+// ============================================================
+// Clicon Banners — Double Banner + Full-Width Banner
+// ============================================================
+
+// ---- Double Banner ----
+.cl-double-banner {
+  @include cl-section;
+
+  &__card {
+    border-radius: var(--cl-radius-md);
+    padding: 32px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+    min-height: 240px;
+    height: 100%;
+
+    &--light {
+      background-color: #F2F4F5;
+    }
+
+    &--dark {
+      background-color: #191C1F;
+    }
+
+    @media (max-width: 575px) {
+      flex-direction: column;
+      text-align: center;
+      padding: 24px;
+    }
+  }
+
+  &__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1;
+
+    @media (max-width: 575px) {
+      align-items: center;
+    }
+  }
+
+  &__tag {
+    @include cl-badge-base;
+    background-color: rgba(250, 130, 50, 0.12);
+    color: var(--cl-primary);
+    align-self: flex-start;
+    border: 1px solid rgba(250, 130, 50, 0.25);
+
+    &--blue {
+      background-color: rgba(45, 165, 243, 0.15);
+      color: #2DA5F3;
+      border-color: rgba(45, 165, 243, 0.3);
+    }
+
+    @media (max-width: 575px) {
+      align-self: center;
+    }
+  }
+
+  &__title {
+    font-family: var(--cl-ff-heading);
+    font-size: 22px;
+    font-weight: var(--cl-fw-bold);
+    color: var(--cl-text-heading);
+    margin: 0;
+    line-height: 1.25;
+
+    &--white {
+      color: #fff;
+    }
+  }
+
+  &__desc {
+    font-size: var(--cl-fs-body-sm);
+    color: var(--cl-text-body);
+    margin: 0;
+    max-width: 260px;
+    line-height: var(--cl-lh-normal);
+
+    &--white {
+      color: rgba(255, 255, 255, 0.65);
+    }
+  }
+
+  &__btn {
+    @include cl-btn-primary;
+    align-self: flex-start;
+    text-decoration: none;
+    font-size: 13px;
+    padding: 10px 20px;
+
+    @media (max-width: 575px) {
+      align-self: center;
+    }
+  }
+
+  &__img {
+    flex-shrink: 0;
+    width: 180px;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    @media (max-width: 767px) {
+      width: 140px;
+      height: 140px;
+    }
+
+    @media (max-width: 575px) {
+      width: 120px;
+      height: 120px;
+    }
+  }
+
+  &__img-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--cl-radius-md);
+    background: linear-gradient(135deg, #e0e4e8, #cdd3da);
+  }
+
+  &__price-circle {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: #2DA5F3;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: var(--cl-fw-bold);
+    font-family: var(--cl-ff-body);
+    z-index: 2;
+    box-shadow: 0 4px 12px rgba(45, 165, 243, 0.3);
+  }
+}
+
+// ---- Full-Width Banner ----
+.cl-full-banner {
+  @include cl-section;
+  padding-top: 0;
+
+  &__inner {
+    background-color: #F2F4F5;
+    border-radius: var(--cl-radius-md);
+    padding: 48px 56px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    min-height: 280px;
+
+    @media (max-width: 767px) {
+      padding: 32px 24px;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 420px;
+    z-index: 1;
+    position: relative;
+  }
+
+  &__tag {
+    @include cl-badge-base;
+    background-color: rgba(250, 130, 50, 0.12);
+    color: var(--cl-primary);
+    border: 1px solid rgba(250, 130, 50, 0.3);
+    align-self: flex-start;
+  }
+
+  &__title {
+    font-family: var(--cl-ff-heading);
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: var(--cl-fw-bold);
+    color: var(--cl-text-heading);
+    margin: 0;
+    line-height: 1.1;
+  }
+
+  &__specs {
+    font-size: var(--cl-fs-body);
+    color: var(--cl-text-body);
+    margin: 0;
+    line-height: var(--cl-lh-normal);
+  }
+
+  &__btn {
+    @include cl-btn-primary;
+    align-self: flex-start;
+    text-decoration: none;
+  }
+
+  &__image {
+    position: absolute;
+    right: 5%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 360px;
+    height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    @media (max-width: 991px) {
+      right: 24px;
+      width: 220px;
+      height: 160px;
+    }
+
+    @media (max-width: 767px) {
+      position: static;
+      transform: none;
+      margin-top: 20px;
+      width: 100%;
+      height: auto;
+    }
+  }
+
+  &__image-placeholder {
+    width: 100%;
+    height: 200px;
+    border-radius: var(--cl-radius-md);
+    background: linear-gradient(135deg, #d8dde2 0%, #c0cad5 100%);
+  }
+
+  &__price-circle {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #2DA5F3;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: var(--cl-fw-bold);
+    font-family: var(--cl-ff-body);
+    z-index: 2;
+    box-shadow: 0 4px 12px rgba(45, 165, 243, 0.3);
+
+    @media (max-width: 767px) {
+      width: 60px;
+      height: 60px;
+      font-size: 16px;
+      top: -5px;
+      left: -5px;
+    }
+  }
+}

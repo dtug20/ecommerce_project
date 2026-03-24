@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 // internal
 import SEO from "@/components/seo";
 import HeaderTwo from "@/layout/headers/header-2";
@@ -9,6 +10,7 @@ import Wrapper from "@/layout/wrapper";
 import error from '@assets/img/error/error.png';
 
 const ErrorPage = () => {
+  const { t } = useTranslation();
   return (
     <Wrapper>
       <SEO pageTitle="404" />
@@ -23,14 +25,13 @@ const ErrorPage = () => {
                   <Image src={error} alt="error img" />
                 </div>
 
-                <h3 className="tp-error-title">Oops! Page not found</h3>
+                <h3 className="tp-error-title">{t('error.title')}</h3>
                 <p>
-                  Whoops, this is embarrassing. Looks like the page you were
-                  looking for was not found.
+                  {t('error.message')}
                 </p>
 
                 <Link href="/" className="tp-error-btn">
-                  Back to Home
+                  {t('error.backHome')}
                 </Link>
               </div>
             </div>

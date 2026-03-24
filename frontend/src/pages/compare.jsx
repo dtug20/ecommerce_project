@@ -9,7 +9,7 @@ import CommonBreadcrumb from '@/components/breadcrumb/common-breadcrumb';
 const ComparePage = () => {
   return (
     <Wrapper>
-      <SEO pageTitle="Shop" />
+      <SEO pageTitle="Compare Products" />
       <HeaderTwo style_2={true} />
       <CommonBreadcrumb title="Compare" subtitle="Compare" />
       <CompareArea/>

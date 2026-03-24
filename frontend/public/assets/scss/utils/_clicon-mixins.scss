@@ -1,0 +1,216 @@
+// ============================================================
+// Clicon Mixins & Utility Classes
+// Reusable patterns for the Clicon homepage redesign
+// ============================================================
+
+// --- Buttons ---
+@mixin cl-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background-color: var(--cl-primary);
+  color: var(--cl-text-white);
+  font-family: var(--cl-ff-body);
+  font-size: 14px;
+  font-weight: var(--cl-fw-bold);
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--cl-radius-sm);
+  cursor: pointer;
+  transition: background-color var(--cl-transition-normal);
+  line-height: 1.4;
+
+  &:hover {
+    background-color: var(--cl-primary-hover);
+    color: var(--cl-text-white);
+  }
+
+  svg, i {
+    font-size: 14px;
+  }
+}
+
+@mixin cl-btn-outlined {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: transparent;
+  color: var(--cl-primary);
+  font-family: var(--cl-ff-body);
+  font-size: 14px;
+  font-weight: var(--cl-fw-semibold);
+  text-transform: uppercase;
+  border: 2px solid var(--cl-primary);
+  border-radius: var(--cl-radius-sm);
+  cursor: pointer;
+  transition: all var(--cl-transition-normal);
+
+  &:hover {
+    background-color: var(--cl-primary);
+    color: var(--cl-text-white);
+  }
+}
+
+// --- Badges ---
+@mixin cl-badge-base {
+  display: inline-block;
+  padding: 3px 10px;
+  font-family: var(--cl-ff-body);
+  font-size: var(--cl-fs-caption);
+  font-weight: var(--cl-fw-semibold);
+  line-height: 1.5;
+  border-radius: var(--cl-radius-sm);
+  text-transform: uppercase;
+}
+
+@mixin cl-badge-hot {
+  @include cl-badge-base;
+  background-color: var(--cl-badge-hot);
+  color: var(--cl-text-white);
+}
+
+@mixin cl-badge-sale {
+  @include cl-badge-base;
+  background-color: var(--cl-badge-sale);
+  color: var(--cl-text-white);
+}
+
+@mixin cl-badge-soldout {
+  @include cl-badge-base;
+  background-color: var(--cl-badge-soldout);
+  color: var(--cl-text-white);
+}
+
+@mixin cl-badge-deal {
+  @include cl-badge-base;
+  background-color: var(--cl-badge-deal);
+  color: var(--cl-text-white);
+}
+
+@mixin cl-badge-discount {
+  @include cl-badge-base;
+  background-color: var(--cl-badge-discount);
+  color: var(--cl-text-heading);
+}
+
+// --- Card ---
+@mixin cl-card {
+  background-color: var(--cl-bg-white);
+  border: 1px solid var(--cl-border);
+  border-radius: var(--cl-radius-sm);
+  transition: box-shadow var(--cl-transition-normal);
+
+  &:hover {
+    box-shadow: var(--cl-shadow-md);
+  }
+}
+
+// --- Product Card Actions (hover reveal on right side) ---
+@mixin cl-card-actions {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--cl-transition-normal);
+
+  button, a {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--cl-bg-white);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-full);
+    color: var(--cl-text-body);
+    cursor: pointer;
+    transition: all var(--cl-transition-fast);
+
+    &:hover {
+      background-color: var(--cl-primary);
+      border-color: var(--cl-primary);
+      color: var(--cl-text-white);
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+// --- Section ---
+@mixin cl-section {
+  padding: var(--cl-spacing-3xl) 0;
+  font-family: var(--cl-ff-body);
+}
+
+@mixin cl-section-title {
+  font-family: var(--cl-ff-heading);
+  font-size: var(--cl-fs-h2);
+  font-weight: var(--cl-fw-semibold);
+  color: var(--cl-text-heading);
+  margin: 0;
+}
+
+// --- Browse Link ---
+@mixin cl-browse-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--cl-fs-body);
+  font-weight: var(--cl-fw-semibold);
+  color: var(--cl-primary);
+  transition: color var(--cl-transition-fast);
+
+  &:hover {
+    color: var(--cl-primary-hover);
+  }
+
+  svg, i {
+    font-size: 12px;
+  }
+}
+
+// --- Price ---
+@mixin cl-price-current {
+  font-size: var(--cl-fs-body);
+  font-weight: var(--cl-fw-semibold);
+  color: var(--cl-primary);
+}
+
+@mixin cl-price-old {
+  font-size: var(--cl-fs-body-sm);
+  font-weight: var(--cl-fw-regular);
+  color: var(--cl-text-secondary);
+  text-decoration: line-through;
+}
+
+// --- Rating ---
+@mixin cl-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  .cl-star {
+    color: var(--cl-primary);
+    font-size: 12px;
+  }
+
+  .cl-star--empty {
+    color: var(--cl-border);
+  }
+
+  .cl-rating-count {
+    font-size: var(--cl-fs-caption);
+    color: var(--cl-text-secondary);
+    margin-left: 2px;
+  }
+}

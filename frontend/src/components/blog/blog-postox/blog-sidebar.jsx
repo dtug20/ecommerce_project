@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 // internal
 import user from '@assets/img/users/user-11.jpg';
 import signature from '@assets/img/blog/signature/signature.png';
@@ -11,14 +12,24 @@ import blogData from '@/data/blog-data';
 const latest_post = blogData.slice(0,3)
 
 const BlogSidebar = () => {
+  const [searchVal, setSearchVal] = useState('');
+  const router = useRouter();
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchVal.trim()) {
+      router.push(`/search?searchText=${encodeURIComponent(searchVal.trim())}`);
+    }
+  };
+
   return (
     <>
       <div className="tp-sidebar-wrapper tp-sidebar-ml--24">
         <div className="tp-sidebar-widget mb-35">
           <div className="tp-sidebar-search">
-            <form action="#">
+            <form onSubmit={handleSearch}>
               <div className="tp-sidebar-search-input">
-                <input type="text" placeholder="Search..." />
+                <input type="text" placeholder="Search..." value={searchVal} onChange={(e) => setSearchVal(e.target.value)} />
                 <button type="submit">
                   <Search/>
                 </button>
@@ -39,10 +50,10 @@ const BlogSidebar = () => {
               </div>
               <div className="tp-sidebar-about-content">
                 <h3 className="tp-sidebar-about-title">
-                  <a href="#">Ravi {"O'Leigh"}</a>
+                  <a href="#">Shofy Team</a>
                 </h3>
-                <span className="tp-sidebar-about-designation">Photographer & Blogger</span>
-                <p>Lorem ligula eget dolor. Aenean massa. Cum sociis que penatibus magnis dis parturient</p>
+                <span className="tp-sidebar-about-designation">E-commerce & Lifestyle</span>
+                <p>Discover the latest trends in electronics, fashion, beauty, and more with our curated guides and reviews.</p>
                 <div className="tp-sidebar-about-signature">
                   <Image src={signature} alt="signature" />
                 </div>

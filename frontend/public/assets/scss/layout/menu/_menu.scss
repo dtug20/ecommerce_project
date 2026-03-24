@@ -6,11 +6,12 @@
 
 .main-menu{
     & > nav > ul{
+        white-space: nowrap;
         & > li{
             position: relative;
             list-style: none;
             display: inline-block;
-            margin-right: 27px;
+            margin-right: 20px;
 
             &.has-mega-menu{
                 position: static;

@@ -59,7 +59,7 @@ const CheckoutBillingArea = ({ register, errors }) => {
                   type="text"
                   placeholder="United States (US)"
                 />
-                <ErrorMsg msg={errors?.lastName?.message} />
+                <ErrorMsg msg={errors?.country?.message} />
               </div>
             </div>
             <div className="col-md-12">

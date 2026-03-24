@@ -12,14 +12,14 @@
         color: var(--tp-common-white);
         background-color: var(--tp-theme-primary);
         width: 100%;
-        padding: 12px 30px;
+        padding: 10px 20px;
         text-align: left;
         position: relative;
 
         &::after{
             position: absolute;
             content: '\f107';
-            right: 30px;
+            right: 20px;
             top: 50%;
             @include transform(translateY(-50%));
             font-family: var(--tp-ff-fontawesome);

@@ -13,7 +13,7 @@ export default function Document() {
         />
         {/* All four font families are referenced in /assets/scss/utils/_typography.scss */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Charm:wght@400;700&family=Jost:wght@300;400;500;600;700&family=Oregano&family=Roboto:wght@300;400;500;700;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Charm:wght@400;700&family=Jost:wght@300;400;500;600;700&family=Oregano&family=Public+Sans:wght@400;500;600;700&family=Roboto:wght@300;400;500;700;900&display=swap"
           rel="stylesheet"
         />
       </Head>

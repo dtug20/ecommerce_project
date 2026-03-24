@@ -32,9 +32,6 @@ const Menus = () => {
 
   return (
     <ul>
-      <li>
-        <Link href="/shop">{t("nav.shop")}</Link>
-      </li>
       {!isLoading && !isError && menuCategories.map((item) => (
         <li key={item._id} className={item.children && item.children.length > 0 ? "has-dropdown" : ""}>
           <Link href={`/shop?category=${buildCategorySlug(item.parent)}`}>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Rating } from 'react-simple-star-rating';
 import { useDispatch, useSelector } from 'react-redux';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 // internal
 import { AskQuestion, CompareTwo, WishlistTwo } from '@/svg';
 import DetailsBottomInfo from './details-bottom-info';
@@ -13,6 +14,7 @@ import { handleModalClose } from '@/redux/features/productModalSlice';
 import useWishlist from '@/hooks/use-wishlist';
 
 const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBottom = false, selectedVariant = null }) => {
+  const { t } = useTranslation();
   const { sku, img, title, imageURLs, category, description, discount, price, status, reviews, tags, offerDate, vendor } = productItem || {};
   const [ratingVal, setRatingVal] = useState(0);
   const [textMore, setTextMore] = useState(false);
@@ -71,7 +73,7 @@ const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBott
   return (
     <div className="tp-product-details-wrapper">
       <div className="tp-product-details-category">
-        <span>{category.name}</span>
+        <span>{category?.name}</span>
       </div>
       <h3 className="tp-product-details-title">{title}</h3>
 
@@ -85,18 +87,18 @@ const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBott
             <Rating allowFraction size={16} initialValue={ratingVal} readonly={true} />
           </div>
           <div className="tp-product-details-reviews">
-            <span>({reviews && reviews.length > 0 ? reviews.length : 0} Review)</span>
+            <span>({reviews && reviews.length > 0 ? reviews.length : 0} {t('product.reviews')})</span>
           </div>
         </div>
       </div>
-      <p>{textMore ? description : `${description.substring(0, 100)}...`}
-        <span onClick={() => setTextMore(!textMore)}>{textMore ? 'See less' : 'See more'}</span>
+      <p>{textMore ? description : `${(description || '').substring(0, 100)}...`}
+        <span onClick={() => setTextMore(!textMore)}>{textMore ? t('product.seeLess') : t('product.seeMore')}</span>
       </p>
 
       {/* vendor badge */}
       {vendor?.vendorProfile?.storeName && vendor?.vendorProfile?.storeSlug && (
         <div className="tp-product-vendor mb-10">
-          <span className="text-muted" style={{ fontSize: '13px' }}>Sold by: </span>
+          <span className="text-muted" style={{ fontSize: '13px' }}>{t('product.soldBy')} </span>
           <Link
             href={`/vendor/${vendor.vendorProfile.storeSlug}`}
             className="tp-product-vendor-link"
@@ -156,7 +158,7 @@ const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBott
 
       {/* actions */}
       <div className="tp-product-details-action-wrapper">
-        <h3 className="tp-product-details-action-title">Quantity</h3>
+        <h3 className="tp-product-details-action-title">{t('product.quantity')}</h3>
         <div className="tp-product-details-action-item-wrapper d-sm-flex align-items-center">
           {/* product quantity */}
           <ProductQuantity />
@@ -167,27 +169,27 @@ const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBott
               disabled={displayStatus === 'out-of-stock'}
               className="tp-product-details-add-to-cart-btn w-100"
             >
-              Add To Cart
+              {t('product.addToCart')}
             </button>
           </div>
         </div>
         <Link href="/cart" onClick={() => dispatch(handleModalClose())}>
-          <button className="tp-product-details-buy-now-btn w-100">Buy Now</button>
+          <button className="tp-product-details-buy-now-btn w-100">{t('product.buyNow')}</button>
         </Link>
       </div>
       {/* product-details-action-sm start */}
       <div className="tp-product-details-action-sm">
         <button disabled={displayStatus === 'out-of-stock'} onClick={() => handleCompareProduct(productItem)} type="button" className="tp-product-details-action-sm-btn">
           <CompareTwo />
-          Compare
+          {t('product.addToCompare')}
         </button>
         <button disabled={displayStatus === 'out-of-stock'} onClick={() => handleWishlistProduct(productItem)} type="button" className="tp-product-details-action-sm-btn">
           <WishlistTwo />
-          Add Wishlist
+          {t('product.addToWishlist')}
         </button>
         <button type="button" className="tp-product-details-action-sm-btn">
           <AskQuestion />
-          Ask a question
+          {t('product.askQuestion')}
         </button>
       </div>
       {/* product-details-action-sm end */}

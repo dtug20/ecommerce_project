@@ -1,0 +1,186 @@
+@use '../../utils' as *;
+
+// ============================================================
+// Clicon Category Showcase — Phase 5
+// BEM: .cl-categories, .cl-category-card
+// ============================================================
+
+// ---------------------------------------------------------------------------
+// Section wrapper
+// ---------------------------------------------------------------------------
+.cl-categories {
+  @include cl-section;
+  background-color: var(--cl-bg-white);
+
+  &__header {
+    text-align: center;
+    margin-bottom: var(--cl-spacing-xl);
+  }
+
+  &__title {
+    @include cl-section-title;
+  }
+
+  // Carousel wrapper — positions the nav arrows outside the swiper
+  &__carousel-wrap {
+    position: relative;
+    padding: 0 var(--cl-spacing-xl);
+
+    @media (min-width: 768px) {
+      padding: 0 var(--cl-spacing-2xl);
+    }
+  }
+
+  // Navigation arrows
+  &__nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--cl-radius-full);
+    background-color: var(--cl-bg-white);
+    border: 1px solid var(--cl-border);
+    color: var(--cl-text-heading);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--cl-transition-normal);
+    font-size: 14px;
+    flex-shrink: 0;
+
+    &:hover {
+      background-color: var(--cl-primary);
+      border-color: var(--cl-primary);
+      color: var(--cl-text-white);
+    }
+
+    // Disabled state (when Swiper is at the edge)
+    &.swiper-button-disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+
+      &:hover {
+        background-color: var(--cl-bg-white);
+        border-color: var(--cl-border);
+        color: var(--cl-text-heading);
+      }
+    }
+
+    &--prev {
+      left: 0;
+    }
+
+    &--next {
+      right: 0;
+    }
+  }
+
+  // States
+  &__skeleton-row {
+    display: flex;
+    gap: var(--cl-spacing-md);
+    overflow: hidden;
+  }
+
+  &__error,
+  &__empty {
+    text-align: center;
+    color: var(--cl-text-secondary);
+    font-size: var(--cl-fs-body);
+    padding: var(--cl-spacing-xl);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Category card
+// ---------------------------------------------------------------------------
+.cl-category-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--cl-spacing-md) var(--cl-spacing-sm);
+  border: 1px solid var(--cl-border);
+  border-radius: var(--cl-radius-md);
+  text-decoration: none;
+  background-color: var(--cl-bg-white);
+  transition: border-color var(--cl-transition-normal), box-shadow var(--cl-transition-normal), transform var(--cl-transition-normal);
+  height: 100%;
+
+  &:hover {
+    border-color: var(--cl-primary);
+    box-shadow: var(--cl-shadow-md);
+    transform: translateY(-3px);
+    text-decoration: none;
+  }
+
+  &__image-wrap {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--cl-spacing-sm);
+    flex-shrink: 0;
+
+    @media (min-width: 768px) {
+      width: 120px;
+      height: 120px;
+    }
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transition: transform var(--cl-transition-normal);
+    }
+
+    .cl-category-card:hover & img {
+      transform: scale(1.05);
+    }
+  }
+
+  &__no-img {
+    width: 80px;
+    height: 80px;
+    background-color: var(--cl-bg-gray);
+    border-radius: var(--cl-radius-sm);
+  }
+
+  &__body {
+    width: 100%;
+  }
+
+  &__name {
+    font-family: var(--cl-ff-heading);
+    font-size: var(--cl-fs-body);
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+    margin: 0 0 2px;
+    line-height: var(--cl-lh-tight);
+    transition: color var(--cl-transition-fast);
+
+    .cl-category-card:hover & {
+      color: var(--cl-primary);
+    }
+  }
+
+  &__count {
+    font-size: var(--cl-fs-caption);
+    color: var(--cl-text-secondary);
+    margin: 0;
+  }
+
+  // Skeleton variant
+  &--skeleton {
+    border-color: transparent;
+    box-shadow: none;
+    pointer-events: none;
+    flex-shrink: 0;
+    width: calc(100% / 6 - var(--cl-spacing-md));
+    min-width: 140px;
+  }
+}

@@ -34,7 +34,7 @@ const VendorStorePage = ({ vendor, products, pagination }) => {
           style={{
             height: '200px',
             background: storeBanner
-              ? `url(${storeBanner}) center/cover no-repeat`
+              ? `url(${encodeURI(storeBanner)}) center/cover no-repeat`
               : 'linear-gradient(135deg, #821F40 0%, #3d0f1e 100%)',
             overflow: 'hidden',
           }}
@@ -220,12 +220,17 @@ export async function getServerSideProps({ params }) {
       fetch(`${API_URL}/api/v1/store/products?vendor=${params.slug}&page=1&limit=20`),
     ]);
 
+    if (!vendorRes.ok) {
+      return { notFound: true };
+    }
+
     const vendorData = await vendorRes.json();
-    const productsData = await productsRes.json();
 
     if (!vendorData.success) {
       return { notFound: true };
     }
+
+    const productsData = productsRes.ok ? await productsRes.json() : { data: [], pagination: null };
 
     return {
       props: {

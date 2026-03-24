@@ -1,0 +1,187 @@
+@use '../../utils' as *;
+
+// ============================================================
+// Clicon Footer Styles
+// Dark footer with 5 columns + copyright bar
+// ============================================================
+
+.cl-footer {
+  font-family: var(--cl-ff-body);
+
+  // --- Main Section ---
+  &__main {
+    background-color: var(--cl-footer-bg);
+    padding: 60px 0 40px;
+  }
+
+  // --- Brand / Logo column ---
+  &__logo {
+    display: inline-block;
+    margin-bottom: 16px;
+
+    img {
+      filter: brightness(0) invert(1);
+    }
+  }
+
+  &__contact {
+    &-label {
+      font-size: var(--cl-fs-caption);
+      color: var(--cl-footer-text);
+      margin-bottom: 4px;
+    }
+
+    &-phone {
+      display: block;
+      font-size: 18px;
+      font-weight: var(--cl-fw-semibold);
+      color: #fff;
+      margin-bottom: 12px;
+      transition: color var(--cl-transition-fast);
+
+      &:hover { color: var(--cl-primary); }
+    }
+
+    &-address {
+      font-size: var(--cl-fs-body-sm);
+      color: var(--cl-footer-text);
+      margin-bottom: 4px;
+      line-height: 1.6;
+    }
+
+    &-email {
+      font-size: var(--cl-fs-body-sm);
+      color: #fff;
+      font-weight: var(--cl-fw-medium);
+      transition: color var(--cl-transition-fast);
+
+      &:hover { color: var(--cl-primary); }
+    }
+  }
+
+  // --- Widget ---
+  &__widget-title {
+    font-size: var(--cl-fs-h6);
+    font-weight: var(--cl-fw-medium);
+    color: #fff;
+    margin-bottom: 16px;
+    letter-spacing: 0.5px;
+  }
+
+  &__links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    a {
+      font-size: var(--cl-fs-body-sm);
+      color: var(--cl-footer-text);
+      transition: color var(--cl-transition-fast);
+
+      &:hover {
+        color: #fff;
+      }
+    }
+  }
+
+  &__browse-link {
+    color: var(--cl-primary) !important;
+    font-weight: var(--cl-fw-medium);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    i { font-size: 11px; }
+
+    &:hover {
+      color: var(--cl-primary-hover) !important;
+    }
+  }
+
+  // --- App Badges ---
+  &__app-badges {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__app-badge {
+    display: block;
+    text-decoration: none;
+
+    &-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background-color: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--cl-radius-md);
+      padding: 10px 16px;
+      transition: border-color var(--cl-transition-fast);
+
+      i {
+        font-size: 24px;
+        color: #fff;
+      }
+
+      span {
+        display: block;
+        font-size: 11px;
+        color: var(--cl-footer-text);
+        line-height: 1.2;
+      }
+
+      strong {
+        display: block;
+        font-size: 14px;
+        color: #fff;
+        font-weight: var(--cl-fw-medium);
+      }
+    }
+
+    &:hover &-inner {
+      border-color: var(--cl-primary);
+    }
+  }
+
+  // --- Tags ---
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  &__tag {
+    display: inline-block;
+    padding: 4px 12px;
+    font-size: var(--cl-fs-caption);
+    color: var(--cl-footer-text);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--cl-radius-sm);
+    transition: all var(--cl-transition-fast);
+
+    &:hover {
+      background-color: var(--cl-primary);
+      border-color: var(--cl-primary);
+      color: #fff;
+    }
+  }
+
+  // --- Bottom Bar ---
+  &__bottom {
+    background-color: #141617;
+    padding: 16px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  &__copyright {
+    text-align: center;
+    font-size: var(--cl-fs-body-sm);
+    color: var(--cl-footer-text);
+    margin: 0;
+  }
+}

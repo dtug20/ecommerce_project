@@ -1,42 +1,38 @@
 import SEO from "@/components/seo";
 import Wrapper from "@/layout/wrapper";
-import Header from "@/layout/headers/header";
-import Footer from "@/layout/footers/footer";
+import HeaderClicon from "@/layout/headers/header-clicon";
+import FooterClicon from "@/layout/footers/footer-clicon";
 import BlockRenderer from "@/components/cms/BlockRenderer";
 import JsonLd from "@/components/seo/JsonLd";
 import { organizationJsonLd } from "@/utils/structuredData";
-// Keep all existing imports as fallback
-import ElectronicCategory from "@/components/categories/electronic-category";
-import HomeHeroSlider from "@/components/hero-banner/home-hero-slider";
-import FeatureArea from "@/components/features/feature-area";
-import ProductArea from "@/components/products/electronics/product-area";
-import BannerArea from "@/components/banner/banner-area";
-import OfferProducts from "@/components/products/electronics/offer-products";
-import ProductGadgetArea from "@/components/products/electronics/product-gadget-area";
-import ProductBanner from "@/components/products/electronics/product-banner";
-import ProductSmArea from "@/components/products/electronics/product-sm-area";
-import NewArrivals from "@/components/products/electronics/new-arrivals";
-import BlogArea from "@/components/blog/electronic/blog-area";
-import InstagramArea from "@/components/instagram/instagram-area";
-import CtaArea from "@/components/cta/cta-area";
+// Clicon homepage sections
+import CliconHeroArea from "@/components/clicon/hero/clicon-hero-area";
+import CliconFeaturesBar from "@/components/clicon/features/clicon-features-bar";
+import CliconBestDeals from "@/components/clicon/deals/clicon-best-deals";
+import CliconCategoryShowcase from "@/components/clicon/categories/clicon-category-showcase";
+import CliconFeaturedProducts from "@/components/clicon/products/clicon-featured-products";
+import CliconDoubleBanner from "@/components/clicon/banners/clicon-double-banner";
+import CliconProductSectionWithPromo from "@/components/clicon/products/clicon-product-section-with-promo";
+import CliconFullWidthBanner from "@/components/clicon/banners/clicon-full-width-banner";
+import CliconProductColumns from "@/components/clicon/products/clicon-product-columns";
+import CliconBlogArea from "@/components/clicon/blog/clicon-blog-area";
+import CliconNewsletter from "@/components/clicon/newsletter/clicon-newsletter";
 
-// Fallback layout when CMS data is not available
-function FallbackHome() {
+// Clicon fallback layout
+function FallbackHomeClicon() {
   return (
     <>
-      <HomeHeroSlider />
-      <ElectronicCategory />
-      <FeatureArea />
-      <ProductArea />
-      <BannerArea />
-      <OfferProducts />
-      <ProductGadgetArea />
-      <ProductBanner />
-      <NewArrivals />
-      <ProductSmArea />
-      <BlogArea />
-      <InstagramArea />
-      <CtaArea />
+      <CliconHeroArea />
+      <CliconFeaturesBar />
+      <CliconBestDeals />
+      <CliconCategoryShowcase />
+      <CliconFeaturedProducts />
+      <CliconDoubleBanner />
+      <CliconProductSectionWithPromo title="Computer Accessories" productType="electronics" queryType="new" />
+      <CliconFullWidthBanner />
+      <CliconProductColumns />
+      <CliconBlogArea />
+      <CliconNewsletter />
     </>
   );
 }
@@ -58,13 +54,13 @@ export default function Home({ page, settings }) {
         url="/"
       />
       <JsonLd data={organizationJsonLd(siteUrl)} />
-      <Header />
+      <HeaderClicon />
       {hasCmsContent ? (
         <BlockRenderer blocks={page.blocks} />
       ) : (
-        <FallbackHome />
+        <FallbackHomeClicon />
       )}
-      <Footer />
+      <FooterClicon />
     </Wrapper>
   );
 }

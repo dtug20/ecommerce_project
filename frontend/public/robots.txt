@@ -5,6 +5,10 @@ Disallow: /checkout
 Disallow: /profile
 Disallow: /order/
 Disallow: /search
+Disallow: /login
+Disallow: /register
+Disallow: /compare
+Disallow: /wishlist
 Disallow: /api/
 
 Sitemap: https://shofy.com/sitemap.xml

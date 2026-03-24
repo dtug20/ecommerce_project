@@ -1,0 +1,271 @@
+@use '../../utils' as *;
+
+// ============================================================
+// Clicon Hero Area — Phase 4
+// BEM: .cl-hero-area, .cl-hero-slider, .cl-hero-slide,
+//       .cl-hero-promo, .cl-hero-promo-card
+// ============================================================
+
+// ---------------------------------------------------------------------------
+// Hero wrapper
+// ---------------------------------------------------------------------------
+.cl-hero-area {
+  padding: var(--cl-spacing-lg) 0;
+  font-family: var(--cl-ff-body);
+  background-color: var(--cl-bg-white);
+}
+
+// ---------------------------------------------------------------------------
+// Slider — left column (60% on xl+)
+// ---------------------------------------------------------------------------
+.cl-hero-slider {
+  position: relative;
+  border-radius: var(--cl-radius-md);
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .cl-hero-swiper {
+    border-radius: var(--cl-radius-md);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .swiper-wrapper {
+      flex: 1;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Individual slide
+// ---------------------------------------------------------------------------
+.cl-hero-slide {
+  border-radius: var(--cl-radius-md);
+  padding: var(--cl-spacing-xl) var(--cl-spacing-xl) var(--cl-spacing-xl) var(--cl-spacing-2xl);
+  min-height: 360px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+
+  @media (min-width: 768px) {
+    min-height: 400px;
+  }
+
+  @media (min-width: 1200px) {
+    min-height: unset;
+  }
+
+  // Text content column
+  &__content {
+    padding: var(--cl-spacing-lg) 0;
+    max-width: 340px;
+  }
+
+  &__subtitle {
+    font-size: var(--cl-fs-body-sm);
+    font-weight: var(--cl-fw-medium);
+    color: var(--cl-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: var(--cl-spacing-sm);
+  }
+
+  &__title {
+    font-family: var(--cl-ff-heading);
+    font-size: var(--cl-fs-h2);
+    font-weight: var(--cl-fw-bold);
+    color: var(--cl-text-heading);
+    line-height: var(--cl-lh-tight);
+    margin-bottom: var(--cl-spacing-md);
+
+    @media (min-width: 992px) {
+      font-size: 30px;
+    }
+
+    @media (min-width: 1200px) {
+      font-size: 36px;
+    }
+  }
+
+  &__desc {
+    font-size: var(--cl-fs-body);
+    color: var(--cl-text-body);
+    line-height: var(--cl-lh-relaxed);
+    margin-bottom: var(--cl-spacing-lg);
+  }
+
+  &__btn {
+    @include cl-btn-primary;
+    text-decoration: none;
+  }
+
+  // Product image column
+  &__image {
+    text-align: center;
+    position: relative;
+
+    img {
+      max-height: 320px;
+      width: auto !important;
+    }
+  }
+
+  // Price circle badge (like Figma: blue circle with white price text)
+  &__price-circle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #2DA5F3;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: var(--cl-fw-bold);
+    font-family: var(--cl-ff-body);
+    z-index: 2;
+    box-shadow: 0 4px 12px rgba(45, 165, 243, 0.3);
+
+    @media (max-width: 767px) {
+      width: 60px;
+      height: 60px;
+      font-size: 16px;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Swiper dot pagination — below slider
+// ---------------------------------------------------------------------------
+.cl-hero-dots {
+  text-align: center;
+  padding: var(--cl-spacing-sm) 0 var(--cl-spacing-md);
+
+  &.swiper-pagination-bullets {
+    .swiper-pagination-bullet {
+      width: 8px;
+      height: 8px;
+      background-color: var(--cl-border);
+      opacity: 1;
+      margin: 0 4px;
+      transition: background-color var(--cl-transition-normal), width var(--cl-transition-normal);
+      border-radius: var(--cl-radius-full);
+
+      &-active {
+        background-color: var(--cl-primary);
+        width: 24px;
+        border-radius: 4px;
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Promo column — right (40% on xl+)
+// ---------------------------------------------------------------------------
+.cl-hero-promo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cl-spacing-md);
+  height: 100%;
+}
+
+// ---------------------------------------------------------------------------
+// Promo card
+// ---------------------------------------------------------------------------
+.cl-hero-promo-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: var(--cl-radius-md);
+  padding: var(--cl-spacing-lg);
+  flex: 1;
+  min-height: 180px;
+  overflow: hidden;
+  position: relative;
+  transition: box-shadow var(--cl-transition-normal);
+
+  &:hover {
+    box-shadow: var(--cl-shadow-md);
+  }
+
+  &__body {
+    flex: 1;
+    z-index: 1;
+  }
+
+  &__subtitle {
+    font-size: var(--cl-fs-caption);
+    font-weight: var(--cl-fw-medium);
+    color: var(--cl-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--cl-spacing-xs);
+  }
+
+  &__title {
+    font-family: var(--cl-ff-heading);
+    font-size: var(--cl-fs-h4);
+    font-weight: var(--cl-fw-bold);
+    color: var(--cl-text-heading);
+    line-height: var(--cl-lh-tight);
+    margin-bottom: var(--cl-spacing-sm);
+  }
+
+  &__price {
+    margin-bottom: var(--cl-spacing-sm);
+
+    &-label {
+      font-size: var(--cl-fs-caption);
+      color: var(--cl-text-secondary);
+      margin-right: 4px;
+    }
+
+    &-value {
+      font-size: var(--cl-fs-h5);
+      font-weight: var(--cl-fw-bold);
+      color: var(--cl-primary);
+    }
+  }
+
+  &__link {
+    @include cl-browse-link;
+    font-size: var(--cl-fs-caption);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+  }
+
+  &__image {
+    flex-shrink: 0;
+    margin-left: var(--cl-spacing-md);
+
+    img {
+      max-width: 140px;
+      height: auto;
+      object-fit: contain;
+    }
+  }
+
+  // Mobile: stack vertically
+  @media (max-width: 575px) {
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: 140px;
+
+    &__image {
+      margin-left: 0;
+      margin-top: var(--cl-spacing-sm);
+      align-self: flex-end;
+
+      img {
+        max-width: 100px;
+      }
+    }
+  }
+}

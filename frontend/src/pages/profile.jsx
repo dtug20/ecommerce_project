@@ -12,12 +12,14 @@ import keycloak from "@/lib/keycloak";
 
 const ProfilePage = () => {
   const router = useRouter();
-  const { data: orderData, isLoading } = useGetUserOrdersQuery();
+  const { data: orderData, isLoading } = useGetUserOrdersQuery(undefined, {
+    skip: !keycloak.authenticated,
+  });
   useEffect(() => {
     if (!keycloak.authenticated) {
       keycloak.login({ redirectUri: window.location.href });
     }
-  }, [router]);
+  }, []);
 
   if (isLoading) {
     return (

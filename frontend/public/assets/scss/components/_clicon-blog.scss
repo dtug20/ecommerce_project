@@ -1,0 +1,155 @@
+@use '../utils' as *;
+
+// ============================================================
+// Clicon Blog SCSS
+// Blog Area + Blog Card
+// ============================================================
+
+// ---- Blog Area ----
+.cl-blog-area {
+  @include cl-section;
+  background-color: var(--cl-bg-gray);
+
+  &__header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  &__title {
+    @include cl-section-title;
+    font-size: clamp(22px, 3vw, var(--cl-fs-h1));
+    margin-bottom: 10px;
+  }
+
+  &__subtitle {
+    font-size: var(--cl-fs-body);
+    color: var(--cl-text-secondary);
+    margin: 0;
+  }
+
+  &__footer {
+    text-align: center;
+    margin-top: 40px;
+  }
+
+  &__view-all {
+    @include cl-btn-outlined;
+    text-decoration: none;
+  }
+}
+
+// ---- Blog Card ----
+.cl-blog-card {
+  background-color: var(--cl-bg-white);
+  border: 1px solid var(--cl-border);
+  border-radius: var(--cl-radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: box-shadow var(--cl-transition-normal);
+  font-family: var(--cl-ff-body);
+
+  &:hover {
+    box-shadow: var(--cl-shadow-md);
+  }
+
+  &__image {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background-color: var(--cl-bg-gray);
+
+    a {
+      display: block;
+      width: 100%;
+      height: 100%;
+
+      img {
+        transition: transform var(--cl-transition-slow);
+      }
+    }
+
+    &:hover img {
+      transform: scale(1.04);
+    }
+  }
+
+  &__no-img {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--cl-bg-gray) 0%, var(--cl-border) 100%);
+  }
+
+  &__body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  &__meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: var(--cl-fs-caption);
+    color: var(--cl-text-secondary);
+
+    svg {
+      flex-shrink: 0;
+      color: var(--cl-primary);
+    }
+  }
+
+  &__title {
+    font-family: var(--cl-ff-heading);
+    font-size: var(--cl-fs-h5);
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: var(--cl-lh-tight);
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      transition: color var(--cl-transition-fast);
+
+      &:hover {
+        color: var(--cl-primary);
+      }
+    }
+  }
+
+  &__excerpt {
+    font-size: var(--cl-fs-body-sm);
+    color: var(--cl-text-body);
+    margin: 0;
+    line-height: var(--cl-lh-relaxed);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  &__readmore {
+    @include cl-btn-outlined;
+    text-decoration: none;
+    align-self: flex-start;
+    font-size: var(--cl-fs-caption);
+    padding: 8px 16px;
+    margin-top: auto;
+  }
+}

@@ -40,7 +40,7 @@ const ColorFilter = ({setCurrPage,shop_right=false}) => {
     const product_items = products.data;
     let allColor = [];
     product_items.forEach((product) => {
-      let uniqueColor = new Set(product.imageURLs.map((item) => item?.color));
+      let uniqueColor = new Set((product.imageURLs || []).map((item) => item?.color));
       allColor = [...new Set([...allColor, ...uniqueColor])];
     });
 

@@ -35,13 +35,13 @@ const KeycloakProvider = ({ children }) => {
           try {
             await dispatch(authApi.endpoints.getUserProfile.initiate());
           } catch (err) {
-            console.error("[Keycloak] Failed to fetch user profile:", err);
+            // Failed to fetch user profile — user can still browse
           }
         }
         setInitialized(true);
       })
       .catch((err) => {
-        console.error("[Keycloak] Init failed:", err);
+        // Keycloak init failed — app will still render for anonymous users
         setInitialized(true);
       });
 
@@ -55,7 +55,7 @@ const KeycloakProvider = ({ children }) => {
           }
         })
         .catch(() => {
-          console.error("[Keycloak] Token refresh failed");
+          // Token refresh failed — log user out
           dispatch(userLoggedOut());
         });
     };
@@ -83,19 +83,10 @@ const KeycloakProvider = ({ children }) => {
     }
   };
 
-  if (!initialized) {
-    return (
-      <div
-        className="d-flex align-items-center justify-content-center"
-        style={{ height: "100vh" }}
-      >
-        <Loader spinner="fade" loading={true} />
-      </div>
-    );
-  }
-
+  // Render children immediately — don't block the entire app while Keycloak
+  // initializes. Protected pages handle their own auth checks.
   return (
-    <KeycloakContext.Provider value={keycloak}>
+    <KeycloakContext.Provider value={{ ...keycloak, initialized }}>
       {children}
     </KeycloakContext.Provider>
   );

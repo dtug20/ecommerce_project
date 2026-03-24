@@ -14,7 +14,7 @@ const social_data = [
   },
   {
     id:3,
-    link:'https://www.linkedin.com/in/shuvok/',
+    link:'https://www.linkedin.com',
     icon:'fa-brands fa-linkedin-in',
     title:'Linkedin'
   },

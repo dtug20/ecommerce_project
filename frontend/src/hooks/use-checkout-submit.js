@@ -59,13 +59,17 @@ const useCheckoutSubmit = () => {
   const couponRef = useRef(null);
 
   useEffect(() => {
-    if (localStorage.getItem("couponInfo")) {
+    try {
       const data = localStorage.getItem("couponInfo");
-      const coupon = JSON.parse(data);
-      setCouponInfo(coupon);
-      setDiscountPercentage(coupon.discountPercentage);
-      setMinimumAmount(coupon.minimumAmount);
-      setDiscountProductType(coupon.productType);
+      if (data) {
+        const coupon = JSON.parse(data);
+        setCouponInfo(coupon);
+        setDiscountPercentage(coupon.discountPercentage);
+        setMinimumAmount(coupon.minimumAmount);
+        setDiscountProductType(coupon.productType);
+      }
+    } catch (err) {
+      // localStorage unavailable (Safari Private) — skip coupon restore
     }
   }, []);
 
@@ -100,8 +104,6 @@ const useCheckoutSubmit = () => {
     discountPercentage,
     cart_products,
     discountProductType,
-    discountAmount,
-    cartTotal,
   ]);
 
   // handleCouponCode — tries server validation first, falls back to client-side
@@ -253,8 +255,7 @@ const useCheckoutSubmit = () => {
         notifySuccess("Your Order Confirmed!");
         router.push(`/order/${res.data?.order?._id}`);
       }
-    }).catch(err => {
-      console.log(err);
+    }).catch(() => {
       setIsCheckoutSubmit(false);
     });
   };

@@ -5,8 +5,20 @@ import ContactForm from "../forms/contact-form";
 import contact_icon_1 from "@assets/img/contact/contact-icon-1.png";
 import contact_icon_2 from "@assets/img/contact/contact-icon-2.png";
 import contact_icon_3 from "@assets/img/contact/contact-icon-3.png";
+import { useGetSettingsQuery } from "@/redux/features/cmsApi";
 
 const ContactArea = () => {
+  const { data: settingsData } = useGetSettingsQuery();
+  const settings = settingsData?.data || {};
+
+  const email = settings.contact?.email || settings.contactEmail || "contact@shofy.com";
+  const phone = settings.contact?.phone || settings.contactPhone || "+84 123 456 789";
+  const address = settings.contact?.address || settings.address || "Ho Chi Minh City, Vietnam";
+  const socialLinks = settings.contact?.socialLinks || settings.socialLinks || {};
+  const facebook = socialLinks.facebook || "#";
+  const twitter = socialLinks.twitter || "#";
+  const linkedin = socialLinks.linkedin || "#";
+
   return (
     <>
       <section className="tp-contact-area pb-100">
@@ -15,7 +27,7 @@ const ContactArea = () => {
             <div className="row">
               <div className="col-xl-9 col-lg-8">
                 <div className="tp-contact-wrapper">
-                  <h3 className="tp-contact-title">Sent A Message</h3>
+                  <h3 className="tp-contact-title">Send A Message</h3>
 
                   <div className="tp-contact-form">
                     {/* form start */}
@@ -35,10 +47,10 @@ const ContactArea = () => {
                     </div>
                     <div className="tp-contact-info-content">
                       <p data-info="mail">
-                        <a href="mailto:contact@shofy.com">contact@shofy.com</a>
+                        <a href={`mailto:${email}`}>{email}</a>
                       </p>
                       <p data-info="phone">
-                        <a href="tel:670-413-90-762">+670 413 90 762</a>
+                        <a href={`tel:${phone}`}>{phone}</a>
                       </p>
                     </div>
                   </div>
@@ -50,12 +62,7 @@ const ContactArea = () => {
                     </div>
                     <div className="tp-contact-info-content">
                       <p>
-                        <a
-                          href="https://www.google.com/maps/place/New+York,+NY,+USA/@40.6976637,-74.1197638,11z/data=!3m1!4b1!4m6!3m5!1s0x89c24fa5d33f083b:0xc80b8f06e177fe62!8m2!3d40.7127753!4d-74.0059728!16zL20vMDJfMjg2"
-                          target="_blank"
-                        >
-                          84 sleepy hollow st. <br /> jamaica, New York 1432
-                        </a>
+                        <span>{address}</span>
                       </p>
                     </div>
                   </div>
@@ -72,13 +79,13 @@ const ContactArea = () => {
                         </h4>
 
                         <div className="tp-contact-social-icon">
-                          <a href="#">
+                          <a href={facebook}>
                             <i className="fa-brands fa-facebook-f"></i>
                           </a>
-                          <a href="#">
+                          <a href={twitter}>
                             <i className="fa-brands fa-twitter"></i>
                           </a>
-                          <a href="#">
+                          <a href={linkedin}>
                             <i className="fa-brands fa-linkedin-in"></i>
                           </a>
                         </div>

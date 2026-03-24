@@ -1,0 +1,96 @@
+// ============================================================
+// Badge & Tag System
+// Product badges, status badges, and category tags
+// ============================================================
+
+// Product badges (positioned on product cards)
+.tp-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: var(--tp-fs-overline);
+  font-weight: var(--tp-fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: var(--tp-radius-sm);
+  line-height: 1.2;
+
+  &--new {
+    background-color: var(--tp-theme-primary);
+    color: #fff;
+  }
+
+  &--sale {
+    background-color: var(--tp-error);
+    color: #fff;
+  }
+
+  &--hot {
+    background-color: #ec4899;
+    color: #fff;
+  }
+
+  &--out-of-stock {
+    background-color: var(--tp-gray-600);
+    color: #fff;
+  }
+}
+
+// Status badges (order status, review status, etc.)
+.tp-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: var(--tp-fs-caption);
+  font-weight: var(--tp-fw-medium);
+  border-radius: var(--tp-radius-full);
+  line-height: 1.3;
+
+  &--pending {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--tp-warning);
+  }
+
+  &--processing {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--tp-info);
+  }
+
+  &--shipped {
+    background-color: rgba(164, 44, 72, 0.1);
+    color: var(--tp-theme-primary);
+  }
+
+  &--delivered {
+    background-color: rgba(34, 197, 94, 0.1);
+    color: var(--tp-success);
+  }
+
+  &--cancelled {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--tp-error);
+  }
+}
+
+// Category tags
+.tp-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  font-size: var(--tp-fs-caption);
+  border: 1px solid var(--tp-gray-200);
+  border-radius: var(--tp-radius-full);
+  color: var(--tp-gray-700);
+  background-color: transparent;
+  transition: var(--tp-transition-fast);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--tp-gray-50);
+    border-color: var(--tp-gray-300);
+  }
+
+  &--active {
+    background-color: var(--tp-theme-primary);
+    border-color: var(--tp-theme-primary);
+    color: #fff;
+  }
+}

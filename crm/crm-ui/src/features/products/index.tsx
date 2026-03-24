@@ -4,7 +4,6 @@ import {
   Button,
   Input,
   Select,
-  Modal,
   Form,
   InputNumber,
   Switch,
@@ -15,13 +14,19 @@ import {
   Badge,
   Row,
   Col,
-  Descriptions,
   Divider,
   Tag,
   Cascader,
   Tabs,
   Space,
   Empty,
+  Card,
+  Statistic,
+  Drawer,
+  Flex,
+  Progress,
+  Upload,
+  Avatar,
 } from 'antd';
 import type { TableProps } from 'antd';
 import {
@@ -29,21 +34,31 @@ import {
   EditOutlined,
   DeleteOutlined,
   EyeOutlined,
-  ClearOutlined,
   SearchOutlined,
   WarningOutlined,
   PictureOutlined,
+  ShoppingOutlined,
+  InboxOutlined,
+  StarOutlined,
+  StopOutlined,
+  DollarOutlined,
+  TagOutlined,
+  CalendarOutlined,
+  BarcodeOutlined,
+  InfoCircleOutlined,
+  ColumnWidthOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 import { productsApi, categoriesApi } from '@/services/api';
-import type { Product, Category, ProductVariant, ProductSeo } from '@/types';
-import { formatCurrency } from '@/hooks/useFormatters';
+import api from '@/services/api';
+import type { Product, Category, ProductVariant, ProductSeo, ProductStats } from '@/types';
+import { formatCurrency, formatDate } from '@/hooks/useFormatters';
 import StatusBadge from '@/components/commons/StatusBadge';
 import PageHeader from '@/components/commons/PageHeader';
 
-const { Text } = Typography;
+const { Text, Title, Paragraph } = Typography;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -69,20 +84,17 @@ interface ProductFormValues {
   colors?: string;
   sizes?: string;
   tags?: string;
-  // Shipping/physical
   weight?: number;
   dimLength?: number;
   dimWidth?: number;
   dimHeight?: number;
   barcode?: string;
-  // SEO
   metaTitle?: string;
   metaDescription?: string;
   metaKeywords?: string[];
   ogImage?: string;
 }
 
-// Variant editing state (kept in component state, not in the Form directly)
 interface VariantFormState {
   sku: string;
   colorName: string;
@@ -107,29 +119,115 @@ const DEBOUNCE_MS = 300;
 
 function splitComma(value: string | undefined): string[] {
   if (!value) return [];
-  return value
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean);
+  return value.split(',').map((s) => s.trim()).filter(Boolean);
 }
 
 function joinArray(arr: string[] | undefined): string {
   return arr ? arr.join(', ') : '';
 }
 
-// ---------------------------------------------------------------------------
-// ProductModal — Add / Edit
-// ---------------------------------------------------------------------------
-
-interface ProductModalProps {
-  open: boolean;
-  editingProduct: Product | null;
-  categories: Category[];
-  onClose: () => void;
+function getStockStatus(qty: number): { color: string; text: string; bg: string } {
+  if (qty === 0) return { color: '#ff4d4f', text: 'Out of stock', bg: '#fff2f0' };
+  if (qty <= 5) return { color: '#fa8c16', text: 'Critical', bg: '#fff7e6' };
+  if (qty <= 10) return { color: '#faad14', text: 'Low stock', bg: '#fffbe6' };
+  return { color: '#52c41a', text: 'In stock', bg: '#f6ffed' };
 }
 
 // ---------------------------------------------------------------------------
-// VariantsTab — inline variant management
+// Product image component
+// ---------------------------------------------------------------------------
+
+function ProductImage({ src, alt, size = 56 }: { src?: string; alt: string; size?: number }) {
+  if (src) {
+    return (
+      <Image
+        src={src}
+        alt={alt}
+        width={size}
+        height={size}
+        style={{ objectFit: 'cover', borderRadius: 8, border: '1px solid #f0f0f0' }}
+        fallback={PLACEHOLDER_IMG}
+        preview={{ mask: <EyeOutlined /> }}
+      />
+    );
+  }
+  return (
+    <Avatar
+      shape="square"
+      size={size}
+      icon={<PictureOutlined />}
+      style={{ backgroundColor: '#fafafa', color: '#d9d9d9', borderRadius: 8, border: '1px solid #f0f0f0' }}
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Stats cards
+// ---------------------------------------------------------------------------
+
+function StatsCards({ stats, loading }: { stats: ProductStats | null; loading: boolean }) {
+  const total = stats?.totalProducts ?? 0;
+  const active = stats?.activeProducts ?? 0;
+  const lowStock = stats?.lowStockProducts ?? 0;
+  const outOfStock = stats?.outOfStockProducts ?? 0;
+
+  return (
+    <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+      <Col xs={12} sm={12} md={6}>
+        <Card style={{ borderRadius: 12, height: '100%' }} loading={loading} size="small">
+          <Statistic
+            title={<Text type="secondary" style={{ fontSize: 13 }}>Total Products</Text>}
+            value={total}
+            prefix={<ShoppingOutlined style={{ color: '#1677ff', fontSize: 20 }} />}
+            valueStyle={{ color: '#1677ff', fontWeight: 600 }}
+          />
+        </Card>
+      </Col>
+      <Col xs={12} sm={12} md={6}>
+        <Card style={{ borderRadius: 12, height: '100%' }} loading={loading} size="small">
+          <Statistic
+            title={<Text type="secondary" style={{ fontSize: 13 }}>Active</Text>}
+            value={active}
+            prefix={<StarOutlined style={{ color: '#52c41a', fontSize: 20 }} />}
+            valueStyle={{ color: '#52c41a', fontWeight: 600 }}
+          />
+          {total > 0 && (
+            <Progress
+              percent={Math.round((active / total) * 100)}
+              showInfo={false}
+              strokeColor="#52c41a"
+              size="small"
+              style={{ marginTop: 4 }}
+            />
+          )}
+        </Card>
+      </Col>
+      <Col xs={12} sm={12} md={6}>
+        <Card style={{ borderRadius: 12, height: '100%' }} loading={loading} size="small">
+          <Statistic
+            title={<Text type="secondary" style={{ fontSize: 13 }}>Low Stock</Text>}
+            value={lowStock}
+            prefix={<WarningOutlined style={{ color: '#faad14', fontSize: 20 }} />}
+            valueStyle={{ color: '#faad14', fontWeight: 600 }}
+          />
+        </Card>
+      </Col>
+      <Col xs={12} sm={12} md={6}>
+        <Card style={{ borderRadius: 12, height: '100%' }} loading={loading} size="small">
+          <Statistic
+            title={<Text type="secondary" style={{ fontSize: 13 }}>Out of Stock</Text>}
+            value={outOfStock}
+            prefix={<StopOutlined style={{ color: '#ff4d4f', fontSize: 20 }} />}
+            valueStyle={{ color: '#ff4d4f', fontWeight: 600 }}
+          />
+        </Card>
+      </Col>
+    </Row>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// VariantsTab
 // ---------------------------------------------------------------------------
 
 interface VariantsTabProps {
@@ -145,7 +243,6 @@ function VariantsTab({ variants, onChange }: VariantsTabProps) {
   const handleAddOrUpdate = async () => {
     try {
       const values = await variantForm.validateFields();
-      // Validate SKU unique within product
       const isDuplicate = variants.some(
         (v, i) => v.sku === values.sku && i !== editingIndex,
       );
@@ -200,7 +297,7 @@ function VariantsTab({ variants, onChange }: VariantsTabProps) {
       key: 'sku',
       width: 120,
       render: (sku: string) => (
-        <Tag style={{ fontFamily: 'monospace' }}>{sku}</Tag>
+        <Tag style={{ fontFamily: 'monospace', borderRadius: 4 }}>{sku}</Tag>
       ),
     },
     {
@@ -208,7 +305,7 @@ function VariantsTab({ variants, onChange }: VariantsTabProps) {
       key: 'color',
       width: 120,
       render: (_: unknown, record: ProductVariant) => (
-        <Space size={6}>
+        <Flex align="center" gap={6}>
           <span
             style={{
               display: 'inline-block',
@@ -217,10 +314,11 @@ function VariantsTab({ variants, onChange }: VariantsTabProps) {
               borderRadius: '50%',
               background: record.color.clrCode,
               border: '1px solid #d9d9d9',
+              flexShrink: 0,
             }}
           />
           <Text style={{ fontSize: 12 }}>{record.color.name}</Text>
-        </Space>
+        </Flex>
       ),
     },
     { title: 'Size', dataIndex: 'size', key: 'size', width: 70 },
@@ -229,16 +327,17 @@ function VariantsTab({ variants, onChange }: VariantsTabProps) {
       dataIndex: 'price',
       key: 'price',
       width: 90,
-      render: (v: number) => `$${v.toFixed(2)}`,
+      render: (v: number) => formatCurrency(v),
     },
     {
       title: 'Stock',
       dataIndex: 'stock',
       key: 'stock',
       width: 70,
-      render: (v: number) => (
-        <span style={{ color: v <= 5 ? '#ff4d4f' : undefined }}>{v}</span>
-      ),
+      render: (v: number) => {
+        const status = getStockStatus(v);
+        return <Text style={{ color: status.color, fontWeight: 600 }}>{v}</Text>;
+      },
     },
     {
       title: '',
@@ -246,14 +345,14 @@ function VariantsTab({ variants, onChange }: VariantsTabProps) {
       width: 80,
       render: (_: unknown, _record: ProductVariant, index: number) => (
         <Space size={2}>
-          <Button size="small" icon={<EditOutlined />} onClick={() => handleEditVariant(index)} />
+          <Button size="small" type="text" icon={<EditOutlined />} onClick={() => handleEditVariant(index)} />
           <Popconfirm
             title="Remove this variant?"
             onConfirm={() => handleDeleteVariant(index)}
             okText="Remove"
             okButtonProps={{ danger: true }}
           >
-            <Button size="small" danger icon={<DeleteOutlined />} />
+            <Button size="small" type="text" danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
       ),
@@ -270,15 +369,22 @@ function VariantsTab({ variants, onChange }: VariantsTabProps) {
         size="small"
         style={{ marginBottom: 12 }}
         expandable={{ childrenColumnName: '__children' }}
-        locale={{ emptyText: 'No variants added yet' }}
+        locale={{
+          emptyText: (
+            <div style={{ padding: '16px 0' }}>
+              <InboxOutlined style={{ fontSize: 28, color: '#d9d9d9' }} />
+              <div style={{ color: '#8c8c8c', marginTop: 4, fontSize: 13 }}>No variants yet</div>
+            </div>
+          ),
+        }}
       />
 
       {addingVariant ? (
-        <div style={{ border: '1px solid #f0f0f0', borderRadius: 6, padding: 12, background: '#fafafa' }}>
-          <Text strong style={{ display: 'block', marginBottom: 8 }}>
-            {editingIndex !== null ? 'Edit Variant' : 'Add Variant'}
+        <Card size="small" style={{ borderRadius: 8, background: '#fafafa' }}>
+          <Text strong style={{ display: 'block', marginBottom: 12, fontSize: 13 }}>
+            {editingIndex !== null ? 'Edit Variant' : 'New Variant'}
           </Text>
-          <Form form={variantForm} layout="vertical">
+          <Form form={variantForm} layout="vertical" size="small">
             <Row gutter={12}>
               <Col span={6}>
                 <Form.Item name="sku" label="SKU" rules={[{ required: true, message: 'Required' }]}>
@@ -286,12 +392,12 @@ function VariantsTab({ variants, onChange }: VariantsTabProps) {
                 </Form.Item>
               </Col>
               <Col span={5}>
-                <Form.Item name="colorName" label="Color Name" rules={[{ required: true, message: 'Required' }]}>
+                <Form.Item name="colorName" label="Color" rules={[{ required: true, message: 'Required' }]}>
                   <Input placeholder="Red" />
                 </Form.Item>
               </Col>
               <Col span={4}>
-                <Form.Item name="colorHex" label="Hex Code" rules={[{ required: true, message: 'Required' }]}>
+                <Form.Item name="colorHex" label="Hex" rules={[{ required: true, message: 'Required' }]}>
                   <Input placeholder="#FF0000" />
                 </Form.Item>
               </Col>
@@ -327,7 +433,7 @@ function VariantsTab({ variants, onChange }: VariantsTabProps) {
               </Button>
             </Space>
           </Form>
-        </div>
+        </Card>
       ) : (
         <Button
           type="dashed"
@@ -337,6 +443,7 @@ function VariantsTab({ variants, onChange }: VariantsTabProps) {
             setEditingIndex(null);
             variantForm.resetFields();
           }}
+          block
         >
           Add Variant
         </Button>
@@ -362,43 +469,54 @@ function SeoTab({ form, slug }: SeoTabProps) {
 
   return (
     <div>
+      {/* Google preview */}
+      <Card
+        size="small"
+        style={{ marginBottom: 16, borderRadius: 8, background: '#fafafa' }}
+        styles={{ body: { padding: 12 } }}
+      >
+        <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+          Search Preview
+        </Text>
+        <div style={{ marginTop: 8 }}>
+          <Text style={{ color: '#1a0dab', fontSize: 16 }}>
+            {metaTitle || 'Page Title'}
+          </Text>
+          <div style={{ color: '#006621', fontSize: 12, fontFamily: 'monospace' }}>
+            example.com/products/{slug || 'product-slug'}
+          </div>
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            {metaDescription || 'Meta description will appear here...'}
+          </Text>
+        </div>
+      </Card>
+
       <Form.Item
         name="metaTitle"
         label={
-          <Space>
+          <Flex justify="space-between" style={{ width: '100%' }}>
             <span>Meta Title</span>
-            <Text
-              type={titleLen > 70 ? 'danger' : 'secondary'}
-              style={{ fontSize: 12 }}
-            >
+            <Text type={titleLen > 70 ? 'danger' : 'secondary'} style={{ fontSize: 12 }}>
               {titleLen}/70
             </Text>
-          </Space>
+          </Flex>
         }
       >
-        <Input placeholder="SEO page title (recommended: 50–70 chars)" maxLength={120} showCount />
+        <Input placeholder="SEO page title (recommended: 50-70 chars)" maxLength={120} />
       </Form.Item>
 
       <Form.Item
         name="metaDescription"
         label={
-          <Space>
+          <Flex justify="space-between" style={{ width: '100%' }}>
             <span>Meta Description</span>
-            <Text
-              type={descLen > 160 ? 'danger' : 'secondary'}
-              style={{ fontSize: 12 }}
-            >
+            <Text type={descLen > 160 ? 'danger' : 'secondary'} style={{ fontSize: 12 }}>
               {descLen}/160
             </Text>
-          </Space>
+          </Flex>
         }
       >
-        <Input.TextArea
-          rows={3}
-          placeholder="SEO description (recommended: under 160 chars)"
-          maxLength={320}
-          showCount
-        />
+        <Input.TextArea rows={3} placeholder="SEO description (recommended: under 160 chars)" maxLength={320} />
       </Form.Item>
 
       <Form.Item name="metaKeywords" label="Meta Keywords">
@@ -415,11 +533,11 @@ function SeoTab({ form, slug }: SeoTabProps) {
       </Form.Item>
 
       {slug && (
-        <Form.Item label="Canonical URL (preview)">
+        <Form.Item label="Canonical URL">
           <Input
             readOnly
             value={`/products/${slug}`}
-            style={{ background: '#f5f5f5', color: '#888', fontFamily: 'monospace', fontSize: 12 }}
+            style={{ background: '#fafafa', color: '#8c8c8c', fontFamily: 'monospace', fontSize: 12 }}
           />
         </Form.Item>
       )}
@@ -428,17 +546,307 @@ function SeoTab({ form, slug }: SeoTabProps) {
 }
 
 // ---------------------------------------------------------------------------
-// ProductModal — Add / Edit (with Variants + SEO tabs)
+// Product detail drawer
 // ---------------------------------------------------------------------------
 
-function ProductModal({ open, editingProduct, categories, onClose }: ProductModalProps) {
+function ProductDetail({
+  product,
+  onEdit,
+}: {
+  product: Product;
+  onEdit: () => void;
+}) {
+  const stockStatus = getStockStatus(product.quantity ?? 0);
+  const hasDiscount = (product.discount ?? 0) > 0;
+  const finalPrice = hasDiscount
+    ? product.price * (1 - (product.discount ?? 0) / 100)
+    : product.price;
+
+  return (
+    <div>
+      {/* Hero */}
+      <Flex gap={16} style={{ marginBottom: 24 }}>
+        <ProductImage src={product.img} alt={product.title} size={100} />
+        <div style={{ flex: 1 }}>
+          <Title level={4} style={{ margin: 0 }}>{product.title}</Title>
+          {product.slug && (
+            <Text type="secondary" style={{ fontSize: 12, fontFamily: 'monospace' }}>
+              /{product.slug}
+            </Text>
+          )}
+          <Flex gap={6} style={{ marginTop: 8 }} wrap="wrap">
+            <StatusBadge status={product.status} />
+            {product.featured && <Tag color="gold">Featured</Tag>}
+            {product.productType && (
+              <Tag color="blue">{product.productType}</Tag>
+            )}
+          </Flex>
+        </div>
+      </Flex>
+
+      {/* Price section */}
+      <Card
+        size="small"
+        style={{ borderRadius: 8, marginBottom: 16 }}
+        styles={{ body: { padding: '12px 16px' } }}
+      >
+        <Flex justify="space-between" align="center">
+          <div>
+            <Text type="secondary" style={{ fontSize: 12 }}>Price</Text>
+            <div>
+              <Text strong style={{ fontSize: 22 }}>{formatCurrency(finalPrice)}</Text>
+              {hasDiscount && (
+                <>
+                  <Text
+                    delete
+                    type="secondary"
+                    style={{ marginLeft: 8, fontSize: 14 }}
+                  >
+                    {formatCurrency(product.price)}
+                  </Text>
+                  <Tag color="red" style={{ marginLeft: 6, borderRadius: 4 }}>
+                    -{product.discount}%
+                  </Tag>
+                </>
+              )}
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <Text type="secondary" style={{ fontSize: 12 }}>Stock</Text>
+            <div>
+              <Tag
+                color={stockStatus.color === '#52c41a' ? 'success' : stockStatus.color === '#ff4d4f' ? 'error' : 'warning'}
+                style={{ fontSize: 14, padding: '2px 10px', borderRadius: 4 }}
+              >
+                {product.quantity ?? 0} units
+              </Tag>
+            </div>
+          </div>
+        </Flex>
+      </Card>
+
+      {/* Metrics row */}
+      <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
+        <Col span={8}>
+          <Card size="small" style={{ textAlign: 'center', borderRadius: 8 }}>
+            <Statistic
+              title={<Text type="secondary" style={{ fontSize: 11 }}>Sold</Text>}
+              value={product.sellCount ?? 0}
+              valueStyle={{ fontSize: 18 }}
+            />
+          </Card>
+        </Col>
+        <Col span={8}>
+          <Card size="small" style={{ textAlign: 'center', borderRadius: 8 }}>
+            <Statistic
+              title={<Text type="secondary" style={{ fontSize: 11 }}>Reviews</Text>}
+              value={product.reviews?.length ?? 0}
+              valueStyle={{ fontSize: 18 }}
+            />
+          </Card>
+        </Col>
+        <Col span={8}>
+          <Card size="small" style={{ textAlign: 'center', borderRadius: 8 }}>
+            <Statistic
+              title={<Text type="secondary" style={{ fontSize: 11 }}>Variants</Text>}
+              value={product.variants?.length ?? 0}
+              valueStyle={{ fontSize: 18 }}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Description */}
+      {product.description && (
+        <div style={{ marginBottom: 16 }}>
+          <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            Description
+          </Text>
+          <Paragraph style={{ marginTop: 4, marginBottom: 0, color: '#595959' }}>
+            {product.description}
+          </Paragraph>
+        </div>
+      )}
+
+      {/* Category & Brand */}
+      <div style={{ marginBottom: 16 }}>
+        <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+          Classification
+        </Text>
+        <Flex gap={8} style={{ marginTop: 6 }} wrap="wrap">
+          {(product as any).parent && (
+            <Tag icon={<TagOutlined />} style={{ borderRadius: 4, padding: '2px 8px' }}>
+              {(product as any).parent}
+              {(product as any).children ? ` > ${(product as any).children}` : ''}
+            </Tag>
+          )}
+          {product.brand?.name && (
+            <Tag color="purple" style={{ borderRadius: 4, padding: '2px 8px' }}>
+              {product.brand.name}
+            </Tag>
+          )}
+        </Flex>
+      </div>
+
+      {/* Colors, sizes, tags */}
+      {((product.colors?.length ?? 0) > 0 || (product.sizes?.length ?? 0) > 0 || (product.tags?.length ?? 0) > 0) && (
+        <div style={{ marginBottom: 16 }}>
+          {product.colors && product.colors.length > 0 && (
+            <div style={{ marginBottom: 8 }}>
+              <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                Colors
+              </Text>
+              <div style={{ marginTop: 4 }}>
+                {product.colors.map((c) => (
+                  <Tag key={c} style={{ borderRadius: 4, marginBottom: 4 }}>{c}</Tag>
+                ))}
+              </div>
+            </div>
+          )}
+          {product.sizes && product.sizes.length > 0 && (
+            <div style={{ marginBottom: 8 }}>
+              <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                Sizes
+              </Text>
+              <div style={{ marginTop: 4 }}>
+                {product.sizes.map((s) => (
+                  <Tag key={s} style={{ borderRadius: 4, marginBottom: 4 }}>{s}</Tag>
+                ))}
+              </div>
+            </div>
+          )}
+          {product.tags && product.tags.length > 0 && (
+            <div style={{ marginBottom: 8 }}>
+              <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                Tags
+              </Text>
+              <div style={{ marginTop: 4 }}>
+                {product.tags.map((t) => (
+                  <Tag key={t} color="blue" style={{ borderRadius: 4, marginBottom: 4 }}>{t}</Tag>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Variants */}
+      {product.variants && product.variants.length > 0 && (
+        <div style={{ marginBottom: 16 }}>
+          <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            Variants ({product.variants.length})
+          </Text>
+          <div style={{ marginTop: 8 }}>
+            {product.variants.map((v, idx) => (
+              <Card
+                key={v.sku || idx}
+                size="small"
+                style={{ marginBottom: 6, borderRadius: 6 }}
+                styles={{ body: { padding: '8px 12px' } }}
+              >
+                <Flex justify="space-between" align="center">
+                  <Flex align="center" gap={8}>
+                    <span
+                      style={{
+                        width: 14,
+                        height: 14,
+                        borderRadius: '50%',
+                        background: v.color.clrCode,
+                        border: '1px solid #d9d9d9',
+                        display: 'inline-block',
+                        flexShrink: 0,
+                      }}
+                    />
+                    <Text style={{ fontSize: 13 }}>
+                      {v.color.name} / {v.size}
+                    </Text>
+                    <Tag style={{ fontFamily: 'monospace', fontSize: 11, borderRadius: 4 }}>
+                      {v.sku}
+                    </Tag>
+                  </Flex>
+                  <Flex gap={12}>
+                    <Text strong style={{ fontSize: 13 }}>{formatCurrency(v.price)}</Text>
+                    <Text type={v.stock <= 5 ? 'danger' : 'secondary'} style={{ fontSize: 13 }}>
+                      {v.stock} pcs
+                    </Text>
+                  </Flex>
+                </Flex>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Physical properties */}
+      {(product.weight || product.barcode || product.dimensions?.length) && (
+        <div style={{ marginBottom: 16 }}>
+          <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            Physical Properties
+          </Text>
+          <Flex gap={16} style={{ marginTop: 6 }} wrap="wrap">
+            {product.weight && (
+              <Flex align="center" gap={4}>
+                <ColumnWidthOutlined style={{ color: '#8c8c8c' }} />
+                <Text style={{ fontSize: 13 }}>{product.weight}g</Text>
+              </Flex>
+            )}
+            {product.dimensions?.length && (
+              <Flex align="center" gap={4}>
+                <InboxOutlined style={{ color: '#8c8c8c' }} />
+                <Text style={{ fontSize: 13 }}>
+                  {product.dimensions.length} x {product.dimensions.width} x {product.dimensions.height} cm
+                </Text>
+              </Flex>
+            )}
+            {product.barcode && (
+              <Flex align="center" gap={4}>
+                <BarcodeOutlined style={{ color: '#8c8c8c' }} />
+                <Text style={{ fontSize: 13, fontFamily: 'monospace' }}>{product.barcode}</Text>
+              </Flex>
+            )}
+          </Flex>
+        </div>
+      )}
+
+      <Divider style={{ margin: '12px 0' }} />
+
+      {/* Timestamps */}
+      <Flex vertical gap={6}>
+        <Flex align="center" gap={6}>
+          <CalendarOutlined style={{ color: '#bfbfbf', fontSize: 12 }} />
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            Created: {formatDate(product.createdAt)}
+          </Text>
+        </Flex>
+        <Flex align="center" gap={6}>
+          <CalendarOutlined style={{ color: '#bfbfbf', fontSize: 12 }} />
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            Updated: {formatDate(product.updatedAt)}
+          </Text>
+        </Flex>
+      </Flex>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Product edit drawer
+// ---------------------------------------------------------------------------
+
+interface ProductDrawerProps {
+  open: boolean;
+  editingProduct: Product | null;
+  categories: Category[];
+  onClose: () => void;
+}
+
+function ProductDrawer({ open, editingProduct, categories, onClose }: ProductDrawerProps) {
   const [form] = Form.useForm<ProductFormValues>();
   const queryClient = useQueryClient();
   const [variants, setVariants] = useState<ProductVariant[]>([]);
 
   const isEdit = editingProduct !== null;
 
-  // Reset form whenever the modal opens
   const handleAfterOpenChange = (visible: boolean) => {
     if (visible) {
       if (editingProduct) {
@@ -481,7 +889,7 @@ function ProductModal({ open, editingProduct, categories, onClose }: ProductModa
     mutationFn: (data: Partial<Product>) => productsApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast.success('Product created successfully');
+      toast.success('Product created');
       onClose();
     },
     onError: (err: Error) => {
@@ -494,7 +902,7 @@ function ProductModal({ open, editingProduct, categories, onClose }: ProductModa
       productsApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast.success('Product updated successfully');
+      toast.success('Product updated');
       onClose();
     },
     onError: (err: Error) => {
@@ -543,13 +951,10 @@ function ProductModal({ open, editingProduct, categories, onClose }: ProductModa
         const childName = categoryVal[2] || '';
         const catObj = categories.find(c => c.parent === parentName && c.productType === prodType);
         if (catObj) {
-           (payload as any).productType = prodType;
-           (payload as any).parent = parentName;
-           (payload as any).children = childName;
-           (payload as any).category = {
-             id: catObj._id,
-             name: parentName,
-           };
+          (payload as any).productType = prodType;
+          (payload as any).parent = parentName;
+          (payload as any).children = childName;
+          (payload as any).category = { id: catObj._id, name: parentName };
         }
       }
 
@@ -559,7 +964,7 @@ function ProductModal({ open, editingProduct, categories, onClose }: ProductModa
         createMutation.mutate(payload);
       }
     } catch {
-      // Ant Design validation error — swallow so form highlights fields
+      // Ant Design validation error
     }
   };
 
@@ -569,58 +974,97 @@ function ProductModal({ open, editingProduct, categories, onClose }: ProductModa
       label: 'General',
       children: (
         <>
-          <Row gutter={16}>
-            <Col span={24}>
-              <Form.Item
-                name="title"
-                label="Title"
-                rules={[{ required: true, message: 'Product title is required' }]}
-              >
-                <Input placeholder="Enter product title" />
+          {/* Image upload */}
+          <Form.Item name="img" hidden>
+            <Input />
+          </Form.Item>
+          <Form.Item label="Product Image">
+            <Upload
+              name="image"
+              listType="picture-card"
+              showUploadList={false}
+              customRequest={async (options) => {
+                const { file, onSuccess, onError } = options;
+                const formData = new FormData();
+                formData.append('image', file as Blob);
+                try {
+                  const res = await api.post('/api/v1/admin/media/upload', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                  });
+                  const url = res.data?.data?.url;
+                  if (url) {
+                    form.setFieldsValue({ img: url });
+                    if (onSuccess) onSuccess('ok');
+                    toast.success('Image uploaded');
+                  } else {
+                    throw new Error('No URL returned');
+                  }
+                } catch (err: any) {
+                  if (onError) onError(err);
+                  toast.error('Upload failed');
+                }
+              }}
+            >
+              <Form.Item dependencies={['img']} noStyle>
+                {() => {
+                  const imgUrl = form.getFieldValue('img');
+                  return imgUrl ? (
+                    <img
+                      src={imgUrl}
+                      alt="product"
+                      style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 8 }}
+                    />
+                  ) : (
+                    <div>
+                      <PictureOutlined style={{ fontSize: 24, color: '#bfbfbf' }} />
+                      <div style={{ marginTop: 8, color: '#8c8c8c', fontSize: 13 }}>Upload</div>
+                    </div>
+                  );
+                }}
               </Form.Item>
-            </Col>
-          </Row>
+            </Upload>
+          </Form.Item>
+
+          <Form.Item
+            name="title"
+            label="Title"
+            rules={[{ required: true, message: 'Product title is required' }]}
+          >
+            <Input placeholder="Enter product title" />
+          </Form.Item>
 
           <Form.Item name="description" label="Description">
-            <Input.TextArea rows={3} placeholder="Enter product description" />
+            <Input.TextArea rows={3} placeholder="Enter product description" showCount maxLength={2000} />
           </Form.Item>
 
           <Row gutter={16}>
-            <Col xs={24} sm={12}>
+            <Col span={8}>
               <Form.Item
                 name="price"
                 label="Price (USD)"
-                rules={[{ required: true, message: 'Price is required' }]}
+                rules={[{ required: true, message: 'Required' }]}
               >
                 <InputNumber min={0} precision={2} style={{ width: '100%' }} placeholder="0.00" prefix="$" />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={12}>
+            <Col span={8}>
               <Form.Item name="discount" label="Discount (%)">
                 <InputNumber min={0} max={100} style={{ width: '100%' }} placeholder="0" />
               </Form.Item>
             </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col xs={24} sm={12}>
+            <Col span={8}>
               <Form.Item
                 name="quantity"
                 label="Quantity"
-                rules={[{ required: true, message: 'Quantity is required' }]}
+                rules={[{ required: true, message: 'Required' }]}
               >
                 <InputNumber min={0} style={{ width: '100%' }} placeholder="0" />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={12}>
-              <Form.Item name="shipping" label="Shipping Cost (USD)">
-                <InputNumber min={0} precision={2} style={{ width: '100%' }} placeholder="0.00" prefix="$" />
-              </Form.Item>
-            </Col>
           </Row>
 
           <Row gutter={16}>
-            <Col xs={24} sm={12}>
+            <Col span={12}>
               <Form.Item name="category" label="Category">
                 <Cascader
                   placeholder="Select category"
@@ -645,63 +1089,71 @@ function ProductModal({ open, editingProduct, categories, onClose }: ProductModa
                 />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={12}>
+            <Col span={6}>
               <Form.Item name="status" label="Status">
                 <Select
                   options={[
-                    { value: 'Show', label: 'Show' },
-                    { value: 'Hide', label: 'Hide' },
+                    { value: 'Show', label: 'Visible' },
+                    { value: 'Hide', label: 'Hidden' },
                   ]}
                 />
               </Form.Item>
             </Col>
-          </Row>
-
-          <Form.Item name="img" label="Image URL">
-            <Input placeholder="https://example.com/image.jpg" />
-          </Form.Item>
-
-          <Form.Item name="featured" label="Featured" valuePropName="checked">
-            <Switch />
-          </Form.Item>
-
-          <Row gutter={16}>
-            <Col xs={24} sm={8}>
-              <Form.Item name="colors" label="Colors" tooltip="Comma-separated values">
-                <Input placeholder="red, blue, green" />
+            <Col span={6}>
+              <Form.Item name="shipping" label="Shipping ($)">
+                <InputNumber min={0} precision={2} style={{ width: '100%' }} placeholder="0" />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={8}>
-              <Form.Item name="sizes" label="Sizes" tooltip="Comma-separated values">
+          </Row>
+
+          <Form.Item name="featured" label="Featured" valuePropName="checked">
+            <Switch checkedChildren="Yes" unCheckedChildren="No" />
+          </Form.Item>
+
+          <Divider orientation="left" orientationMargin={0} style={{ fontSize: 13, color: '#8c8c8c' }}>
+            Attributes
+          </Divider>
+
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item name="colors" label="Colors" tooltip="Comma-separated">
+                <Input placeholder="red, blue" />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item name="sizes" label="Sizes" tooltip="Comma-separated">
                 <Input placeholder="S, M, L, XL" />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={8}>
-              <Form.Item name="tags" label="Tags" tooltip="Comma-separated values">
-                <Input placeholder="sale, new, hot" />
+            <Col span={8}>
+              <Form.Item name="tags" label="Tags" tooltip="Comma-separated">
+                <Input placeholder="sale, new" />
               </Form.Item>
             </Col>
           </Row>
 
-          <Divider style={{ fontSize: 13 }}>Shipping &amp; Physical</Divider>
+          <Divider orientation="left" orientationMargin={0} style={{ fontSize: 13, color: '#8c8c8c' }}>
+            Shipping & Physical
+          </Divider>
+
           <Row gutter={12}>
-            <Col xs={24} sm={6}>
+            <Col span={6}>
               <Form.Item name="weight" label="Weight (g)">
-                <InputNumber min={0} style={{ width: '100%' }} placeholder="0" />
+                <InputNumber min={0} style={{ width: '100%' }} />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={6}>
-              <Form.Item name="dimLength" label="Length (cm)">
+            <Col span={6}>
+              <Form.Item name="dimLength" label="L (cm)">
                 <InputNumber min={0} precision={1} style={{ width: '100%' }} />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={6}>
-              <Form.Item name="dimWidth" label="Width (cm)">
+            <Col span={6}>
+              <Form.Item name="dimWidth" label="W (cm)">
                 <InputNumber min={0} precision={1} style={{ width: '100%' }} />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={6}>
-              <Form.Item name="dimHeight" label="Height (cm)">
+            <Col span={6}>
+              <Form.Item name="dimHeight" label="H (cm)">
                 <InputNumber min={0} precision={1} style={{ width: '100%' }} />
               </Form.Item>
             </Col>
@@ -725,151 +1177,36 @@ function ProductModal({ open, editingProduct, categories, onClose }: ProductModa
   ];
 
   return (
-    <Modal
-      title={isEdit ? 'Edit Product' : 'Add Product'}
+    <Drawer
+      title={
+        <Flex align="center" gap={8}>
+          {isEdit ? <EditOutlined /> : <PlusOutlined />}
+          <span>{isEdit ? 'Edit Product' : 'New Product'}</span>
+        </Flex>
+      }
       open={open}
-      onCancel={onClose}
-      onOk={handleSubmit}
-      okText={isEdit ? 'Update' : 'Create'}
-      confirmLoading={isLoading}
-      width={800}
+      onClose={onClose}
+      width={640}
+      destroyOnClose
       afterOpenChange={handleAfterOpenChange}
-      destroyOnHidden
+      extra={
+        <Space>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button type="primary" onClick={handleSubmit} loading={isLoading}>
+            {isEdit ? 'Update' : 'Create'}
+          </Button>
+        </Space>
+      }
     >
-      <Form form={form} layout="vertical" style={{ marginTop: 8 }}>
+      <Form
+        form={form}
+        layout="vertical"
+        requiredMark="optional"
+        initialValues={{ status: 'Show', featured: false, discount: 0, shipping: 0 }}
+      >
         <Tabs items={tabItems} size="small" />
       </Form>
-    </Modal>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// ViewProductModal — read-only detail modal
-// ---------------------------------------------------------------------------
-
-interface ViewProductModalProps {
-  product: Product | null;
-  onClose: () => void;
-}
-
-function ViewProductModal({ product, onClose }: ViewProductModalProps) {
-  if (!product) return null;
-
-  return (
-    <Modal
-      title="Product Details"
-      open={product !== null}
-      onCancel={onClose}
-      footer={
-        <Button onClick={onClose}>Close</Button>
-      }
-      width={680}
-    >
-      <div style={{ display: 'flex', gap: 16, marginBottom: 16, alignItems: 'flex-start' }}>
-        {product.img ? (
-          <Image
-            src={product.img}
-            alt={product.title}
-            width={120}
-            height={120}
-            style={{ objectFit: 'cover', borderRadius: 8, border: '1px solid #f0f0f0' }}
-            fallback={PLACEHOLDER_IMG}
-          />
-        ) : (
-          <div
-            style={{
-              width: 120,
-              height: 120,
-              background: '#f5f5f5',
-              borderRadius: 8,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#bbb',
-              flexShrink: 0,
-            }}
-          >
-            <PictureOutlined style={{ fontSize: 32 }} />
-          </div>
-        )}
-        <div>
-          <Typography.Title level={5} style={{ margin: 0, marginBottom: 4 }}>
-            {product.title}
-          </Typography.Title>
-          {product.slug && (
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              /{product.slug}
-            </Text>
-          )}
-          <div style={{ marginTop: 8 }}>
-            <StatusBadge status={product.status} />
-            {product.featured && <Tag color="gold" style={{ marginLeft: 4 }}>Featured</Tag>}
-          </div>
-        </div>
-      </div>
-
-      <Descriptions bordered size="small" column={2}>
-        <Descriptions.Item label="Price">
-          {formatCurrency(product.price)}
-          {product.discount ? (
-            <Badge
-              count={`-${product.discount}%`}
-              style={{ backgroundColor: '#f50', marginLeft: 6 }}
-            />
-          ) : null}
-        </Descriptions.Item>
-        <Descriptions.Item label="Quantity">
-          <span style={{ color: (product.quantity ?? 0) <= 10 ? '#ff4d4f' : undefined }}>
-            {product.quantity ?? 0}
-            {(product.quantity ?? 0) <= 10 && (
-              <WarningOutlined style={{ color: '#ff4d4f', marginLeft: 4 }} />
-            )}
-          </span>
-        </Descriptions.Item>
-        <Descriptions.Item label="Category">
-          {(product as any).parent ? `${(product as any).parent} > ${(product as any).children || ''}` : (product.category?.parent ?? '—')}
-        </Descriptions.Item>
-        <Descriptions.Item label="Brand">
-          {product.brand?.name ?? '—'}
-        </Descriptions.Item>
-        <Descriptions.Item label="Shipping Cost">
-          {product.shipping ? formatCurrency(product.shipping) : 'Free'}
-        </Descriptions.Item>
-        <Descriptions.Item label="Sell Count">
-          {product.sellCount ?? 0}
-        </Descriptions.Item>
-        {product.colors && product.colors.length > 0 && (
-          <Descriptions.Item label="Colors" span={2}>
-            {product.colors.map((c) => (
-              <Tag key={c}>{c}</Tag>
-            ))}
-          </Descriptions.Item>
-        )}
-        {product.sizes && product.sizes.length > 0 && (
-          <Descriptions.Item label="Sizes" span={2}>
-            {product.sizes.map((s) => (
-              <Tag key={s}>{s}</Tag>
-            ))}
-          </Descriptions.Item>
-        )}
-        {product.tags && product.tags.length > 0 && (
-          <Descriptions.Item label="Tags" span={2}>
-            {product.tags.map((t) => (
-              <Tag key={t} color="blue">{t}</Tag>
-            ))}
-          </Descriptions.Item>
-        )}
-      </Descriptions>
-
-      {product.description && (
-        <>
-          <Divider />
-          <Typography.Paragraph style={{ marginBottom: 0 }}>
-            {product.description}
-          </Typography.Paragraph>
-        </>
-      )}
-    </Modal>
+    </Drawer>
   );
 }
 
@@ -885,14 +1222,14 @@ export default function ProductsPage() {
 
   // Filters
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
-  // Committed search (debounced)
   const [committedSearch, setCommittedSearch] = useState('');
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Modal state
-  const [modalOpen, setModalOpen] = useState(false);
+  // Drawer state
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // ---------------------------------------------------------------------------
   // Queries
@@ -921,9 +1258,16 @@ export default function ProductsPage() {
     staleTime: 1000 * 60 * 10,
   });
 
+  const { data: statsData, isLoading: statsLoading } = useQuery({
+    queryKey: ['products', 'stats'],
+    queryFn: () => productsApi.getStats(),
+    staleTime: 1000 * 60 * 5,
+  });
+
   const categories: Category[] = categoriesData?.data ?? [];
   const products: Product[] = productsData?.data ?? [];
   const pagination = productsData?.pagination;
+  const stats: ProductStats | null = statsData?.data ?? null;
 
   // ---------------------------------------------------------------------------
   // Mutations
@@ -933,10 +1277,12 @@ export default function ProductsPage() {
     mutationFn: (id: string) => productsApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast.success('Product deleted successfully');
+      toast.success('Product deleted');
+      setDeletingId(null);
     },
     onError: (err: Error) => {
       toast.error(err.message || 'Failed to delete product');
+      setDeletingId(null);
     },
   });
 
@@ -970,16 +1316,16 @@ export default function ProductsPage() {
 
   const handleOpenAdd = useCallback(() => {
     setEditingProduct(null);
-    setModalOpen(true);
+    setDrawerOpen(true);
   }, []);
 
   const handleOpenEdit = useCallback((product: Product) => {
     setEditingProduct(product);
-    setModalOpen(true);
+    setDrawerOpen(true);
   }, []);
 
-  const handleCloseModal = useCallback(() => {
-    setModalOpen(false);
+  const handleCloseDrawer = useCallback(() => {
+    setDrawerOpen(false);
     setEditingProduct(null);
   }, []);
 
@@ -993,6 +1339,7 @@ export default function ProductsPage() {
 
   const handleDelete = useCallback(
     (id: string) => {
+      setDeletingId(id);
       deleteMutation.mutate(id);
     },
     [deleteMutation],
@@ -1002,133 +1349,150 @@ export default function ProductsPage() {
   // Table columns
   // ---------------------------------------------------------------------------
 
+  const hasActiveFilters =
+    filters.search !== '' || filters.category !== '' || filters.status !== '';
+
   const columns: TableProps<Product>['columns'] = [
-    {
-      title: 'Image',
-      dataIndex: 'img',
-      key: 'img',
-      width: 80,
-      render: (img: string | undefined, record: Product) =>
-        img ? (
-          <Image
-            src={img}
-            alt={record.title}
-            width={56}
-            height={56}
-            style={{ objectFit: 'cover', borderRadius: 6, border: '1px solid #f0f0f0' }}
-            fallback={PLACEHOLDER_IMG}
-            preview={false}
-          />
-        ) : (
-          <div
-            style={{
-              width: 56,
-              height: 56,
-              background: '#f5f5f5',
-              borderRadius: 6,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#bbb',
-            }}
-          >
-            <PictureOutlined style={{ fontSize: 20 }} />
-          </div>
-        ),
-    },
     {
       title: 'Product',
       key: 'product',
       render: (_: unknown, record: Product) => (
-        <div>
-          <Text strong style={{ display: 'block' }}>
-            {record.title}
-          </Text>
-          {record.slug && (
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              {record.slug}
-            </Text>
-          )}
-        </div>
-      ),
-    },
-    {
-      title: 'Category',
-      key: 'category',
-      width: 160,
-      render: (_: unknown, record: Product) => (
-        <Text>{(record as any).parent ? `${(record as any).parent} > ${(record as any).children || ''}` : (record.category?.parent ?? '—')}</Text>
+        <Flex align="center" gap={12}>
+          <ProductImage src={record.img} alt={record.title} />
+          <div style={{ minWidth: 0 }}>
+            <Flex align="center" gap={6}>
+              <Text strong style={{ fontSize: 14 }} ellipsis>
+                {record.title}
+              </Text>
+              {record.featured && <StarOutlined style={{ color: '#eb2f96', fontSize: 12, flexShrink: 0 }} />}
+            </Flex>
+            {record.slug && (
+              <Text type="secondary" style={{ fontSize: 11, fontFamily: 'monospace' }}>
+                /{record.slug}
+              </Text>
+            )}
+            <div style={{ marginTop: 2 }}>
+              {(record as any).parent && (
+                <Tag style={{ fontSize: 11, borderRadius: 4, marginRight: 4 }}>
+                  {(record as any).parent}
+                </Tag>
+              )}
+              {record.brand?.name && (
+                <Tag color="purple" style={{ fontSize: 11, borderRadius: 4 }}>
+                  {record.brand.name}
+                </Tag>
+              )}
+            </div>
+          </div>
+        </Flex>
       ),
     },
     {
       title: 'Price',
       key: 'price',
-      width: 140,
-      render: (_: unknown, record: Product) => (
-        <div>
-          <Text strong>{formatCurrency(record.price)}</Text>
-          {record.discount && record.discount > 0 ? (
-            <Badge
-              count={`-${record.discount}%`}
-              style={{ backgroundColor: '#f50', marginLeft: 6, fontSize: 10 }}
-            />
-          ) : null}
-        </div>
-      ),
-    },
-    {
-      title: 'Quantity',
-      dataIndex: 'quantity',
-      key: 'quantity',
-      width: 110,
-      render: (qty: number) => {
-        const isLow = qty <= 10;
+      width: 130,
+      sorter: (a: Product, b: Product) => a.price - b.price,
+      render: (_: unknown, record: Product) => {
+        const hasDiscount = (record.discount ?? 0) > 0;
+        const final = hasDiscount
+          ? record.price * (1 - (record.discount ?? 0) / 100)
+          : record.price;
         return (
-          <span style={{ color: isLow ? '#ff4d4f' : undefined, fontWeight: isLow ? 600 : undefined }}>
-            {qty}
-            {isLow && (
-              <Tooltip title="Low stock">
-                <WarningOutlined style={{ color: '#ff4d4f', marginLeft: 4 }} />
-              </Tooltip>
+          <div>
+            <Text strong>{formatCurrency(final)}</Text>
+            {hasDiscount && (
+              <div>
+                <Text delete type="secondary" style={{ fontSize: 11 }}>
+                  {formatCurrency(record.price)}
+                </Text>
+                <Tag color="red" style={{ fontSize: 10, marginLeft: 4, borderRadius: 4, padding: '0 4px' }}>
+                  -{record.discount}%
+                </Tag>
+              </div>
             )}
-          </span>
+          </div>
         );
       },
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      width: 90,
-      render: (status: string) => <StatusBadge status={status} />,
+      title: 'Stock',
+      key: 'quantity',
+      width: 100,
+      sorter: (a: Product, b: Product) => (a.quantity ?? 0) - (b.quantity ?? 0),
+      render: (_: unknown, record: Product) => {
+        const qty = record.quantity ?? 0;
+        const status = getStockStatus(qty);
+        return (
+          <Tooltip title={status.text}>
+            <Tag
+              style={{
+                borderRadius: 4,
+                fontWeight: 600,
+                borderColor: status.color,
+                color: status.color,
+                background: status.bg,
+              }}
+            >
+              {qty === 0 && <StopOutlined style={{ marginRight: 4 }} />}
+              {qty <= 10 && qty > 0 && <WarningOutlined style={{ marginRight: 4 }} />}
+              {qty}
+            </Tag>
+          </Tooltip>
+        );
+      },
     },
     {
-      title: 'Actions',
-      key: 'actions',
-      width: 130,
-      fixed: 'right' as const,
+      title: 'Sold',
+      key: 'sellCount',
+      width: 70,
+      align: 'center',
+      sorter: (a: Product, b: Product) => (a.sellCount ?? 0) - (b.sellCount ?? 0),
       render: (_: unknown, record: Product) => (
-        <Button.Group size="small">
+        <Text type="secondary" style={{ fontSize: 13 }}>
+          {record.sellCount ?? 0}
+        </Text>
+      ),
+    },
+    {
+      title: 'Status',
+      key: 'status',
+      width: 85,
+      filters: [
+        { text: 'Visible', value: 'Show' },
+        { text: 'Hidden', value: 'Hide' },
+      ],
+      onFilter: (value, record) => record.status === value,
+      render: (_: unknown, record: Product) => <StatusBadge status={record.status} />,
+    },
+    {
+      title: '',
+      key: 'actions',
+      width: 110,
+      fixed: 'right',
+      render: (_: unknown, record: Product) => (
+        <Space size={0}>
           <Tooltip title="View">
-            <Button icon={<EyeOutlined />} onClick={() => handleView(record)} />
+            <Button type="text" size="small" icon={<EyeOutlined />} onClick={() => handleView(record)} />
           </Tooltip>
           <Tooltip title="Edit">
-            <Button icon={<EditOutlined />} onClick={() => handleOpenEdit(record)} />
+            <Button type="text" size="small" icon={<EditOutlined />} onClick={() => handleOpenEdit(record)} />
           </Tooltip>
-          <Tooltip title="Delete">
-            <Popconfirm
-              title="Delete product"
-              description="Are you sure you want to delete this product? This action cannot be undone."
-              onConfirm={() => handleDelete(record._id)}
-              okText="Delete"
-              okButtonProps={{ danger: true }}
-              cancelText="Cancel"
-              placement="topRight"
-            >
-              <Button icon={<DeleteOutlined />} danger loading={deleteMutation.isPending} />
-            </Popconfirm>
-          </Tooltip>
-        </Button.Group>
+          <Popconfirm
+            title="Delete product"
+            description="This action cannot be undone."
+            onConfirm={() => handleDelete(record._id)}
+            okText="Delete"
+            okButtonProps={{ danger: true }}
+          >
+            <Button
+              type="text"
+              size="small"
+              danger
+              icon={<DeleteOutlined />}
+              loading={deletingId === record._id && deleteMutation.isPending}
+            />
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
@@ -1136,9 +1500,6 @@ export default function ProductsPage() {
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
-
-  const hasActiveFilters =
-    filters.search !== '' || filters.category !== '' || filters.status !== '';
 
   return (
     <div>
@@ -1151,23 +1512,29 @@ export default function ProductsPage() {
         }
       />
 
-      {/* Filters Row */}
-      <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
-        <Col xs={24} sm={12} md={8} lg={7}>
+      {/* Stats cards */}
+      <StatsCards stats={stats} loading={statsLoading} />
+
+      {/* Filter bar */}
+      <Card
+        size="small"
+        style={{ marginBottom: 16, borderRadius: 12 }}
+        styles={{ body: { padding: '12px 16px' } }}
+      >
+        <Flex gap={12} wrap="wrap" align="center">
           <Input
             placeholder="Search products..."
-            prefix={<SearchOutlined style={{ color: '#bbb' }} />}
+            prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
             value={filters.search}
             onChange={(e) => handleSearchChange(e.target.value)}
             allowClear
             onClear={() => handleSearchChange('')}
+            style={{ width: 260 }}
           />
-        </Col>
 
-        <Col xs={24} sm={12} md={6} lg={5}>
           <Select
-            placeholder="All Categories"
-            style={{ width: '100%' }}
+            placeholder="Category"
+            style={{ width: 180 }}
             value={filters.category || undefined}
             onChange={(val) => handleFilterChange('category', val ?? '')}
             allowClear
@@ -1175,62 +1542,120 @@ export default function ProductsPage() {
             optionFilterProp="label"
             options={categories.map((c) => ({ value: c._id, label: c.parent }))}
           />
-        </Col>
 
-        <Col xs={24} sm={12} md={5} lg={4}>
           <Select
-            placeholder="All Statuses"
-            style={{ width: '100%' }}
+            placeholder="Status"
+            style={{ width: 130 }}
             value={filters.status || undefined}
             onChange={(val) => handleFilterChange('status', val ?? '')}
             allowClear
             options={[
-              { value: 'Show', label: 'Show' },
-              { value: 'Hide', label: 'Hide' },
+              { value: 'Show', label: 'Visible' },
+              { value: 'Hide', label: 'Hidden' },
             ]}
           />
-        </Col>
 
-        <Col xs={24} sm={12} md={5} lg={4}>
-          <Button
-            icon={<ClearOutlined />}
-            onClick={handleClearFilters}
-            disabled={!hasActiveFilters}
-          >
-            Clear Filters
-          </Button>
-        </Col>
-      </Row>
+          {hasActiveFilters && (
+            <Button type="link" onClick={handleClearFilters} style={{ padding: 0 }}>
+              Clear filters
+            </Button>
+          )}
 
-      {/* Products Table */}
-      <Table<Product>
-        rowKey="_id"
-        columns={columns}
-        dataSource={products}
-        loading={productsLoading || isFetching}
-        expandable={{ childrenColumnName: '__children' }}
-        scroll={{ x: 900 }}
-        locale={{ emptyText: <Empty description="No products found" /> }}
-        pagination={{
-          current: page,
-          pageSize: PAGE_SIZE,
-          total: pagination?.totalItems ?? 0,
-          showSizeChanger: false,
-          showTotal: (total, range) => `${range[0]}–${range[1]} of ${total} products`,
-          onChange: (newPage) => setPage(newPage),
-        }}
-      />
+          <div style={{ flex: 1 }} />
 
-      {/* Add / Edit Modal */}
-      <ProductModal
-        open={modalOpen}
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            {pagination?.totalItems ?? 0} products
+          </Text>
+        </Flex>
+      </Card>
+
+      {/* Products table */}
+      <Card style={{ borderRadius: 12 }} styles={{ body: { padding: 0 } }}>
+        <Table<Product>
+          rowKey="_id"
+          columns={columns}
+          dataSource={products}
+          loading={productsLoading || isFetching}
+          expandable={{ childrenColumnName: '__children' }}
+          scroll={{ x: 820 }}
+          size="middle"
+          locale={{
+            emptyText: (
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={hasActiveFilters ? 'No products match your filters' : 'No products yet'}
+              >
+                {!hasActiveFilters && (
+                  <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenAdd}>
+                    Add First Product
+                  </Button>
+                )}
+              </Empty>
+            ),
+          }}
+          pagination={{
+            current: page,
+            pageSize: PAGE_SIZE,
+            total: pagination?.totalItems ?? 0,
+            showSizeChanger: false,
+            showTotal: (total, range) => (
+              <Text type="secondary" style={{ fontSize: 13 }}>
+                {range[0]}-{range[1]} of {total}
+              </Text>
+            ),
+            onChange: (newPage) => setPage(newPage),
+            style: { padding: '0 16px' },
+          }}
+        />
+      </Card>
+
+      {/* Add / Edit Drawer */}
+      <ProductDrawer
+        open={drawerOpen}
         editingProduct={editingProduct}
         categories={categories}
-        onClose={handleCloseModal}
+        onClose={handleCloseDrawer}
       />
 
-      {/* View Modal */}
-      <ViewProductModal product={viewingProduct} onClose={handleCloseView} />
+      {/* View Detail Drawer */}
+      <Drawer
+        title={
+          <Flex align="center" gap={8}>
+            <InfoCircleOutlined />
+            <span>Product Details</span>
+          </Flex>
+        }
+        open={viewingProduct !== null}
+        onClose={handleCloseView}
+        width={480}
+        destroyOnClose
+        extra={
+          viewingProduct && (
+            <Button
+              type="primary"
+              icon={<EditOutlined />}
+              onClick={() => {
+                const product = viewingProduct;
+                handleCloseView();
+                handleOpenEdit(product);
+              }}
+            >
+              Edit
+            </Button>
+          )
+        }
+      >
+        {viewingProduct && (
+          <ProductDetail
+            product={viewingProduct}
+            onEdit={() => {
+              const product = viewingProduct;
+              handleCloseView();
+              handleOpenEdit(product);
+            }}
+          />
+        )}
+      </Drawer>
     </div>
   );
 }
