@@ -1,12 +1,17 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
+import { useKeycloak } from "@/components/providers/keycloak-provider";
 import keycloak from "@/lib/keycloak";
 import Loader from "@/components/loader/loader";
 
 const LoginPage = () => {
   const router = useRouter();
+  const kc = useKeycloak();
 
   useEffect(() => {
+    // Wait until Keycloak has initialized
+    if (!kc?.initialized) return;
+
     // Validate redirect param to prevent open redirect attacks
     const rawRedirect = router.query.redirect;
     const safeRedirect = (typeof rawRedirect === 'string' && rawRedirect.startsWith('/') && !rawRedirect.includes('://'))
@@ -20,7 +25,7 @@ const LoginPage = () => {
         redirectUri: window.location.origin + safeRedirect,
       });
     }
-  }, [router]);
+  }, [kc?.initialized, router]);
 
   return (
     <div

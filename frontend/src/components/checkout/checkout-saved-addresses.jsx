@@ -13,7 +13,8 @@ const CheckoutSavedAddresses = ({ setValue, onAddressSelected }) => {
   const [selectedId, setSelectedId] = useState(null);
   const [showManual, setShowManual] = useState(false);
 
-  const addresses = data?.addresses || data || [];
+  const raw = data?.data ?? data?.addresses ?? data;
+  const addresses = Array.isArray(raw) ? raw : [];
 
   // Pre-select default address on load
   useEffect(() => {

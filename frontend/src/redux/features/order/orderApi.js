@@ -53,7 +53,7 @@ export const authApi = apiSlice.injectEndpoints({
     // getUserOrderById
     getUserOrderById: builder.query({
       query: (id) => `/api/v1/user/orders/${id}`,
-      providesTags: (result, error, arg) => [{ type: "UserOrder", id: arg }],
+      providesTags: (result, error, arg) => [{ type: "UserOrder", id: arg }, "UserOrder"],
       keepUnusedDataFor: 600,
     }),
   }),

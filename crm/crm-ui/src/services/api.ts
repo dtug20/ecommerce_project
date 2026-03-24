@@ -157,6 +157,18 @@ export const ordersApi = {
 
   getStats: () =>
     api.get<ApiResponse<OrderStats>>('/api/orders/stats').then((r) => r.data),
+
+  takeOrder: (id: string) =>
+    api.patch<ApiResponse<Order>>(`/api/orders/${id}/take`).then((r) => r.data),
+};
+
+// ---------------------------------------------------------------------------
+// Auth / Session
+// ---------------------------------------------------------------------------
+
+export const authApi = {
+  getMe: () =>
+    api.get<{ name: string; email: string; roles: string[] }>('/api/me').then((r) => r.data),
 };
 
 // ---------------------------------------------------------------------------

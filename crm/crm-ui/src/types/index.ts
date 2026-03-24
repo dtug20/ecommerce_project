@@ -96,6 +96,7 @@ export interface Order {
   trackingNumber?: string;
   carrier?: string;
   trackingUrl?: string;
+  shipper?: { _id: string; name: string; email?: string };
   shippedAt?: string;
   deliveredAt?: string;
   estimatedDelivery?: string;

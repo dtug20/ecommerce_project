@@ -9,7 +9,8 @@ import dayjs from 'dayjs';
 const CheckoutCouponSuggestions = ({ onApplyCoupon }) => {
   const { data, isLoading, isError } = useGetCheckoutCouponsQuery();
 
-  const coupons = data?.coupons || data || [];
+  const raw = data?.data ?? data?.coupons ?? data;
+  const coupons = Array.isArray(raw) ? raw : [];
   const now = dayjs();
 
   // Filter to active, non-expired coupons only

@@ -98,10 +98,10 @@ app.get('/api-docs.json', (req, res) => {
 // Rate limiters
 // ---------------------------------------------------------------------------
 
-// Global — 200 req / 15 min per IP
+// Global — 1000 req / 15 min per IP (generous for dev; tighten in production)
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max: 1000,
   standardHeaders: true,
   legacyHeaders: false,
   message: { status: "fail", error: "Too many requests, please try again later" },

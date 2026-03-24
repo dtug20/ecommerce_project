@@ -166,10 +166,48 @@ void NotificationOutlined;
 // Component
 // ---------------------------------------------------------------------------
 
+import { useEffect } from 'react';
+import { authApi } from '@/services/api';
+
 export default function MainLayout() {
-  const { sidebarCollapsed, toggleSidebar } = useAppStore();
+  const { sidebarCollapsed, toggleSidebar, user, setUser } = useAppStore();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Hydrate user session from CRM backend on mount
+  useEffect(() => {
+    if (!user) {
+      authApi.getMe()
+        .then(data => {
+          console.log('[MainLayout] /api/me response:', data);
+          if (data && data.roles) {
+            setUser(data);
+          } else {
+            console.warn('[MainLayout] /api/me returned unexpected format:', data);
+          }
+        })
+        .catch((err) => {
+          console.error('[MainLayout] /api/me failed:', err);
+        });
+    }
+  }, [user, setUser]);
+
+  // Detect shipper-only role
+  const roles = user?.roles || [];
+  const isShipper = roles.some(r => r.toLowerCase() === 'shipper') &&
+                    !roles.some(r => ['admin', 'manager', 'staff'].includes(r.toLowerCase()));
+
+  // Filter sidebar: shippers can only see Orders
+  const displayMenuItems = isShipper
+    ? MENU_ITEMS.filter(item => (item as any)?.key === '/orders')
+    : MENU_ITEMS;
+
+  // Redirect shippers away from non-order pages
+  useEffect(() => {
+    if (user && isShipper && !location.pathname.startsWith('/orders') && location.pathname !== '/logout') {
+      navigate('/orders', { replace: true });
+    }
+  }, [user, isShipper, location.pathname, navigate]);
 
   const selectedKey = resolveSelectedKey(location.pathname);
   const pageTitle = resolvePageTitle(location.pathname);
@@ -232,7 +270,7 @@ export default function MainLayout() {
           mode="inline"
           selectedKeys={[selectedKey]}
           defaultOpenKeys={defaultOpenKeys}
-          items={MENU_ITEMS}
+          items={displayMenuItems as any}
           onClick={handleMenuClick}
           style={{ borderRight: 0, marginTop: 8 }}
         />

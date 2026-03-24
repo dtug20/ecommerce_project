@@ -32,6 +32,9 @@ import type { Order, OrderItem } from '@/types';
 import { formatCurrency, formatDate } from '@/hooks/useFormatters';
 import StatusBadge from '@/components/commons/StatusBadge';
 import PageHeader from '@/components/commons/PageHeader';
+import useAppStore from '@/stores/appStore';
+import { Tag } from 'antd';
+import { CarryOutOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -101,6 +104,9 @@ interface OrderDetailModalProps {
   onClose: () => void;
   onStatusChange: (orderId: string, status: string) => void;
   isUpdating: boolean;
+  isShipper: boolean;
+  onTakeOrder?: (id: string) => void;
+  isTaking?: boolean;
 }
 
 function OrderDetailModal({
@@ -109,6 +115,9 @@ function OrderDetailModal({
   onClose,
   onStatusChange,
   isUpdating,
+  isShipper,
+  onTakeOrder,
+  isTaking,
 }: OrderDetailModalProps) {
   if (!order) return null;
 
@@ -189,17 +198,30 @@ function OrderDetailModal({
       width={860}
       footer={
         <Space>
-          <Dropdown
-            menu={{
-              items: statusMenuItems,
-              onClick: ({ key }) => onStatusChange(order._id, key),
-            }}
-            disabled={isUpdating}
-          >
-            <Button type="primary" loading={isUpdating}>
-              Update Status <DownOutlined />
+          {isShipper && ['pending', 'processing'].includes(effectiveStatus.toLowerCase()) && !order.shipper && (
+            <Button
+              type="primary"
+              icon={<CarryOutOutlined />}
+              onClick={() => onTakeOrder?.(order._id)}
+              loading={isTaking}
+              style={{ background: '#52c41a', borderColor: '#52c41a' }}
+            >
+              Take Order to Ship
             </Button>
-          </Dropdown>
+          )}
+          {!isShipper && (
+            <Dropdown
+              menu={{
+                items: statusMenuItems,
+                onClick: ({ key }) => onStatusChange(order._id, key),
+              }}
+              disabled={isUpdating}
+            >
+              <Button type="primary" loading={isUpdating}>
+                Update Status <DownOutlined />
+              </Button>
+            </Dropdown>
+          )}
           <Button onClick={onClose}>Close</Button>
         </Space>
       }
@@ -222,6 +244,22 @@ function OrderDetailModal({
             <Descriptions.Item label="Order Date">{formatDate(order.createdAt)}</Descriptions.Item>
             {order.trackingNumber && (
               <Descriptions.Item label="Tracking">{order.trackingNumber}</Descriptions.Item>
+            )}
+            {order.shipper && (
+              <Descriptions.Item label="Shipper">
+                <Tag color="blue">{order.shipper.name}</Tag>
+              </Descriptions.Item>
+            )}
+            {order.shippedAt && (
+              <Descriptions.Item label="Taken At">
+                {new Date(order.shippedAt).toLocaleString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </Descriptions.Item>
             )}
             {order.estimatedDelivery && (
               <Descriptions.Item label="Est. Delivery">
@@ -346,6 +384,12 @@ const INITIAL_FILTERS: Filters = {
 
 export default function OrdersPage() {
   const queryClient = useQueryClient();
+  const { user } = useAppStore();
+
+  // Detect shipper-only role
+  const roles = user?.roles || [];
+  const isShipper = roles.some(r => r.toLowerCase() === 'shipper') &&
+                    !roles.some(r => ['admin', 'manager', 'staff'].includes(r.toLowerCase()));
 
   const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS);
   const [pendingSearch, setPendingSearch] = useState('');
@@ -425,6 +469,25 @@ export default function OrdersPage() {
 
   const handleStatusChange = (orderId: string, status: string) => {
     updateStatusMutation.mutate({ id: orderId, status });
+  };
+
+  // ---------------------------------------------------------------------------
+  // Mutation — take order (shipper)
+  // ---------------------------------------------------------------------------
+
+  const takeOrderMutation = useMutation({
+    mutationFn: (id: string) => ordersApi.takeOrder(id),
+    onSuccess: () => {
+      toast.success('Order taken successfully! You are now the shipper.');
+      void queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || 'Failed to take order');
+    },
+  });
+
+  const handleTakeOrder = (id: string) => {
+    takeOrderMutation.mutate(id);
   };
 
   // ---------------------------------------------------------------------------
@@ -550,8 +613,25 @@ export default function OrdersPage() {
     {
       title: 'Status',
       key: 'status',
-      width: 120,
-      render: (_, order) => <StatusBadge status={getEffectiveStatus(order)} type="order" />,
+      width: 160,
+      render: (_, order) => (
+        <Space direction="vertical" size={0}>
+          <StatusBadge status={getEffectiveStatus(order)} type="order" />
+          {order.shipper && (
+            <Text type="secondary" style={{ fontSize: 11 }}>
+              <CarryOutOutlined style={{ marginRight: 3 }} />
+              {order.shipper.name}
+            </Text>
+          )}
+          {order.shippedAt && (
+            <Text type="secondary" style={{ fontSize: 10 }}>
+              {new Date(order.shippedAt).toLocaleString('en-US', {
+                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+              })}
+            </Text>
+          )}
+        </Space>
+      ),
     },
     {
       title: 'Date',
@@ -576,9 +656,12 @@ export default function OrdersPage() {
     {
       title: 'Actions',
       key: 'actions',
-      width: 140,
+      width: 180,
       fixed: 'right',
       render: (_, order) => {
+        const effectiveStatus = getEffectiveStatus(order).toLowerCase();
+        const canTake = isShipper && ['pending', 'processing'].includes(effectiveStatus) && !order.shipper;
+
         const statusMenuItems: MenuProps['items'] = [
           { key: 'pending', label: 'Pending' },
           { key: 'confirmed', label: 'Confirmed' },
@@ -602,17 +685,30 @@ export default function OrdersPage() {
             >
               View
             </Button>
-            <Dropdown
-              menu={{
-                items: statusMenuItems,
-                onClick: ({ key }) => handleStatusChange(order._id, key),
-              }}
-              disabled={updateStatusMutation.isPending}
-            >
-              <Button size="small">
-                Status <DownOutlined />
+            {canTake ? (
+              <Button
+                size="small"
+                type="primary"
+                icon={<CarryOutOutlined />}
+                onClick={() => handleTakeOrder(order._id)}
+                loading={takeOrderMutation.isPending}
+                style={{ background: '#52c41a', borderColor: '#52c41a' }}
+              >
+                Take
               </Button>
-            </Dropdown>
+            ) : !isShipper ? (
+              <Dropdown
+                menu={{
+                  items: statusMenuItems,
+                  onClick: ({ key }) => handleStatusChange(order._id, key),
+                }}
+                disabled={updateStatusMutation.isPending}
+              >
+                <Button size="small">
+                  Status <DownOutlined />
+                </Button>
+              </Dropdown>
+            ) : null}
           </Space>
         );
       },
@@ -705,6 +801,9 @@ export default function OrdersPage() {
         onClose={handleCloseDetail}
         onStatusChange={handleStatusChange}
         isUpdating={updateStatusMutation.isPending}
+        isShipper={isShipper}
+        onTakeOrder={handleTakeOrder}
+        isTaking={takeOrderMutation.isPending}
       />
     </div>
   );

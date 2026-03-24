@@ -69,7 +69,8 @@ const crmProtect = keycloak.protect((token) => {
   return (
     token.hasRealmRole('admin') ||
     token.hasRealmRole('manager') ||
-    token.hasRealmRole('staff')
+    token.hasRealmRole('staff') ||
+    token.hasRealmRole('shipper')
   );
 });
 
@@ -113,6 +114,36 @@ app.use('/api/analytics', apiProtect, require('./routes/analytics.routes'));
 app.use('/api/email-templates', apiProtect, require('./routes/email-template.routes'));
 app.use('/api/activity-log', apiProtect, require('./routes/activity-log.routes'));
 app.use('/api/v1/admin/media', apiProtect, require('./routes/media'));
+
+// ─── Self-identification endpoint ───
+// Returns the current session's user info and roles for the React SPA
+app.get('/api/me', apiProtect, (req, res) => {
+  try {
+    const token = req.kauth.grant.access_token.content;
+
+    // Merge realm and client roles
+    const realmRoles = token.realm_access?.roles || [];
+    const resourceAccess = token.resource_access || {};
+    const clientRoles = [];
+    for (const [, client] of Object.entries(resourceAccess)) {
+      if (client && Array.isArray(client.roles)) {
+        clientRoles.push(...client.roles);
+      }
+    }
+    const allRoles = [...new Set([...realmRoles, ...clientRoles])];
+
+    console.log('[/api/me]', token.preferred_username, 'roles:', allRoles);
+
+    res.json({
+      name: token.preferred_username || token.name || 'Unknown',
+      email: token.email || '',
+      roles: allRoles,
+    });
+  } catch (err) {
+    console.error('[/api/me] Error:', err.message);
+    res.status(500).json({ success: false, message: 'Failed to read session' });
+  }
+});
 
 // ─── Page Routes (React SPA, protected by Keycloak) ─────────
 

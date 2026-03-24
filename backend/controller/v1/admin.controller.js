@@ -50,6 +50,7 @@ exports.createOrder       = (req, res, next) => adminOrderCtrl.createOrder(req, 
 exports.updateOrder       = (req, res, next) => adminOrderCtrl.updateOrder(req, res, next);
 exports.updateOrderStatus = (req, res, next) => adminOrderCtrl.updateOrderStatus(req, res, next);
 exports.deleteOrder       = (req, res, next) => adminOrderCtrl.deleteOrder(req, res, next);
+exports.takeOrder         = (req, res, next) => adminOrderCtrl.takeOrder(req, res, next);
 
 // ---------------------------------------------------------------------------
 // Users

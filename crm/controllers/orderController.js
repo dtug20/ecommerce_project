@@ -51,6 +51,15 @@ exports.updateOrderStatus = async (req, res) => {
   }
 };
 
+exports.takeOrder = async (req, res) => {
+  try {
+    const result = await req.api.patch(`/api/v1/admin/orders/${req.params.id}/take`, req.body);
+    res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 exports.deleteOrder = async (req, res) => {
   try {
     const result = await req.api.delete(`/api/v1/admin/orders/${req.params.id}`);

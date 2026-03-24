@@ -176,4 +176,11 @@ export const registerCmsInvalidations = (store, api) => {
   );
 };
 
+
+export const registerOrderInvalidations = (store, api) => {
+  registerInvalidateCallback('order', () =>
+    store.dispatch(api.util.invalidateTags(['UserOrders', 'UserOrder']))
+  );
+};
+
 export const getSocket = () => socket;

@@ -38,6 +38,6 @@ router.use('/vendor', verifyToken, authorization('vendor'), vendorRoutes);
 
 // Authenticated — at least staff role required
 // (finer-grained admin/manager checks are enforced inside adminRoutes)
-router.use('/admin',  verifyToken, authorization('admin', 'manager', 'staff'), adminRoutes);
+router.use('/admin',  verifyToken, authorization('admin', 'manager', 'staff', 'shipper'), adminRoutes);
 
 module.exports = router;

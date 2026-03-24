@@ -38,6 +38,17 @@ const NOT_IMPLEMENTED = (req, res) =>
   respond.error(res, 'NOT_IMPLEMENTED', 'This endpoint is not yet implemented', 501);
 
 // ---------------------------------------------------------------------------
+// Shipper Firewall
+// Prevent shippers from accessing anything other than the /orders routes
+// ---------------------------------------------------------------------------
+router.use((req, res, next) => {
+  if (req.user?.role === 'shipper' && !req.path.startsWith('/orders')) {
+    return respond.error(res, 'FORBIDDEN', 'Shippers are only authorized to access orders', 403);
+  }
+  next();
+});
+
+// ---------------------------------------------------------------------------
 // Products
 // ---------------------------------------------------------------------------
 
@@ -246,6 +257,7 @@ router.get('/orders/:id',            ctrl.getOrderById);
  */
 router.get('/orders',                ctrl.getAllOrders);
 router.post('/orders',               authorization('admin', 'manager'), logActivity('create', 'order'), ctrl.createOrder);
+router.patch('/orders/:id/take',     authorization('shipper', 'admin'), logActivity('status-change', 'order'), ctrl.takeOrder);
 
 /**
  * @swagger

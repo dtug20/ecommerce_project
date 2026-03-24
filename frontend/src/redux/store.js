@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { apiSlice } from "./api/apiSlice";
+import { initSocket, registerCmsInvalidations, registerOrderInvalidations } from "../utils/socketClient";
 import authSlice from "./features/auth/authSlice";
 import cartSlice from "./features/cartSlice";
 import compareSlice from "./features/compareSlice";
@@ -24,5 +25,12 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(apiSlice.middleware),
 });
+
+// Initialize real-time socket connections and wire up cache invalidation (client-side only)
+if (typeof window !== "undefined") {
+  initSocket();
+  registerCmsInvalidations(store, apiSlice);
+  registerOrderInvalidations(store, apiSlice);
+}
 
 export default store;

@@ -54,7 +54,8 @@ exports.getAllOrders = async (req, res, next) => {
         .sort(sort)
         .skip(skip)
         .limit(parseInt(limit))
-        .populate('user', 'name email phone address'),
+        .populate('user', 'name email phone address')
+        .populate('shipper', 'name email'),
       Order.countDocuments(filter),
     ]);
 
@@ -111,7 +112,9 @@ exports.getOrderStats = async (req, res, next) => {
 // GET /api/admin/orders/:id
 exports.getOrderById = async (req, res, next) => {
   try {
-    const order = await Order.findById(req.params.id).populate('user', 'name email phone address');
+    const order = await Order.findById(req.params.id)
+      .populate('user', 'name email phone address')
+      .populate('shipper', 'name email');
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
@@ -287,6 +290,53 @@ exports.updateOrderStatus = async (req, res, next) => {
     // ─────────────────────────────────────────────────────────────────────
 
     res.json({ success: true, data: order, message: `Order status updated to ${status}` });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// PATCH /api/admin/orders/:id/take
+// Allows a shipper (or admin) to claim an order for delivery
+exports.takeOrder = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    if (order.shipper) {
+      return res.status(400).json({ success: false, message: 'Order has already been taken by another shipper' });
+    }
+
+    if (!['pending', 'processing'].includes(order.status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot take an order with status "${order.status}"`,
+      });
+    }
+
+    order.shipper = req.user._id;
+    order.status = 'shipped';
+    order.shippedAt = new Date();
+
+    order.statusHistory = order.statusHistory || [];
+    order.statusHistory.push({
+      status: 'shipped',
+      timestamp: new Date(),
+      note: `Order taken by shipper ${req.user.name || req.user._id}`,
+      updatedBy: req.user._id,
+    });
+
+    await order.save();
+
+    // Re-fetch with populated shipper for the response
+    const populated = await Order.findById(order._id)
+      .populate('shipper', 'name email')
+      .populate('user', 'name email phone address');
+
+    if (global.io) global.io.emit('order:updated', populated);
+
+    res.json({ success: true, data: populated, message: 'Order taken successfully' });
   } catch (error) {
     next(error);
   }
