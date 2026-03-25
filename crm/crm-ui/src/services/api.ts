@@ -24,9 +24,9 @@ import type {
   ActivityLogEntry,
   EmailTemplate,
   DashboardAnalytics,
-  RevenueDataPoint,
+  RevenueResponse,
   TopProduct,
-  CustomerGrowthPoint,
+  CustomerGrowthResponse,
 } from '@/types/index';
 
 // Axios instance with relative baseURL — proxied by Vite to the CRM backend
@@ -430,7 +430,7 @@ export const analyticsApi = {
 
   getRevenue: (params: { groupBy: string; startDate?: string; endDate?: string }) =>
     api
-      .get<ApiResponse<RevenueDataPoint[]>>('/api/analytics/revenue', { params })
+      .get<ApiResponse<RevenueResponse>>('/api/analytics/revenue', { params })
       .then((r) => r.data),
 
   getTopProducts: (params?: { sortBy?: string; period?: string }) =>
@@ -440,7 +440,7 @@ export const analyticsApi = {
 
   getCustomerGrowth: (params?: { groupBy?: string; period?: string }) =>
     api
-      .get<ApiResponse<CustomerGrowthPoint[]>>('/api/analytics/customer-growth', { params })
+      .get<ApiResponse<CustomerGrowthResponse>>('/api/analytics/customer-growth', { params })
       .then((r) => r.data),
 
   getRecentOrders: () =>

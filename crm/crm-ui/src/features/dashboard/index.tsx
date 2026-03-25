@@ -47,7 +47,7 @@ import {
 } from '@/services/api';
 import { formatCurrency, formatDate } from '@/hooks/useFormatters';
 import StatusBadge from '@/components/commons/StatusBadge';
-import type { Order, Product, MonthlyStats, RevenueDataPoint } from '@/types/index';
+import type { Order, Product, MonthlyStats, RevenueDataPoint, RevenueResponse, CustomerGrowthResponse } from '@/types/index';
 
 const { Title, Text } = Typography;
 
@@ -238,10 +238,11 @@ export default function Dashboard() {
   const analytics = analyticsData?.data;
   const orderStats = orderStatsData?.data;
 
-  // Revenue chart: prefer analytics endpoint, fall back to legacy monthly stats
-  const rawRevenueData = revenueData?.data;
-  const revenueChartData: RevenueDataPoint[] = Array.isArray(rawRevenueData)
-    ? rawRevenueData
+  // Revenue chart: backend returns { groupBy, rows } — unwrap rows
+  const revenueWrapped = revenueData?.data as RevenueResponse | undefined;
+  const rawRevenueRows: RevenueDataPoint[] = revenueWrapped?.rows ?? [];
+  const revenueChartData: RevenueDataPoint[] = rawRevenueRows.length > 0
+    ? rawRevenueRows
     : (orderStats?.monthlyStats ?? []).map((stat: MonthlyStats) => ({
         _id: monthLabel(stat),
         revenue: stat.totalRevenue ?? stat.totalOrders ?? 0,
@@ -249,16 +250,20 @@ export default function Dashboard() {
       }));
 
   const chartData = revenueChartData.map((pt) => ({
-    name: pt._id,
+    // backend row shape: { date|week|month, orderCount, revenue } OR legacy { _id, revenue, orders }
+    name: pt._id ?? pt.date ?? pt.week ?? pt.month ?? '',
     revenue: pt.revenue ?? 0,
-    orders: pt.orders ?? 0,
+    orders: pt.orderCount ?? pt.orders ?? 0,
   }));
 
   const topProducts = Array.isArray(topProductsData?.data) ? topProductsData.data : [];
-  const rawGrowth = customerGrowthData?.data;
-  const customerGrowth = (Array.isArray(rawGrowth) ? rawGrowth : []).map((pt) => ({
-    name: pt._id,
-    count: pt.count,
+
+  // Customer growth: backend returns { groupBy, rows } — unwrap rows
+  const growthWrapped = customerGrowthData?.data as CustomerGrowthResponse | undefined;
+  const growthRows = growthWrapped?.rows ?? [];
+  const customerGrowth = growthRows.map((pt) => ({
+    name: pt._id ?? pt.month ?? pt.week ?? '',
+    count: pt.newUsers ?? pt.count ?? 0,
   }));
 
   const recentOrders: Order[] = Array.isArray(recentOrdersAnalyticsData?.data) ? recentOrdersAnalyticsData.data : [];

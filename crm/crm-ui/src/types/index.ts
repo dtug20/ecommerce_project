@@ -468,9 +468,21 @@ export interface DashboardAnalytics {
 }
 
 export interface RevenueDataPoint {
-  _id: string;
-  revenue: number;
-  orders: number;
+  // legacy shape
+  _id?: string;
+  revenue?: number;
+  orders?: number;
+  // backend v1 shape (varies by groupBy)
+  date?: string;
+  week?: string;
+  month?: string;
+  orderCount?: number;
+}
+
+// Backend wraps revenue + growth rows in { groupBy, rows }
+export interface RevenueResponse {
+  groupBy: string;
+  rows: RevenueDataPoint[];
 }
 
 export interface TopProduct {
@@ -482,8 +494,18 @@ export interface TopProduct {
 }
 
 export interface CustomerGrowthPoint {
-  _id: string;
-  count: number;
+  // legacy shape
+  _id?: string;
+  count?: number;
+  // backend v1 shape
+  month?: string;
+  week?: string;
+  newUsers?: number;
+}
+
+export interface CustomerGrowthResponse {
+  groupBy: string;
+  rows: CustomerGrowthPoint[];
 }
 
 export interface Coupon {
