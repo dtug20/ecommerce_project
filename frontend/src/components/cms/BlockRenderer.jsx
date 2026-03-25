@@ -1,6 +1,6 @@
 import React from 'react';
 
-// Block component imports
+// Block component imports — implemented
 import HeroSlider from './blocks/HeroSlider';
 import FeaturedProducts from './blocks/FeaturedProducts';
 import CategoryShowcase from './blocks/CategoryShowcase';
@@ -8,6 +8,15 @@ import BannerGrid from './blocks/BannerGrid';
 import TextBlock from './blocks/TextBlock';
 import ProductCarousel from './blocks/ProductCarousel';
 import Newsletter from './blocks/Newsletter';
+
+// Block component imports — Phase 2
+import PromoSection from './blocks/PromoSection';
+import Testimonials from './blocks/Testimonials';
+import CustomHtml from './blocks/CustomHtml';
+import BrandShowcase from './blocks/BrandShowcase';
+import CountdownDeal from './blocks/CountdownDeal';
+import ImageGallery from './blocks/ImageGallery';
+import VideoSection from './blocks/VideoSection';
 
 const BLOCK_MAP = {
   'hero-slider': HeroSlider,
@@ -17,6 +26,13 @@ const BLOCK_MAP = {
   'text-block': TextBlock,
   'product-carousel': ProductCarousel,
   'newsletter': Newsletter,
+  'promo-section': PromoSection,
+  'testimonials': Testimonials,
+  'custom-html': CustomHtml,
+  'brand-showcase': BrandShowcase,
+  'countdown-deal': CountdownDeal,
+  'image-gallery': ImageGallery,
+  'video-section': VideoSection,
 };
 
 const BlockRenderer = ({ blocks = [] }) => {

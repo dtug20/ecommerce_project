@@ -146,12 +146,12 @@ app.get('/api/me', apiProtect, (req, res) => {
 });
 
 // ─── Page Routes (React SPA, protected by Keycloak) ─────────
+// Wildcard catch-all: serve index.html for all non-API routes so React Router
+// handles /vendors, /reviews, /coupons, /cms/*, /settings/*, /activity-log, etc.
 
-const spaRoutes = ['/', '/products', '/categories', '/orders', '/users'];
-spaRoutes.forEach((route) => {
-  app.get(route, crmProtect, (req, res) => {
-    res.sendFile(path.join(reactBuildPath, 'index.html'));
-  });
+app.get('*', crmProtect, (req, res, next) => {
+  if (req.path.startsWith('/api/')) return next();
+  res.sendFile(path.join(reactBuildPath, 'index.html'));
 });
 
 // ─── Error handling ────────────────────────────────────────────

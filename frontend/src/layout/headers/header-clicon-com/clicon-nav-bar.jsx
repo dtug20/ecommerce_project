@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useGetShowCategoryQuery } from "@/redux/features/categoryApi";
-import { useGetSettingsQuery } from "@/redux/features/cmsApi";
+import { useGetSettingsQuery, useGetMenuQuery } from "@/redux/features/cmsApi";
 
 const CliconNavBar = () => {
   const { t } = useTranslation();
@@ -10,7 +10,9 @@ const CliconNavBar = () => {
   const dropdownRef = useRef(null);
   const { data: settingsData } = useGetSettingsQuery();
   const { data: categories } = useGetShowCategoryQuery();
+  const { data: menuData } = useGetMenuQuery("header-main");
   const phone = settingsData?.data?.contact?.phone || "+1-202-555-0104";
+  const cmsMenuItems = menuData?.data?.items?.filter((item) => item.isVisible !== false) || [];
 
   const categoryItems = (categories?.result || []).slice(0, 8);
 
@@ -92,23 +94,62 @@ const CliconNavBar = () => {
             </div>
           </div>
 
-          {/* Nav links — matching Figma layout */}
+          {/* Nav links — CMS-driven when header-main menu exists, fallback to hardcoded */}
           <nav className="cl-nav-bar__links">
-            <Link href="/track-order">
-              <i className="far fa-map-marker-alt"></i> {t("nav.trackOrder")}
-            </Link>
-            <Link href="/compare">
-              <i className="far fa-arrows-repeat"></i> {t("nav.compare")}
-            </Link>
-            <Link href="/contact">
-              <i className="far fa-headset"></i> {t("nav.customerSupport")}
-            </Link>
-            <Link href="/blog">
-              <i className="far fa-newspaper"></i> {t("nav.blog")}
-            </Link>
-            <Link href="/coupon">
-              <i className="far fa-tags"></i> {t("nav.coupons")}
-            </Link>
+            {cmsMenuItems.length > 0 ? (
+              cmsMenuItems.map((item, idx) => {
+                const url =
+                  item.type === "category" && item.reference?.id
+                    ? `/shop?category=${item.reference.id}`
+                    : item.url || "#";
+                const hasChildren =
+                  item.children?.filter((c) => c.isVisible !== false).length > 0;
+                return (
+                  <div key={item._id || idx} className={hasChildren ? "cl-nav-bar__dropdown-wrap" : ""}>
+                    <Link href={url} target={item.target || "_self"}>
+                      {item.icon && <i className={item.icon}></i>} {item.label}
+                    </Link>
+                    {hasChildren && (
+                      <ul className="cl-nav-bar__dropdown">
+                        {item.children
+                          .filter((c) => c.isVisible !== false)
+                          .map((child, ci) => {
+                            const childUrl =
+                              child.type === "category" && child.reference?.id
+                                ? `/shop?category=${child.reference.id}`
+                                : child.url || "#";
+                            return (
+                              <li key={child._id || ci}>
+                                <Link href={childUrl} target={child.target || "_self"}>
+                                  {child.label}
+                                </Link>
+                              </li>
+                            );
+                          })}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <>
+                <Link href="/track-order">
+                  <i className="far fa-map-marker-alt"></i> {t("nav.trackOrder")}
+                </Link>
+                <Link href="/compare">
+                  <i className="far fa-arrows-repeat"></i> {t("nav.compare")}
+                </Link>
+                <Link href="/contact">
+                  <i className="far fa-headset"></i> {t("nav.customerSupport")}
+                </Link>
+                <Link href="/blog">
+                  <i className="far fa-newspaper"></i> {t("nav.blog")}
+                </Link>
+                <Link href="/coupon">
+                  <i className="far fa-tags"></i> {t("nav.coupons")}
+                </Link>
+              </>
+            )}
           </nav>
 
           {/* Phone */}

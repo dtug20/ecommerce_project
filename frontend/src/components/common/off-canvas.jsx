@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { CloseTwo } from '@/svg';
 import logo from '@assets/img/logo/logo.svg';
 import MobileCategory from '@/layout/headers/header-com/mobile-category';
-import MobileMenus from './mobile-menus';
 
 const OffCanvas = ({ isOffCanvasOpen, setIsCanvasOpen }) => {
   const [isCategoryActive, setIsCategoryActive] = useState(false);
@@ -45,9 +44,6 @@ const OffCanvas = ({ isOffCanvasOpen, setIsCanvasOpen }) => {
                   <MobileCategory isCategoryActive={isCategoryActive} />
                 </nav>
               </div>
-            </div>
-            <div className="tp-main-menu-mobile fix d-lg-none mb-40">
-              <MobileMenus />
             </div>
 
             <div className="offcanvas__btn">

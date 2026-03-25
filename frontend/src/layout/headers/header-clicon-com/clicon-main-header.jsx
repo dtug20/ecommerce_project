@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import useCartInfo from "@/hooks/use-cart-info";
 import { openCartMini } from "@/redux/features/cartSlice";
+import { userLoggedOut } from "@/redux/features/auth/authSlice";
 import { Search } from "@/svg";
 import useSearchFormSubmit from "@/hooks/use-search-form-submit";
+import { useKeycloak } from "@/components/providers/keycloak-provider";
 import logo from "@assets/img/logo/logo.svg";
 
 const CliconMainHeader = ({ setIsCanvasOpen }) => {
@@ -15,7 +17,39 @@ const CliconMainHeader = ({ setIsCanvasOpen }) => {
   const { wishlist } = useSelector((state) => state.wishlist);
   const { quantity } = useCartInfo();
   const dispatch = useDispatch();
+  const keycloak = useKeycloak();
   const { setSearchText, handleSubmit, searchText } = useSearchFormSubmit();
+
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef(null);
+
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    setProfileOpen(false);
+    dispatch(userLoggedOut());
+    try {
+      localStorage.removeItem("cart_products");
+      localStorage.removeItem("wishlist_items");
+      localStorage.removeItem("compare_items");
+      localStorage.removeItem("couponInfo");
+      localStorage.removeItem("shipping_info");
+    } catch (_) {
+      // ignore
+    }
+    if (keycloak?.logout) {
+      keycloak.logout({ redirectUri: window.location.origin });
+    }
+  };
 
   return (
     <div className="cl-main-header">
@@ -69,16 +103,96 @@ const CliconMainHeader = ({ setIsCanvasOpen }) => {
               {wishlist.length > 0 && <span className="cl-header-icon__badge">{wishlist.length}</span>}
             </Link>
 
-            {/* User */}
-            <Link
-              href={userInfo?.name ? "/profile" : "/login"}
-              className="cl-header-icon"
-              aria-label={userInfo?.name || t("header.signIn")}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM20.59 22c0-3.87-3.85-7-8.59-7s-8.59 3.13-8.59 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </Link>
+            {/* User / Profile dropdown */}
+            <div className="cl-profile-drop-wrap" ref={profileRef}>
+              <button
+                type="button"
+                className="cl-header-icon cl-profile-drop-wrap__trigger"
+                aria-label={userInfo?.name || t("header.signIn")}
+                onClick={() => setProfileOpen((o) => !o)}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM20.59 22c0-3.87-3.85-7-8.59-7s-8.59 3.13-8.59 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+
+              {profileOpen && (
+                <div className="cl-profile-drop">
+                  {userInfo?.name ? (
+                    <>
+                      {/* Logged-in header */}
+                      <div className="cl-profile-drop__head">
+                        <div className="cl-profile-drop__avatar">
+                          {userInfo.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="cl-profile-drop__name">{userInfo.name}</p>
+                          {userInfo.email && (
+                            <p className="cl-profile-drop__email">{userInfo.email}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="cl-profile-drop__divider" />
+                      <ul className="cl-profile-drop__menu">
+                        <li>
+                          <Link href="/profile" onClick={() => setProfileOpen(false)} className="cl-profile-drop__item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            {t("header.myProfile")}
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/profile?tab=orders" onClick={() => setProfileOpen(false)} className="cl-profile-drop__item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/>
+                            </svg>
+                            {t("header.myOrders")}
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/wishlist" onClick={() => setProfileOpen(false)} className="cl-profile-drop__item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                            {t("header.wishlist")}
+                          </Link>
+                        </li>
+                      </ul>
+                      <div className="cl-profile-drop__divider" />
+                      <ul className="cl-profile-drop__menu">
+                        <li>
+                          <button onClick={handleLogout} className="cl-profile-drop__item cl-profile-drop__item--logout">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                            </svg>
+                            {t("header.logout")}
+                          </button>
+                        </li>
+                      </ul>
+                    </>
+                  ) : (
+                    <>
+                      {/* Guest state */}
+                      <div className="cl-profile-drop__guest">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <p>{t("header.signIn")}</p>
+                      </div>
+                      <div className="cl-profile-drop__guest-actions">
+                        <Link href="/login" onClick={() => setProfileOpen(false)} className="cl-profile-drop__btn cl-profile-drop__btn--primary">
+                          {t("header.login")}
+                        </Link>
+                        <Link href="/register" onClick={() => setProfileOpen(false)} className="cl-profile-drop__btn cl-profile-drop__btn--outline">
+                          {t("header.register")}
+                        </Link>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Mobile menu */}
             <button

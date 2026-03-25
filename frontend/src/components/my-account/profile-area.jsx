@@ -1,90 +1,64 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import ProfileNavTab from "./profile-nav-tab";
-import ProfileShape from "./profile-shape";
-import NavProfileTab from "./nav-profile-tab";
-import ProfileInfo from "./profile-info";
-import ChangePassword from "./change-password";
-import MyOrders from "./my-orders";
-import AddressBook from "./address-book";
-import VendorApplication from "./vendor-application";
+import ProfileDashboard from "./profile-dashboard";
+import OrderHistory from "./order-history";
+import AccountSetting from "./account-setting";
+import CardsAddress from "./cards-address";
+import BrowsingHistory from "./browsing-history";
 
-const ProfileArea = ({orderData}) => {
+const VALID_TABS = ["dashboard", "orders", "cards", "browsing", "setting"];
+
+const ProfileArea = ({ orderData }) => {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState("dashboard");
+
+  // sync tab from URL ?tab= param
+  useEffect(() => {
+    const tabParam = router.query.tab;
+    if (tabParam && VALID_TABS.includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [router.query.tab]);
+
+  // update URL when tab changes (shallow routing)
+  const handleSetActiveTab = (tab) => {
+    setActiveTab(tab);
+    router.replace({ pathname: router.pathname, query: { tab } }, undefined, { shallow: true });
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "dashboard":
+        return <ProfileDashboard orderData={orderData} setActiveTab={handleSetActiveTab} />;
+      case "orders":
+        return <OrderHistory orderData={orderData} />;
+      case "cards":
+        return <CardsAddress setActiveTab={handleSetActiveTab} />;
+      case "browsing":
+        return <BrowsingHistory />;
+      case "setting":
+        return <AccountSetting />;
+      default:
+        return <ProfileDashboard orderData={orderData} setActiveTab={handleSetActiveTab} />;
+    }
+  };
+
   return (
-    <>
-      <section className="profile__area pt-120 pb-120">
-        <div className="container">
-          <div className="profile__inner p-relative">
-            <ProfileShape />
-            <div className="row">
-              <div className="col-xxl-4 col-lg-4">
-                <div className="profile__tab mr-40">
-                  <ProfileNavTab />
-                </div>
-              </div>
-              <div className="col-xxl-8 col-lg-8">
-                <div className="profile__tab-content">
-                  <div className="tab-content" id="profile-tabContent">
-                    <div
-                      className="tab-pane fade show active"
-                      id="nav-profile"
-                      role="tabpanel"
-                      aria-labelledby="nav-profile-tab"
-                    >
-                      <NavProfileTab orderData={orderData} />
-                    </div>
-
-                    <div
-                      className="tab-pane fade"
-                      id="nav-information"
-                      role="tabpanel"
-                      aria-labelledby="nav-information-tab"
-                    >
-                      <ProfileInfo />
-                    </div>
-
-                    <div
-                      className="tab-pane fade"
-                      id="nav-password"
-                      role="tabpanel"
-                      aria-labelledby="nav-password-tab"
-                    >
-                      <ChangePassword />
-                    </div>
-
-                    <div
-                      className="tab-pane fade"
-                      id="nav-order"
-                      role="tabpanel"
-                      aria-labelledby="nav-order-tab"
-                    >
-                      <MyOrders orderData={orderData} />
-                    </div>
-
-                    <div
-                      className="tab-pane fade"
-                      id="nav-addresses"
-                      role="tabpanel"
-                      aria-labelledby="nav-addresses-tab"
-                    >
-                      <AddressBook />
-                    </div>
-
-                    <div
-                      className="tab-pane fade"
-                      id="nav-vendor"
-                      role="tabpanel"
-                      aria-labelledby="nav-vendor-tab"
-                    >
-                      <VendorApplication />
-                    </div>
-                  </div>
-                </div>
-              </div>
+    <section className="cl-profile-wrap">
+      <div className="container">
+        <div className="row">
+          <div className="col-xxl-3 col-lg-3 col-md-4">
+            <ProfileNavTab activeTab={activeTab} setActiveTab={handleSetActiveTab} />
+          </div>
+          <div className="col-xxl-9 col-lg-9 col-md-8">
+            <div className="cl-profile-content">
+              {renderContent()}
             </div>
           </div>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 };
 

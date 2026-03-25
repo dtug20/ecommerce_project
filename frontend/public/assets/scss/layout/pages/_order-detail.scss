@@ -1,0 +1,387 @@
+@use '../../utils' as *;
+
+// ── Order Detail Page — Clicon Style ────────────────────────────────
+
+.cl-order-detail-area {
+  padding: 40px 0 80px;
+  background: #f5f5f5;
+  font-family: var(--cl-ff-body);
+}
+
+// ── Top header bar ────────────────────────────────────────────────────
+.cl-od-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+
+  &__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #253d4e;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: none;
+
+    &:hover {
+      color: var(--cl-primary);
+      text-decoration: none;
+    }
+
+    svg { flex-shrink: 0; }
+  }
+
+  &__rating {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--cl-primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+
+    &:hover {
+      color: var(--cl-primary-hover, #d95e1e);
+      text-decoration: none;
+    }
+  }
+}
+
+// ── Summary card (beige) ─────────────────────────────────────────────
+.cl-od-summary {
+  background: #fdf8f0;
+  border: 1px solid #f0e8d8;
+  border-radius: 8px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  &__id {
+    font-size: 20px;
+    font-weight: 700;
+    color: #253d4e;
+    margin-bottom: 4px;
+  }
+
+  &__meta {
+    font-size: 13px;
+    color: #687188;
+  }
+
+  &__amount {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--cl-primary);
+    white-space: nowrap;
+  }
+}
+
+// ── Expected arrival ─────────────────────────────────────────────────
+.cl-od-arrival {
+  font-size: 14px;
+  color: #253d4e;
+  margin-bottom: 24px;
+
+  strong { font-weight: 700; }
+}
+
+// ── Stepper ───────────────────────────────────────────────────────────
+.cl-od-stepper {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  position: relative;
+  padding: 0 12px;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 20px;
+    left: 32px;
+    right: 32px;
+    height: 2px;
+    background: #e9e9e9;
+    z-index: 0;
+  }
+}
+
+.cl-od-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+
+  &__circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #e9e9e9;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+    position: relative;
+
+    svg { width: 18px; height: 18px; color: #adb5bd; }
+  }
+
+  &__label {
+    font-size: 12px;
+    color: #687188;
+    text-align: center;
+    line-height: 1.3;
+    font-weight: 500;
+  }
+
+  &--active &__circle {
+    border-color: var(--cl-primary);
+    background: var(--cl-primary);
+
+    svg { color: #fff; }
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid rgba(239, 107, 42, 0.25);
+    }
+  }
+
+  &--active &__label {
+    color: var(--cl-primary);
+    font-weight: 700;
+  }
+
+  &--done &__circle {
+    border-color: var(--cl-primary);
+    background: var(--cl-primary);
+
+    svg { color: #fff; }
+  }
+}
+
+// connector between done steps
+.cl-od-connector {
+  flex: 1;
+  height: 2px;
+  background: #e9e9e9;
+  align-self: center;
+  position: relative;
+  top: -16px;
+  z-index: 0;
+  transition: background 0.2s;
+
+  &--done { background: var(--cl-primary); }
+}
+
+// ── Content card wrapper ─────────────────────────────────────────────
+.cl-od-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 20px;
+
+  &__title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #253d4e;
+    padding: 18px 24px;
+    border-bottom: 1px solid #f0f0f0;
+    margin: 0;
+  }
+
+  &__body {
+    padding: 20px 24px;
+  }
+}
+
+// ── Activity feed ─────────────────────────────────────────────────────
+.cl-od-activity {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cl-od-activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f5;
+
+  &:last-child { border-bottom: none; }
+
+  &__icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    svg { width: 15px; height: 15px; }
+
+    &--delivered { background: #eaf7f0; svg { color: #28a745; } }
+    &--shipped   { background: #e8f4fb; svg { color: #2196f3; } }
+    &--processing { background: #fff3cd; svg { color: #856404; } }
+    &--confirmed { background: #f0ecfb; svg { color: #6f42c1; } }
+    &--pending   { background: #fef3ec; svg { color: var(--cl-primary); } }
+    &--canceled  { background: #fef2f2; svg { color: #dc3545; } }
+  }
+
+  &__content {
+    flex: 1;
+  }
+
+  &__text {
+    font-size: 14px;
+    color: #253d4e;
+    margin-bottom: 2px;
+  }
+
+  &__time {
+    font-size: 12px;
+    color: #687188;
+  }
+}
+
+// ── Products table ────────────────────────────────────────────────────
+.cl-od-products-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  th {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #687188;
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  td {
+    padding: 14px 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f5f5f5;
+    color: #253d4e;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+}
+
+.cl-od-product-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  &__img {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    border: 1px solid #f0f0f0;
+    object-fit: contain;
+    flex-shrink: 0;
+    background: #fafafa;
+    padding: 4px;
+  }
+
+  &__info {
+    flex: 1;
+  }
+
+  &__type {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--cl-primary);
+    margin-bottom: 2px;
+  }
+
+  &__name {
+    font-size: 13px;
+    color: #253d4e;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  &__variant {
+    font-size: 11px;
+    color: #687188;
+    margin-top: 2px;
+  }
+}
+
+// ── Addresses row ─────────────────────────────────────────────────────
+.cl-od-addresses {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+
+  @media #{$md} { grid-template-columns: repeat(2, 1fr); }
+  @media #{$sm, $xs} { grid-template-columns: 1fr; }
+}
+
+.cl-od-address-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+
+  &__title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #253d4e;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  &__name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #253d4e;
+    margin-bottom: 6px;
+  }
+
+  &__line {
+    font-size: 13px;
+    color: #687188;
+    margin-bottom: 3px;
+    line-height: 1.5;
+
+    &:last-child { margin-bottom: 0; }
+  }
+
+  &__notes {
+    font-size: 13px;
+    color: #687188;
+    line-height: 1.6;
+  }
+}

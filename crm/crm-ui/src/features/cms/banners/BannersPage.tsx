@@ -11,19 +11,19 @@ import {
   Modal,
   Form,
   Input,
-  InputNumber,
   Switch,
-  Radio,
   Row,
   Col,
-  Divider,
   Badge,
+  Segmented,
+  ColorPicker,
 } from 'antd';
 import type { TableProps } from 'antd';
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
+  CalendarOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -58,36 +58,24 @@ const STATUS_OPTIONS = [
   { value: 'scheduled', label: 'Scheduled' },
 ];
 
-const PAGE_TARGETS = [
-  { value: 'home', label: 'Home' },
-  { value: 'shop', label: 'Shop' },
-  { value: 'cart', label: 'Cart' },
-  { value: 'checkout', label: 'Checkout' },
-  { value: 'product', label: 'Product Detail' },
-  { value: '*', label: 'All Pages' },
-];
-
 // ---------------------------------------------------------------------------
-// Banner Modal
+// Banner Modal — simplified
 // ---------------------------------------------------------------------------
 
 interface BannerFormValues {
   title: string;
   type: Banner['type'];
   status: Banner['status'];
-  priority: number;
-  content_backgroundColor?: string;
-  content_textColor?: string;
-  content_text?: string;
-  content_textVi?: string;
-  content_buttonText?: string;
-  content_buttonUrl?: string;
-  content_image?: string;
+  content_text: string;
+  content_textVi: string;
+  content_buttonText: string;
+  content_buttonUrl: string;
+  content_image: string;
+  content_backgroundColor: string;
+  content_textColor: string;
   scheduling_isAlwaysActive: boolean;
-  scheduling_startDate?: string;
-  scheduling_endDate?: string;
-  targeting_pages: string[];
-  targeting_userSegments: string;
+  scheduling_startDate: string;
+  scheduling_endDate: string;
   dismissible: boolean;
 }
 
@@ -101,48 +89,43 @@ function BannerModal({ open, editing, onClose }: BannerModalProps) {
   const [form] = Form.useForm<BannerFormValues>();
   const queryClient = useQueryClient();
   const isEdit = editing !== null;
-  const [alwaysActive, setAlwaysActive] = useState(true);
+  const [scheduled, setScheduled] = useState(false);
 
   const handleAfterOpenChange = (visible: boolean) => {
     if (!visible) return;
     if (editing) {
-      const always = editing.scheduling?.isAlwaysActive ?? true;
-      setAlwaysActive(always);
+      const isAlways = editing.scheduling?.isAlwaysActive ?? true;
+      setScheduled(!isAlways);
       form.setFieldsValue({
         title: editing.title,
         type: editing.type,
         status: editing.status,
-        priority: editing.priority,
-        content_backgroundColor: editing.content?.backgroundColor ?? '',
-        content_textColor: editing.content?.textColor ?? '',
         content_text: editing.content?.text ?? '',
         content_textVi: editing.content?.textVi ?? '',
         content_buttonText: editing.content?.buttonText ?? '',
         content_buttonUrl: editing.content?.buttonUrl ?? '',
         content_image: editing.content?.image ?? '',
-        scheduling_isAlwaysActive: always,
+        content_backgroundColor: editing.content?.backgroundColor ?? '#0989FF',
+        content_textColor: editing.content?.textColor ?? '#ffffff',
+        scheduling_isAlwaysActive: isAlways,
         scheduling_startDate: editing.scheduling?.startDate
           ? dayjs(editing.scheduling.startDate).format('YYYY-MM-DDTHH:mm')
           : '',
         scheduling_endDate: editing.scheduling?.endDate
           ? dayjs(editing.scheduling.endDate).format('YYYY-MM-DDTHH:mm')
           : '',
-        targeting_pages: editing.targeting?.pages ?? [],
-        targeting_userSegments:
-          editing.targeting?.userSegments?.[0] ?? 'all',
-        dismissible: editing.dismissible,
+        dismissible: editing.dismissible ?? false,
       });
     } else {
       form.resetFields();
-      setAlwaysActive(true);
+      setScheduled(false);
       form.setFieldsValue({
         status: 'active',
-        type: 'promotional-banner',
-        priority: 0,
+        type: 'announcement-bar',
         scheduling_isAlwaysActive: true,
-        targeting_pages: ['*'],
-        targeting_userSegments: 'all',
-        dismissible: false,
+        content_backgroundColor: '#0989FF',
+        content_textColor: '#ffffff',
+        dismissible: true,
       });
     }
   };
@@ -177,32 +160,27 @@ function BannerModal({ open, editing, onClose }: BannerModalProps) {
         title: values.title,
         type: values.type,
         status: values.status,
-        priority: values.priority,
+        priority: 0,
         dismissible: values.dismissible,
         content: {
-          backgroundColor: values.content_backgroundColor,
-          textColor: values.content_textColor,
           text: values.content_text,
           textVi: values.content_textVi,
           buttonText: values.content_buttonText,
           buttonUrl: values.content_buttonUrl,
           image: values.content_image,
+          backgroundColor: values.content_backgroundColor,
+          textColor: values.content_textColor,
         },
         scheduling: {
-          isAlwaysActive: values.scheduling_isAlwaysActive,
-          startDate: values.scheduling_startDate
+          isAlwaysActive: !scheduled,
+          startDate: scheduled && values.scheduling_startDate
             ? new Date(values.scheduling_startDate).toISOString()
             : undefined,
-          endDate: values.scheduling_endDate
+          endDate: scheduled && values.scheduling_endDate
             ? new Date(values.scheduling_endDate).toISOString()
             : undefined,
         },
-        targeting: {
-          pages: values.targeting_pages ?? [],
-          userSegments: values.targeting_userSegments
-            ? [values.targeting_userSegments]
-            : [],
-        },
+        targeting: { pages: ['*'], userSegments: [] },
       };
       if (isEdit && editing) {
         updateMutation.mutate({ id: editing._id, data: payload });
@@ -216,147 +194,136 @@ function BannerModal({ open, editing, onClose }: BannerModalProps) {
 
   return (
     <Modal
-      title={isEdit ? 'Edit Banner' : 'Create Banner'}
+      title={isEdit ? 'Edit Banner' : 'New Banner'}
       open={open}
       onCancel={onClose}
       onOk={handleSubmit}
-      okText={isEdit ? 'Update' : 'Create'}
+      okText={isEdit ? 'Save' : 'Create'}
       confirmLoading={isLoading}
-      width={700}
+      width={560}
       afterOpenChange={handleAfterOpenChange}
       destroyOnHidden
     >
       <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
-        {/* 1. Basic */}
-        <Text strong>1. Basic Info</Text>
-        <Divider style={{ margin: '8px 0 12px' }} />
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="title"
-              label="Banner Name"
-              rules={[{ required: true, message: 'Name is required' }]}
-            >
-              <Input placeholder="Summer Sale Banner" />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-          <Col xs={24} sm={8}>
-            <Form.Item
-              name="type"
-              label="Type"
-              rules={[{ required: true }]}
-            >
+        {/* Name + Type */}
+        <Form.Item
+          name="title"
+          label="Banner Name"
+          rules={[{ required: true, message: 'Required' }]}
+        >
+          <Input placeholder="e.g. Summer Sale" />
+        </Form.Item>
+
+        <Row gutter={12}>
+          <Col span={14}>
+            <Form.Item name="type" label="Type" rules={[{ required: true }]}>
               <Select options={BANNER_TYPE_OPTIONS} />
             </Form.Item>
           </Col>
-          <Col xs={24} sm={8}>
+          <Col span={10}>
             <Form.Item name="status" label="Status">
-              <Radio.Group>
-                <Radio value="active">Active</Radio>
-                <Radio value="inactive">Inactive</Radio>
-                <Radio value="scheduled">Scheduled</Radio>
-              </Radio.Group>
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={8}>
-            <Form.Item name="priority" label="Priority">
-              <InputNumber min={0} max={100} style={{ width: '100%' }} />
+              <Segmented
+                options={[
+                  { label: 'Active', value: 'active' },
+                  { label: 'Off', value: 'inactive' },
+                ]}
+              />
             </Form.Item>
           </Col>
         </Row>
 
-        {/* 2. Content */}
-        <Text strong>2. Content</Text>
-        <Divider style={{ margin: '8px 0 12px' }} />
-        <Row gutter={16}>
-          <Col xs={24} sm={12}>
-            <Form.Item name="content_backgroundColor" label="Background Color">
-              <Input placeholder="#FFFFFF" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item name="content_textColor" label="Text Color">
-              <Input placeholder="#000000" />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-          <Col xs={24} sm={12}>
+        {/* Image */}
+        <Form.Item name="content_image" label="Banner Image">
+          <ImageUpload placeholder="Upload image" width={520} height={160} />
+        </Form.Item>
+
+        {/* Text */}
+        <Row gutter={12}>
+          <Col span={12}>
             <Form.Item name="content_text" label="Text (EN)">
-              <Input placeholder="Announcement text" />
+              <Input placeholder="Free shipping on orders over $50!" />
             </Form.Item>
           </Col>
-          <Col xs={24} sm={12}>
+          <Col span={12}>
             <Form.Item name="content_textVi" label="Text (VI)">
-              <Input placeholder="Nội dung thông báo" />
+              <Input placeholder="Miễn phí vận chuyển cho đơn trên 1.200.000₫!" />
             </Form.Item>
           </Col>
         </Row>
-        <Row gutter={16}>
-          <Col xs={24} sm={12}>
-            <Form.Item name="content_buttonText" label="Button Text">
+
+        {/* Button */}
+        <Row gutter={12}>
+          <Col span={10}>
+            <Form.Item name="content_buttonText" label="Button Label">
               <Input placeholder="Shop Now" />
             </Form.Item>
           </Col>
-          <Col xs={24} sm={12}>
+          <Col span={14}>
             <Form.Item name="content_buttonUrl" label="Button URL">
               <Input placeholder="/shop" />
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item name="content_image" label="Banner Image">
-          <ImageUpload placeholder="Upload Banner Image" width={300} height={180} />
-        </Form.Item>
 
-        {/* 3. Scheduling */}
-        <Text strong>3. Scheduling</Text>
-        <Divider style={{ margin: '8px 0 12px' }} />
-        <Form.Item
-          name="scheduling_isAlwaysActive"
-          label="Always Active"
-          valuePropName="checked"
-        >
-          <Switch
-            onChange={(v) => setAlwaysActive(v)}
-          />
-        </Form.Item>
-        {!alwaysActive && (
-          <Row gutter={16}>
-            <Col xs={24} sm={12}>
-              <Form.Item name="scheduling_startDate" label="Start Date">
+        {/* Colors + Dismissible */}
+        <Row gutter={12} align="middle">
+          <Col span={7}>
+            <Form.Item
+              name="content_backgroundColor"
+              label="Background"
+              getValueFromEvent={(color) => color.toHexString()}
+              getValueProps={(hex) => ({ value: hex || '#0989FF' })}
+            >
+              <ColorPicker format="hex" showText />
+            </Form.Item>
+          </Col>
+          <Col span={7}>
+            <Form.Item
+              name="content_textColor"
+              label="Text Color"
+              getValueFromEvent={(color) => color.toHexString()}
+              getValueProps={(hex) => ({ value: hex || '#ffffff' })}
+            >
+              <ColorPicker format="hex" showText />
+            </Form.Item>
+          </Col>
+          <Col span={10}>
+            <Form.Item name="dismissible" label="Dismissible" valuePropName="checked">
+              <Switch />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        {/* Schedule toggle */}
+        <Row align="middle" style={{ marginBottom: 8 }}>
+          <Col flex="auto">
+            <Text type="secondary">
+              <CalendarOutlined style={{ marginRight: 6 }} />
+              Set active dates
+            </Text>
+          </Col>
+          <Col>
+            <Switch
+              size="small"
+              checked={scheduled}
+              onChange={setScheduled}
+            />
+          </Col>
+        </Row>
+        {scheduled && (
+          <Row gutter={12}>
+            <Col span={12}>
+              <Form.Item name="scheduling_startDate" label="Start">
                 <Input type="datetime-local" />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={12}>
-              <Form.Item name="scheduling_endDate" label="End Date">
+            <Col span={12}>
+              <Form.Item name="scheduling_endDate" label="End">
                 <Input type="datetime-local" />
               </Form.Item>
             </Col>
           </Row>
         )}
-
-        {/* 4. Targeting */}
-        <Text strong>4. Targeting</Text>
-        <Divider style={{ margin: '8px 0 12px' }} />
-        <Form.Item name="targeting_pages" label="Target Pages">
-          <Select
-            mode="multiple"
-            options={PAGE_TARGETS}
-            placeholder="Select target pages"
-          />
-        </Form.Item>
-        <Form.Item name="targeting_userSegments" label="User Segment">
-          <Radio.Group>
-            <Radio value="all">All Users</Radio>
-            <Radio value="guest">Guests Only</Radio>
-            <Radio value="registered">Registered Users</Radio>
-          </Radio.Group>
-        </Form.Item>
-        <Form.Item name="dismissible" label="Dismissible" valuePropName="checked">
-          <Switch />
-        </Form.Item>
       </Form>
     </Modal>
   );

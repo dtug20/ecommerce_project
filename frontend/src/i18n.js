@@ -1,16 +1,12 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import LanguageDetector from "i18next-browser-languagedetector";
 
 import en from "@/locales/en/common.json";
 import vi from "@/locales/vi/common.json";
 
 if (!i18n.isInitialized) {
-  // Only attach LanguageDetector on client side — it accesses localStorage
-  // which crashes during SSR and in Safari Private Browsing
-  if (typeof window !== 'undefined') {
-    i18n.use(LanguageDetector);
-  }
+  // Always start with "en" so SSR and initial client render match.
+  // _app.jsx detects the real language after hydration and calls changeLanguage().
   i18n
     .use(initReactI18next)
     .init({
@@ -18,14 +14,10 @@ if (!i18n.isInitialized) {
         en: { translation: en },
         vi: { translation: vi },
       },
+      lng: "en",
       fallbackLng: "en",
       interpolation: {
         escapeValue: false,
-      },
-      detection: {
-        order: ["localStorage", "navigator"],
-        caches: ["localStorage"],
-        lookupLocalStorage: "i18nextLng",
       },
     });
 }

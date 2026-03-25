@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
 // internal
 import useCartInfo from '@/hooks/use-cart-info';
-import RenderCartProgress from './render-cart-progress';
 import empty_cart_img from '@assets/img/product/cartmini/empty-cart.png';
 import { closeCartMini, remove_product } from '@/redux/features/cartSlice';
 
@@ -36,9 +35,6 @@ const handleCloseCartMini = () => {
                   <i className="fal fa-times"></i>
                 </button>
               </div>
-            </div>
-            <div className="cartmini__shipping">
-              <RenderCartProgress/>
             </div>
             {cart_products.length > 0 && <div className="cartmini__widget">
               {cart_products.map((item) => (

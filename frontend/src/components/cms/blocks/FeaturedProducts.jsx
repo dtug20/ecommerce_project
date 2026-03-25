@@ -1,9 +1,8 @@
 import React from 'react';
 import { useGetProductTypeQuery } from '@/redux/features/productApi';
 import { useGetFilteredProductsQuery } from '@/redux/features/cmsApi';
-import ProductItem from '@/components/products/electronics/product-item';
+import CliconDealProductCard from '@/components/clicon/deals/clicon-deal-product-card';
 import ErrorMsg from '@/components/common/error-msg';
-import HomePrdLoader from '@/components/loader/home/home-prd-loader';
 import { ShapeLine } from '@/svg';
 
 const FeaturedProducts = ({ settings = {}, title, subtitle }) => {
@@ -23,7 +22,7 @@ const FeaturedProducts = ({ settings = {}, title, subtitle }) => {
   let content = null;
 
   if (isLoading) {
-    content = <HomePrdLoader loading={isLoading} />;
+    content = <div className="d-flex justify-content-center py-5"><div className="spinner-border text-primary" /></div>;
   } else if (isError) {
     content = <ErrorMsg msg="There was an error loading products" />;
   } else if (!products?.data?.length) {
@@ -31,7 +30,7 @@ const FeaturedProducts = ({ settings = {}, title, subtitle }) => {
   } else {
     content = products.data.slice(0, limit).map((prd, i) => (
       <div key={prd._id || i} className="col-xl-3 col-lg-3 col-sm-6">
-        <ProductItem product={prd} />
+        <CliconDealProductCard product={prd} />
       </div>
     ));
   }

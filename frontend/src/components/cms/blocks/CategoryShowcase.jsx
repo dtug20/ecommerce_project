@@ -3,7 +3,6 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useGetProductTypeCategoryQuery } from '@/redux/features/categoryApi';
 import ErrorMsg from '@/components/common/error-msg';
-import HomeCateLoader from '@/components/loader/home/home-cate-loader';
 import { ShapeLine } from '@/svg';
 
 const CategoryShowcase = ({ settings = {}, title, subtitle }) => {
@@ -26,7 +25,7 @@ const CategoryShowcase = ({ settings = {}, title, subtitle }) => {
   let content = null;
 
   if (isLoading) {
-    content = <HomeCateLoader loading={isLoading} />;
+    content = <div className="d-flex justify-content-center py-5"><div className="spinner-border text-primary" /></div>;
   } else if (isError) {
     content = <ErrorMsg msg="There was an error loading categories" />;
   } else if (!categories?.result?.length) {

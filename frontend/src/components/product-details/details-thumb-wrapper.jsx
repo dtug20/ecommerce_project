@@ -1,7 +1,5 @@
 import Image from "next/image";
-import { useState, useRef } from "react";
-import PopupVideo from "../common/popup-video";
-
+import { useRef } from "react";
 const DetailsThumbWrapper = ({
   imageURLs,
   handleImageActive,
@@ -11,7 +9,6 @@ const DetailsThumbWrapper = ({
   videoId = false,
   status
 }) => {
-  const [isVideoOpen, setIsVideoOpen] = useState(false);
   const thumbsRef = useRef(null);
 
   const scrollThumbs = (direction) => {
@@ -38,16 +35,6 @@ const DetailsThumbWrapper = ({
             <div className="cl-pd__gallery-badge">
               <span className="cl-badge cl-badge--soldout">Out of Stock</span>
             </div>
-          )}
-          {videoId && (
-            <button
-              type="button"
-              className="cl-pd__gallery-video-btn"
-              onClick={() => setIsVideoOpen(true)}
-              aria-label="Play video"
-            >
-              <i className="fas fa-play" />
-            </button>
           )}
         </div>
 
@@ -95,13 +82,6 @@ const DetailsThumbWrapper = ({
         )}
       </div>
 
-      {videoId && (
-        <PopupVideo
-          isVideoOpen={isVideoOpen}
-          setIsVideoOpen={setIsVideoOpen}
-          videoId={videoId}
-        />
-      )}
     </>
   );
 };

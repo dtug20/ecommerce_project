@@ -2,9 +2,8 @@ import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper';
 import { useGetProductTypeQuery } from '@/redux/features/productApi';
-import ProductItem from '@/components/products/electronics/product-item';
+import CliconDealProductCard from '@/components/clicon/deals/clicon-deal-product-card';
 import ErrorMsg from '@/components/common/error-msg';
-import HomeNewArrivalPrdLoader from '@/components/loader/home/home-newArrival-prd-loader';
 import { ShapeLine, NextArr, PrevArr } from '@/svg';
 
 const sliderSettings = {
@@ -42,7 +41,7 @@ const ProductCarousel = ({ settings = {}, title, subtitle }) => {
   let content = null;
 
   if (isLoading) {
-    content = <HomeNewArrivalPrdLoader loading={isLoading} />;
+    content = <div className="d-flex justify-content-center py-5"><div className="spinner-border text-primary" /></div>;
   } else if (isError) {
     content = <ErrorMsg msg="There was an error loading products" />;
   } else if (!products?.data?.length) {
@@ -57,7 +56,7 @@ const ProductCarousel = ({ settings = {}, title, subtitle }) => {
       >
         {items.map((item) => (
           <SwiperSlide key={item._id}>
-            <ProductItem product={item} />
+            <CliconDealProductCard product={item} />
           </SwiperSlide>
         ))}
       </Swiper>

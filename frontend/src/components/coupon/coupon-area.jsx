@@ -1,8 +1,6 @@
 import React,{useState} from "react";
 import ErrorMsg from "../common/error-msg";
-import CouponItem from "./coupon-item";
 import { useGetOfferCouponsQuery } from "@/redux/features/coupon/couponApi";
-import CouponLoader from "../loader/coupon-loader";
 
 const CouponArea = () => {
   const [copiedCode, setCopiedCode] = useState("");
@@ -21,7 +19,7 @@ const CouponArea = () => {
   let content = null;
 
   if (isLoading) {
-    content = <CouponLoader loading={isLoading}/>;
+    content = <div className="d-flex justify-content-center py-5"><div className="spinner-border text-primary" /></div>;
   }
 
   if (!isLoading && isError) {
@@ -36,13 +34,21 @@ const CouponArea = () => {
     const coupon_items = offerCoupons;
     // const coupon_items = offerCoupons.slice(0, 2);
     content = coupon_items.map((coupon) => (
-      <div key={coupon._id} className="col-xl-6">
-        <CouponItem
-          coupon={coupon}
-          handleCopied={handleCopied}
-          copied={copied}
-          copiedCode={copiedCode}
-        />
+      <div key={coupon._id} className="col-xl-6 col-md-6 mb-30">
+        <div className="tp-coupon-item d-flex align-items-center justify-content-between p-20 border rounded">
+          <div>
+            <h4 className="tp-coupon-title mb-5">{coupon.title || coupon.productType}</h4>
+            <p className="mb-5">{coupon.discountPercentage}% off — min. ${coupon.minimumAmount}</p>
+            <span className="tp-coupon-code fw-bold">{coupon.couponCode}</span>
+          </div>
+          <button
+            type="button"
+            className="tp-btn tp-btn-sm"
+            onClick={() => handleCopied(coupon.couponCode)}
+          >
+            {copied && copiedCode === coupon.couponCode ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
       </div>
     ));
   }
