@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import Link from "next/link";
 // internal
 import { Close, Minus, Plus } from "@/svg";
-import { add_cart_product, quantityDecrement, remove_product } from "@/redux/features/cartSlice";
+import { add_cart_product, quantityDecrement, remove_product, setCartItemQuantity } from "@/redux/features/cartSlice";
 
 const CartItem = ({product}) => {
   const {_id, img,title,price, orderQuantity = 0 } = product || {};
@@ -24,6 +24,14 @@ const CartItem = ({product}) => {
     const handleRemovePrd = (prd) => {
       dispatch(remove_product(prd))
     }
+
+    const handleQuantityChange = (e) => {
+      dispatch(setCartItemQuantity({
+        _id: product._id,
+        quantity: e.target.value,
+        maxStock: product.quantity // The maximum variant stock bound to this item
+      }));
+    };
 
   return (
     <tr>
@@ -47,7 +55,13 @@ const CartItem = ({product}) => {
           <span onClick={()=> handleDecrement(product)} className="tp-cart-minus" role="button" aria-label="Decrease quantity">
             <Minus />
           </span>
-          <input className="tp-cart-input" type="text" value={orderQuantity} readOnly aria-label="Product quantity" />
+          <input 
+            className="tp-cart-input" 
+            type="text" 
+            value={orderQuantity} 
+            onChange={handleQuantityChange}
+            aria-label="Product quantity" 
+          />
           <span onClick={()=> handleAddProduct(product)} className="tp-cart-plus" role="button" aria-label="Increase quantity">
             <Plus />
           </span>

@@ -1,6 +1,7 @@
 const dayjs = require('dayjs');
 const { secret } = require("../config/secret");
 const Order = require("../model/Order");
+const Product = require("../model/Products");
 const Coupon = require("../model/Coupon");
 const { emitOrderCreated, emitOrderUpdated } = require("../utils/socketEmitter");
 const PaymentService = require("../services/paymentService");
@@ -101,6 +102,23 @@ exports.addOrder = async (req, res, next) => {
       paymentStatus: paymentResult.paymentStatus || 'unpaid',
       transactionId: paymentResult.transactionId || null,
     });
+
+    // Deduct stock for each cart item
+    for (const item of cart) {
+      const quantityToDeduct = item.orderQuantity || 1;
+      
+      if (item.selectedVariant && item.selectedVariant.sku) {
+        await Product.updateOne(
+          { _id: item._id, "variants.sku": item.selectedVariant.sku },
+          { $inc: { "variants.$.stock": -quantityToDeduct } }
+        );
+      } else {
+        await Product.updateOne(
+          { _id: item._id },
+          { $inc: { quantity: -quantityToDeduct } }
+        );
+      }
+    }
 
     // Emit real-time update
     emitOrderCreated(orderItems);

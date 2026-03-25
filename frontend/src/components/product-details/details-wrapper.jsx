@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
-import { add_cart_product } from '@/redux/features/cartSlice';
+import { add_cart_product, decrement, increment, setOrderQuantity } from "@/redux/features/cartSlice";
 import { add_to_compare } from '@/redux/features/compareSlice';
 import { handleModalClose } from '@/redux/features/productModalSlice';
-import { increment, decrement } from '@/redux/features/cartSlice';
 import useWishlist from '@/hooks/use-wishlist';
 import useCurrency from '@/hooks/use-currency';
 import ProductVariantSelector from './product-variant-selector';
@@ -23,7 +22,7 @@ const DetailsWrapper = ({
   const { formatPrice } = useCurrency();
   const {
     sku, img, title, imageURLs, category, description, discount, price,
-    status, reviews, tags, offerDate, vendor, brand,
+    status, reviews, tags, offerDate, vendor, brand, quantity
   } = productItem || {};
   const [ratingVal, setRatingVal] = useState(0);
   const dispatch = useDispatch();
@@ -46,6 +45,7 @@ const DetailsWrapper = ({
     ? (selectedVariant.stock > 0 ? 'in-stock' : 'out-of-stock')
     : status;
   const isOutOfStock = displayStatus === 'out-of-stock';
+  const displayStock = selectedVariant?.stock ?? quantity ?? '';
 
   const discountedPrice = discount > 0
     ? (Number(price) - (Number(price) * Number(discount)) / 100).toFixed(2)
@@ -64,8 +64,9 @@ const DetailsWrapper = ({
           },
           price: selectedVariant.price ?? price,
           img: selectedVariant.image || img,
+          quantity: displayStock // strictly set quantity to current active stock
         }
-      : productItem;
+      : { ...productItem, quantity: displayStock }; // ensure even non-variants cast current stock limit
     dispatch(add_cart_product(productToAdd));
   };
 
@@ -104,7 +105,7 @@ const DetailsWrapper = ({
         <div className="cl-pd__meta-item">
           Availability:{' '}
           <span className={`cl-pd__meta-badge cl-pd__meta-badge--${isOutOfStock ? 'out-of-stock' : 'in-stock'}`}>
-            {isOutOfStock ? 'Out of Stock' : 'In Stock'}
+            {isOutOfStock ? 'Out of Stock' : `${displayStock} In Stock`}
           </span>
         </div>
         {brand && (
@@ -178,8 +179,12 @@ const DetailsWrapper = ({
       <div className="cl-pd__actions">
         <div className="cl-pd__quantity">
           <button type="button" onClick={() => dispatch(decrement())}>&#8722;</button>
-          <input type="text" readOnly value={String(orderQuantity).padStart(2, '0')} />
-          <button type="button" onClick={() => dispatch(increment())}>+</button>
+          <input 
+            type="text" 
+            value={orderQuantity} 
+            onChange={(e) => dispatch(setOrderQuantity({ quantity: e.target.value, maxStock: displayStock }))}
+          />
+          <button type="button" onClick={() => dispatch(increment(displayStock))}>+</button>
         </div>
         <button
           type="button"

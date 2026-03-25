@@ -15,21 +15,29 @@ export const cartSlice = createSlice({
     add_cart_product: (state, { payload }) => {
       const isExist = state.cart_products.some((i) => i._id === payload._id);
       if (!isExist) {
-        const newItem = {
-          ...payload,
-          orderQuantity: state.orderQuantity,
-        };
-        state.cart_products.push(newItem);
-        notifySuccess(`${state.orderQuantity} ${payload.title} added to cart`);
+        // Enforce maximum stock limit even for new items
+        const requestedQuantity = Number(state.orderQuantity) || 1;
+        if (payload.quantity >= requestedQuantity) {
+          const newItem = {
+            ...payload,
+            orderQuantity: requestedQuantity,
+          };
+          state.cart_products.push(newItem);
+          notifySuccess(`${requestedQuantity} ${payload.title} added to cart`);
+        } else {
+          notifyError(`Cannot add more than ${payload.quantity} available in stock!`);
+          state.orderQuantity = 1; // Reset local counter
+        }
       } else {
         state.cart_products.map((item) => {
           if (item._id === payload._id) {
-            if (item.quantity >= item.orderQuantity + state.orderQuantity) {
+            const currentOrderQty = Number(state.orderQuantity) || 1;
+            if (item.quantity >= item.orderQuantity + currentOrderQty) {
               item.orderQuantity =
-                state.orderQuantity !== 1
-                  ? state.orderQuantity + item.orderQuantity
+                currentOrderQty !== 1
+                  ? currentOrderQty + item.orderQuantity
                   : item.orderQuantity + 1;
-              notifySuccess(`${state.orderQuantity} ${item.title} added to cart`);
+              notifySuccess(`${currentOrderQty} ${item.title} added to cart`);
             } else {
               notifyError("No more quantity available for this product!");
               state.orderQuantity = 1;
@@ -41,7 +49,17 @@ export const cartSlice = createSlice({
       setLocalStorage("cart_products", state.cart_products);
     },
     increment: (state, { payload }) => {
-      state.orderQuantity = state.orderQuantity + 1;
+      // payload represents the absolute global stock capacity for the item being viewed
+      // If payload is not provided, decrement blindly (legacy behavior)
+      if (typeof payload === 'number') {
+        if (state.orderQuantity < payload) {
+          state.orderQuantity += 1;
+        } else {
+          notifyError(`Maximum stock limit of ${payload} reached!`);
+        }
+      } else {
+        state.orderQuantity += 1;
+      }
     },
     decrement: (state, { payload }) => {
       state.orderQuantity =
@@ -57,6 +75,40 @@ export const cartSlice = createSlice({
           }
         }
         return { ...item };
+      });
+      setLocalStorage("cart_products", state.cart_products);
+    },
+    setOrderQuantity: (state, { payload }) => {
+      const { quantity, maxStock } = payload;
+      if (quantity === "" || isNaN(quantity)) {
+        state.orderQuantity = "";
+      } else {
+        const numQty = Number(quantity);
+        if (typeof maxStock === 'number' && numQty > maxStock) {
+          state.orderQuantity = maxStock;
+          notifyError(`Maximum stock limit of ${maxStock} reached!`);
+        } else if (numQty >= 1) {
+          state.orderQuantity = numQty;
+        }
+      }
+    },
+    setCartItemQuantity: (state, { payload }) => {
+      const { _id, quantity, maxStock } = payload;
+      state.cart_products = state.cart_products.map((item) => {
+        if (item._id === _id) {
+          if (quantity === "" || isNaN(quantity)) {
+            item.orderQuantity = "";
+          } else {
+            const numQty = Number(quantity);
+            if (typeof maxStock === 'number' && numQty > maxStock) {
+              item.orderQuantity = maxStock;
+              notifyError(`Maximum stock limit of ${maxStock} reached!`);
+            } else if (numQty >= 1) {
+              item.orderQuantity = numQty;
+            }
+          }
+        }
+        return item;
       });
       setLocalStorage("cart_products", state.cart_products);
     },
@@ -96,6 +148,8 @@ export const {
   get_cart_products,
   remove_product,
   quantityDecrement,
+  setOrderQuantity,
+  setCartItemQuantity,
   initialOrderQuantity,
   clearCart,
   closeCartMini,

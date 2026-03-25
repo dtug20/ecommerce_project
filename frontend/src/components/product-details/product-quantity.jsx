@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 // internal
 import { Minus, Plus } from '@/svg';
-import { decrement, increment } from '@/redux/features/cartSlice';
+import { decrement, increment, setOrderQuantity } from '@/redux/features/cartSlice';
 
 const ProductQuantity = () => {
   const { orderQuantity } = useSelector((state) => state.cart);
@@ -21,7 +21,12 @@ const ProductQuantity = () => {
       <span className="tp-cart-minus" onClick={handleDecrease}>
         <Minus />
       </span>
-      <input className="tp-cart-input" type="text" readOnly value={orderQuantity} />
+      <input 
+        className="tp-cart-input" 
+        type="text" 
+        onChange={(e) => dispatch(setOrderQuantity({ quantity: e.target.value }))} 
+        value={orderQuantity} 
+      />
       <span className="tp-cart-plus" onClick={handleIncrease}>
         <Plus />
       </span>

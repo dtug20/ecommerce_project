@@ -405,6 +405,9 @@
     input {
       width: 48px;
       height: 44px;
+      padding: 0;
+      margin: 0;
+      line-height: 44px;
       text-align: center;
       border: none;
       border-left: 1px solid var(--cl-border);
@@ -413,6 +416,7 @@
       font-size: var(--cl-fs-body);
       font-weight: var(--cl-fw-semibold);
       color: var(--cl-text-heading);
+      background: var(--cl-bg-white);
       outline: none;
     }
   }
@@ -440,6 +444,59 @@
     justify-content: center;
     min-width: 120px;
   }
+
+// ---------------------------------------------------------------------------
+// Quick View Modal Overrides
+// ---------------------------------------------------------------------------
+.cl-quick-view-modal {
+  display: flex;
+  gap: var(--cl-spacing-xl);
+  align-items: flex-start;
+  padding: var(--cl-spacing-xl);
+  max-width: 1000px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: var(--cl-bg-white);
+  border-radius: var(--cl-radius-md);
+  position: relative;
+
+  .cl-pd__gallery {
+    flex: 0 0 400px;
+    width: 400px;
+    position: static;
+  }
+
+  .cl-pd__gallery-main {
+    min-height: 350px;
+    padding: var(--cl-spacing-md);
+  }
+
+  .tp-product-modal-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 10;
+    color: var(--cl-text-body);
+    transition: color 0.2s;
+
+    &:hover {
+      color: var(--cl-primary);
+    }
+  }
+
+  @media (max-width: 991px) {
+    flex-direction: column;
+    .cl-pd__gallery {
+      flex: none;
+      width: 100%;
+    }
+  }
+}
+
 
   // ---------------------------------------------------------------------------
   // Secondary actions (wishlist, compare, share)

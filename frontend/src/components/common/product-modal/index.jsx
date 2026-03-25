@@ -48,16 +48,15 @@ const ProductModal = () => {
         style={customStyles}
         contentLabel="Product Modal"
       >
-        <div className="tp-product-modal">
-          <div className="tp-product-modal-content d-lg-flex">
-            <button
-              onClick={() => dispatch(handleModalClose())}
-              type="button"
-              className="tp-product-modal-close-btn"
-            >
-              <i className="fa-regular fa-xmark"></i>
-            </button>
-            {/* product-details-thumb-wrapper start */}
+        <div className="cl-quick-view-modal">
+          <button
+            onClick={() => dispatch(handleModalClose())}
+            type="button"
+            className="tp-product-modal-close-btn"
+          >
+            <i className="fa-regular fa-xmark"></i>
+          </button>
+          {/* product-details-thumb-wrapper start */}
             <DetailsThumbWrapper
               activeImg={activeImg}
               handleImageActive={handleImageActive}
@@ -76,7 +75,6 @@ const ProductModal = () => {
               activeImg={activeImg}
             />
             {/* product-details-wrapper end */}
-          </div>
         </div>
       </ReactModal>
     </div>
