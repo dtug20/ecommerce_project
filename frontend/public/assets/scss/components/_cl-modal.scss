@@ -1,0 +1,103 @@
+// ============================================================
+// Modal — Clicon design system
+// Based on clicon-html .modal-two
+// ============================================================
+
+.cl-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  animation: cl-modal-fade-in 200ms ease;
+  padding: var(--cl-spacing-md);
+}
+
+.cl-modal {
+  position: relative;
+  background: var(--cl-bg-white);
+  border-radius: var(--cl-radius-lg);
+  padding: var(--cl-spacing-lg);
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: cl-modal-slide-up 200ms ease;
+
+  &--sm {
+    max-width: 400px;
+  }
+
+  &--md {
+    max-width: 560px;
+  }
+
+  &--lg {
+    max-width: 720px;
+  }
+
+  &__header {
+    padding-bottom: var(--cl-spacing-md);
+    border-bottom: 1px solid var(--cl-border);
+    margin-bottom: var(--cl-spacing-md);
+  }
+
+  &__title {
+    font-family: var(--cl-ff-heading);
+    font-size: var(--cl-fs-h3);
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+    margin: 0;
+    padding-right: 32px;
+  }
+
+  &__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--cl-radius-full);
+    color: var(--cl-text-secondary);
+    cursor: pointer;
+    transition: all var(--cl-transition-fast);
+
+    &:hover {
+      background-color: var(--cl-bg-gray);
+      color: var(--cl-text-heading);
+    }
+
+    i {
+      font-size: 16px;
+    }
+  }
+
+  &__body {
+    // Content area
+  }
+
+  &__footer {
+    padding-top: var(--cl-spacing-md);
+    border-top: 1px solid var(--cl-border);
+    margin-top: var(--cl-spacing-md);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--cl-spacing-sm);
+  }
+}
+
+@keyframes cl-modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes cl-modal-slide-up {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

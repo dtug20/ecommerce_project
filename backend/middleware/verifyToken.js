@@ -73,39 +73,107 @@ module.exports = async (req, res, next) => {
       role: primaryRole,
     };
 
+    console.log(`[Auth] Token verified for: ${payload.email} (sub: ${payload.sub}, role: ${primaryRole})`);
+
     // Resolve MongoDB user (find or auto-create on first login)
     let mongoUser = await User.findOne({ keycloakId: payload.sub });
 
     const expectedName = req.user.name || payload.email;
 
     if (!mongoUser) {
-      // Try by email (for migrated users whose keycloakId hasn't been set yet)
-      mongoUser = await User.findOne({ email: payload.email });
-      if (mongoUser) {
-        // Link Keycloak identity but preserve existing status (don't reactivate blocked users)
-        mongoUser.keycloakId = payload.sub;
-        if (mongoUser.name !== expectedName) mongoUser.name = expectedName;
-        await mongoUser.save({ validateBeforeSave: false });
-      } else {
-        // Auto-create MongoDB user record on first Keycloak login
+      // Try by email (for users migrated via migrate-users-to-keycloak.js
+      // whose keycloakId hasn't been set yet).
+      // ONLY link if the existing record was explicitly migrated — i.e. it
+      // does NOT already have a different keycloakId and it has NO password
+      // (Keycloak-managed users don't store passwords in MongoDB).
+      const existingByEmail = await User.findOne({ email: payload.email });
+
+      if (existingByEmail && !existingByEmail.keycloakId && !existingByEmail.password) {
+        // Legitimate migrated user — link Keycloak identity
+        mongoUser = existingByEmail;
+      } else if (existingByEmail && existingByEmail.keycloakId && existingByEmail.keycloakId !== payload.sub) {
+        // Email belongs to a DIFFERENT Keycloak user — don't hijack their record.
+        // Create a new record with a slightly modified email to avoid unique constraint.
+        console.warn(`[Auth] Email ${payload.email} already linked to keycloakId ${existingByEmail.keycloakId}. Creating separate record.`);
+        mongoUser = await User.create({
+          name: expectedName,
+          email: `${payload.sub}@keycloak.local`,
+          keycloakId: payload.sub,
+          role: primaryRole,
+          status: "active",
+          emailVerified: payload.email_verified || false,
+          lastLogin: new Date(),
+        });
+      } else if (!existingByEmail) {
+        // Brand new user — create fresh MongoDB record
+        console.log(`[Auth] Creating new MongoDB user for: ${payload.email} (keycloakId: ${payload.sub})`);
         mongoUser = await User.create({
           name: expectedName,
           email: payload.email,
           keycloakId: payload.sub,
           role: primaryRole,
           status: "active",
+          emailVerified: payload.email_verified || false,
+          lastLogin: new Date(),
+        });
+      } else {
+        // Existing record has a password (seed data / legacy local auth) —
+        // do NOT auto-link. Create fresh record for this Keycloak user.
+        console.warn(`[Auth] Email ${payload.email} belongs to a legacy/seed user. Creating fresh record for Keycloak user.`);
+        mongoUser = await User.create({
+          name: expectedName,
+          email: `${payload.sub}@keycloak.local`,
+          keycloakId: payload.sub,
+          role: primaryRole,
+          status: "active",
+          emailVerified: payload.email_verified || false,
+          lastLogin: new Date(),
         });
       }
-    } else {
-      // Continuously sync Keycloak profile changes down to the local MongoDB replica
-      // Only sync if the token provides a real name (not "Unknown"), or if the DB currently has no name
-      if (expectedName !== 'Unknown' && mongoUser.name !== expectedName) {
-        mongoUser.name = expectedName;
-        await mongoUser.save({ validateBeforeSave: false });
-      } else if (mongoUser.name && mongoUser.name !== 'Unknown') {
-        // If token has "Unknown" but DB has a real name, keep the DB name
-        req.user.name = mongoUser.name;
-      }
+    }
+
+    // ── Full sync: Keycloak → MongoDB (runs for ALL existing users) ──
+    let needsSave = false;
+
+    // Link keycloakId if missing (email-fallback users, seed data)
+    if (!mongoUser.keycloakId) {
+      mongoUser.keycloakId = payload.sub;
+      needsSave = true;
+    }
+
+    // Sync name (only if token provides a real name)
+    if (expectedName !== 'Unknown' && mongoUser.name !== expectedName) {
+      mongoUser.name = expectedName;
+      needsSave = true;
+    } else if (mongoUser.name && mongoUser.name !== 'Unknown') {
+      // If token has "Unknown" but DB has a real name, keep the DB name
+      req.user.name = mongoUser.name;
+    }
+
+    // Sync role if changed in Keycloak
+    if (mongoUser.role !== primaryRole) {
+      mongoUser.role = primaryRole;
+      needsSave = true;
+    }
+
+    // Sync email if changed in Keycloak
+    if (payload.email && mongoUser.email !== payload.email) {
+      mongoUser.email = payload.email;
+      needsSave = true;
+    }
+
+    // Sync emailVerified from Keycloak token
+    if (payload.email_verified !== undefined && mongoUser.emailVerified !== payload.email_verified) {
+      mongoUser.emailVerified = payload.email_verified;
+      needsSave = true;
+    }
+
+    // Update lastLogin timestamp
+    mongoUser.lastLogin = new Date();
+    needsSave = true;
+
+    if (needsSave) {
+      await mongoUser.save({ validateBeforeSave: false });
     }
 
     // Check if user is blocked or inactive
@@ -134,10 +202,11 @@ module.exports = async (req, res, next) => {
         error: "Token expired",
       });
     }
-    console.error("[Auth] Token verification failed:", error.name, error.message, error.code);
+    console.error("[Auth] Token verification failed:", error.name, error.message, error.code, error.stack?.split('\n')[1]);
     res.status(403).json({
       status: "fail",
       error: "Invalid token",
+      debug: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 };

@@ -24,3 +24,24 @@
 @forward 'clicon-newsletter';
 @forward 'clicon-features';
 @forward 'clicon-support';
+
+// Clicon UI Atoms — Phase 1 (extracted)
+@forward 'cl-star-rating';
+@forward 'cl-price-display';
+@forward 'cl-section-header';
+@forward 'cl-countdown';
+@forward 'cl-skeleton';
+
+// Clicon UI Atoms — Phase 2 (new)
+@forward 'cl-button';
+@forward 'cl-input';
+@forward 'cl-quantity';
+@forward 'cl-tabs';
+@forward 'cl-modal';
+@forward 'cl-form';
+@forward 'cl-misc';
+
+// Clicon Composites — Phase 3
+@forward 'cl-cart-item';
+@forward 'cl-minicart';
+@forward 'cl-composites';

@@ -13,9 +13,15 @@ export const authApi = apiSlice.injectEndpoints({
           // Backend returns { success, data: user } or { status, data: { user } }
           const mongoUser = result.data?.data?.user || result.data?.data || result.data;
           const existingUser = getState().auth.user;
+          // Merge: MongoDB provides _id, addresses, vendorProfile, etc.
+          // Keycloak identity (name, email, keycloakId, roles) takes precedence
           dispatch(
             userLoggedIn({
-              user: { ...existingUser, ...mongoUser },
+              user: {
+                ...mongoUser,
+                ...existingUser,
+                _id: mongoUser._id || existingUser?._id,
+              },
               authenticated: true,
             })
           );

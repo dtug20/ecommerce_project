@@ -6,12 +6,13 @@ import {
   useGetTopRatedProductsQuery,
 } from '@/redux/features/productApi';
 import CliconProductSmRow from './clicon-product-sm-row';
+import { SkeletonLoader } from '@/components/clicon/ui';
 import ErrorMsg from '@/components/common/error-msg';
 
 const ColumnSkeleton = () => (
   <div className="cl-product-columns__col">
     {[...Array(3)].map((_, i) => (
-      <div key={i} className="cl-product-columns__skeleton" />
+      <SkeletonLoader key={i} variant="rect" height={80} className="cl-product-columns__skeleton" />
     ))}
   </div>
 );

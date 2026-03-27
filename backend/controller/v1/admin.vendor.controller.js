@@ -14,6 +14,7 @@ const User = require('../../model/User');
 const Product = require('../../model/Products');
 const Order = require('../../model/Order');
 const Payout = require('../../model/Payout');
+const keycloakService = require('../../services/keycloak.service');
 
 // ---------------------------------------------------------------------------
 // Vendor listing and stats
@@ -266,14 +267,23 @@ exports.getVendorPayouts = async (req, res, next) => {
 /**
  * PATCH /api/v1/admin/vendors/:id/approve
  * Approve a vendor application. Sets verificationStatus to 'approved' and
- * role to 'vendor'.
- * Note: Keycloak role assignment must be performed manually or via admin API.
+ * role to 'vendor'. Also assigns 'vendor' role in Keycloak.
  */
 exports.approveVendor = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
       return respond.notFound(res, 'VENDOR_NOT_FOUND', 'Vendor not found');
+    }
+
+    // Assign vendor role in Keycloak so token-based auth recognizes the role
+    if (user.keycloakId) {
+      try {
+        await keycloakService.assignRealmRole(user.keycloakId, 'vendor');
+      } catch (kcErr) {
+        console.error(`[Vendor] Failed to assign Keycloak vendor role:`, kcErr.message);
+        // Don't block approval — admin can fix Keycloak role manually
+      }
     }
 
     user.role = 'vendor';
@@ -346,6 +356,15 @@ exports.suspendVendor = async (req, res, next) => {
     if (!user.vendorProfile) user.vendorProfile = {};
     user.vendorProfile.verificationStatus = 'suspended';
     user.status = 'blocked';
+
+    // Disable user in Keycloak
+    if (user.keycloakId) {
+      try {
+        await keycloakService.setUserEnabled(user.keycloakId, false);
+      } catch (kcErr) {
+        console.error(`[Vendor] Failed to disable user in Keycloak:`, kcErr.message);
+      }
+    }
 
     await user.save();
 

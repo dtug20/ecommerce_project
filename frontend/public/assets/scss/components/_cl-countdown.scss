@@ -1,0 +1,57 @@
+// ============================================================
+// Countdown Timer — reusable atom
+// ============================================================
+
+.cl-countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cl-spacing-sm);
+
+  &__label {
+    font-size: var(--cl-fs-body);
+    color: var(--cl-text-secondary);
+    white-space: nowrap;
+  }
+
+  &__units {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &__unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 40px;
+  }
+
+  &__value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 36px;
+    background-color: var(--cl-bg-gray);
+    border-radius: var(--cl-radius-sm);
+    font-size: var(--cl-fs-h4);
+    font-weight: var(--cl-fw-bold);
+    color: var(--cl-text-heading);
+    line-height: 1;
+  }
+
+  &__unit-label {
+    font-size: 11px;
+    color: var(--cl-text-secondary);
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+
+  &__sep {
+    font-size: var(--cl-fs-h4);
+    font-weight: var(--cl-fw-bold);
+    color: var(--cl-text-secondary);
+    align-self: flex-start;
+    padding-top: 6px;
+  }
+}

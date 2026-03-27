@@ -1,6 +1,7 @@
 const User = require('../model/User');
 const Order = require('../model/Order');
 const bcrypt = require('bcryptjs');
+const keycloakService = require('../services/keycloak.service');
 
 // GET /api/admin/users
 exports.getAllUsers = async (req, res, next) => {
@@ -145,18 +146,41 @@ exports.getUserOrders = async (req, res, next) => {
 // POST /api/admin/users
 exports.createUser = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, name, role } = req.body;
 
     const existing = await User.findOne({ email: email?.toLowerCase() });
     if (existing) {
       return res.status(400).json({ success: false, message: 'Email already exists' });
     }
 
-    if (password) {
-      req.body.password = await bcrypt.hash(password, 10);
+    // Create user in Keycloak first so they can actually log in
+    const keycloakUserId = await keycloakService.createUser({
+      username: email,
+      email,
+      firstName: name,
+      enabled: true,
+      emailVerified: true,
+    });
+
+    // Assign realm role in Keycloak (default to "user")
+    const keycloakRole = role || 'user';
+    try {
+      await keycloakService.assignRealmRole(keycloakUserId, keycloakRole);
+    } catch (roleErr) {
+      console.error(`[Admin] Failed to assign Keycloak role '${keycloakRole}':`, roleErr.message);
+      // Continue — user is created, role can be fixed later
     }
 
-    const user = await User.create(req.body);
+    // Set temporary password in Keycloak (user must change on first login)
+    if (password) {
+      await keycloakService.resetUserPassword(keycloakUserId, password, true);
+    }
+
+    // Create MongoDB record with keycloakId link
+    const mongoBody = { ...req.body, keycloakId: keycloakUserId };
+    delete mongoBody.password; // Password is managed by Keycloak, not MongoDB
+
+    const user = await User.create(mongoBody);
     const userData = user.toObject();
     delete userData.password;
 
@@ -214,6 +238,15 @@ exports.updateUserStatus = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
+    // Sync enabled/disabled state to Keycloak
+    if (user.keycloakId) {
+      try {
+        await keycloakService.setUserEnabled(user.keycloakId, status === 'active');
+      } catch (kcErr) {
+        console.error(`[Admin] Failed to sync status to Keycloak:`, kcErr.message);
+      }
+    }
+
     if (global.io) global.io.emit('user:updated', user);
 
     res.json({ success: true, data: user, message: `User status updated to ${status}` });
@@ -240,6 +273,15 @@ exports.deleteUser = async (req, res, next) => {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Also delete from Keycloak
+    if (user.keycloakId) {
+      try {
+        await keycloakService.deleteUser(user.keycloakId);
+      } catch (kcErr) {
+        console.error(`[Admin] Failed to delete user from Keycloak:`, kcErr.message);
+      }
     }
 
     if (global.io) global.io.emit('user:deleted', { _id: req.params.id });

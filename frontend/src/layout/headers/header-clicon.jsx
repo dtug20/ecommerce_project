@@ -10,7 +10,7 @@ import logo from "@assets/img/logo/logo.svg";
 import CliconWelcomeBar from "./header-clicon-com/clicon-welcome-bar";
 import CliconMainHeader from "./header-clicon-com/clicon-main-header";
 import CliconNavBar from "./header-clicon-com/clicon-nav-bar";
-import CartMiniSidebar from "@/components/common/cart-mini-sidebar";
+import { CliconMiniCart } from "@/components/clicon/composites";
 import OffCanvas from "@/components/common/off-canvas";
 import { Search } from "@/svg";
 import useSearchFormSubmit from "@/hooks/use-search-form-submit";
@@ -120,7 +120,7 @@ const HeaderClicon = () => {
         </div>
       </div>
 
-      <CartMiniSidebar />
+      <CliconMiniCart />
       <OffCanvas isOffCanvasOpen={isOffCanvasOpen} setIsCanvasOpen={setIsCanvasOpen} />
     </>
   );

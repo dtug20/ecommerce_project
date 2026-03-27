@@ -5,41 +5,11 @@ import { useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { add_cart_product } from '@/redux/features/cartSlice';
 import { handleProductModal } from '@/redux/features/productModalSlice';
-import useCurrency from '@/hooks/use-currency';
+import { StarRating, PriceDisplay } from '@/components/clicon/ui';
 
-// ---------------------------------------------------------------------------
-// Star rating row
-// ---------------------------------------------------------------------------
-function StarRating({ reviews = [] }) {
-  const count = reviews.length;
-  const avg =
-    count > 0
-      ? Math.round(reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / count)
-      : 0;
-
-  return (
-    <div className="cl-deal-featured__rating" aria-label={`${avg} out of 5 stars`}>
-      {Array.from({ length: 5 }, (_, i) => (
-        <span
-          key={i}
-          className={`cl-star${i < avg ? '' : ' cl-star--empty'}`}
-          aria-hidden="true"
-        >
-          &#9733;
-        </span>
-      ))}
-      {count > 0 && <span className="cl-rating-count">({count})</span>}
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Main component
-// ---------------------------------------------------------------------------
 const CliconDealFeaturedCard = ({ product }) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  const { formatPrice } = useCurrency();
 
   if (!product) return null;
 
@@ -54,9 +24,6 @@ const CliconDealFeaturedCard = ({ product }) => {
     reviews = [],
     description,
   } = product;
-
-  const discountedPrice =
-    discount > 0 ? (price - (price * discount) / 100).toFixed(2) : price.toFixed(2);
 
   const isOutOfStock = quantity === 0 || product.status === 'out-of-stock';
   const productImage = img || imageURLs?.[0]?.img || null;
@@ -109,12 +76,7 @@ const CliconDealFeaturedCard = ({ product }) => {
           <Link href={`/product-details/${_id}`}>{title}</Link>
         </h2>
 
-        <div className="cl-deal-featured__price-row">
-          <span className="cl-deal-featured__price-current">{formatPrice(discountedPrice)}</span>
-          {discount > 0 && (
-            <span className="cl-deal-featured__price-old">{formatPrice(price)}</span>
-          )}
-        </div>
+        <PriceDisplay price={price} discount={discount} size="md" className="cl-deal-featured__price-row" />
 
         {shortDesc && (
           <p className="cl-deal-featured__desc">{shortDesc}</p>

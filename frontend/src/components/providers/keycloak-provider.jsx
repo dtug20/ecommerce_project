@@ -33,9 +33,12 @@ const KeycloakProvider = ({ children }) => {
           syncUserToRedux();
           // Fetch MongoDB profile to populate _id for orders, reviews, etc.
           try {
-            await dispatch(authApi.endpoints.getUserProfile.initiate());
+            const profileResult = await dispatch(authApi.endpoints.getUserProfile.initiate());
+            if (profileResult?.error) {
+              console.error("[Auth] Failed to fetch user profile:", profileResult.error);
+            }
           } catch (err) {
-            // Failed to fetch user profile — user can still browse
+            console.error("[Auth] getUserProfile exception:", err);
           }
         }
         setInitialized(true);

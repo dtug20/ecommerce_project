@@ -20,6 +20,11 @@ exports.getProfile = async (req, res, next) => {
     }
 
     const { password, ...userData } = user.toObject();
+    // Override with Keycloak identity (source of truth for name, email, role)
+    userData.name = req.user.name;
+    userData.email = req.user.email;
+    userData.role = req.user.role;
+    userData.keycloakId = req.user.keycloakId;
     res.status(200).json({
       status: "success",
       data: { user: userData },

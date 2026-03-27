@@ -28,6 +28,8 @@ module.exports = {
   updateUser:       user.updateUser,
   updateUserStatus: user.updateUserStatus,
   vendorApplication: user.vendorApplication,
+  createUser:       user.createUser,
+  addStaff:         user.addStaff,
 
   // Review
   createReview:  review.createReview,

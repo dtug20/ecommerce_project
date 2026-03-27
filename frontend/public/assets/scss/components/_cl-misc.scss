@@ -1,0 +1,230 @@
+// ============================================================
+// Misc atoms — IconButton, Avatar, Tag, Divider, ProgressBar
+// ============================================================
+
+// --- Icon Button ---
+.cl-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--cl-border);
+  background-color: var(--cl-bg-white);
+  color: var(--cl-text-body);
+  cursor: pointer;
+  transition: all var(--cl-transition-fast);
+
+  &:hover:not(:disabled) {
+    background-color: var(--cl-primary);
+    border-color: var(--cl-primary);
+    color: var(--cl-text-white);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(250, 130, 50, 0.25);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  // Sizes
+  &--sm { width: 32px; height: 32px; font-size: 12px; }
+  &--md { width: 40px; height: 40px; font-size: 14px; }
+  &--lg { width: 48px; height: 48px; font-size: 16px; }
+
+  // Shapes
+  &--circle { border-radius: var(--cl-radius-full); }
+  &--square { border-radius: var(--cl-radius-sm); }
+
+  // Variants
+  &--primary {
+    background-color: var(--cl-primary);
+    border-color: var(--cl-primary);
+    color: var(--cl-text-white);
+
+    &:hover:not(:disabled) {
+      background-color: var(--cl-primary-hover);
+      border-color: var(--cl-primary-hover);
+    }
+  }
+
+  &--outlined {
+    background-color: transparent;
+    border-color: var(--cl-border);
+    color: var(--cl-text-body);
+  }
+}
+
+// --- Avatar ---
+.cl-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--cl-radius-full);
+  overflow: hidden;
+  flex-shrink: 0;
+
+  &--sm { width: 32px; height: 32px; }
+  &--md { width: 40px; height: 40px; }
+  &--lg { width: 56px; height: 56px; }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+  }
+
+  &__initials {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--cl-primary);
+    color: var(--cl-text-white);
+    font-family: var(--cl-ff-body);
+    font-weight: var(--cl-fw-semibold);
+    font-size: 14px;
+  }
+
+  &--lg .cl-avatar__initials {
+    font-size: 18px;
+  }
+
+  &--sm .cl-avatar__initials {
+    font-size: 11px;
+  }
+}
+
+// --- Tag ---
+.cl-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-family: var(--cl-ff-body);
+  font-size: var(--cl-fs-caption);
+  font-weight: var(--cl-fw-medium);
+  line-height: 1.5;
+  border-radius: var(--cl-radius-sm);
+  border: none;
+
+  &--default {
+    background-color: var(--cl-bg-gray);
+    color: var(--cl-text-body);
+  }
+
+  &--primary {
+    background-color: rgba(250, 130, 50, 0.1);
+    color: var(--cl-primary);
+  }
+
+  &--success {
+    background-color: rgba(45, 178, 36, 0.1);
+    color: var(--cl-success);
+  }
+
+  &--warning {
+    background-color: rgba(239, 211, 61, 0.15);
+    color: #99801F;
+  }
+
+  &--danger {
+    background-color: rgba(238, 88, 88, 0.1);
+    color: var(--cl-error);
+  }
+
+  &--clickable {
+    cursor: pointer;
+    transition: all var(--cl-transition-fast);
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  &__remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+    opacity: 0.6;
+    transition: opacity var(--cl-transition-fast);
+
+    &:hover {
+      opacity: 1;
+    }
+
+    i { font-size: 10px; }
+  }
+}
+
+// --- Divider ---
+.cl-divider {
+  border: none;
+  border-top: 1px solid var(--cl-border);
+
+  &--labeled {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-spacing-md);
+  }
+
+  &__line {
+    flex: 1;
+    height: 1px;
+    background-color: var(--cl-border);
+  }
+
+  &__label {
+    font-size: var(--cl-fs-caption);
+    color: var(--cl-text-secondary);
+    white-space: nowrap;
+  }
+}
+
+// --- Progress Bar ---
+.cl-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--cl-spacing-sm);
+  width: 100%;
+
+  &__track {
+    flex: 1;
+    background-color: var(--cl-bg-gray);
+    border-radius: var(--cl-radius-full);
+    overflow: hidden;
+  }
+
+  &--sm .cl-progress__track { height: 4px; }
+  &--md .cl-progress__track { height: 8px; }
+
+  &__bar {
+    height: 100%;
+    border-radius: inherit;
+    transition: width var(--cl-transition-slow);
+  }
+
+  &--primary .cl-progress__bar { background-color: var(--cl-primary); }
+  &--success .cl-progress__bar { background-color: var(--cl-success); }
+  &--warning .cl-progress__bar { background-color: var(--cl-warning); }
+  &--danger .cl-progress__bar  { background-color: var(--cl-error); }
+
+  &__label {
+    font-size: var(--cl-fs-caption);
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+    min-width: 36px;
+    text-align: right;
+  }
+}

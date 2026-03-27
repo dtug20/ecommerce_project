@@ -11,6 +11,7 @@ import PrdDetailsLoader from "@/components/loader/prd-details-loader";
 import ShopBreadcrumb from "@/components/breadcrumb/shop-breadcrumb";
 import { useGetUserOrderByIdQuery } from "@/redux/features/order/orderApi";
 import useCurrency from "@/hooks/use-currency";
+import { OrderStatusStepper } from "@/components/clicon/composites";
 
 // ── Status helpers ───────────────────────────────────────────────────
 function getStepIndex(status) {
@@ -226,32 +227,11 @@ const SingleOrder = ({ params }) => {
           )}
 
           {/* Progress Stepper */}
-          {!isCanceled && (
-            <div style={{ background: "#fff", borderRadius: 8, padding: "24px 16px", marginBottom: 20, boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
-              <div style={{ display: "flex", alignItems: "center", padding: "0 12px" }}>
-                {stepLabels.map((label, i) => (
-                  <React.Fragment key={i}>
-                    <div className={`cl-od-step${i <= stepIndex ? " cl-od-step--done" : ""}${i === stepIndex ? " cl-od-step--active" : ""}`}>
-                      <div className="cl-od-step__circle">
-                        <StepIcon step={i} done={i < stepIndex} active={i === stepIndex} />
-                      </div>
-                      <div className="cl-od-step__label">{label}</div>
-                    </div>
-                    {i < stepLabels.length - 1 && (
-                      <div className={`cl-od-connector${i < stepIndex ? " cl-od-connector--done" : ""}`} />
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
+          <div className="cl-od-card" style={{ marginBottom: 20 }}>
+            <div className="cl-od-card__body" style={{ padding: "24px 16px" }}>
+              <OrderStatusStepper currentStatus={status} />
             </div>
-          )}
-
-          {/* Canceled banner */}
-          {isCanceled && (
-            <div style={{ background: "#fef2f2", border: "1px solid #f5c6cb", borderRadius: 8, padding: "16px 20px", marginBottom: 20, color: "#dc3545", fontWeight: 600 }}>
-              {t("trackOrder.orderCancelled")}
-            </div>
-          )}
+          </div>
 
           {/* Order Activity */}
           {activities.length > 0 && (

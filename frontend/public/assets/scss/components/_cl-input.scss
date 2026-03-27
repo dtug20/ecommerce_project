@@ -1,0 +1,94 @@
+// ============================================================
+// Input — Clicon design system
+// Based on clicon-html form styles
+// ============================================================
+
+.cl-input {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  &__label {
+    font-size: var(--cl-fs-body);
+    font-weight: var(--cl-fw-medium);
+    color: var(--cl-text-heading);
+  }
+
+  &__wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  &__field {
+    width: 100%;
+    height: 44px;
+    padding: 0 16px;
+    font-family: var(--cl-ff-body);
+    font-size: var(--cl-fs-body);
+    color: var(--cl-text-heading);
+    background-color: var(--cl-bg-white);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-md);
+    transition: border-color var(--cl-transition-fast), box-shadow var(--cl-transition-fast);
+    outline: none;
+
+    &::placeholder {
+      color: #77878F;
+    }
+
+    &:focus {
+      border-color: var(--cl-primary);
+      box-shadow: 0 0 0 2px rgba(250, 130, 50, 0.15);
+    }
+
+    &:disabled {
+      background-color: var(--cl-bg-gray);
+      cursor: not-allowed;
+    }
+  }
+
+  &__icon {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    color: #77878F;
+    pointer-events: none;
+
+    &--left {
+      left: 14px;
+    }
+
+    &--right {
+      right: 14px;
+    }
+  }
+
+  // Icon padding adjustments
+  &--has-left-icon .cl-input__field {
+    padding-left: 40px;
+  }
+
+  &--has-right-icon .cl-input__field {
+    padding-right: 40px;
+  }
+
+  // Error state
+  &--error .cl-input__field {
+    border-color: var(--cl-error);
+
+    &:focus {
+      box-shadow: 0 0 0 2px rgba(238, 88, 88, 0.15);
+    }
+  }
+
+  &__error {
+    font-size: var(--cl-fs-caption);
+    color: var(--cl-error);
+  }
+
+  &__helper {
+    font-size: var(--cl-fs-caption);
+    color: var(--cl-text-secondary);
+  }
+}

@@ -1,0 +1,184 @@
+// ============================================================
+// Cart Page — based on clicon-html shopping-card-body
+// ============================================================
+
+.cl-cart {
+  padding: var(--cl-spacing-2xl) 0 var(--cl-spacing-3xl);
+
+  // --- Empty state ---
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--cl-spacing-md);
+    padding: var(--cl-spacing-3xl) 0;
+    text-align: center;
+  }
+
+  &__empty-icon {
+    font-size: 48px;
+    color: var(--cl-border);
+  }
+
+  &__empty-title {
+    font-family: var(--cl-ff-heading);
+    font-size: var(--cl-fs-h3);
+    color: var(--cl-text-heading);
+  }
+
+  // --- Title ---
+  &__title {
+    font-family: var(--cl-ff-heading);
+    font-size: var(--cl-fs-h4);
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+    margin-bottom: var(--cl-spacing-md);
+  }
+
+  // --- Wrapper ---
+  &__wrapper {
+    background-color: var(--cl-bg-white);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-sm);
+    padding: var(--cl-spacing-lg);
+    margin-bottom: var(--cl-spacing-lg);
+
+    @media (max-width: 991px) {
+      padding: var(--cl-spacing-md);
+    }
+  }
+
+  // --- Shipping progress ---
+  &__shipping-progress {
+    margin-bottom: var(--cl-spacing-md);
+    padding: var(--cl-spacing-sm) var(--cl-spacing-md);
+    background-color: var(--cl-bg-gray);
+    border-radius: var(--cl-radius-sm);
+  }
+
+  &__shipping-text {
+    font-size: var(--cl-fs-body-sm);
+    color: var(--cl-text-body);
+    margin-bottom: var(--cl-spacing-xs);
+
+    &--success {
+      color: var(--cl-success);
+      font-weight: var(--cl-fw-medium);
+    }
+  }
+
+  // --- Table ---
+  &__table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead th {
+      font-size: var(--cl-fs-caption);
+      font-weight: var(--cl-fw-semibold);
+      color: var(--cl-text-secondary);
+      text-transform: uppercase;
+      padding: var(--cl-spacing-sm) var(--cl-spacing-sm);
+      border-bottom: 2px solid var(--cl-border);
+      white-space: nowrap;
+    }
+  }
+
+  // --- Bottom actions ---
+  &__bottom {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--cl-spacing-sm);
+    margin-top: var(--cl-spacing-md);
+    flex-wrap: wrap;
+  }
+}
+
+// --- Cart Summary sidebar ---
+.cl-cart-summary {
+  background-color: var(--cl-bg-white);
+  border: 1px solid var(--cl-border);
+  border-radius: var(--cl-radius-sm);
+  padding: var(--cl-spacing-lg);
+  position: sticky;
+  top: 100px;
+
+  &__title {
+    font-family: var(--cl-ff-heading);
+    font-size: var(--cl-fs-h5);
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+    margin-bottom: var(--cl-spacing-md);
+    padding-bottom: var(--cl-spacing-sm);
+    border-bottom: 1px solid var(--cl-border);
+  }
+
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--cl-spacing-sm) 0;
+    font-size: var(--cl-fs-body);
+    color: var(--cl-text-body);
+    border-bottom: 1px solid var(--cl-border);
+  }
+
+  &__value {
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+  }
+
+  &__shipping {
+    padding: var(--cl-spacing-md) 0;
+    border-bottom: 1px solid var(--cl-border);
+  }
+
+  &__shipping-title {
+    font-size: var(--cl-fs-body);
+    font-weight: var(--cl-fw-medium);
+    color: var(--cl-text-heading);
+    margin-bottom: var(--cl-spacing-sm);
+  }
+
+  &__shipping-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-spacing-sm);
+  }
+
+  &__option {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-spacing-sm);
+    font-size: var(--cl-fs-body-sm);
+    color: var(--cl-text-body);
+    cursor: pointer;
+
+    input[type="radio"] {
+      accent-color: var(--cl-primary);
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &__total {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--cl-spacing-md) 0;
+    font-size: var(--cl-fs-h5);
+    font-weight: var(--cl-fw-bold);
+    color: var(--cl-text-heading);
+  }
+
+  &__total-value {
+    color: var(--cl-primary);
+  }
+
+  &__checkout-link {
+    display: block;
+    text-decoration: none;
+  }
+}

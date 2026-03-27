@@ -217,6 +217,121 @@
             info:    '${msg("shofy.toast.info")}',
         };
 
+        /* ── i18n validation messages (injected from Keycloak) ── */
+        var V = {
+            nameNoNumbers:     '${msg("shofy.register.nameNoNumbers")}',
+            nameRequired:      '${msg("shofy.register.nameRequired")}',
+            emailRequired:     '${msg("shofy.register.emailRequired")}',
+            emailInvalid:      '${msg("shofy.register.emailInvalid")}',
+            passwordRequired:  '${msg("shofy.register.passwordRequired")}',
+            passwordMinLength: '${msg("shofy.register.passwordMinLength")}',
+            passwordDigit:     '${msg("shofy.register.passwordDigit")}',
+            passwordUppercase: '${msg("shofy.register.passwordUppercase")}',
+            passwordLowercase: '${msg("shofy.register.passwordLowercase")}',
+            passwordSpecial:   '${msg("shofy.register.passwordSpecial")}',
+            passwordMismatch:  '${msg("shofy.register.passwordMismatch")}',
+        };
+
+        /* ── Helpers ── */
+
+        function showFieldError(input, message) {
+            clearFieldError(input);
+            input.classList.add('shofy-input-error');
+            var span = document.createElement('span');
+            span.className = 'shofy-field-error shofy-js-error';
+            span.textContent = message;
+            // Insert after the input (or after its wrapper for password fields)
+            var parent = input.closest('.shofy-password-wrapper') || input;
+            parent.parentNode.insertBefore(span, parent.nextSibling);
+        }
+
+        function clearFieldError(input) {
+            input.classList.remove('shofy-input-error');
+            var parent = input.closest('.shofy-field');
+            if (parent) {
+                var existing = parent.querySelectorAll('.shofy-js-error');
+                existing.forEach(function(el) { el.remove(); });
+            }
+        }
+
+        /* ── Validators ── */
+
+        function validateName(input) {
+            var val = input.value.trim();
+            if (!val) { showFieldError(input, V.nameRequired); return false; }
+            if (/[0-9]/.test(val)) { showFieldError(input, V.nameNoNumbers); return false; }
+            clearFieldError(input);
+            return true;
+        }
+
+        function validateEmail(input) {
+            var val = input.value.trim();
+            if (!val) { showFieldError(input, V.emailRequired); return false; }
+            // RFC-ish email pattern
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { showFieldError(input, V.emailInvalid); return false; }
+            clearFieldError(input);
+            return true;
+        }
+
+        function validatePassword(input) {
+            var val = input.value;
+            if (!val) { showFieldError(input, V.passwordRequired); return false; }
+            if (val.length < 8)        { showFieldError(input, V.passwordMinLength); return false; }
+            if (!/[0-9]/.test(val))    { showFieldError(input, V.passwordDigit);     return false; }
+            if (!/[A-Z]/.test(val))    { showFieldError(input, V.passwordUppercase); return false; }
+            if (!/[a-z]/.test(val))    { showFieldError(input, V.passwordLowercase); return false; }
+            if (!/[^A-Za-z0-9]/.test(val)) { showFieldError(input, V.passwordSpecial); return false; }
+            clearFieldError(input);
+            return true;
+        }
+
+        function validateConfirmPassword(pwdInput, confirmInput) {
+            var val = confirmInput.value;
+            if (!val || val !== pwdInput.value) { showFieldError(confirmInput, V.passwordMismatch); return false; }
+            clearFieldError(confirmInput);
+            return true;
+        }
+
+        /* ── Wire up form ── */
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var form       = document.getElementById('kc-register-form');
+            var firstName  = document.getElementById('firstName');
+            var lastName   = document.getElementById('lastName');
+            var email      = document.getElementById('email');
+            var password   = document.getElementById('password');
+            var confirmPwd = document.getElementById('password-confirm');
+
+            // Real-time validation on blur
+            if (firstName) firstName.addEventListener('blur', function() { validateName(firstName); });
+            if (lastName)  lastName.addEventListener('blur',  function() { validateName(lastName); });
+            if (email)     email.addEventListener('blur',     function() { validateEmail(email); });
+            if (password)  password.addEventListener('blur',  function() { validatePassword(password); });
+            if (confirmPwd) confirmPwd.addEventListener('blur', function() { validateConfirmPassword(password, confirmPwd); });
+
+            // Clear error on input
+            [firstName, lastName, email, password, confirmPwd].forEach(function(el) {
+                if (el) el.addEventListener('input', function() { clearFieldError(el); });
+            });
+
+            // Submit validation
+            form.addEventListener('submit', function(e) {
+                var valid = true;
+                if (firstName && !validateName(firstName))  valid = false;
+                if (lastName  && !validateName(lastName))   valid = false;
+                if (email     && !validateEmail(email))     valid = false;
+                if (password  && !validatePassword(password)) valid = false;
+                if (confirmPwd && !validateConfirmPassword(password, confirmPwd)) valid = false;
+
+                if (!valid) {
+                    e.preventDefault();
+                    // Scroll to first error
+                    var firstErr = form.querySelector('.shofy-input-error');
+                    if (firstErr) firstErr.focus();
+                }
+            });
+        });
+
         function toggleLangMenu() {
             var switcher = document.querySelector('.shofy-lang-switcher');
             switcher.classList.toggle('open');

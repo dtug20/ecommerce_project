@@ -1,0 +1,58 @@
+// ============================================================
+// Price Display — reusable atom
+// Extends @mixin cl-price-current / cl-price-old from _clicon-mixins
+// ============================================================
+
+.cl-price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+
+  &__current {
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+  }
+
+  &__old {
+    font-weight: var(--cl-fw-regular);
+    color: var(--cl-text-secondary);
+    text-decoration: line-through;
+  }
+
+  // Size: sm (default) — product cards
+  &--sm {
+    .cl-price__current {
+      font-size: var(--cl-fs-body);
+    }
+
+    .cl-price__old {
+      font-size: var(--cl-fs-body-sm);
+    }
+  }
+
+  // Size: md — product detail, featured card
+  &--md {
+    .cl-price__current {
+      font-size: var(--cl-fs-h5);
+      font-weight: var(--cl-fw-bold);
+    }
+
+    .cl-price__old {
+      font-size: var(--cl-fs-body);
+    }
+  }
+
+  // Size: lg — hero, large featured
+  &--lg {
+    .cl-price__current {
+      font-size: var(--cl-fs-h2);
+      font-weight: var(--cl-fw-bold);
+      color: var(--cl-secondary);
+    }
+
+    .cl-price__old {
+      font-size: var(--cl-fs-h5);
+    }
+  }
+}

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import { useGetProductTypeQuery } from '@/redux/features/productApi';
 import { useGetShowCategoryQuery } from '@/redux/features/categoryApi';
 import CliconDealProductCard from '@/components/clicon/deals/clicon-deal-product-card';
+import { SkeletonLoader } from '@/components/clicon/ui';
 import ErrorMsg from '@/components/common/error-msg';
 
 const MAX_TABS = 5;
@@ -44,7 +44,7 @@ const CliconFeaturedProducts = () => {
     gridContent = (
       <div className="cl-featured__loading">
         {[...Array(8)].map((_, i) => (
-          <div key={i} className="cl-featured__skeleton" />
+          <SkeletonLoader key={i} variant="rect" height={200} className="cl-featured__skeleton" />
         ))}
       </div>
     );

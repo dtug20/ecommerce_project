@@ -74,7 +74,9 @@
     "seeMore": "See more",
     "seeLess": "See less",
     "soldBy": "Sold by:",
-    "askQuestion": "Ask a question"
+    "askQuestion": "Ask a question",
+    "ratingLabel": "{{value}} out of {{max}} stars",
+    "actions": "Product actions"
   },
   "shop": {
     "title": "Shop",
@@ -469,5 +471,22 @@
     "noBrowsingHistory": "No browsing history yet. Visit some products!",
     "noSearchResults": "No results match your search.",
     "clearAllHistory": "Clear All History"
+  },
+  "badge": {
+    "hot": "HOT",
+    "sale": "SALE",
+    "soldOut": "SOLD OUT",
+    "bestDeal": "BEST DEAL",
+    "new": "NEW",
+    "discount": "-{{percent}}%"
+  },
+  "countdown": {
+    "days": "Days",
+    "hours": "Hrs",
+    "minutes": "Min",
+    "seconds": "Sec"
+  },
+  "section": {
+    "browseAll": "Browse All Product"
   }
 }

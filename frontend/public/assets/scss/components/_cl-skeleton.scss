@@ -1,0 +1,43 @@
+// ============================================================
+// Skeleton Loader — unified loading placeholders
+// Replaces inline tp-skeleton and cl-skeleton patterns
+// ============================================================
+
+@keyframes cl-skeleton-pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.cl-skeleton {
+  background-color: var(--cl-bg-gray);
+  animation: cl-skeleton-pulse 1.5s ease-in-out infinite;
+
+  // Rect (default) — cards, images, blocks
+  &--rect {
+    border-radius: var(--cl-radius-sm);
+    min-height: 20px;
+  }
+
+  // Circle — avatars, category icons
+  &--circle {
+    border-radius: var(--cl-radius-full);
+  }
+
+  // Line — text placeholders
+  &--line {
+    height: 14px;
+    border-radius: var(--cl-radius-sm);
+  }
+}
+
+.cl-skeleton-group {
+  display: flex;
+  flex-direction: column;
+}

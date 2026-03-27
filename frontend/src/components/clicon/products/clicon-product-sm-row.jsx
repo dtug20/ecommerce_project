@@ -2,15 +2,11 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
-import useCurrency from '@/hooks/use-currency';
+import { PriceDisplay } from '@/components/clicon/ui';
 
 const CliconProductSmRow = ({ product }) => {
   const { t } = useTranslation();
-  const { formatPrice } = useCurrency();
   const { _id, img, title, price, discount } = product || {};
-
-  const discountedPrice =
-    discount > 0 ? price - (price * discount) / 100 : null;
 
   return (
     <Link
@@ -33,16 +29,7 @@ const CliconProductSmRow = ({ product }) => {
       </div>
       <div className="cl-product-sm-row__info">
         <p className="cl-product-sm-row__title">{title}</p>
-        <div className="cl-product-sm-row__price">
-          <span className="cl-product-sm-row__price--current">
-            {formatPrice(discountedPrice ?? price ?? 0)}
-          </span>
-          {discountedPrice && (
-            <span className="cl-product-sm-row__price--old">
-              {formatPrice(price)}
-            </span>
-          )}
-        </div>
+        <PriceDisplay price={price} discount={discount} size="sm" />
       </div>
     </Link>
   );

@@ -57,8 +57,8 @@ const CliconHeroPromoCard = ({
           <Image
             src={image}
             alt={title}
-            width={140}
-            height={130}
+            width={120}
+            height={110}
             style={{ objectFit: 'contain' }}
           />
         </div>

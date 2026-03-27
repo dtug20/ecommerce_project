@@ -1,0 +1,136 @@
+// ============================================================
+// Button — Clicon design system
+// Based on clicon-html: app/scss/components/_button.scss
+// ============================================================
+
+.cl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--cl-ff-body);
+  font-weight: var(--cl-fw-bold);
+  text-transform: uppercase;
+  border: 2px solid transparent;
+  border-radius: var(--cl-radius-sm);
+  cursor: pointer;
+  transition: all var(--cl-transition-normal);
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(250, 130, 50, 0.25);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  // --- Variants ---
+
+  &--primary {
+    background-color: var(--cl-primary);
+    border-color: var(--cl-primary);
+    color: var(--cl-text-white);
+
+    &:hover:not(:disabled) {
+      background-color: var(--cl-primary-hover);
+      border-color: var(--cl-primary-hover);
+    }
+  }
+
+  &--outlined {
+    background-color: transparent;
+    border-color: var(--cl-primary);
+    color: var(--cl-primary);
+
+    &:hover:not(:disabled) {
+      background-color: var(--cl-primary);
+      color: var(--cl-text-white);
+    }
+  }
+
+  &--ghost {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--cl-primary);
+
+    &:hover:not(:disabled) {
+      background-color: rgba(250, 130, 50, 0.1);
+    }
+  }
+
+  &--danger {
+    background-color: var(--cl-error);
+    border-color: var(--cl-error);
+    color: var(--cl-text-white);
+
+    &:hover:not(:disabled) {
+      background-color: #d94e4e;
+      border-color: #d94e4e;
+    }
+  }
+
+  // --- Sizes ---
+
+  &--sm {
+    height: 36px;
+    padding: 0 16px;
+    font-size: var(--cl-fs-body);
+  }
+
+  &--md {
+    height: 44px;
+    padding: 0 24px;
+    font-size: var(--cl-fs-body);
+  }
+
+  &--lg {
+    height: 52px;
+    padding: 0 32px;
+    font-size: var(--cl-fs-h5);
+  }
+
+  // --- Modifiers ---
+
+  &--full {
+    width: 100%;
+  }
+
+  &--loading {
+    pointer-events: none;
+  }
+
+  // --- Children ---
+
+  &__spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: cl-btn-spin 0.6s linear infinite;
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    font-size: inherit;
+
+    svg, i {
+      width: 1em;
+      height: 1em;
+    }
+  }
+}
+
+@keyframes cl-btn-spin {
+  to { transform: rotate(360deg); }
+}

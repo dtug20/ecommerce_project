@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ReviewForm from '../forms/review-form';
-import ReviewItem from './review-item';
+import { ReviewCard } from '@/components/clicon/composites';
 import ReviewRatingBreakdown from './review-rating-breakdown';
 import { useGetProductReviewsQuery } from '@/redux/features/cmsApi';
 
@@ -135,7 +135,7 @@ const DetailsTabNav = ({ product }) => {
                 )}
 
                 {!reviewsLoading && reviews.length > 0 && reviews.map((item) => (
-                  <ReviewItem key={item._id} review={item} />
+                  <ReviewCard key={item._id} review={item} />
                 ))}
 
                 {totalPages > 1 && (

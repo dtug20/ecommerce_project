@@ -1,0 +1,72 @@
+// ============================================================
+// Tabs — Clicon design system
+// Based on clicon-html .nav-tabs + product-information
+// ============================================================
+
+.cl-tabs {
+  &__nav {
+    display: flex;
+    gap: 0;
+    flex-wrap: wrap;
+  }
+
+  &__tab {
+    padding: 12px 20px;
+    font-family: var(--cl-ff-body);
+    font-size: var(--cl-fs-body);
+    font-weight: var(--cl-fw-medium);
+    color: var(--cl-text-secondary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--cl-transition-fast);
+    white-space: nowrap;
+  }
+
+  // --- Underline variant ---
+  &--underline {
+    .cl-tabs__nav {
+      border-bottom: 1px solid var(--cl-border);
+    }
+
+    .cl-tabs__tab {
+      border-bottom: 3px solid transparent;
+      margin-bottom: -1px;
+
+      &--active {
+        color: var(--cl-text-heading);
+        border-bottom-color: var(--cl-primary);
+      }
+
+      &:hover:not(.cl-tabs__tab--active) {
+        color: var(--cl-text-heading);
+      }
+    }
+  }
+
+  // --- Pill variant ---
+  &--pill {
+    .cl-tabs__nav {
+      gap: 4px;
+    }
+
+    .cl-tabs__tab {
+      border-radius: var(--cl-radius-full);
+      padding: 8px 16px;
+
+      &--active {
+        background-color: var(--cl-primary);
+        color: var(--cl-text-white);
+      }
+
+      &:hover:not(.cl-tabs__tab--active) {
+        background-color: var(--cl-bg-gray);
+        color: var(--cl-text-heading);
+      }
+    }
+  }
+
+  &__panel {
+    padding-top: var(--cl-spacing-md);
+  }
+}

@@ -1,70 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGetProductTypeQuery } from '@/redux/features/productApi';
 import CliconDealFeaturedCard from './clicon-deal-featured-card';
 import CliconDealProductCard from './clicon-deal-product-card';
-
-// ---------------------------------------------------------------------------
-// Countdown — counts down to the end of the current day (midnight local time)
-// ---------------------------------------------------------------------------
-function useEndOfDayCountdown() {
-  const getSecondsLeft = () => {
-    const now = new Date();
-    const midnight = new Date(now);
-    midnight.setHours(24, 0, 0, 0);
-    return Math.max(0, Math.floor((midnight - now) / 1000));
-  };
-
-  // Start with null to avoid SSR/client mismatch
-  const [seconds, setSeconds] = useState(null);
-
-  useEffect(() => {
-    setSeconds(getSecondsLeft());
-    const timer = setInterval(() => {
-      setSeconds(getSecondsLeft());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // Show placeholder during SSR / first render
-  if (seconds === null) return { h: '--', m: '--', s: '--' };
-
-  const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
-  const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
-  const s = String(seconds % 60).padStart(2, '0');
-
-  return { h, m, s };
-}
-
-// ---------------------------------------------------------------------------
-// Countdown display sub-component
-// ---------------------------------------------------------------------------
-function Countdown({ t }) {
-  const { h, m, s } = useEndOfDayCountdown();
-
-  return (
-    <div className="cl-deals__countdown" aria-live="off" data-testid="clicon-deals-countdown">
-      <span className="cl-deals__countdown-label">{t('deals.ends')}</span>
-      <div className="cl-deals__countdown-units">
-        <div className="cl-deals__countdown-unit">
-          <span className="cl-deals__countdown-value">{h}</span>
-          <span className="cl-deals__countdown-unit-label">Hrs</span>
-        </div>
-        <span className="cl-deals__countdown-sep" aria-hidden="true">:</span>
-        <div className="cl-deals__countdown-unit">
-          <span className="cl-deals__countdown-value">{m}</span>
-          <span className="cl-deals__countdown-unit-label">Min</span>
-        </div>
-        <span className="cl-deals__countdown-sep" aria-hidden="true">:</span>
-        <div className="cl-deals__countdown-unit">
-          <span className="cl-deals__countdown-value">{s}</span>
-          <span className="cl-deals__countdown-unit-label">Sec</span>
-        </div>
-      </div>
-    </div>
-  );
-}
+import { SectionHeader, CountdownTimer, SkeletonLoader } from '@/components/clicon/ui';
 
 // ---------------------------------------------------------------------------
 // Skeleton placeholder row
@@ -74,9 +13,9 @@ function DealsSkeletonRow() {
     <div className="row g-3">
       <div className="col-xl-4">
         <div className="cl-deal-featured cl-deal-featured--skeleton" aria-busy="true">
-          <div className="cl-skeleton cl-skeleton--rect" style={{ height: 320 }} />
-          <div className="cl-skeleton cl-skeleton--line mt-3" style={{ width: '60%' }} />
-          <div className="cl-skeleton cl-skeleton--line mt-2" style={{ width: '40%' }} />
+          <SkeletonLoader variant="rect" height={320} />
+          <SkeletonLoader variant="line" width="60%" className="mt-3" />
+          <SkeletonLoader variant="line" width="40%" className="mt-2" />
         </div>
       </div>
       <div className="col-xl-8">
@@ -84,9 +23,9 @@ function DealsSkeletonRow() {
           {Array.from({ length: 8 }, (_, i) => (
             <div key={i} className="col-6 col-sm-4 col-md-3">
               <div className="cl-deal-card cl-deal-card--skeleton" aria-busy="true">
-                <div className="cl-skeleton cl-skeleton--rect" style={{ height: 160 }} />
-                <div className="cl-skeleton cl-skeleton--line mt-2" style={{ width: '80%' }} />
-                <div className="cl-skeleton cl-skeleton--line mt-1" style={{ width: '50%' }} />
+                <SkeletonLoader variant="rect" height={160} />
+                <SkeletonLoader variant="line" width="80%" className="mt-2" />
+                <SkeletonLoader variant="line" width="50%" className="mt-1" />
               </div>
             </div>
           ))}
@@ -113,20 +52,13 @@ const CliconBestDeals = () => {
     <section className="cl-deals" data-testid="clicon-best-deals">
       <div className="container">
         {/* Section header */}
-        <div className="cl-deals__header">
-          <div className="cl-deals__header-left">
-            <h2 className="cl-deals__title">{t('deals.title')}</h2>
-            <Countdown t={t} />
-          </div>
-          <Link
-            href="/shop"
-            className="cl-browse-link cl-deals__browse-link"
-            data-testid="clicon-deals-browse-link"
-          >
-            {t('deals.browseAll')}
-            <i className="fa-solid fa-arrow-right ms-1" aria-hidden="true" />
-          </Link>
-        </div>
+        <SectionHeader
+          title={t('deals.title')}
+          browseLink="/shop"
+          browseLinkText={t('deals.browseAll')}
+          rightContent={<CountdownTimer label={t('deals.ends')} />}
+          className="cl-deals__header"
+        />
 
         {/* Content */}
         {isLoading && <DealsSkeletonRow />}

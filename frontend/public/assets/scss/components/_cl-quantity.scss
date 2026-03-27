@@ -1,0 +1,73 @@
+// ============================================================
+// Quantity Selector — Clicon design system
+// Based on clicon-html .product-quantity-count
+// ============================================================
+
+.cl-quantity {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  border: 2px solid var(--cl-border);
+  border-radius: var(--cl-radius-sm);
+  overflow: hidden;
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 100%;
+    background: transparent;
+    border: none;
+    color: var(--cl-text-body);
+    cursor: pointer;
+    transition: all var(--cl-transition-fast);
+
+    &:hover:not(:disabled) {
+      background-color: var(--cl-bg-gray);
+      color: var(--cl-text-heading);
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    i {
+      font-size: 10px;
+    }
+  }
+
+  &__input {
+    width: 48px;
+    height: 100%;
+    text-align: center;
+    border: none;
+    border-left: 1px solid var(--cl-border);
+    border-right: 1px solid var(--cl-border);
+    font-family: var(--cl-ff-body);
+    font-size: var(--cl-fs-h5);
+    color: var(--cl-text-heading);
+    outline: none;
+    -moz-appearance: textfield;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    &:focus {
+      box-shadow: none;
+    }
+
+    &:disabled {
+      background-color: var(--cl-bg-gray);
+    }
+  }
+
+  &--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}

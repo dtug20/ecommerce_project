@@ -74,7 +74,9 @@
     "seeMore": "Xem thêm",
     "seeLess": "Rút gọn",
     "soldBy": "Bán bởi:",
-    "askQuestion": "Đặt câu hỏi"
+    "askQuestion": "Đặt câu hỏi",
+    "ratingLabel": "{{value}} trên {{max}} sao",
+    "actions": "Thao tác sản phẩm"
   },
   "shop": {
     "title": "Cửa hàng",
@@ -469,5 +471,22 @@
     "noBrowsingHistory": "Chưa có lịch sử xem. Hãy xem một số sản phẩm!",
     "noSearchResults": "Không có kết quả phù hợp.",
     "clearAllHistory": "Xóa tất cả lịch sử"
+  },
+  "badge": {
+    "hot": "HOT",
+    "sale": "GIẢM GIÁ",
+    "soldOut": "HẾT HÀNG",
+    "bestDeal": "DEAL TỐT",
+    "new": "MỚI",
+    "discount": "-{{percent}}%"
+  },
+  "countdown": {
+    "days": "Ngày",
+    "hours": "Giờ",
+    "minutes": "Phút",
+    "seconds": "Giây"
+  },
+  "section": {
+    "browseAll": "Xem tất cả sản phẩm"
   }
 }

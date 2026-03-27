@@ -302,7 +302,7 @@ router.get('/users/stats',          ctrl.getUserStats);
 router.get('/users/:id/orders',     ctrl.getUserOrders);
 router.get('/users/:id',            ctrl.getUserById);
 router.get('/users',                ctrl.getAllUsers);
-router.post('/users',               authorization('admin', 'manager'), logActivity('create', 'user'), ctrl.createUser);
+router.post('/users',               authorization('admin', 'manager'), validate(v.createUser), logActivity('create', 'user'), ctrl.createUser);
 router.patch('/users/:id/status',   authorization('admin', 'manager'), validate(v.updateUserStatus), logActivity('status-change', 'user'), ctrl.updateUserStatus);
 router.patch('/users/:id',          authorization('admin', 'manager'), validate(v.updateUser), logActivity('update', 'user'), ctrl.updateUser);
 router.delete('/users/:id',         authorization('admin', 'manager'), logActivity('delete', 'user'), ctrl.deleteUser);
@@ -311,7 +311,7 @@ router.delete('/users/:id',         authorization('admin', 'manager'), logActivi
 // Staff — admin/manager only (Keycloak-integrated)
 // ---------------------------------------------------------------------------
 
-router.post('/staff',             authorization('admin', 'manager'), ctrl.addStaff);
+router.post('/staff',             authorization('admin', 'manager'), validate(v.addStaff), ctrl.addStaff);
 router.get('/staff',              authorization('admin', 'manager'), ctrl.getAllStaff);
 router.get('/staff/:id',          authorization('admin', 'manager'), ctrl.getStaffById);
 router.patch('/staff/:id',        authorization('admin', 'manager'), ctrl.updateStaff);

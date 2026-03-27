@@ -4,6 +4,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { useTranslation } from 'react-i18next';
 import { useGetShowCategoryQuery } from '@/redux/features/categoryApi';
 import CliconCategoryCard from './clicon-category-card';
+import { SkeletonLoader } from '@/components/clicon/ui';
 
 // ---------------------------------------------------------------------------
 // Skeleton loader row
@@ -13,8 +14,8 @@ function CategorySkeletons() {
     <div className="cl-categories__skeleton-row" aria-busy="true">
       {Array.from({ length: 6 }, (_, i) => (
         <div key={i} className="cl-category-card cl-category-card--skeleton">
-          <div className="cl-skeleton cl-skeleton--circle" style={{ width: 120, height: 120 }} />
-          <div className="cl-skeleton cl-skeleton--line mt-2" style={{ width: '70%', margin: '8px auto 0' }} />
+          <SkeletonLoader variant="circle" width={120} height={120} />
+          <SkeletonLoader variant="line" width="70%" className="mt-2" />
         </div>
       ))}
     </div>

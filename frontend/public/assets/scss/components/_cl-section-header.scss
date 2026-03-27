@@ -1,0 +1,73 @@
+// ============================================================
+// Section Header — reusable atom
+// Composes @mixin cl-section-title + @mixin cl-browse-link
+// ============================================================
+
+.cl-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cl-spacing-md);
+  margin-bottom: var(--cl-spacing-lg);
+  flex-wrap: wrap;
+
+  &--bordered {
+    padding-bottom: var(--cl-spacing-md);
+    border-bottom: 1px solid var(--cl-border);
+  }
+
+  &--centered {
+    justify-content: center;
+    text-align: center;
+
+    .cl-section-header__left {
+      align-items: center;
+    }
+  }
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-spacing-md);
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    font-family: var(--cl-ff-heading);
+    font-size: var(--cl-fs-h2);
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+    margin: 0;
+  }
+
+  &__subtitle {
+    font-size: var(--cl-fs-body);
+    color: var(--cl-text-secondary);
+    margin: 4px 0 0;
+  }
+
+  &__extra {
+    display: flex;
+    align-items: center;
+  }
+}
+
+// Browse link (standalone, also used outside section-header)
+.cl-browse-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--cl-fs-body);
+  font-weight: var(--cl-fw-semibold);
+  color: var(--cl-primary);
+  transition: color var(--cl-transition-fast);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--cl-primary-hover);
+  }
+
+  svg, i {
+    font-size: 12px;
+  }
+}

@@ -1,4 +1,15 @@
 {
+  "permissions": {
+    "allow": [
+      "mcp__claude_ai_Figma__get_figjam",
+      "Bash(grep -l \"nav-tabs\\\\|tabs\\\\|select\" /Users/mac/Downloads/ecommerce_website-main/clicon-html/app/*.html)",
+      "Bash(find /Users/mac/Downloads/ecommerce_website-main/clicon-html/app -name *product* -o -name *details*)",
+      "Bash(find /Users/mac/Downloads/ecommerce_website-main/frontend/src/components/my-account -type f \\\\\\(-name *.jsx -o -name *.js \\\\\\))",
+      "Bash(find /Users/mac/Downloads/ecommerce_website-main/frontend/src/components/checkout -type f \\\\\\(-name *.jsx -o -name *.js \\\\\\))",
+      "Bash(ls -1 /Users/mac/Downloads/ecommerce_website-main/frontend/public/assets/scss/components/_cl-*.scss)",
+      "Bash(xargs -I {} basename {})"
+    ]
+  },
   "enabledPlugins": {
     "context7@claude-plugins-official": true
   }

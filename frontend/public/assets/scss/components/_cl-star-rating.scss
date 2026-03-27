@@ -1,0 +1,43 @@
+// ============================================================
+// Star Rating — reusable atom
+// Extends @mixin cl-rating from _clicon-mixins.scss
+// ============================================================
+
+.cl-star-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  .cl-star {
+    color: var(--cl-primary);
+    line-height: 1;
+  }
+
+  .cl-star--empty {
+    color: var(--cl-border);
+  }
+
+  .cl-rating-count {
+    font-size: var(--cl-fs-caption);
+    color: var(--cl-text-secondary);
+    margin-left: 2px;
+  }
+
+  // Size: sm (default) — 12px stars
+  &--sm {
+    .cl-star {
+      font-size: 12px;
+    }
+  }
+
+  // Size: md — 16px stars
+  &--md {
+    .cl-star {
+      font-size: 16px;
+    }
+
+    .cl-rating-count {
+      font-size: var(--cl-fs-body-sm);
+    }
+  }
+}
