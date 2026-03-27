@@ -1,4 +1,4 @@
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const notifySuccess = (message) =>
@@ -23,16 +23,4 @@ const notifyError = (message) =>
     progress: undefined,
   });
 
-<ToastContainer
-  position="top-center"
-  autoClose={3000}
-  hideProgressBar={false}
-  newestOnTop={false}
-  closeOnClick
-  rtl={false}
-  pauseOnFocusLoss
-  draggable
-  pauseOnHover
-/>;
-
-export { ToastContainer, notifySuccess, notifyError };
+export { notifySuccess, notifyError };

@@ -142,7 +142,7 @@ export const initSocket = (store) => {
   return socket;
 };
 
-export const registerInvalidateCallback = (resourceType, callback) => {
+const registerInvalidateCallback = (resourceType, callback) => {
   invalidateCallbacks[resourceType] = callback;
 };
 
@@ -183,4 +183,3 @@ export const registerOrderInvalidations = (store, api) => {
   );
 };
 
-export const getSocket = () => socket;
