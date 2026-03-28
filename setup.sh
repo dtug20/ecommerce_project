@@ -129,7 +129,7 @@ echo ""
 echo "   Backend:  cd backend && npm run start-dev"
 echo "   Frontend: cd frontend && npm run dev"
 echo ""
-print_info "For detailed setup instructions, see ENVIRONMENT_SETUP.md"
+print_info "For detailed setup instructions, see DEPLOYMENT.md"
 
 # Check if MongoDB is running (optional)
 if command -v mongod &> /dev/null; then

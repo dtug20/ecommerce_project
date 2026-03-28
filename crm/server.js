@@ -1,5 +1,4 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
@@ -47,20 +46,6 @@ app.use(morgan(':method :url :status :response-time ms'));
 // index.html is served by the protected SPA routes below
 const reactBuildPath = path.join(__dirname, 'crm-ui', 'dist');
 app.use(express.static(reactBuildPath, { index: false }));
-app.use(express.static(path.join(__dirname, 'public')));
-
-// ─── Database connection ───────────────────────────────────────
-
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/shofy', {
-      serverSelectionTimeoutMS: 5000,
-    });
-    console.log('CRM Connected to MongoDB');
-  } catch (error) {
-    console.warn('MongoDB connection failed:', error.message);
-  }
-};
 
 // ─── Role-based protection ─────────────────────────────────────
 // Only admin, manager, staff can access CRM
@@ -98,9 +83,6 @@ app.use('/api/products', apiProtect, attachProxy, require('./routes/products'));
 app.use('/api/categories', apiProtect, attachProxy, require('./routes/categories'));
 app.use('/api/orders', apiProtect, attachProxy, require('./routes/orders'));
 app.use('/api/users', apiProtect, attachProxy, require('./routes/users'));
-// Sync service removed in Phase 1 — single database, no sync needed
-// app.use('/api/sync', apiProtect, require('./routes/sync.routes'));
-
 // Phase 2 — CMS and Coupons
 app.use('/api/cms', apiProtect, require('./routes/cms.routes'));
 app.use('/api/coupons', apiProtect, require('./routes/coupon.routes'));
@@ -131,8 +113,6 @@ app.get('/api/me', apiProtect, (req, res) => {
       }
     }
     const allRoles = [...new Set([...realmRoles, ...clientRoles])];
-
-    console.log('[/api/me]', token.preferred_username, 'roles:', allRoles);
 
     res.json({
       name: token.preferred_username || token.name || 'Unknown',
@@ -174,12 +154,10 @@ app.use((req, res) => {
 
 // ─── Start ─────────────────────────────────────────────────────
 
-connectDB().then(() => {
-  const PORT = process.env.CRM_PORT || 8080;
-  app.listen(PORT, () => {
-    console.log(`Shofy CRM Server running on port ${PORT}`);
-    console.log(`Dashboard: http://localhost:${PORT}`);
-  });
+const PORT = process.env.CRM_PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Shofy CRM Server running on port ${PORT}`);
+  console.log(`Dashboard: http://localhost:${PORT}`);
 });
 
 module.exports = app;

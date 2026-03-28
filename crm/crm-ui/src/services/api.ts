@@ -9,7 +9,6 @@ import type {
   OrderStats,
   User,
   UserStats,
-  SyncStatus,
   Page,
   ContentBlock,
   CmsMenu,
@@ -213,33 +212,6 @@ export const usersApi = {
     api
       .get<ApiResponse<Order[]>>(`/api/users/${id}/orders`, { params })
       .then((r) => r.data),
-};
-
-// ---------------------------------------------------------------------------
-// Sync
-// ---------------------------------------------------------------------------
-
-export interface SyncResult {
-  success: boolean;
-  message: string;
-  synced?: number;
-}
-
-export const syncApi = {
-  syncAll: () =>
-    api.post<ApiResponse<SyncResult>>('/api/sync/sync-all').then((r) => r.data),
-
-  syncProducts: () =>
-    api.post<ApiResponse<SyncResult>>('/api/sync/sync-products').then((r) => r.data),
-
-  syncCategories: () =>
-    api.post<ApiResponse<SyncResult>>('/api/sync/sync-categories').then((r) => r.data),
-
-  syncUsers: () =>
-    api.post<ApiResponse<SyncResult>>('/api/sync/sync-users').then((r) => r.data),
-
-  getSyncStatus: () =>
-    api.get<ApiResponse<SyncStatus>>('/api/sync/sync-status').then((r) => r.data),
 };
 
 // ---------------------------------------------------------------------------

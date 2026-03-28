@@ -211,12 +211,6 @@ export interface CategoryStats {
   productTypeStats?: { _id: string; count: number }[];
 }
 
-export interface SyncStatus {
-  crm: { products: number; categories: number; users: number };
-  frontend: { products: number; categories: number; users: number };
-  synced: { products: boolean; categories: boolean; users: boolean };
-}
-
 // ---------------------------------------------------------------------------
 // CMS Types
 // ---------------------------------------------------------------------------

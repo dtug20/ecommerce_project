@@ -16,7 +16,7 @@
     "start:frontend": "cd frontend && npm start",
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "seed": "cd backend && npm run data:import",
-    "kill-ports": "npx kill-port 3000 7000",
+    "kill-ports": "npx kill-port 3001 7001",
     "clean-start": "npm run kill-ports && npm run dev"
   },
   "devDependencies": {
