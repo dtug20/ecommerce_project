@@ -1,6 +1,5 @@
 const express = require("express");
 const {
-  paymentIntent,
   addOrder,
   getOrders,
   updateOrderStatus,
@@ -17,7 +16,6 @@ router.patch("/update-status/:id", verifyToken, authorization("admin", "manager"
 
 // Protected routes (any authenticated user)
 router.get("/:id", verifyToken, getSingleOrder);
-router.post("/create-payment-intent", verifyToken, paymentIntent);
 router.post("/saveOrder", verifyToken, addOrder);
 
 module.exports = router;

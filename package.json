@@ -31,7 +31,7 @@
     "type": "git", 
     "url": "git+https://github.com/ShuvoProgram/shofy-electronics-ecommerce.git"
   },
-  "keywords": ["ecommerce", "nextjs", "nodejs", "mongodb", "stripe"],
+  "keywords": ["ecommerce", "nextjs", "nodejs", "mongodb"],
   "author": "Shofy Team",
   "license": "ISC",
   "bugs": {

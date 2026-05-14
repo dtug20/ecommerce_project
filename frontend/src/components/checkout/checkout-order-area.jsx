@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { CardElement } from "@stripe/react-stripe-js";
 import { useSelector } from "react-redux";
 // internal
 import useCartInfo from "@/hooks/use-cart-info";
@@ -9,9 +8,7 @@ const CheckoutOrderArea = ({ checkoutData }) => {
   const {
     handleShippingCost,
     cartTotal = 0,
-    stripe,
     isCheckoutSubmit,
-    clientSecret,
     register,
     errors,
     showCard,
@@ -115,48 +112,12 @@ const CheckoutOrderArea = ({ checkoutData }) => {
             {...register(`payment`, {
               required: `Payment Option is required!`,
             })}
-            type="radio"
-            id="back_transfer"
-            name="payment"
-            value="Card"
-          />
-          <label onClick={() => setShowCard(true)} htmlFor="back_transfer" data-bs-toggle="direct-bank-transfer">
-            Credit Card
-          </label>
-          {showCard && (
-            <div className="direct-bank-transfer">
-              <div className="payment_card">
-                <CardElement
-                  options={{
-                    style: {
-                      base: {
-                        fontSize: "16px",
-                        color: "#424770",
-                        "::placeholder": {
-                          color: "#aab7c4",
-                        },
-                      },
-                      invalid: {
-                        color: "#9e2146",
-                      },
-                    },
-                  }}
-                />
-              </div>
-            </div>
-          )}
-          <ErrorMsg msg={errors?.payment?.message} />
-        </div>
-        <div className="tp-checkout-payment-item">
-          <input
-            {...register(`payment`, {
-              required: `Payment Option is required!`,
-            })}
             onClick={() => setShowCard(false)}
             type="radio"
             id="cod"
             name="payment"
             value="COD"
+            defaultChecked
           />
           <label htmlFor="cod">Cash on Delivery</label>
           <ErrorMsg msg={errors?.payment?.message} />
@@ -166,7 +127,7 @@ const CheckoutOrderArea = ({ checkoutData }) => {
       <div className="tp-checkout-btn-wrapper">
         <button
           type="submit"
-          disabled={!stripe || isCheckoutSubmit}
+          disabled={isCheckoutSubmit}
           className="tp-checkout-btn w-100"
         >
           Place Order

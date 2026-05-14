@@ -3,7 +3,7 @@
 
 ![Shofy Image Banner](https://shorturl.at/oNJu5)
 
-Shofy is a powerful and modern full stack eCommerce web application built using Next.js, Express.js, MongoDB with Mongoose, Redux Toolkit, RTK Query, Stripe payment method, Bootstrap 5, and Sass. It includes a feature-rich admin panel for easy management and control of your online store.
+Shofy is a powerful and modern full stack eCommerce web application built using Next.js, Express.js, MongoDB with Mongoose, Redux Toolkit, RTK Query, Bootstrap 5, and Sass. It includes a feature-rich admin panel for easy management and control of your online store.
 
 ## Features Overview
 
@@ -11,7 +11,6 @@ Shofy is a powerful and modern full stack eCommerce web application built using 
 - **Express.js:** Express.js is a minimal and flexible Node.js web application framework that offers a robust set of features for web and mobile applications.
 - **MongoDB:** MongoDB is a developer-friendly data platform that provides the services and tools necessary to build distributed applications at scale.
 - **Mongoose:** Mongoose provides a straightforward, schema-based solution to model your application data, offering built-in type casting, validation, and query building.
-- **Stripe:** Stripe offers online payment solutions, allowing you to create a secure and reliable website with e-commerce functionality.
 - **Nodemailer:** Nodemailer is a module for Node.js applications that facilitates easy email sending, keeping your users informed and engaged.
 - **Authentication:** Shofy includes features for Google login, user registration, email verification, forgot password, reset password, and profile updates.
 - **Redux Toolkit:** Manage state effortlessly with Redux Toolkit, providing a convenient and efficient way to handle state in your application.
@@ -29,7 +28,6 @@ Shofy is a powerful and modern full stack eCommerce web application built using 
 - **Express.js:** Create a robust backend for your eCommerce website using Express.js.
 - **MongoDB:** Store and retrieve data efficiently with the flexibility and scalability of MongoDB.
 - **Mongoose:** Model your application data effortlessly with Mongoose's schema-based solution.
-- **Stripe:** Integrate secure and reliable payment solutions into your online store.
 - **Nodemailer:** Keep your users informed with easy email sending capabilities.
 - **Authentication:** Enable secure user registration, login, and profile updates, including Google login option.
 - **Redux Toolkit:** Efficiently manage state in your application with Redux Toolkit.
@@ -63,7 +61,7 @@ Shofy is a powerful and modern full stack eCommerce web application built using 
 - **Quantity Select:** Provide users with two options for selecting product quantities: a dropdown select box or manual input for more flexibility.
 - **Google and Email Password-based Authentication:** Secure user accounts with authentication methods, including Google login and email-based password authentication.
 - **User Profile and Information Update:** Allow users to update their profile information, ensuring accurate and up-to-date data for future interactions.
-- **Powerful Payment Gateway Integration using Stripe:** Securely process payments with Stripe integration, providing a smooth and reliable shopping experience for customers.
+- **Cash on Delivery (COD):** Support multiple payment methods including Cash on Delivery for customer convenience.
 
 ## Installation and Usage
 
