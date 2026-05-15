@@ -5,7 +5,8 @@ const orderSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
+      default: null,
     },
     cart: [{}],
     name: {
@@ -89,14 +90,17 @@ const orderSchema = new mongoose.Schema(
     tax: { type: Number, default: 0 },
     paymentStatus: {
       type: String,
-      enum: ["unpaid", "paid", "refunded", "partially-refunded"],
+      enum: ["unpaid", "pending", "paid", "failed", "refunded", "partially-refunded"],
       default: "unpaid",
     },
     paymentGateway: {
       type: String,
-      enum: ["stripe", "paypal", "cod", "bank-transfer"],
+      enum: ["stripe", "paypal", "cod", "bank-transfer", "vnpay", "momo"],
     },
     transactionId: { type: String },
+    vnpayTransactionNo: { type: String },
+    vnpayBankCode: { type: String },
+    vnpayPayDate: { type: String },
     paidAt: { type: Date },
     refundedAt: { type: Date },
     refundAmount: { type: Number, default: 0 },

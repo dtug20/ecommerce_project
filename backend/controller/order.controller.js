@@ -6,6 +6,7 @@ const Coupon = require("../model/Coupon");
 const { emitOrderCreated, emitOrderUpdated } = require("../utils/socketEmitter");
 const PaymentService = require("../services/paymentService");
 const { sendTemplatedEmail } = require("../utils/emailService");
+const { buildPaymentUrl } = require('../utils/vnpay');
 
 // create-payment-intent - DISABLED (Stripe removed)
 exports.paymentIntent = async (req, res, next) => {
@@ -78,22 +79,28 @@ exports.addOrder = async (req, res, next) => {
           coupon.perUserLimit == null || userUsage < coupon.perUserLimit;
 
         if (withinDates && withinUsageLimit && withinPerUserLimit) {
-          await Coupon.findByIdAndUpdate(coupon._id, {
-            $inc: { usageCount: 1 },
-            $push: {
-              usedBy: {
-                userId: req.user._id,
-                usedAt: now,
+          if (req.user) {
+            await Coupon.findByIdAndUpdate(coupon._id, {
+              $inc: { usageCount: 1 },
+              $push: {
+                usedBy: {
+                  userId: req.user._id,
+                  usedAt: now,
+                },
               },
-            },
-          });
+            });
+          } else {
+            await Coupon.findByIdAndUpdate(coupon._id, {
+              $inc: { usageCount: 1 },
+            });
+          }
           appliedCoupon = coupon.couponCode;
         }
       }
     }
 
     const orderItems = await Order.create({
-      user: req.user._id,
+      user: req.user?._id || null,
       cart, name, address, email, contact, city, country, zipCode,
       subTotal, shippingCost, discount: resolvedDiscount, totalAmount, shippingOption,
       cardInfo, paymentIntent, paymentMethod, orderNote,
@@ -138,10 +145,29 @@ exports.addOrder = async (req, res, next) => {
       shippingAddress: `${address}, ${city}, ${country} ${zipCode}`,
     }).catch((err) => console.error('[email] order-confirmation send error:', err.message));
 
+    let paymentUrl = null;
+
+    if (paymentMethod === 'vnpay') {
+      const ipAddr =
+        req.headers['x-forwarded-for'] ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        req.ip ||
+        '127.0.0.1';
+
+      paymentUrl = buildPaymentUrl({
+        order: orderItems,
+        ipAddr,
+        bankCode: req.body.paymentData?.bankCode,
+        locale: req.body.paymentData?.locale || 'vn',
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: "Order added successfully",
       order: orderItems,
+      ...(paymentUrl && { paymentUrl }),
       ...(paymentResult.bankDetails && { bankDetails: paymentResult.bankDetails }),
       ...(appliedCoupon && { appliedCoupon }),
     });

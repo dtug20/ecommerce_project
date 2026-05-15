@@ -321,6 +321,46 @@ router.get('/vendors',        ctrl.listVendors);
 router.get('/vendors/:slug',  ctrl.getVendorBySlug);
 
 // ---------------------------------------------------------------------------
+// Order Creation (public or authenticated)
+// ---------------------------------------------------------------------------
+
+/**
+ * @swagger
+ * /api/v1/store/orders:
+ *   post:
+ *     summary: Create order (guest checkout or authenticated user)
+ *     tags: [Store Orders]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [cart, shippingInfo, paymentMethod]
+ *             properties:
+ *               cart:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *               shippingInfo:
+ *                 type: object
+ *               paymentMethod:
+ *                 type: string
+ *                 enum: [cod, vnpay, momo, bank-transfer]
+ *               paymentData:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Order created successfully
+ *       400:
+ *         description: Validation error
+ */
+const orderCtrl = require('../../../controller/order.controller');
+const { createOrder: createOrderSchema } = require('../../../validations/order.validation');
+
+router.post('/orders', validate(createOrderSchema), orderCtrl.addOrder);
+
+// ---------------------------------------------------------------------------
 // Order Tracking (public)
 // ---------------------------------------------------------------------------
 

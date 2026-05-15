@@ -60,17 +60,21 @@
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
       "protocol": "openid-connect",
-      "rootUrl": "http://localhost:3000",
-      "baseUrl": "http://localhost:3000",
+      "rootUrl": "http://localhost:3001",
+      "baseUrl": "http://localhost:3001",
       "redirectUris": [
-        "http://localhost:3000/*"
+        "http://localhost:3001/*",
+        "http://localhost:3001/silent-check-sso.html",
+        "http://localhost:3001/auth-callback",
+        "http://localhost:3001/login"
       ],
       "webOrigins": [
-        "http://localhost:3000"
+        "http://localhost:3001",
+        "http://localhost:3001/*"
       ],
       "attributes": {
         "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "http://localhost:3000/*"
+        "post.logout.redirect.uris": "http://localhost:3001/*"
       }
     },
     {
@@ -84,16 +88,19 @@
       "serviceAccountsEnabled": true,
       "protocol": "openid-connect",
       "secret": "CHANGE_ME_CRM_SECRET",
-      "rootUrl": "http://localhost:8080",
-      "baseUrl": "http://localhost:8080",
+      "rootUrl": "http://localhost:8081",
+      "baseUrl": "http://localhost:8081",
       "redirectUris": [
-        "http://localhost:8080/*"
+        "http://localhost:8081/*",
+        "http://localhost:8081/silent-check-sso.html",
+        "http://localhost:8081/auth-callback"
       ],
       "webOrigins": [
-        "http://localhost:8080"
+        "http://localhost:8081",
+        "http://localhost:8081/*"
       ],
       "attributes": {
-        "post.logout.redirect.uris": "http://localhost:8080/*"
+        "post.logout.redirect.uris": "http://localhost:8081/*"
       }
     },
     {

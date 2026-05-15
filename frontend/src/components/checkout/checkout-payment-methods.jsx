@@ -49,9 +49,9 @@ const CheckoutPaymentMethods = ({ selectedMethod, onMethodChange, bankDetails })
   const enabledGateways =
     Array.isArray(rawGateways) && rawGateways.length > 0
       ? rawGateways.map((g) => g.toLowerCase())
-      : ['cod'];
+      : ['cod', 'vnpay']; // Default to COD and VNPay
 
-  const isComingSoon = (gateway) => gateway === 'vnpay' || gateway === 'momo';
+  const isComingSoon = (gateway) => gateway === 'momo'; // Only MoMo is coming soon, VNPay is implemented
 
   const getLabel = (gateway) => {
     const key = PAYMENT_LABEL_KEYS[gateway];
