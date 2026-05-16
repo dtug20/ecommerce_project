@@ -1,9 +1,14 @@
 import React, { useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
 // internal
 import BackToTopCom from "@/components/common/back-to-top";
 import ProductModal from "@/components/common/product-modal";
+
+const ChatWidget = dynamic(() => import("@/components/chatbot/ChatWidget"), {
+  ssr: false,
+});
 import {
   get_cart_products,
   initialOrderQuantity,
@@ -44,12 +49,15 @@ const Wrapper = ({ children }) => {
     }
   }, [settingsData]);
 
+  const chatbotEnabled = settingsData?.data?.chatbot?.enabled !== false;
+
   return (
     <div id="wrapper">
       {children}
       <BackToTopCom />
       <ToastContainer />
       {productItem && <ProductModal />}
+      {chatbotEnabled && <ChatWidget />}
     </div>
   );
 };
