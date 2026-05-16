@@ -30,7 +30,7 @@ const ChatMessageSchema = new mongoose.Schema({
 });
 
 const ChatSessionSchema = new mongoose.Schema({
-  sessionId: { type: String, required: true, unique: true, index: true },
+  sessionId: { type: String, required: true, unique: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null, index: true },
   anonId: { type: String, default: null, index: true },
   locale: { type: String, enum: ['en', 'vi'], default: 'en' },
