@@ -467,4 +467,9 @@ router.get('/blog',             storeCmsCtrl.listPublishedBlogPosts);
  */
 router.get('/settings',         storeCmsCtrl.getPublicSettings);
 
+// ---------------------------------------------------------------------------
+// AI Chatbot
+// ---------------------------------------------------------------------------
+router.use('/chat', require('../chatbot'));
+
 module.exports = router;
