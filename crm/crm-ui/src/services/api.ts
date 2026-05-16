@@ -420,6 +420,46 @@ export const analyticsApi = {
 };
 
 // ---------------------------------------------------------------------------
+// Chatbot Analytics (Phase 6)
+// ---------------------------------------------------------------------------
+
+export interface ChatbotSessionRow {
+  sessionId: string;
+  userId: string | null;
+  anonId: string | null;
+  locale: 'en' | 'vi';
+  status: string;
+  messageCount: number;
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface ChatbotAnalytics {
+  last30Days: {
+    totalSessions: number;
+    totalMessages: number;
+    thumbsUp: number;
+    thumbsDown: number;
+    satisfactionRate: number | null;
+  };
+}
+
+export const chatbotApi = {
+  getAnalytics: () =>
+    api
+      .get<ApiResponse<ChatbotAnalytics>>('/api/chat/analytics')
+      .then((r) => r.data),
+
+  listSessions: (params?: { page?: number; limit?: number }) =>
+    api
+      .get<ApiResponse<{ sessions: ChatbotSessionRow[]; pagination: { page: number; limit: number; total: number } }>>(
+        '/api/chat/sessions',
+        { params }
+      )
+      .then((r) => r.data),
+};
+
+// ---------------------------------------------------------------------------
 // Email Templates
 // ---------------------------------------------------------------------------
 
