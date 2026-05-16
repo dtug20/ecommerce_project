@@ -16,6 +16,7 @@ const SiteSetting = require('../../model/SiteSetting');
 const Coupon = require('../../model/Coupon');
 const respond = require('../../utils/respond');
 const { getPaginationParams, buildPagination } = require('../../utils/pagination');
+const embedQueue = require('../../services/chatbot/embedQueue');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -619,6 +620,9 @@ exports.createBlogPost = async (req, res, next) => {
     if (global.io) {
       global.io.emit('blog:created', { id: post._id, slug: post.slug });
     }
+    if (post.status === 'published') {
+      embedQueue.schedule('blogpost', post._id);
+    }
 
     return respond.created(res, post, 'Blog post created successfully');
   } catch (err) {
@@ -647,6 +651,9 @@ exports.updateBlogPost = async (req, res, next) => {
 
     if (global.io) {
       global.io.emit('blog:updated', { id: post._id, slug: post.slug });
+    }
+    if (post.status === 'published') {
+      embedQueue.schedule('blogpost', post._id);
     }
 
     return respond.success(res, post, 'Blog post updated successfully');
@@ -705,6 +712,7 @@ exports.publishBlogPost = async (req, res, next) => {
     if (global.io) {
       global.io.emit('blog:published', { id: post._id, slug: post.slug });
     }
+    embedQueue.schedule('blogpost', post._id);
 
     return respond.success(res, post, 'Blog post published successfully');
   } catch (err) {

@@ -253,6 +253,9 @@ app.use((req, res) => {
 
 app.use(globalErrorHandler);
 
+// Start the chatbot embedding re-queue (debounced re-embed of products/blogs)
+require('./services/chatbot/embedQueue').start();
+
 server.listen(PORT, () => console.log(`server running on port ${PORT}`));
 
 module.exports = app;
