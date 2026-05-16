@@ -22,8 +22,50 @@ async function searchProductsByVector(queryText, { limit = 10, filters = {} } = 
     return await Product.aggregate(pipeline);
   } catch (e) {
     console.warn('[chatbot] vector search failed, falling back to text:', e.message);
-    return Product.find({ $text: { $search: queryText }, status: { $ne: 'out-of-stock' } }).limit(limit).lean();
+    return textSearchProductsFallback(queryText, { limit, filters });
   }
+}
+
+/**
+ * Token-OR regex search across title / parent / children / description / tags.
+ * Used when $vectorSearch is unavailable (non-Atlas MongoDB).
+ * If still empty, returns the most popular in-stock products as a soft fallback
+ * so recommendProducts never silently returns 0 results.
+ */
+async function textSearchProductsFallback(queryText, { limit = 10, filters = {} } = {}) {
+  const tokens = (queryText || '')
+    .trim()
+    .split(/\s+/)
+    .filter((t) => t.length >= 2)
+    .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+
+  const q = { status: { $ne: 'out-of-stock' }, ...buildFilterMatch(filters) };
+  if (tokens.length > 0) {
+    q.$or = tokens.flatMap((t) => [
+      { title: { $regex: t, $options: 'i' } },
+      { parent: { $regex: t, $options: 'i' } },
+      { children: { $regex: t, $options: 'i' } },
+      { description: { $regex: t, $options: 'i' } },
+      { tags: { $regex: t, $options: 'i' } }
+    ]);
+  }
+
+  let results = await Product.find(q)
+    .limit(limit)
+    .select('title slug price quantity imageURLs sellCount productType')
+    .lean();
+
+  if (results.length === 0) {
+    // Soft fallback: return popular in-stock products so the assistant has
+    // something useful to suggest instead of saying "nothing found".
+    results = await Product.find({ status: { $ne: 'out-of-stock' }, ...buildFilterMatch(filters) })
+      .sort({ sellCount: -1, createdAt: -1 })
+      .limit(limit)
+      .select('title slug price quantity imageURLs sellCount productType')
+      .lean();
+  }
+
+  return results;
 }
 
 async function searchBlogsByVector(queryText, { limit = 5 } = {}) {

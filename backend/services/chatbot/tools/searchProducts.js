@@ -29,11 +29,24 @@ module.exports = (register) => register({
     const filters = args.filters || {};
     const q = {};
     if (args.query && args.query.trim()) {
-      q.$or = [
-        { title: { $regex: args.query.trim(), $options: 'i' } },
-        { description: { $regex: args.query.trim(), $options: 'i' } },
-        { tags: { $regex: args.query.trim(), $options: 'i' } }
-      ];
+      // Tokenize query so multi-word inputs like "smart watch" match each
+      // token across title / parent / description / tags. Drops tokens
+      // shorter than 2 chars (mostly stop words).
+      const tokens = args.query
+        .trim()
+        .split(/\s+/)
+        .filter((t) => t.length >= 2)
+        .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+      if (tokens.length > 0) {
+        const fieldRegexes = (token) => [
+          { title: { $regex: token, $options: 'i' } },
+          { parent: { $regex: token, $options: 'i' } },
+          { children: { $regex: token, $options: 'i' } },
+          { description: { $regex: token, $options: 'i' } },
+          { tags: { $regex: token, $options: 'i' } }
+        ];
+        q.$or = tokens.flatMap(fieldRegexes);
+      }
     }
     if (filters.productType) q.productType = filters.productType;
     if (filters.minPrice != null || filters.maxPrice != null) {
