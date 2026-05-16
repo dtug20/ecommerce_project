@@ -3,7 +3,13 @@ const BlogPost = require('../../model/BlogPost');
 const embeddings = require('./embeddings');
 
 async function searchProductsByVector(queryText, { limit = 10, filters = {} } = {}) {
-  const vec = await embeddings.embedQuery(queryText);
+  let vec;
+  try {
+    vec = await embeddings.embedQuery(queryText);
+  } catch (e) {
+    console.warn('[chatbot] embedQuery failed, falling back to text:', e.message);
+    return textSearchProductsFallback(queryText, { limit, filters });
+  }
   const pipeline = [
     {
       $vectorSearch: {
@@ -19,7 +25,10 @@ async function searchProductsByVector(queryText, { limit = 10, filters = {} } = 
     { $limit: limit }
   ];
   try {
-    return await Product.aggregate(pipeline);
+    const results = await Product.aggregate(pipeline);
+    if (results.length > 0) return results;
+    // Atlas index returned 0 — try the text fallback so we don't bubble up an empty list.
+    return textSearchProductsFallback(queryText, { limit, filters });
   } catch (e) {
     console.warn('[chatbot] vector search failed, falling back to text:', e.message);
     return textSearchProductsFallback(queryText, { limit, filters });
@@ -69,7 +78,13 @@ async function textSearchProductsFallback(queryText, { limit = 10, filters = {} 
 }
 
 async function searchBlogsByVector(queryText, { limit = 5 } = {}) {
-  const vec = await embeddings.embedQuery(queryText);
+  let vec;
+  try {
+    vec = await embeddings.embedQuery(queryText);
+  } catch (e) {
+    console.warn('[chatbot] embedQuery (blogs) failed:', e.message);
+    return [];
+  }
   const pipeline = [
     {
       $vectorSearch: {
