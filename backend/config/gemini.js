@@ -9,7 +9,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 module.exports = {
   apiKey: process.env.GEMINI_API_KEY || '',
-  chatModel: process.env.GEMINI_CHAT_MODEL || 'gemini-1.5-flash',
+  chatModel: process.env.GEMINI_CHAT_MODEL || 'gemini-2.5-flash',
   embedModel: process.env.GEMINI_EMBED_MODEL || 'text-embedding-004',
   enabled: process.env.CHATBOT_ENABLED !== 'false' && !!process.env.GEMINI_API_KEY,
   rateLimitPer5Min: parseInt(process.env.CHATBOT_RATE_LIMIT_PER_USER_PER_5MIN, 10) || 20,
