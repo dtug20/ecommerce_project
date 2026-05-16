@@ -72,11 +72,21 @@ async function streamChat({ systemInstruction, history, userMessage, tools, onTo
     } catch (e) {
       lastErr = e;
       attempt += 1;
-      if (e.status === 429 || (e.message && e.message.includes('429'))) {
-        await new Promise((r) => setTimeout(r, 1000 * Math.pow(2, attempt)));
-      } else {
-        break;
+      const is429 = e.status === 429 || (e.message && e.message.includes('429'));
+      if (!is429) break;
+      // Respect Gemini's retryDelay if provided ("10s", "33.5s"); otherwise
+      // exponential backoff. Capped at 30s — beyond that the user is better
+      // off seeing an error than waiting silently.
+      let waitMs = 1000 * Math.pow(2, attempt);
+      const retryInfo = (e.errorDetails || []).find((d) =>
+        (d['@type'] || '').includes('RetryInfo')
+      );
+      if (retryInfo && typeof retryInfo.retryDelay === 'string') {
+        const m = retryInfo.retryDelay.match(/^([\d.]+)s$/);
+        if (m) waitMs = Math.ceil(parseFloat(m[1]) * 1000) + 500;
       }
+      if (waitMs > 30_000) break;
+      await new Promise((r) => setTimeout(r, waitMs));
     }
   }
   throw lastErr;

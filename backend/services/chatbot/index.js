@@ -4,9 +4,6 @@ const agentLoop = require('./agentLoop');
 const guardrails = require('./guardrails');
 const config = require('../../config/gemini');
 
-let ActivityLog = null;
-try { ActivityLog = require('../../model/ActivityLog'); } catch (e) { /* optional */ }
-
 async function handleMessage({ sessionId, userId, anonId, locale, userMessage, cartSnapshot, recentlyViewedProducts, onToken, onToolCall }) {
   if (!config.enabled) return { error: 'disabled', message: 'Assistant is currently disabled.' };
 
@@ -59,21 +56,11 @@ async function handleMessage({ sessionId, userId, anonId, locale, userMessage, c
     latencyMs: Date.now() - turnStart
   });
 
-  if (ActivityLog) {
-    ActivityLog.create({
-      action: 'chatbot_turn',
-      resourceType: 'chatbot',
-      resourceId: session._id,
-      userId,
-      metadata: {
-        sessionId,
-        tokensIn: turnResult.usage.promptTokenCount || 0,
-        tokensOut: turnResult.usage.candidatesTokenCount || 0,
-        toolCalls: turnResult.toolCalls.map((tc) => tc.toolName),
-        latencyMs: Date.now() - turnStart
-      }
-    }).catch((e) => console.warn('[chatbot] activity log failed:', e.message));
-  }
+  // Chat traffic is already persisted on the ChatSession document
+  // (messages[].tokensIn / tokensOut / latencyMs / toolCalls) and surfaced
+  // by the CRM analytics endpoint, so we deliberately do NOT also write to
+  // ActivityLog — its schema is for admin audit (actor/resource required)
+  // and doesn't model chat turns.
 
   return {
     sessionId,
