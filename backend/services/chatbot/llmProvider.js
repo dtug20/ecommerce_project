@@ -11,7 +11,10 @@ function getClient() {
   return client;
 }
 
-// Token bucket: 14 req/min headroom under 15/min Gemini free-tier limit
+// Token bucket: 14 req/min headroom under 15/min Gemini free-tier limit.
+// NOTE: In-process state — assumes SINGLE process. PM2 cluster or multi-worker
+// deployments must move this to a shared store (Redis counter) or set
+// PM2 instances=1, else effective rate-limit is multiplied by worker count.
 const REQUESTS_PER_MINUTE = 14;
 let tokens = REQUESTS_PER_MINUTE;
 let lastRefill = Date.now();
