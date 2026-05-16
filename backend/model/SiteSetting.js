@@ -192,6 +192,13 @@ const siteSettingSchema = new mongoose.Schema(
       type: i18nSchema,
       default: () => ({}),
     },
+    chatbot: {
+      enabled: { type: Boolean, default: true },
+      welcomeMessage: {
+        en: { type: String, default: 'Hi! I\'m your shopping assistant. How can I help today?' },
+        vi: { type: String, default: 'Xin chào! Tôi là trợ lý mua sắm. Tôi có thể giúp gì cho bạn?' }
+      }
+    },
   },
   {
     timestamps: true,
