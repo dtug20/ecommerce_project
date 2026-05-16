@@ -175,6 +175,10 @@ const productsSchema = mongoose.Schema({
     metaKeywords: [{ type: String }],
     ogImage: { type: String },
   },
+
+  // Vector search fields
+  embedding: { type: [Number], default: null, select: false },
+  embeddedAt: { type: Date, default: null },
 }, {
   timestamps: true,
 })

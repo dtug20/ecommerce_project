@@ -88,6 +88,10 @@ const blogPostSchema = new mongoose.Schema(
       type: blogI18nSchema,
       default: () => ({}),
     },
+
+    // Vector search fields
+    embedding: { type: [Number], default: null, select: false },
+    embeddedAt: { type: Date, default: null },
   },
   {
     timestamps: true,
