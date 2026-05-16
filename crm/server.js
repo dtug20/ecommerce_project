@@ -48,21 +48,35 @@ const reactBuildPath = path.join(__dirname, 'crm-ui', 'dist');
 app.use(express.static(reactBuildPath, { index: false }));
 
 // ─── Role-based protection ─────────────────────────────────────
-// Only admin, manager, staff can access CRM
+// Only admin, manager, staff, shipper can access CRM
 
-const crmProtect = keycloak.protect((token) => {
-  return (
-    token.hasRealmRole('admin') ||
-    token.hasRealmRole('manager') ||
-    token.hasRealmRole('staff') ||
-    token.hasRealmRole('shipper')
-  );
-});
+const CRM_ROLES = ['admin', 'manager', 'staff', 'shipper'];
+
+const keycloakProtectMiddleware = keycloak.protect();
+
+// crmProtect: authenticate first; if logged in but lacks a CRM role,
+// redirect to /no-access (friendly React page) instead of returning
+// keycloak-connect's default "Access denied" plaintext.
+const crmProtect = (req, res, next) => {
+  keycloakProtectMiddleware(req, res, () => {
+    try {
+      const token = req.kauth?.grant?.access_token?.content || {};
+      const realmRoles = token.realm_access?.roles || [];
+      const hasRole = realmRoles.some((r) => CRM_ROLES.includes(r));
+      if (hasRole) return next();
+      // Authenticated, but no CRM role → friendly page
+      if (req.path === '/no-access') return next();
+      return res.redirect('/no-access');
+    } catch (err) {
+      console.error('[crmProtect] role check failed:', err.message);
+      return res.redirect('/no-access');
+    }
+  });
+};
 
 // ─── API Auth Middleware ─────────────────────────────────────
 // Wraps keycloak.protect() but returns 401 JSON for API requests
 // instead of redirecting to Keycloak login (which breaks XHR from React SPA)
-const keycloakProtectMiddleware = keycloak.protect();
 const apiProtect = (req, res, next) => {
   const originalRedirect = res.redirect.bind(res);
   res.redirect = (url) => {
@@ -126,9 +140,15 @@ app.get('/api/me', apiProtect, (req, res) => {
 });
 
 // ─── Page Routes (React SPA, protected by Keycloak) ─────────
+
+// /no-access: requires login but NOT a CRM role.
+// Shown to authenticated users whose token lacks admin/manager/staff/shipper.
+app.get('/no-access', keycloakProtectMiddleware, (req, res) => {
+  res.sendFile(path.join(reactBuildPath, 'index.html'));
+});
+
 // Wildcard catch-all: serve index.html for all non-API routes so React Router
 // handles /vendors, /reviews, /coupons, /cms/*, /settings/*, /activity-log, etc.
-
 app.get('*', crmProtect, (req, res, next) => {
   if (req.path.startsWith('/api/')) return next();
   res.sendFile(path.join(reactBuildPath, 'index.html'));

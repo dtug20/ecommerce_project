@@ -45,6 +45,9 @@ const PaymentSettingsPage = lazy(() => import('@/features/settings/PaymentSettin
 const ShippingSettingsPage = lazy(() => import('@/features/settings/ShippingSettingsPage'));
 const EmailTemplatesPage = lazy(() => import('@/features/settings/EmailTemplatesPage'));
 
+// No-access landing page (authenticated user without CRM role)
+const NoAccessPage = lazy(() => import('@/features/no-access/NoAccessPage'));
+
 function PageLoader() {
   return (
     <div
@@ -78,6 +81,9 @@ export default function App() {
       }}
     >
       <Routes>
+        {/* Standalone routes (no MainLayout shell) */}
+        <Route path="/no-access" element={<SuspenseRoute><NoAccessPage /></SuspenseRoute>} />
+
         <Route element={<MainLayout />}>
           <Route path="/" element={<SuspenseRoute><DashboardPage /></SuspenseRoute>} />
           <Route path="/products" element={<SuspenseRoute><ProductsPage /></SuspenseRoute>} />

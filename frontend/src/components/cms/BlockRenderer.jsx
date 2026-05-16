@@ -18,6 +18,21 @@ import CountdownDeal from './blocks/CountdownDeal';
 import ImageGallery from './blocks/ImageGallery';
 import VideoSection from './blocks/VideoSection';
 
+// Clicon hardcoded-section wrappers (pixel-parity with FallbackHomeClicon)
+import {
+  CliconHeroBlock,
+  CliconFeaturesBarBlock,
+  CliconBestDealsBlock,
+  CliconCategoryShowcaseBlock,
+  CliconFeaturedProductsBlock,
+  CliconDoubleBannerBlock,
+  CliconProductSectionPromoBlock,
+  CliconFullBannerBlock,
+  CliconProductColumnsBlock,
+  CliconBlogAreaBlock,
+  CliconNewsletterBlock,
+} from './blocks/CliconSections';
+
 const BLOCK_MAP = {
   'hero-slider': HeroSlider,
   'featured-products': FeaturedProducts,
@@ -33,6 +48,18 @@ const BLOCK_MAP = {
   'countdown-deal': CountdownDeal,
   'image-gallery': ImageGallery,
   'video-section': VideoSection,
+  // Clicon section wrappers — render the existing hardcoded Clicon components 1:1
+  'clicon-hero': CliconHeroBlock,
+  'clicon-features-bar': CliconFeaturesBarBlock,
+  'clicon-best-deals': CliconBestDealsBlock,
+  'clicon-category-showcase': CliconCategoryShowcaseBlock,
+  'clicon-featured-products': CliconFeaturedProductsBlock,
+  'clicon-double-banner': CliconDoubleBannerBlock,
+  'clicon-product-section-promo': CliconProductSectionPromoBlock,
+  'clicon-full-banner': CliconFullBannerBlock,
+  'clicon-product-columns': CliconProductColumnsBlock,
+  'clicon-blog-area': CliconBlogAreaBlock,
+  'clicon-newsletter': CliconNewsletterBlock,
 };
 
 const BlockRenderer = ({ blocks = [] }) => {

@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "mongodb": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mongodb-mcp-server",
+        "--connectionString",
+        "mongodb://187.124.3.207:27017/shofy",
+        "--readOnly"
+      ]
+    }
+  }
+}

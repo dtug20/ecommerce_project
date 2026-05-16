@@ -20,6 +20,18 @@ const contentBlockSchema = new mongoose.Schema(
         "text-block",
         "image-gallery",
         "video-section",
+        // Clicon hardcoded-section wrappers (pixel-parity with fallback layout)
+        "clicon-hero",
+        "clicon-features-bar",
+        "clicon-best-deals",
+        "clicon-category-showcase",
+        "clicon-featured-products",
+        "clicon-double-banner",
+        "clicon-product-section-promo",
+        "clicon-full-banner",
+        "clicon-product-columns",
+        "clicon-blog-area",
+        "clicon-newsletter",
       ],
     },
     title: {

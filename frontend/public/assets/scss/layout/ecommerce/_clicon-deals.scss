@@ -203,9 +203,19 @@
   &__body {
     padding: var(--cl-spacing-sm) var(--cl-spacing-sm) var(--cl-spacing-md);
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    display: grid;
+    // 3 fixed rows: rating, title (2 lines), price — guarantees alignment across cards
+    grid-template-rows: 18px 38px 1fr;
+    row-gap: 6px;
+
+    .cl-star-rating {
+      min-height: 16px;
+      align-items: center;
+    }
+
+    .cl-price {
+      align-self: end;
+    }
   }
 
   &__rating {
@@ -217,8 +227,7 @@
     font-weight: var(--cl-fw-medium);
     color: var(--cl-text-heading);
     margin: 0;
-    line-height: var(--cl-lh-normal);
-    // 2-line clamp
+    line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
