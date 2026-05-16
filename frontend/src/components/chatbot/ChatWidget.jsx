@@ -6,7 +6,7 @@ import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 
 export default function ChatWidget() {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { sessionId, messages, isStreaming, error, sendMessage, reset } =
     useChatSession();

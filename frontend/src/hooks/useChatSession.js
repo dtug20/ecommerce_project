@@ -18,7 +18,7 @@ function getOrCreateSessionId() {
 }
 
 export default function useChatSession() {
-  const { i18n } = useTranslation('common');
+  const { i18n } = useTranslation();
   const [sessionId, setSessionId] = useState(() => getOrCreateSessionId());
   const [messages, setMessages] = useState([]);
   const [isStreaming, setIsStreaming] = useState(false);

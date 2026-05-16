@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import { add_cart_product } from '@/redux/features/cartSlice';
 
 export default function SuggestedActionCard({ action }) {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const router = useRouter();
 

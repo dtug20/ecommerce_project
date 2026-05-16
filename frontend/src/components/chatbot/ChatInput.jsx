@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export default function ChatInput({ onSend, disabled }) {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation();
   const [text, setText] = useState('');
 
   const submit = () => {

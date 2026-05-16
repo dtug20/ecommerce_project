@@ -4,7 +4,7 @@ import SuggestedActionCard from './SuggestedActionCard';
 import { useSubmitChatFeedbackMutation } from '@/redux/features/chat/chatApi';
 
 export default function ChatMessage({ message, sessionId }) {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation();
   const [rated, setRated] = useState(null);
   const [submit] = useSubmitChatFeedbackMutation();
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 export default function ChatBubble({ onClick }) {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation();
   return (
     <button
       type="button"
