@@ -109,6 +109,7 @@ app.use('/api/vendors', apiProtect, require('./routes/vendor.routes'));
 app.use('/api/analytics', apiProtect, require('./routes/analytics.routes'));
 app.use('/api/email-templates', apiProtect, require('./routes/email-template.routes'));
 app.use('/api/activity-log', apiProtect, require('./routes/activity-log.routes'));
+app.use('/api/chat', apiProtect, require('./routes/chatbot.routes'));
 app.use('/api/v1/admin/media', apiProtect, require('./routes/media'));
 
 // ─── Self-identification endpoint ───

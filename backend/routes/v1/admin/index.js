@@ -22,6 +22,7 @@ const reviewCtrl = require('../../../controller/v1/review.controller');
 const analyticsCtrl = require('../../../controller/v1/analytics.controller');
 const emailTemplateCtrl = require('../../../controller/v1/email-template.controller');
 const activityLogCtrl = require('../../../controller/v1/activityLog.controller');
+const chatbotAdminCtrl = require('../../../controller/v1/chatbot-admin.controller');
 const { logActivity } = require('../../../middleware/activityLog');
 const respond = require('../../../utils/respond');
 
@@ -571,5 +572,12 @@ router.get('/coupons/:id',      cmsCtrl.getCoupon);
 router.post('/coupons',         authorization('admin', 'manager'), validate(v.createCoupon), logActivity('create', 'coupon'), cmsCtrl.createCoupon);
 router.patch('/coupons/:id',    authorization('admin', 'manager'), validate(v.updateCoupon), logActivity('update', 'coupon'), cmsCtrl.updateCoupon);
 router.delete('/coupons/:id',   authorization('admin', 'manager'), logActivity('delete', 'coupon'), cmsCtrl.deleteCoupon);
+
+// ---------------------------------------------------------------------------
+// Chatbot — Phase 4
+// Read-only endpoints for the CRM analytics page.
+// ---------------------------------------------------------------------------
+router.get('/chat/sessions',    authorization('admin', 'manager'), chatbotAdminCtrl.listSessions);
+router.get('/chat/analytics',   authorization('admin', 'manager'), chatbotAdminCtrl.getAnalytics);
 
 module.exports = router;

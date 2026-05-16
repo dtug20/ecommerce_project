@@ -51,6 +51,7 @@ export default function GeneralSettingsPage() {
   const queryClient = useQueryClient();
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [maintenanceEnabled, setMaintenanceEnabled] = useState(false);
+  const [chatbotEnabled, setChatbotEnabled] = useState(true);
 
   const { data, isLoading } = useQuery({
     queryKey: ['site-settings'],
@@ -69,9 +70,12 @@ export default function GeneralSettingsPage() {
         maintenanceMessage: s.maintenance?.message ?? '',
         defaultLanguage: s.i18n?.defaultLanguage ?? 'en',
         supportedLanguages: s.i18n?.supportedLanguages ?? ['en'],
+        chatbotWelcomeEn: s.chatbot?.welcomeMessage?.en ?? '',
+        chatbotWelcomeVi: s.chatbot?.welcomeMessage?.vi ?? '',
       });
       setSocialLinks(s.contact?.socialLinks ?? []);
       setMaintenanceEnabled(s.maintenance?.isEnabled ?? false);
+      setChatbotEnabled(s.chatbot?.enabled ?? true);
     }
   }, [data, form]);
 
@@ -94,6 +98,13 @@ export default function GeneralSettingsPage() {
         i18n: {
           defaultLanguage: values.defaultLanguage,
           supportedLanguages: values.supportedLanguages,
+        },
+        chatbot: {
+          enabled: chatbotEnabled,
+          welcomeMessage: {
+            en: values.chatbotWelcomeEn,
+            vi: values.chatbotWelcomeVi,
+          },
         },
       });
     },
@@ -266,6 +277,53 @@ export default function GeneralSettingsPage() {
               />
             </Form.Item>
           )}
+        </Card>
+
+        {/* AI Chatbot */}
+        <Card
+          title={<Title level={5} style={{ margin: 0 }}>AI Chatbot</Title>}
+          size="small"
+          style={{ marginBottom: 16 }}
+        >
+          <Space style={{ marginBottom: 12 }}>
+            <Switch
+              checked={chatbotEnabled}
+              onChange={setChatbotEnabled}
+            />
+            <Typography.Text>
+              {chatbotEnabled
+                ? 'Chatbot widget is visible on storefront'
+                : 'Chatbot widget is hidden on storefront'}
+            </Typography.Text>
+          </Space>
+          <Row gutter={16}>
+            <Col xs={24} sm={12}>
+              <Form.Item
+                name="chatbotWelcomeEn"
+                label="Welcome message (EN)"
+              >
+                <Input.TextArea
+                  rows={2}
+                  maxLength={300}
+                  showCount
+                  placeholder="Hi! I'm your shopping assistant..."
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12}>
+              <Form.Item
+                name="chatbotWelcomeVi"
+                label="Welcome message (VI)"
+              >
+                <Input.TextArea
+                  rows={2}
+                  maxLength={300}
+                  showCount
+                  placeholder="Xin chào! Tôi là trợ lý mua sắm..."
+                />
+              </Form.Item>
+            </Col>
+          </Row>
         </Card>
 
         {/* Localization */}

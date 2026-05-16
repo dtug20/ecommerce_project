@@ -5,6 +5,7 @@ import ReactModal from "react-modal";
 // import { Elements } from "@stripe/react-stripe-js"; // STRIPE DISABLED
 // import { loadStripe } from "@stripe/stripe-js"; // STRIPE DISABLED
 import '../styles/index.scss';
+import "@/styles/chatbot.scss";
 import i18n from "@/i18n";
 import KeycloakProvider from "@/components/providers/keycloak-provider";
 import ThemeApplicator from "@/components/providers/theme-applicator";

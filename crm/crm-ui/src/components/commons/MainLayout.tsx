@@ -22,6 +22,7 @@ import {
   PictureOutlined,
   StarOutlined,
   AuditOutlined,
+  MessageOutlined,
 } from '@ant-design/icons';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import useAppStore from '@/stores/appStore';
@@ -58,6 +59,7 @@ const FLAT_NAV: FlatNavItem[] = [
   { key: '/settings/shipping', label: 'Shipping', path: '/settings/shipping' },
   { key: '/settings/email-templates', label: 'Email Templates', path: '/settings/email-templates' },
   { key: '/activity-log', label: 'Activity Log', path: '/activity-log' },
+  { key: '/chatbot', label: 'AI Chatbot', path: '/chatbot' },
 ];
 
 function resolveSelectedKey(pathname: string): string {
@@ -156,6 +158,11 @@ const MENU_ITEMS: ItemType[] = [
     key: '/activity-log',
     icon: <AuditOutlined />,
     label: 'Activity Log',
+  },
+  {
+    key: '/chatbot',
+    icon: <MessageOutlined />,
+    label: 'AI Chatbot',
   },
 ];
 

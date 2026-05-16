@@ -23,6 +23,9 @@ const ActivityLogPage = lazy(() => import('@/features/activity-log/ActivityLogPa
 // New: Coupons
 const CouponsPage = lazy(() => import('@/features/coupons/CouponsPage'));
 
+// Phase 6: Chatbot Analytics
+const ChatbotAnalyticsPage = lazy(() => import('@/features/chatbot/ChatbotAnalyticsPage'));
+
 // New: CMS — Pages
 const PagesListPage = lazy(() => import('@/features/cms/pages/PagesListPage'));
 const PageEditorPage = lazy(() => import('@/features/cms/pages/PageEditorPage'));
@@ -102,6 +105,9 @@ export default function App() {
 
           {/* Coupons */}
           <Route path="/coupons" element={<SuspenseRoute><CouponsPage /></SuspenseRoute>} />
+
+          {/* Chatbot Analytics */}
+          <Route path="/chatbot" element={<SuspenseRoute><ChatbotAnalyticsPage /></SuspenseRoute>} />
 
           {/* CMS — Pages */}
           <Route path="/cms/pages" element={<SuspenseRoute><PagesListPage /></SuspenseRoute>} />

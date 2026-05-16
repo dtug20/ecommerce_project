@@ -200,6 +200,15 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
   });
+
+  // Chatbot room management — clients join a room keyed by sessionId so the
+  // controller can stream tokens/tool-call events only to that session.
+  socket.on('chat:join', ({ sessionId }) => {
+    if (sessionId) socket.join(`chat:${sessionId}`);
+  });
+  socket.on('chat:leave', ({ sessionId }) => {
+    if (sessionId) socket.leave(`chat:${sessionId}`);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -243,6 +252,9 @@ app.use((req, res) => {
 // ---------------------------------------------------------------------------
 
 app.use(globalErrorHandler);
+
+// Start the chatbot embedding re-queue (debounced re-embed of products/blogs)
+require('./services/chatbot/embedQueue').start();
 
 server.listen(PORT, () => console.log(`server running on port ${PORT}`));
 

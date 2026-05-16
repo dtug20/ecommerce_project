@@ -13,6 +13,7 @@ const respond = require('../../utils/respond');
 const { getPaginationParams, buildPagination } = require('../../utils/pagination');
 const User = require('../../model/User');
 const Product = require('../../model/Products');
+const embedQueue = require('../../services/chatbot/embedQueue');
 const Category = require('../../model/Category');
 const Brand = require('../../model/Brand');
 const Order = require('../../model/Order');
@@ -227,6 +228,7 @@ exports.createProduct = async (req, res, next) => {
     }
 
     if (global.io) global.io.emit('product:created', { product });
+    embedQueue.schedule('product', product._id);
 
     return respond.created(res, product, 'Product created successfully');
   } catch (err) {
@@ -282,6 +284,7 @@ exports.updateProduct = async (req, res, next) => {
     });
 
     if (global.io) global.io.emit('product:updated', { product: updated });
+    if (updated) embedQueue.schedule('product', updated._id);
 
     return respond.success(res, updated, 'Product updated successfully');
   } catch (err) {

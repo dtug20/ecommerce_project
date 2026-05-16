@@ -2,6 +2,7 @@ const Product = require('../model/Products');
 const Category = require('../model/Category');
 const Brand = require('../model/Brand');
 const Reviews = require('../model/Review');
+const embedQueue = require('../services/chatbot/embedQueue');
 
 /**
  * Generate a URL-safe slug from a title string.
@@ -172,6 +173,7 @@ exports.createProduct = async (req, res, next) => {
 
     // Emit socket event
     if (global.io) global.io.emit('product:created', product);
+    embedQueue.schedule('product', product._id);
 
     res.status(201).json({ success: true, data: product, message: 'Product created successfully' });
   } catch (error) {
@@ -213,6 +215,7 @@ exports.updateProduct = async (req, res, next) => {
     const product = await Product.findByIdAndUpdate(req.params.id, body, { new: true, runValidators: true });
 
     if (global.io) global.io.emit('product:updated', product);
+    if (product) embedQueue.schedule('product', product._id);
 
     res.json({ success: true, data: product, message: 'Product updated successfully' });
   } catch (error) {

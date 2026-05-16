@@ -142,6 +142,12 @@ export const initSocket = (store) => {
   return socket;
 };
 
+/**
+ * Get the current socket singleton if it has been initialised.
+ * Returns null when called before initSocket() (e.g. during SSR).
+ */
+export const getSocket = () => socket;
+
 const registerInvalidateCallback = (resourceType, callback) => {
   invalidateCallbacks[resourceType] = callback;
 };
