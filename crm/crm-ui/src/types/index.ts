@@ -363,6 +363,13 @@ export interface SiteSettings {
     defaultLanguage: string;
     supportedLanguages: string[];
   };
+  chatbot?: {
+    enabled: boolean;
+    welcomeMessage?: {
+      en?: string;
+      vi?: string;
+    };
+  };
 }
 
 // ---------------------------------------------------------------------------
