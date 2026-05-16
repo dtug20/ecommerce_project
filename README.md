@@ -96,6 +96,19 @@ Interactive Swagger UI: `http://localhost:7001/api-docs`
 - **Email templates** — editable with merge tags, preview, test send
 - **Activity logging** — automatic audit trail of admin actions
 - **Payment gateways** — COD, bank transfer (VNPay/MoMo/Stripe stubs ready)
+- **AI shopping assistant** — Gemini 2.0 Flash powered chat widget with semantic product search (Atlas Vector Search), order tracking, EN/VI support, and suggest-only action confirmation. Admin kill-switch + CRM analytics.
+
+## AI Chatbot setup
+
+1. Set `GEMINI_API_KEY` in `backend/.env` (free tier works — get one at [aistudio.google.com](https://aistudio.google.com/apikey)).
+2. Create Atlas Vector Search indexes per [docs/superpowers/plans/atlas-vector-index.md](docs/superpowers/plans/atlas-vector-index.md).
+3. Backfill embeddings for existing data:
+   ```bash
+   node backend/scripts/backfill-embeddings.js
+   ```
+4. Toggle from CRM → Settings → General → AI Chatbot.
+
+The widget appears on every page of the storefront as a floating bubble (bottom-right). See [docs/superpowers/plans/2026-05-16-ai-chatbot.md](docs/superpowers/plans/2026-05-16-ai-chatbot.md) for the full architecture.
 
 ## Documentation
 

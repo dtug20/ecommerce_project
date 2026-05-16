@@ -220,6 +220,65 @@ User applies via profile → admin sees in CRM Vendor Management → approves (s
 - **ADMIN_GUIDE.md** — full CRM user documentation
 - **scripts/backup.sh** — MongoDB backup with compression + retention
 
+## Phase 6 Status (Complete) — AI Chatbot
+
+**What changed:**
+
+### Backend — Chatbot service (`backend/services/chatbot/`)
+- **`llmProvider.js`** — Gemini 2.0 Flash wrapper with streaming + token-bucket rate limit (single-process)
+- **`systemPrompt.js`** — bilingual EN/VI system prompt builder with cart and locale context
+- **`sessionStore.js`** — sliding-window message history bound to `ChatSession`
+- **`guardrails.js`** — PII scrubbing, length cap, per-session rate limit
+- **`agentLoop.js`** — tool-call loop with max-iteration cap and timeout
+- **`tools/`** — 11 tools: `searchProducts`, `getProductDetails`, `getMyOrders`, `getOrderStatus`, `validateCoupon`, `getShippingPolicy`, `getReturnPolicy`, `searchFAQ`, `recommendProducts`, `proposeAddToCart`, `proposeApplyCoupon`
+- **`embeddings.js`** — Gemini `text-embedding-004` wrapper (`embedQuery`, `embedProduct`, `embedBlogPost`)
+- **`ragSearch.js`** — MongoDB Atlas `$vectorSearch` helpers with `$text` fallback for non-Atlas environments
+- **`embedQueue.js`** — in-memory debounced (30 s) re-embed queue, scheduled from product/blog controllers, started on server boot
+
+### Backend — Models & data
+- **New: `ChatSession`** — sessionId, userId/anonId, locale, messages[] (with toolCalls + suggestedActions), context, status
+- **New: `ChatFeedback`** — sessionId, messageId, rating (up/down), reason, userId; unique per messageId
+- **Updated: `Product`** — added `embedding: [Number]` (select: false) + `embeddedAt`
+- **Updated: `BlogPost`** — same embedding fields
+- **Updated: `SiteSetting`** — `chatbot.enabled` (default true) + `chatbot.welcomeMessage.{en,vi}`
+
+### Backend — Routes
+- **Store**: `POST /api/v1/store/chat/message`, `POST /api/v1/store/chat/feedback`, `GET /api/v1/store/chat/sessions/:id`, `DELETE /api/v1/store/chat/sessions/:id`
+- **Admin** (manager-or-above): `GET /api/v1/admin/chat/sessions` (paginated), `GET /api/v1/admin/chat/analytics` (30-day rollup)
+- **Socket.io events**: `chat:join`, `chat:token` (streaming), `chat:done`, `chat:error`, `chat:leave`
+
+### Backend — Operations
+- **`scripts/backfill-embeddings.js`** — one-shot backfill of product + published blog embeddings (batch 20, sleep 500 ms)
+- **`docs/superpowers/plans/atlas-vector-index.md`** — Atlas vector index setup instructions
+
+### Frontend — Widget
+- **`src/components/chatbot/`** — `ChatWidget` (panel + bubble), `ChatBubble`, `ChatMessage` (with thumbs feedback), `ChatInput`, `SuggestedActionCard`
+- **`src/hooks/useChatSession.js`** — owns sessionId (UUID persisted in localStorage), message list, streaming flag, error state; subscribes to Socket.io events
+- **`src/redux/features/chat/chatApi.js`** — RTK Query slice: `sendChatMessage`, `submitChatFeedback`, `getChatSession`, `endChatSession`
+- **`src/styles/chatbot.scss`** — BEM-style widget styles, honors `--tp-theme-primary`
+- **Mount**: `wrapper.jsx` mounts `ChatWidget` via `next/dynamic({ ssr: false })`, gated on `chatbot.enabled` site setting
+- **i18n**: new `chat` namespace with 19 keys in EN/VI
+
+### CRM — Admin tools
+- **General Settings** — new "AI Chatbot" card with enable/disable Switch + EN/VI welcome message text areas
+- **AI Chatbot page** (`/chatbot`) — 4 KPI stat cards (sessions, messages, thumbs up, thumbs down + satisfaction %) + paginated recent-sessions table
+- **Sidebar entry** — "AI Chatbot" with `MessageOutlined` icon after Activity Log
+
+### Suggested Actions Flow
+Bot proposes actions (`add_to_cart`, `apply_coupon`, `view_product`, `view_order`, `sign_in`) → user clicks card to confirm → dispatches Redux action or routes via `next/router`. Bot never executes side effects directly.
+
+### Env vars
+- `GEMINI_API_KEY` — required, Google AI Studio key (free tier works)
+- `CHATBOT_MAX_ITERATIONS` — agent loop cap (default 5)
+- `CHATBOT_RATE_LIMIT_PER_MIN` — messages per session per minute (default 10)
+
+### Setup
+1. `cd backend && npm install` (installs `@google/generative-ai`)
+2. Set `GEMINI_API_KEY` in `backend/.env`
+3. Create Atlas vector indexes per `docs/superpowers/plans/atlas-vector-index.md`
+4. `node backend/scripts/backfill-embeddings.js`
+5. `npm run dev`
+
 ## Commands
 
 ### Setup
