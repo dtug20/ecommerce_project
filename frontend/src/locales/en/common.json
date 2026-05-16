@@ -488,5 +488,26 @@
   },
   "section": {
     "browseAll": "Browse All Product"
+  },
+  "chat": {
+    "title": "Shopping Assistant",
+    "welcome": "Hi! I'm your shopping assistant. How can I help today?",
+    "placeholder": "Ask anything about products, orders, or policies...",
+    "send": "Send",
+    "thinking": "Thinking...",
+    "unavailable": "Assistant is temporarily unavailable. Please try again in a few minutes.",
+    "rateLimited": "You're sending messages too fast. Please wait a moment.",
+    "signInPrompt": "Please sign in to check your orders.",
+    "thumbsUp": "Helpful",
+    "thumbsDown": "Not helpful",
+    "actionAddToCart": "Add to cart",
+    "actionApplyCoupon": "Apply coupon",
+    "actionViewProduct": "View product",
+    "actionViewOrder": "View order",
+    "actionSignIn": "Sign in",
+    "open": "Open chat",
+    "close": "Close chat",
+    "newSession": "Start new chat",
+    "errorGeneric": "Something went wrong. Please try again."
   }
 }

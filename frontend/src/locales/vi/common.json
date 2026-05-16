@@ -488,5 +488,26 @@
   },
   "section": {
     "browseAll": "Xem tất cả sản phẩm"
+  },
+  "chat": {
+    "title": "Trợ lý mua sắm",
+    "welcome": "Xin chào! Tôi là trợ lý mua sắm. Tôi có thể giúp gì cho bạn?",
+    "placeholder": "Hỏi bất cứ điều gì về sản phẩm, đơn hàng hoặc chính sách...",
+    "send": "Gửi",
+    "thinking": "Đang suy nghĩ...",
+    "unavailable": "Trợ lý tạm thời không khả dụng. Vui lòng thử lại sau ít phút.",
+    "rateLimited": "Bạn đang nhắn quá nhanh. Vui lòng đợi một chút.",
+    "signInPrompt": "Vui lòng đăng nhập để xem đơn hàng của bạn.",
+    "thumbsUp": "Hữu ích",
+    "thumbsDown": "Chưa hữu ích",
+    "actionAddToCart": "Thêm vào giỏ",
+    "actionApplyCoupon": "Áp dụng mã",
+    "actionViewProduct": "Xem sản phẩm",
+    "actionViewOrder": "Xem đơn hàng",
+    "actionSignIn": "Đăng nhập",
+    "open": "Mở trò chuyện",
+    "close": "Đóng trò chuyện",
+    "newSession": "Bắt đầu trò chuyện mới",
+    "errorGeneric": "Có lỗi xảy ra. Vui lòng thử lại."
   }
 }
