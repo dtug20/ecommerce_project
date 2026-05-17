@@ -46,6 +46,14 @@ async function runTurn({ systemInstruction, history, userMessage, context, onTok
       toolResults.push({ name: call.name, response: payload });
     }
 
+    // Append the user message that prompted this iteration BEFORE the model
+    // response — Gemini requires conversation history to alternate user/model
+    // and to start with role 'user'. On the first iteration of a brand-new
+    // session, skipping this step left history = [model, function] for the
+    // next iteration and tripped "First content should be with role 'user'".
+    if (workingMessage) {
+      workingHistory.push({ role: 'user', parts: [{ text: workingMessage }] });
+    }
     workingHistory.push({ role: 'model', parts: [{ functionCall: res.toolCalls[0] }] });
     workingHistory.push({ role: 'function', parts: toolResults.map((r) => ({ functionResponse: { name: r.name, response: r.response } })) });
     workingMessage = '';
