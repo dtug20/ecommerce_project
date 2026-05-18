@@ -46,12 +46,17 @@ const CheckoutPaymentMethods = ({ selectedMethod, onMethodChange, bankDetails })
   const { data: settingsData } = useGetSettingsQuery();
 
   const rawGateways = settingsData?.data?.payment?.enabledGateways;
-  const enabledGateways =
+  const enabledGatewaysRaw =
     Array.isArray(rawGateways) && rawGateways.length > 0
       ? rawGateways.map((g) => g.toLowerCase())
       : ['cod'];
 
-  const isComingSoon = (gateway) => gateway === 'vnpay' || gateway === 'momo';
+  // Ensure 'vnpay' is always selectable alongside 'cod'
+  const enabledGateways = enabledGatewaysRaw.includes('vnpay')
+    ? enabledGatewaysRaw
+    : [...enabledGatewaysRaw, 'vnpay'];
+
+  const isComingSoon = (gateway) => gateway === 'momo';
 
   const getLabel = (gateway) => {
     const key = PAYMENT_LABEL_KEYS[gateway];

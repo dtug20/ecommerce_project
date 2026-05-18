@@ -1,66 +1,138 @@
 'use strict';
 
-/**
- * Payment webhook routes — public (no auth)
- *
- * These endpoints are called by external payment gateways, not by the
- * Shofy client.  They must remain publicly accessible (no verifyToken).
- *
- * Mounted at: /api/v1/auth/payment/*
- *
- * Each handler is currently a stub.  Replace the console.log bodies with
- * real signature verification and order status updates when integrating
- * a live gateway.
- */
-
 const express = require('express');
 const router = express.Router();
 
-// ---------------------------------------------------------------------------
-// POST /api/v1/auth/payment/vnpay/ipn
-// VNPay Instant Payment Notification callback
-// VNPay requires a 200 response with { RspCode: '00', Message: '...' }
-// ---------------------------------------------------------------------------
+const Order = require('../../model/Order');
+const { verifyVnpaySignature } = require('../../utils/vnpay');
+const { emitOrderUpdated } = require('../../utils/socketEmitter');
 
-router.post('/vnpay/ipn', (req, res) => {
-  console.log('[Payment] VNPay IPN received:', JSON.stringify(req.body));
+router.get('/vnpay/ipn', async (req, res) => {
+  try {
+    const vnpParams = req.query;
 
-  // TODO: Verify vnp_SecureHash with HMAC-SHA512 using VNPAY_HASH_SECRET
-  // TODO: Find order by vnp_TxnRef, update paymentStatus → 'paid'
-  // TODO: Emit order:updated socket event
+    const isValidSignature = verifyVnpaySignature(vnpParams);
+    if (!isValidSignature) {
+      return res.status(200).json({
+        RspCode: '97',
+        Message: 'Invalid signature',
+      });
+    }
 
-  res.status(200).json({ RspCode: '00', Message: 'Confirm Success' });
+    const orderId = vnpParams.vnp_TxnRef;
+    const vnpAmount = Number(vnpParams.vnp_Amount) / 100;
+    const responseCode = vnpParams.vnp_ResponseCode;
+    const transactionStatus = vnpParams.vnp_TransactionStatus;
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(200).json({
+        RspCode: '01',
+        Message: 'Order not found',
+      });
+    }
+
+    const EXCHANGE_RATE = 25000;
+    const expectedVND = Math.round(order.totalAmount * EXCHANGE_RATE);
+
+    if (Number(expectedVND) !== Number(vnpAmount)) {
+      return res.status(200).json({
+        RspCode: '04',
+        Message: 'Invalid amount',
+      });
+    }
+
+    if (order.paymentStatus === 'paid' || order.paymentStatus === 'failed') {
+      return res.status(200).json({
+        RspCode: '02',
+        Message: 'Order already confirmed',
+      });
+    }
+
+    if (responseCode === '00' && transactionStatus === '00') {
+      order.paymentStatus = 'paid';
+      order.status = 'confirmed';
+      order.transactionId = vnpParams.vnp_TransactionNo;
+      order.vnpayTransactionNo = vnpParams.vnp_TransactionNo;
+      order.vnpayBankCode = vnpParams.vnp_BankCode;
+      order.vnpayPayDate = vnpParams.vnp_PayDate;
+      order.paidAt = new Date();
+    } else {
+      order.paymentStatus = 'failed';
+      order.transactionId = vnpParams.vnp_TransactionNo;
+    }
+
+    await order.save();
+
+    emitOrderUpdated(order);
+
+    return res.status(200).json({
+      RspCode: '00',
+      Message: 'Confirm Success',
+    });
+  } catch (error) {
+    console.error('[VNPay IPN] Error:', error);
+    return res.status(200).json({
+      RspCode: '99',
+      Message: 'Unknown error',
+    });
+  }
 });
 
-// ---------------------------------------------------------------------------
-// POST /api/v1/auth/payment/momo/ipn
-// MoMo Instant Payment Notification callback
-// ---------------------------------------------------------------------------
+router.get('/vnpay/return', async (req, res) => {
+  try {
+    const isValidSignature = verifyVnpaySignature(req.query);
+    const orderId = req.query.vnp_TxnRef;
+    const responseCode = req.query.vnp_ResponseCode;
+    const transactionStatus = req.query.vnp_TransactionStatus;
 
-router.post('/momo/ipn', (req, res) => {
-  console.log('[Payment] MoMo IPN received:', JSON.stringify(req.body));
+    if (!isValidSignature) {
+      console.error('[VNPay Return] Invalid signature');
+      return res.redirect(`${process.env.STORE_URL}/order/${orderId}?paymentStatus=invalid-signature`);
+    }
 
-  // TODO: Verify signature with HMAC-SHA256 using MOMO_SECRET_KEY
-  // TODO: Find order by orderId, update paymentStatus → 'paid'
-  // TODO: Emit order:updated socket event
+    const status =
+      responseCode === '00' && transactionStatus === '00'
+        ? 'success'
+        : 'failed';
 
-  res.status(200).json({ resultCode: 0, message: 'Success' });
-});
+    // Safe fallback to update order in case IPN is slightly delayed
+    const order = await Order.findById(orderId);
+    if (order) {
+      if (status === 'success') {
+        if (order.paymentStatus !== 'paid') {
+          order.paymentStatus = 'paid';
+          order.status = 'confirmed';
+          order.transactionId = req.query.vnp_TransactionNo;
+          order.vnpayTransactionNo = req.query.vnp_TransactionNo;
+          order.vnpayBankCode = req.query.vnp_BankCode;
+          order.vnpayPayDate = req.query.vnp_PayDate;
+          order.paidAt = new Date();
+          await order.save();
+          emitOrderUpdated(order);
+        }
+      } else {
+        if (order.paymentStatus === 'unpaid') {
+          order.paymentStatus = 'failed';
+          order.transactionId = req.query.vnp_TransactionNo;
+          await order.save();
+          emitOrderUpdated(order);
+        }
+      }
+    }
 
-// ---------------------------------------------------------------------------
-// POST /api/v1/auth/payment/stripe/webhook
-// Stripe webhook (raw body required — configure in index.js if needed)
-// ---------------------------------------------------------------------------
-
-router.post('/stripe/webhook', (req, res) => {
-  console.log('[Payment] Stripe webhook received');
-
-  // TODO: Verify Stripe-Signature header using stripe.webhooks.constructEvent()
-  // TODO: Handle payment_intent.succeeded → update order paymentStatus → 'paid'
-  // TODO: Handle payment_intent.payment_failed → handle accordingly
-  // TODO: Emit order:updated socket event
-
-  res.status(200).json({ received: true });
+    return res.redirect(
+      `${process.env.STORE_URL}/order/${orderId}?paymentStatus=${status}`
+    );
+  } catch (error) {
+    console.error('[VNPay Return] Error:', error);
+    const orderId = req.query.vnp_TxnRef;
+    if (orderId) {
+      return res.redirect(`${process.env.STORE_URL}/order/${orderId}?paymentStatus=error`);
+    }
+    return res.redirect(`${process.env.STORE_URL}/profile?tab=orders`);
+  }
 });
 
 module.exports = router;

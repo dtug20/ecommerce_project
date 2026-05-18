@@ -16,4 +16,10 @@ module.exports.secret = {
   stripe_key: process.env.STRIPE_KEY,
   client_url: process.env.STORE_URL,
   admin_url: process.env.ADMIN_URL,
+
+  vnpay_tmn_code: process.env.VNPAY_TMN_CODE,
+  vnpay_hash_secret: process.env.VNPAY_HASH_SECRET,
+  vnpay_url: process.env.VNPAY_URL,
+  vnpay_return_url: process.env.VNPAY_RETURN_URL,
+  vnpay_ipn_url: process.env.VNPAY_IPN_URL,
 }

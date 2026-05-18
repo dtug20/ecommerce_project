@@ -12,6 +12,7 @@ import ShopBreadcrumb from "@/components/breadcrumb/shop-breadcrumb";
 import { useGetUserOrderByIdQuery } from "@/redux/features/order/orderApi";
 import useCurrency from "@/hooks/use-currency";
 import { OrderStatusStepper } from "@/components/clicon/composites";
+import { notifyError, notifySuccess } from "@/utils/toast";
 
 // ── Status helpers ───────────────────────────────────────────────────
 function getStepIndex(status) {
@@ -101,6 +102,27 @@ const SingleOrder = ({ params }) => {
   const { t } = useTranslation();
   const { formatPrice } = useCurrency();
   const { data: orderData, isError, isLoading } = useGetUserOrderByIdQuery(orderId);
+
+  React.useEffect(() => {
+    if (router.query.paymentStatus) {
+      if (router.query.paymentStatus === "success") {
+        notifySuccess("Thanh toán đơn hàng qua VNPay thành công!");
+      } else if (router.query.paymentStatus === "failed") {
+        notifyError("Thanh toán VNPay thất bại hoặc đã bị hủy.");
+      } else if (router.query.paymentStatus === "invalid-signature") {
+        notifyError("Chữ ký phản hồi thanh toán không hợp lệ.");
+      } else if (router.query.paymentStatus === "error") {
+        notifyError("Đã xảy ra lỗi trong quá trình xử lý thanh toán.");
+      }
+
+      // Clean query parameters from URL
+      const { paymentStatus, ...restQuery } = router.query;
+      router.replace({
+        pathname: router.pathname,
+        query: { ...restQuery }
+      }, undefined, { shallow: true });
+    }
+  }, [router.query.paymentStatus]);
 
   const breadcrumbLinks = [
     { label: t("breadcrumb.home"), href: "/" },

@@ -6,6 +6,7 @@ const Coupon = require("../model/Coupon");
 const { emitOrderCreated, emitOrderUpdated } = require("../utils/socketEmitter");
 const PaymentService = require("../services/paymentService");
 const { sendTemplatedEmail } = require("../utils/emailService");
+const { buildPaymentUrl } = require("../utils/vnpay");
 
 // create-payment-intent - DISABLED (Stripe removed)
 exports.paymentIntent = async (req, res, next) => {
@@ -32,9 +33,23 @@ exports.addOrder = async (req, res, next) => {
 
     // Validate required fields
     if (!cart || !name || !totalAmount || !paymentMethod) {
+      console.error("[addOrder Error] Missing required order fields:", {
+        hasCart: !!cart,
+        cartLength: cart ? cart.length : 0,
+        name: name,
+        totalAmount: totalAmount,
+        paymentMethod: paymentMethod,
+        bodyKeys: Object.keys(req.body)
+      });
       return res.status(400).json({
         status: "fail",
         error: "Missing required order fields",
+        details: {
+          hasCart: !!cart,
+          hasName: !!name,
+          hasTotalAmount: !!totalAmount,
+          hasPaymentMethod: !!paymentMethod,
+        }
       });
     }
 
@@ -48,6 +63,7 @@ exports.addOrder = async (req, res, next) => {
     // For unimplemented gateways (VNPay, MoMo, Stripe) that return success:false,
     // reject the order rather than create it with a failed payment status
     if (!paymentResult.success && !['COD', 'bank-transfer'].includes(paymentMethod)) {
+      console.error("[addOrder Error] Payment processing failed:", paymentResult);
       return res.status(400).json({
         status: "fail",
         error: paymentResult.error || "Payment processing failed",
@@ -138,10 +154,28 @@ exports.addOrder = async (req, res, next) => {
       shippingAddress: `${address}, ${city}, ${country} ${zipCode}`,
     }).catch((err) => console.error('[email] order-confirmation send error:', err.message));
 
+    let paymentUrl = null;
+    if (paymentMethod === 'vnpay') {
+      const ipAddr =
+        req.headers['x-forwarded-for'] ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        req.ip ||
+        '127.0.0.1';
+
+      paymentUrl = buildPaymentUrl({
+        order: orderItems,
+        ipAddr,
+        bankCode: req.body.paymentData?.bankCode,
+        locale: req.body.paymentData?.locale || 'vn',
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: "Order added successfully",
       order: orderItems,
+      ...(paymentUrl && { paymentUrl }),
       ...(paymentResult.bankDetails && { bankDetails: paymentResult.bankDetails }),
       ...(appliedCoupon && { appliedCoupon }),
     });

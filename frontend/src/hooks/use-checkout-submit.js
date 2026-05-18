@@ -246,6 +246,11 @@ const useCheckoutSubmit = () => {
     }).then(res => {
       if (res?.error) {
         setIsCheckoutSubmit(false);
+      } else if (res.data?.paymentUrl) {
+        // VNPay flow: redirect to VNPay gateway
+        localStorage.removeItem("cart_products");
+        localStorage.removeItem("couponInfo");
+        window.location.href = res.data.paymentUrl;
       } else if (res.data?.bankDetails) {
         // Bank-transfer flow: surface bank details on the order page
         setBankDetails(res.data.bankDetails);
