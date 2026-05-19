@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { useTranslation } from "react-i18next";
 import { useKeycloak } from "@/components/providers/keycloak-provider";
 import keycloak from "@/lib/keycloak";
 import Loader from "@/components/loader/loader";
@@ -7,32 +8,120 @@ import Loader from "@/components/loader/loader";
 const LoginPage = () => {
   const router = useRouter();
   const kc = useKeycloak();
+  const { t } = useTranslation();
+  const [redirecting, setRedirecting] = useState(false);
+
+  const rawRedirect = router.query.redirect;
+  const safeRedirect =
+    typeof rawRedirect === "string" &&
+    rawRedirect.startsWith("/") &&
+    !rawRedirect.includes("://")
+      ? rawRedirect
+      : "/";
 
   useEffect(() => {
-    // Wait until Keycloak has initialized
     if (!kc?.initialized) return;
-
-    // Validate redirect param to prevent open redirect attacks
-    const rawRedirect = router.query.redirect;
-    const safeRedirect = (typeof rawRedirect === 'string' && rawRedirect.startsWith('/') && !rawRedirect.includes('://'))
-      ? rawRedirect
-      : '/';
-
     if (keycloak.authenticated) {
       router.push(safeRedirect);
-    } else {
-      keycloak.login({
-        redirectUri: window.location.origin + safeRedirect,
-      });
     }
-  }, [kc?.initialized, router]);
+  }, [kc?.initialized, router, safeRedirect]);
+
+  const loginWithGoogle = () => {
+    setRedirecting(true);
+    keycloak.login({
+      idpHint: "google",
+      redirectUri: window.location.origin + safeRedirect,
+    });
+  };
+
+  const loginWithEmail = () => {
+    setRedirecting(true);
+    keycloak.login({
+      redirectUri: window.location.origin + safeRedirect,
+    });
+  };
+
+  if (!kc?.initialized || redirecting) {
+    return (
+      <div
+        className="d-flex align-items-center justify-content-center"
+        style={{ height: "100vh" }}
+      >
+        <Loader spinner="fade" loading={true} />
+      </div>
+    );
+  }
 
   return (
     <div
       className="d-flex align-items-center justify-content-center"
-      style={{ height: "100vh" }}
+      style={{ minHeight: "100vh", padding: "16px", backgroundColor: "#f8f9fa" }}
     >
-      <Loader spinner="fade" loading={true} />
+      <div
+        className="card shadow-sm border-0"
+        style={{ width: "100%", maxWidth: "400px" }}
+      >
+        <div className="card-body p-4">
+          <h3 className="text-center mb-4" style={{ fontWeight: 600 }}>
+            {t("auth.signIn")}
+          </h3>
+
+          <button
+            type="button"
+            onClick={loginWithGoogle}
+            className="btn w-100 mb-3 d-flex align-items-center justify-content-center"
+            style={{
+              border: "1px solid #dadce0",
+              background: "#fff",
+              color: "#3c4043",
+              fontWeight: 500,
+              padding: "10px 16px",
+            }}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              style={{ marginRight: "12px", flexShrink: 0 }}
+              aria-hidden="true"
+            >
+              <path
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                fill="#4285F4"
+              />
+              <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#34A853"
+              />
+              <path
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                fill="#FBBC05"
+              />
+              <path
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                fill="#EA4335"
+              />
+            </svg>
+            {t("auth.continueWithGoogle")}
+          </button>
+
+          <div
+            className="text-center my-3 text-muted"
+            style={{ fontSize: "13px" }}
+          >
+            {t("auth.orContinueWith")}
+          </div>
+
+          <button
+            type="button"
+            onClick={loginWithEmail}
+            className="btn btn-outline-primary w-100"
+            style={{ padding: "10px 16px", fontWeight: 500 }}
+          >
+            {t("auth.signInWithEmail")}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

@@ -158,7 +158,29 @@
     "expireDate": "Expire Date",
     "noItemsInCart": "No items found in cart to checkout",
     "loginPrompt": "Returning customer?",
-    "clickHereToLogin": "Click here to login"
+    "clickHereToLogin": "Click here to login",
+    "returnToShop": "Return to shop",
+    "billingInfo": "Billing Information",
+    "userName": "User name",
+    "firstNamePlaceholder": "First name",
+    "lastNamePlaceholder": "Last name",
+    "companyName": "Company Name",
+    "optionalSuffix": "(Optional)",
+    "addressPlaceholder": "House number and street name",
+    "selectPlaceholder": "Select...",
+    "regionState": "Region/State",
+    "emailPlaceholder": "Email address",
+    "phonePlaceholder": "Phone number",
+    "shipDifferentAddress": "Ship into different address",
+    "orderNotesPlaceholder": "Notes about your order, e.g. special notes for delivery",
+    "couponPlaceholder": "Enter coupon code",
+    "savedAddresses": "Saved Addresses",
+    "additionalInfo": "Additional Information",
+    "cvc": "CVC",
+    "haveCoupon": "Have a coupon?",
+    "clickHereToEnterCode": "Click here to enter your code",
+    "addressDefault": "Default",
+    "useDifferentAddress": "+ Use a different address"
   },
   "auth": {
     "login": "Login",
@@ -172,7 +194,11 @@
     "haveAccount": "Already have an account?",
     "signUp": "Sign Up",
     "resetPassword": "Reset Password",
-    "sendResetLink": "Send Reset Link"
+    "sendResetLink": "Send Reset Link",
+    "signIn": "Sign in",
+    "continueWithGoogle": "Continue with Google",
+    "orContinueWith": "Or continue with",
+    "signInWithEmail": "Sign in with email"
   },
   "common": {
     "search": "Search Products...",
@@ -233,6 +259,8 @@
     "noMatch": "Sorry, nothing matched your search terms"
   },
   "error": {
+    "generic": "There was an error",
+    "uploadFailed": "Upload failed",
     "title": "Page Not Found",
     "message": "The page you are looking for does not exist.",
     "backHome": "Back to Home",
@@ -241,8 +269,43 @@
     "goBack": "Go Back",
     "goHome": "Go to Home"
   },
+  "coupon": {
+    "noCouponsFound": "No Coupons found!",
+    "copied": "Copied!",
+    "copy": "Copy",
+    "offMinimum": "off — min. {{amount}}",
+    "availableCoupons": "Available Coupons",
+    "off": "off",
+    "onOrdersOver": "on orders over {{amount}}",
+    "appliesTo": "On",
+    "expires": "Expires",
+    "apply": "Apply"
+  },
+  "aria": {
+    "closeMenu": "Close menu",
+    "noImageAvailable": "No image available",
+    "noCategoryImage": "No category image",
+    "search": "Search",
+    "shareOnWhatsapp": "Share on WhatsApp",
+    "shareOnFacebook": "Share on Facebook",
+    "shareOnTwitter": "Share on Twitter",
+    "shareOnLinkedin": "Share on LinkedIn",
+    "shareOnPinterest": "Share on Pinterest",
+    "copyLink": "Copy link",
+    "previousThumbnails": "Previous thumbnails",
+    "nextThumbnails": "Next thumbnails",
+    "previousCategories": "Previous categories",
+    "nextCategories": "Next categories",
+    "dismiss": "Dismiss",
+    "close": "Close"
+  },
+  "review": {
+    "writePlaceholder": "Write your review here...",
+    "yourName": "Your Name"
+  },
   "hero": {
     "shopNow": "SHOP NOW",
+    "priceFrom": "From",
     "slide1Subtitle": "Starting at only",
     "slide1Title": "Best Collection For Home Decoration",
     "slide1Desc": "Exclusive design and premium quality furniture for your living space.",
