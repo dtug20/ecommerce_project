@@ -58,7 +58,28 @@ const keycloak = new Keycloak({ store: memoryStore }, {
   },
 });
 
-app.use(keycloak.middleware({ logout: '/logout', admin: '/' }));
+// Disable keycloak-connect's built-in logout handler — it builds the
+// post_logout_redirect_uri without the /admin prefix, so after Keycloak signs
+// the user out they land on the frontend root. We register a custom /logout
+// route below that points back to the CRM entry, where the next request
+// triggers a fresh Keycloak login.
+app.use(keycloak.middleware({ logout: '/_kc_logout_disabled', admin: '/' }));
+
+app.get('/logout', (req, res) => {
+  const realm = process.env.KEYCLOAK_REALM || 'shofy';
+  const baseUrl = process.env.KEYCLOAK_BASE_URL || 'http://localhost:8180';
+  const clientId = process.env.KEYCLOAK_CRM_CLIENT_ID || 'shofy-crm';
+  const postLogoutUri = `${req.protocol}://${req.get('host')}${CRM_PUBLIC_PREFIX || ''}/`;
+  const idTokenHint = req.kauth?.grant?.id_token?.token;
+  const params = new URLSearchParams({
+    post_logout_redirect_uri: postLogoutUri,
+    client_id: clientId,
+  });
+  if (idTokenHint) params.set('id_token_hint', idTokenHint);
+  const logoutUrl = `${baseUrl}/realms/${realm}/protocol/openid-connect/logout?${params.toString()}`;
+  const done = () => res.redirect(logoutUrl);
+  req.session ? req.session.destroy(done) : done();
+});
 
 // ─── Middleware ─────────────────────────────────────────────────
 
