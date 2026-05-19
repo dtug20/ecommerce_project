@@ -8,6 +8,23 @@ require('dotenv').config();
 
 const app = express();
 
+// ─── Reverse proxy awareness ───────────────────────────────────
+// nginx terminates TLS and forwards `/admin/*` → CRM at `/*` (strips prefix).
+// 1. trust proxy   → req.protocol reflects X-Forwarded-Proto (https)
+// 2. originalUrl re-prepend `/admin` → keycloak-connect builds the right
+//    redirect_uri (matching the Keycloak client's allowed redirect URIs)
+//    without forcing CRM routes to be mounted under /admin.
+app.set('trust proxy', true);
+const CRM_PUBLIC_PREFIX = process.env.CRM_PUBLIC_PREFIX || '';
+if (CRM_PUBLIC_PREFIX) {
+  app.use((req, _res, next) => {
+    if (!req.originalUrl.startsWith(CRM_PUBLIC_PREFIX)) {
+      req.originalUrl = CRM_PUBLIC_PREFIX + req.originalUrl;
+    }
+    next();
+  });
+}
+
 // ─── Session + Keycloak Setup ───────────────────────────────────
 
 const memoryStore = new session.MemoryStore();
