@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Email service — wraps nodemailer with template-based sending.
+ * Email service — wraps nodemailer with file-based template sending.
  *
  * nodemailer is an optional peer dependency.  If it is not installed the
  * service logs a warning and silently no-ops so the rest of the application
@@ -12,16 +12,15 @@
  *   Set EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS in backend/.env
  */
 
-const EmailTemplate = require('../model/EmailTemplate');
-const { renderTemplate } = require('./emailRenderer');
+const { getTemplate } = require('./emailTemplates');
 
-// ── env vars (not in secret.js yet, read directly) ──────────────────────────
+// ── env vars ─────────────────────────────────────────────────────────────────
 const EMAIL_HOST = process.env.EMAIL_HOST || process.env.SERVICE || 'smtp.gmail.com';
 const EMAIL_PORT = parseInt(process.env.EMAIL_PORT, 10) || 587;
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_PASS;
 
-// ── try to load nodemailer (optional dep) ───────────────────────────────────
+// ── try to load nodemailer (optional dep) ─────────────────────────────────────
 let transporter = null;
 
 try {
@@ -46,9 +45,9 @@ try {
 /**
  * Send a templated email.
  *
- * @param {string} templateSlug   Slug of the EmailTemplate document
+ * @param {string} templateSlug   Slug of the file-based template (e.g. 'order-confirmation')
  * @param {string} recipientEmail Recipient address
- * @param {Record<string,string>} data  Merge tag values
+ * @param {Record<string,string>} data  Template data values
  * @param {'en'|'vi'} [language='en']  Preferred language
  * @returns {Promise<void>}
  */
@@ -58,21 +57,16 @@ async function sendTemplatedEmail(templateSlug, recipientEmail, data, language =
     return;
   }
 
-  const template = await EmailTemplate.findOne({ slug: templateSlug, status: 'active' });
-  if (!template) {
-    console.warn(`[emailService] Template '${templateSlug}' not found or inactive — skipping email`);
+  let tpl;
+  try {
+    tpl = getTemplate(templateSlug);
+  } catch (err) {
+    console.warn(`[emailService] ${err.message} — skipping email`);
     return;
   }
 
-  const subject =
-    language === 'vi' && template.subjectVi
-      ? renderTemplate(template.subjectVi, data)
-      : renderTemplate(template.subject, data);
-
-  const html =
-    language === 'vi' && template.bodyVi
-      ? renderTemplate(template.bodyVi, data)
-      : renderTemplate(template.body, data);
+  const subject = tpl.subject(data, language);
+  const html    = tpl.html(data, language);
 
   await transporter.sendMail({
     from: EMAIL_USER,
