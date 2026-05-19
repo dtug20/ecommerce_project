@@ -18,9 +18,7 @@ const { validate } = require('../../../middleware/validate');
 const v = require('../../../validations');
 const ctrl = require('../../../controller/v1/admin.controller');
 const cmsCtrl = require('../../../controller/v1/cms.controller');
-const reviewCtrl = require('../../../controller/v1/review.controller');
 const analyticsCtrl = require('../../../controller/v1/analytics.controller');
-const emailTemplateCtrl = require('../../../controller/v1/email-template.controller');
 const activityLogCtrl = require('../../../controller/v1/activityLog.controller');
 const chatbotAdminCtrl = require('../../../controller/v1/chatbot-admin.controller');
 const { logActivity } = require('../../../middleware/activityLog');
@@ -416,50 +414,6 @@ router.get('/analytics/recent-orders',     analyticsCtrl.getRecentOrders);
 router.get('/analytics/dashboard-amount',  ctrl.getDashboardAmount);
 
 // ---------------------------------------------------------------------------
-// Pages — CMS Phase 2
-// ---------------------------------------------------------------------------
-
-/**
- * @swagger
- * /api/v1/admin/pages:
- *   get:
- *     summary: List CMS pages
- *     tags: [Admin CMS]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Page list
- *   post:
- *     summary: Create CMS page
- *     tags: [Admin CMS]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       201:
- *         description: Page created
- *       422:
- *         description: Validation error
- */
-router.get('/pages',                  cmsCtrl.listPages);
-router.get('/pages/:id',              cmsCtrl.getPage);
-router.post('/pages',                 authorization('admin', 'manager'), validate(v.createPage), logActivity('create', 'page'), cmsCtrl.createPage);
-router.post('/pages/:id/duplicate',   authorization('admin', 'manager'), cmsCtrl.duplicatePage);
-router.patch('/pages/:id/blocks',     authorization('admin', 'manager'), logActivity('update', 'page'), cmsCtrl.updatePageBlocks);
-router.patch('/pages/:id',            authorization('admin', 'manager'), validate(v.updatePage), logActivity('update', 'page'), cmsCtrl.updatePage);
-router.delete('/pages/:id',           authorization('admin', 'manager'), logActivity('delete', 'page'), cmsCtrl.deletePage);
-
-// ---------------------------------------------------------------------------
-// Menus — CMS Phase 2
-// ---------------------------------------------------------------------------
-
-router.get('/menus',         cmsCtrl.listMenus);
-router.get('/menus/:id',     cmsCtrl.getMenu);
-router.post('/menus',        authorization('admin', 'manager'), validate(v.createMenu), logActivity('create', 'menu'), cmsCtrl.createMenu);
-router.patch('/menus/:id',   authorization('admin', 'manager'), validate(v.updateMenu), logActivity('update', 'menu'), cmsCtrl.updateMenu);
-router.delete('/menus/:id',  authorization('admin', 'manager'), logActivity('delete', 'menu'), cmsCtrl.deleteMenu);
-
-// ---------------------------------------------------------------------------
 // Banners — CMS Phase 2
 // Note: /banners/priority must be declared before /banners/:id
 // ---------------------------------------------------------------------------
@@ -490,28 +444,6 @@ router.delete('/blog/:id',           authorization('admin', 'manager'), logActiv
 
 router.get('/settings',     cmsCtrl.getSettings);
 router.patch('/settings',   authorization('admin', 'manager'), logActivity('update', 'setting'), cmsCtrl.updateSettings);
-
-// ---------------------------------------------------------------------------
-// Reviews — Phase 3
-// ---------------------------------------------------------------------------
-
-router.get('/reviews',                                          reviewCtrl.listReviews);
-router.get('/reviews/:id',                                      reviewCtrl.getReview);
-router.get('/products/:productId/reviews',                      reviewCtrl.getProductReviews);
-router.patch('/reviews/:id/approve',   authorization('admin', 'manager'), reviewCtrl.approveReview);
-router.patch('/reviews/:id/reject',    authorization('admin', 'manager'), validate(v.rejectReview), reviewCtrl.rejectReview);
-router.post('/reviews/:id/reply',      authorization('admin', 'manager'), validate(v.replyToReview), reviewCtrl.replyToReview);
-router.delete('/reviews/:id',          authorization('admin', 'manager'), reviewCtrl.deleteReview);
-
-// ---------------------------------------------------------------------------
-// Email Templates — Phase 4
-// ---------------------------------------------------------------------------
-
-router.get('/email-templates',              emailTemplateCtrl.listTemplates);
-router.get('/email-templates/:id',          emailTemplateCtrl.getTemplate);
-router.patch('/email-templates/:id',        authorization('admin', 'manager'), logActivity('update', 'email-template'), emailTemplateCtrl.updateTemplate);
-router.post('/email-templates/:id/preview', authorization('admin', 'manager'), emailTemplateCtrl.previewTemplate);
-router.post('/email-templates/:id/test',    authorization('admin', 'manager'), emailTemplateCtrl.testTemplate);
 
 // ---------------------------------------------------------------------------
 // Activity Log — Phase 4
