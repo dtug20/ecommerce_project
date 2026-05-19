@@ -93,22 +93,6 @@ export const initSocket = (store) => {
     if (invalidateCallbacks.user) invalidateCallbacks.user();
   });
 
-  // CMS Page events
-  socket.on('page:created', () => {
-    if (invalidateCallbacks.page) invalidateCallbacks.page();
-  });
-  socket.on('page:updated', () => {
-    if (invalidateCallbacks.page) invalidateCallbacks.page();
-  });
-  socket.on('page:deleted', () => {
-    if (invalidateCallbacks.page) invalidateCallbacks.page();
-  });
-
-  // Menu events
-  socket.on('menu:updated', () => {
-    if (invalidateCallbacks.menu) invalidateCallbacks.menu();
-  });
-
   // Banner events
   socket.on('banner:created', () => {
     if (invalidateCallbacks.banner) invalidateCallbacks.banner();
@@ -165,12 +149,6 @@ const registerInvalidateCallback = (resourceType, callback) => {
  *   registerCmsInvalidations(store, apiSlice);
  */
 export const registerCmsInvalidations = (store, api) => {
-  registerInvalidateCallback('page', () =>
-    store.dispatch(api.util.invalidateTags(['Page']))
-  );
-  registerInvalidateCallback('menu', () =>
-    store.dispatch(api.util.invalidateTags(['Menu']))
-  );
   registerInvalidateCallback('banner', () =>
     store.dispatch(api.util.invalidateTags(['Banners']))
   );

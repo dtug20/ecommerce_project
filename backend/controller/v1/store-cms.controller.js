@@ -7,93 +7,11 @@
  * No authentication required. Only published / active content is exposed.
  */
 
-const Page = require('../../model/Page');
-const Menu = require('../../model/Menu');
 const Banner = require('../../model/Banner');
 const BlogPost = require('../../model/BlogPost');
 const SiteSetting = require('../../model/SiteSetting');
 const respond = require('../../utils/respond');
 const { getPaginationParams, buildPagination } = require('../../utils/pagination');
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Recursively filter out menu items where isVisible === false.
- * Also filters children of each item.
- * @param {Array} items
- * @returns {Array}
- */
-const filterVisibleItems = (items) => {
-  if (!Array.isArray(items)) return [];
-  return items
-    .filter((item) => item.isVisible !== false)
-    .map((item) => {
-      const filtered = { ...item };
-      if (Array.isArray(item.children) && item.children.length > 0) {
-        filtered.children = filterVisibleItems(item.children);
-      }
-      return filtered;
-    });
-};
-
-// ---------------------------------------------------------------------------
-// Pages
-// ---------------------------------------------------------------------------
-
-/**
- * GET /api/v1/store/pages/:slug
- * Returns a published page by its slug. Blocks are sorted by their order field.
- */
-exports.getPageBySlug = async (req, res, next) => {
-  try {
-    const page = await Page.findOne({ slug: req.params.slug, status: 'published' });
-
-    if (!page) {
-      return respond.notFound(res, 'PAGE_NOT_FOUND', 'Page not found or not published');
-    }
-
-    // Sort blocks by their order field ascending
-    const pageObj = page.toObject();
-    if (Array.isArray(pageObj.blocks)) {
-      pageObj.blocks = pageObj.blocks.sort((a, b) => (a.order || 0) - (b.order || 0));
-    }
-
-    return respond.success(res, pageObj, 'Page retrieved successfully');
-  } catch (err) {
-    next(err);
-  }
-};
-
-// ---------------------------------------------------------------------------
-// Menus
-// ---------------------------------------------------------------------------
-
-/**
- * GET /api/v1/store/menus/:location
- * Returns the active menu for a given location. Invisible items are filtered out.
- */
-exports.getMenuByLocation = async (req, res, next) => {
-  try {
-    const menu = await Menu.findOne({
-      location: req.params.location,
-      status: 'active',
-    });
-
-    if (!menu) {
-      // Return empty menu instead of 404 — frontend calls this on every page load
-      return respond.success(res, { items: [], location: req.params.location }, 'No menu configured for this location');
-    }
-
-    const menuObj = menu.toObject();
-    menuObj.items = filterVisibleItems(menuObj.items);
-
-    return respond.success(res, menuObj, 'Menu retrieved successfully');
-  } catch (err) {
-    next(err);
-  }
-};
 
 // ---------------------------------------------------------------------------
 // Banners

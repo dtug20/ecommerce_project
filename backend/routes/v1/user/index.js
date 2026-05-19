@@ -162,7 +162,7 @@ router.post('/orders',    validate(v.createOrder), ctrl.createOrder);
  *                 type: string
  *     responses:
  *       201:
- *         description: Review submitted for moderation
+ *         description: Review submitted successfully
  *       422:
  *         description: Validation error
  */

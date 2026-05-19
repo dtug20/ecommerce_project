@@ -2,7 +2,6 @@ import SEO from "@/components/seo";
 import Wrapper from "@/layout/wrapper";
 import HeaderClicon from "@/layout/headers/header-clicon";
 import FooterClicon from "@/layout/footers/footer-clicon";
-import BlockRenderer from "@/components/cms/BlockRenderer";
 import JsonLd from "@/components/seo/JsonLd";
 import { organizationJsonLd } from "@/utils/structuredData";
 // Clicon homepage sections
@@ -18,36 +17,36 @@ import CliconProductColumns from "@/components/clicon/products/clicon-product-co
 import CliconBlogArea from "@/components/clicon/blog/clicon-blog-area";
 import CliconNewsletter from "@/components/clicon/newsletter/clicon-newsletter";
 
-// Clicon fallback layout
-function FallbackHomeClicon() {
-  return (
-    <>
-      <CliconHeroArea />
-      <CliconFeaturesBar />
-      <CliconBestDeals />
-      <CliconCategoryShowcase />
-      <CliconFeaturedProducts />
-      <CliconDoubleBanner />
-      <CliconProductSectionWithPromo title="Computer Accessories" productType="electronics" queryType="new" />
-      <CliconFullWidthBanner />
-      <CliconProductColumns />
-      <CliconBlogArea />
-      <CliconNewsletter />
-    </>
-  );
+const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:7001";
+
+async function safeFetch(url) {
+  try {
+    const r = await fetch(url);
+    if (!r.ok) return null;
+    return await r.json();
+  } catch {
+    return null;
+  }
 }
 
-export default function Home({ page, settings }) {
-  const hasCmsContent = page && page.blocks && page.blocks.length > 0;
+export async function getServerSideProps() {
+  const settingsRes = await safeFetch(`${API}/api/v1/store/settings`);
 
+  return {
+    props: {
+      settings: settingsRes?.data ?? null,
+    },
+  };
+}
+
+export default function Home({ settings }) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
 
   return (
     <Wrapper>
       <SEO
-        pageTitle={page?.seo?.metaTitle || settings?.siteName || "Home"}
+        pageTitle={settings?.siteName || "Home"}
         description={
-          page?.seo?.metaDescription ||
           settings?.siteDescription ||
           "Shop electronics, fashion, beauty and more at Shofy"
         }
@@ -55,31 +54,23 @@ export default function Home({ page, settings }) {
       />
       <JsonLd data={organizationJsonLd(siteUrl)} />
       <HeaderClicon />
-      {hasCmsContent ? (
-        <BlockRenderer blocks={page.blocks} />
-      ) : (
-        <FallbackHomeClicon />
-      )}
+      <main>
+        <CliconHeroArea />
+        <CliconFeaturesBar />
+        <CliconBestDeals />
+        <CliconCategoryShowcase />
+        <CliconFeaturedProducts />
+        <CliconDoubleBanner />
+        <CliconProductSectionWithPromo
+          productType="electronics"
+          queryType="new"
+        />
+        <CliconFullWidthBanner />
+        <CliconProductColumns />
+        <CliconBlogArea />
+        <CliconNewsletter />
+      </main>
       <FooterClicon />
     </Wrapper>
   );
-}
-
-export async function getServerSideProps() {
-  const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:7001';
-  let page = null;
-  let settings = null;
-
-  try {
-    const [pageRes, settingsRes] = await Promise.all([
-      fetch(`${API_URL}/api/v1/store/pages/home`).then((r) => (r.ok ? r.json() : null)),
-      fetch(`${API_URL}/api/v1/store/settings`).then((r) => (r.ok ? r.json() : null)),
-    ]);
-    page = pageRes?.data || null;
-    settings = settingsRes?.data || null;
-  } catch (err) {
-    console.error('[Home SSR] Error fetching CMS data:', err.message);
-  }
-
-  return { props: { page, settings } };
 }

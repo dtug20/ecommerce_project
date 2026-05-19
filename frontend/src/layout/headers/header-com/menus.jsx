@@ -2,8 +2,6 @@ import React from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useGetShowCategoryQuery } from "@/redux/features/categoryApi";
-import { useGetMenuQuery } from "@/redux/features/cmsApi";
-import DynamicMenu from "@/components/cms/DynamicMenu";
 
 const MAX_MENU_CATEGORIES = 5;
 
@@ -12,15 +10,8 @@ const buildCategorySlug = (title) =>
 
 const Menus = () => {
   const { t } = useTranslation();
-  const { data: cmsMenu, isLoading: menuLoading } = useGetMenuQuery('header-main');
   const { data: categories, isError, isLoading } = useGetShowCategoryQuery();
 
-  // If CMS menu is available and has items, use it
-  if (!menuLoading && cmsMenu?.data?.items?.length > 0) {
-    return <DynamicMenu items={cmsMenu.data.items} />;
-  }
-
-  // Fallback to category-based menu
   const category_items = categories?.result || [];
   let menuCategories = [...category_items]
     .filter((cat) => cat.featured)

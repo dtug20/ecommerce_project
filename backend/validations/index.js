@@ -33,8 +33,6 @@ module.exports = {
 
   // Review
   createReview:  review.createReview,
-  replyToReview: review.replyToReview,
-  rejectReview:  review.rejectReview,
 
   // Coupon
   createCoupon: coupon.createCoupon,

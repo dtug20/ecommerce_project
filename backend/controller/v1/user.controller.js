@@ -87,7 +87,7 @@ exports.createOrder = (req, res, next) => {
 
 /**
  * POST /api/v1/user/reviews
- * Enhanced version: sets status pending, checks verified purchase, prevents duplicates.
+ * Creates an approved review, checks verified purchase, prevents duplicates.
  */
 exports.addReview = async (req, res, next) => {
   try {
@@ -128,7 +128,7 @@ exports.addReview = async (req, res, next) => {
       rating,
       comment: comment || '',
       images: images || [],
-      status: 'pending',
+      status: 'approved',
       isVerifiedPurchase,
     });
 
@@ -142,7 +142,7 @@ exports.addReview = async (req, res, next) => {
       global.io.emit('review:created', { review });
     }
 
-    return respond.created(res, review, 'Review submitted and awaiting moderation');
+    return respond.created(res, review, 'Review submitted successfully');
   } catch (err) {
     next(err);
   }

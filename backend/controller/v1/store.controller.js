@@ -12,6 +12,7 @@ const mongoose = require('mongoose');
 const respond = require('../../utils/respond');
 const productServices = require('../../services/product.service');
 const Product = require('../../model/Products');
+const Category = require('../../model/Category');
 const categoryServices = require('../../services/category.service');
 const brandService = require('../../services/brand.service');
 const Brand = require('../../model/Brand');
@@ -41,12 +42,23 @@ exports.getAllProducts = async (req, res, next) => {
     const q = req.query;
     const filter = {};
 
-    // category — try ObjectId match first, fall back to case-insensitive parent name
+    // category — accept ObjectId, slug, or raw parent name.
+    // Frontend slugifies parent as: lowercase, '&' stripped, spaces → '-'.
+    // Reverse it by resolving against Category.parent.
     if (q.category) {
       if (mongoose.Types.ObjectId.isValid(q.category)) {
         filter['category.id'] = new mongoose.Types.ObjectId(q.category);
       } else {
-        filter['parent'] = { $regex: q.category, $options: 'i' };
+        const slugify = (s) =>
+          String(s).toLowerCase().replace(/&/g, '').split(' ').filter(Boolean).join('-');
+        const cats = await Category.find({}, { _id: 1, parent: 1 }).lean();
+        const matched = cats.find((c) => slugify(c.parent) === q.category);
+        if (matched) {
+          filter.$or = [{ 'category.id': matched._id }, { parent: matched.parent }];
+        } else {
+          // Fallback: case-insensitive substring on parent (legacy behaviour)
+          filter.parent = { $regex: q.category, $options: 'i' };
+        }
       }
     }
 

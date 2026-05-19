@@ -55,7 +55,7 @@ const ReviewForm = ({ product_id }) => {
     );
   }
 
-  // Pending approval confirmation
+  // Post-submit confirmation
   if (submitted) {
     return (
       <div
@@ -108,21 +108,6 @@ const ReviewForm = ({ product_id }) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      {/* Moderation notice */}
-      <p
-        className="mb-15"
-        style={{
-          fontSize: '12px',
-          color: '#555',
-          padding: '8px 12px',
-          backgroundColor: '#fffbeb',
-          border: '1px solid #fde68a',
-          borderRadius: '4px',
-        }}
-      >
-        {t('review.moderationNotice')}
-      </p>
-
       <div className="tp-product-details-review-form-rating d-flex align-items-center">
         <p>{t('review.yourRating')}</p>
         <div className="tp-product-details-review-form-rating-icon d-flex align-items-center">
