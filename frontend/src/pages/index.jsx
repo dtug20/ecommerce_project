@@ -30,21 +30,10 @@ async function safeFetch(url) {
 }
 
 export async function getServerSideProps() {
-  const [bannersRes, categoriesRes, featuredRes, blogRes, settingsRes] =
-    await Promise.all([
-      safeFetch(`${API}/api/v1/store/banners?location=hero&limit=5`),
-      safeFetch(`${API}/api/v1/store/categories/tree`),
-      safeFetch(`${API}/api/v1/store/products?featured=true&limit=8`),
-      safeFetch(`${API}/api/v1/store/blog?limit=3`),
-      safeFetch(`${API}/api/v1/store/settings`),
-    ]);
+  const settingsRes = await safeFetch(`${API}/api/v1/store/settings`);
 
   return {
     props: {
-      banners: bannersRes?.data ?? [],
-      categories: categoriesRes?.data ?? [],
-      featured: featuredRes?.data ?? [],
-      blog: blogRes?.data ?? [],
       settings: settingsRes?.data ?? null,
     },
   };
@@ -73,7 +62,6 @@ export default function Home({ settings }) {
         <CliconFeaturedProducts />
         <CliconDoubleBanner />
         <CliconProductSectionWithPromo
-          title="Computer Accessories"
           productType="electronics"
           queryType="new"
         />
