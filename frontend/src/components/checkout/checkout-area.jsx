@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 // internal
 import CheckoutBillingArea from "./checkout-billing-area";
@@ -12,6 +13,7 @@ import CheckoutPaymentMethods from "./checkout-payment-methods";
 import useCheckoutSubmit from "@/hooks/use-checkout-submit";
 
 const CheckoutArea = () => {
+  const { t } = useTranslation();
   const checkoutData = useCheckoutSubmit();
   const {
     handleSubmit,
@@ -41,8 +43,8 @@ const CheckoutArea = () => {
       <div className="container">
         {cart_products.length === 0 && (
           <div className="cl-checkout__empty">
-            <h3>No items found in cart to checkout</h3>
-            <Link href="/shop">Return to shop</Link>
+            <h3>{t("checkout.noItemsInCart")}</h3>
+            <Link href="/shop">{t("checkout.returnToShop")}</Link>
           </div>
         )}
         {cart_products.length > 0 && (
@@ -65,17 +67,17 @@ const CheckoutArea = () => {
 
                 {/* Additional Information */}
                 <div className="cl-checkout__card">
-                  <h3 className="cl-checkout__section-title">Additional Information</h3>
+                  <h3 className="cl-checkout__section-title">{t("checkout.additionalInfo")}</h3>
                   <div className="cl-checkout__form-group">
                     <label className="cl-checkout__label">
-                      Order Notes <span className="optional">(Optional)</span>
+                      {t("checkout.orderNotes")} <span className="optional">{t("checkout.optionalSuffix")}</span>
                     </label>
                     <textarea
                       {...register("orderNote", { required: false })}
                       name="orderNote"
                       id="orderNote"
                       className="cl-checkout__textarea"
-                      placeholder="Notes about your order, e.g. special notes for delivery"
+                      placeholder={t("checkout.orderNotesPlaceholder")}
                     />
                   </div>
                 </div>

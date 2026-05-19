@@ -5,6 +5,7 @@ import { useGetProductTypeQuery } from '@/redux/features/productApi';
 import { useGetShowCategoryQuery } from '@/redux/features/categoryApi';
 import CliconDealProductCard from '@/components/clicon/deals/clicon-deal-product-card';
 import ErrorMsg from '@/components/common/error-msg';
+import useCurrency from '@/hooks/use-currency';
 
 const MAX_TABS = 4;
 
@@ -14,6 +15,7 @@ const CliconProductSectionWithPromo = ({
   queryType = 'new',
 }) => {
   const { t } = useTranslation();
+  const { formatPrice } = useCurrency();
   const [activeTab, setActiveTab] = useState('all');
 
   const {
@@ -129,7 +131,7 @@ const CliconProductSectionWithPromo = ({
                       {promoProduct.title}
                     </h4>
                     <p className="cl-product-section__promo-price">
-                      ${promoProduct.price?.toFixed(2)}
+                      {formatPrice(promoProduct.price)}
                     </p>
                     <Link
                       href={`/product-details/${promoProduct._id}`}

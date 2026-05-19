@@ -134,11 +134,11 @@ const CheckoutPaymentMethods = ({ selectedMethod, onMethodChange, bankDetails })
               />
             </div>
             <div className="cl-checkout__form-group">
-              <label className="cl-checkout__label">CVC</label>
+              <label className="cl-checkout__label">{t('checkout.cvc')}</label>
               <input
                 type="text"
                 className="cl-checkout__input"
-                placeholder="CVC"
+                placeholder={t('checkout.cvc')}
               />
             </div>
           </div>

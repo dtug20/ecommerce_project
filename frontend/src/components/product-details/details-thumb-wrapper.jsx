@@ -1,5 +1,6 @@
-import Image from "next/image";
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
+import SafeImage from "@/components/common/safe-image";
 const DetailsThumbWrapper = ({
   imageURLs,
   handleImageActive,
@@ -9,6 +10,7 @@ const DetailsThumbWrapper = ({
   videoId = false,
   status
 }) => {
+  const { t } = useTranslation();
   const thumbsRef = useRef(null);
 
   const scrollThumbs = (direction) => {
@@ -23,7 +25,7 @@ const DetailsThumbWrapper = ({
       <div className="cl-pd__gallery">
         {/* Main image */}
         <div className="cl-pd__gallery-main">
-          <Image
+          <SafeImage
             src={activeImg}
             alt="product img"
             width={imgWidth}
@@ -33,7 +35,7 @@ const DetailsThumbWrapper = ({
           />
           {status === 'out-of-stock' && (
             <div className="cl-pd__gallery-badge">
-              <span className="cl-badge cl-badge--soldout">Out of Stock</span>
+              <span className="cl-badge cl-badge--soldout">{t('product.outOfStock')}</span>
             </div>
           )}
         </div>
@@ -45,7 +47,7 @@ const DetailsThumbWrapper = ({
               type="button"
               className="cl-pd__gallery-arrow"
               onClick={() => scrollThumbs('left')}
-              aria-label="Previous thumbnails"
+              aria-label={t('aria.previousThumbnails')}
             >
               <i className="fa-solid fa-chevron-left" />
             </button>
@@ -58,7 +60,7 @@ const DetailsThumbWrapper = ({
                   className={`cl-pd__gallery-thumb${item.img === activeImg ? ' cl-pd__gallery-thumb--active' : ''}`}
                   onClick={() => handleImageActive(item)}
                 >
-                  <Image
+                  <SafeImage
                     src={item.img}
                     alt={`thumbnail ${i + 1}`}
                     width={80}
@@ -74,7 +76,7 @@ const DetailsThumbWrapper = ({
               type="button"
               className="cl-pd__gallery-arrow"
               onClick={() => scrollThumbs('right')}
-              aria-label="Next thumbnails"
+              aria-label={t('aria.nextThumbnails')}
             >
               <i className="fa-solid fa-chevron-right" />
             </button>

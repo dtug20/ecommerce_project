@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 const CheckoutCoupon = ({ handleCouponCode, couponRef, couponApplyMsg }) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const { coupon_info } = useSelector((state) => state.coupon);
 
   return (
     <div className="cl-checkout__coupon">
       <p className="cl-checkout__coupon-toggle">
-        Have a coupon?{" "}
+        {t("checkout.haveCoupon")}{" "}
         <button onClick={() => setIsOpen(!isOpen)} type="button">
-          Click here to enter your code
+          {t("checkout.clickHereToEnterCode")}
         </button>
       </p>
 
@@ -19,10 +21,10 @@ const CheckoutCoupon = ({ handleCouponCode, couponRef, couponApplyMsg }) => {
           <input
             ref={couponRef}
             type="text"
-            placeholder="Enter coupon code"
+            placeholder={t("checkout.couponPlaceholder")}
           />
           <button type="submit" className="cl-checkout__coupon-btn">
-            Apply
+            {t("coupon.apply")}
           </button>
         </form>
       )}

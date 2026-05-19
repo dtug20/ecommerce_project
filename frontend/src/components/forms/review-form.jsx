@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { Rating } from "react-simple-star-rating";
 import * as Yup from "yup";
 import Link from "next/link";
@@ -18,6 +19,7 @@ const schema = Yup.object().shape({
 });
 
 const ReviewForm = ({ product_id }) => {
+  const { t } = useTranslation();
   const { user } = useSelector((state) => state.auth);
   const [rating, setRating] = useState(0);
   const [submitted, setSubmitted] = useState(false);
@@ -43,11 +45,11 @@ const ReviewForm = ({ product_id }) => {
     return (
       <div className="tp-product-details-review-form">
         <p className="text-muted">
-          Please{' '}
+          {t('review.loginPrompt')}{' '}
           <Link href="/login" style={{ color: '#821F40', textDecoration: 'underline' }}>
-            sign in
+            {t('review.signInLink')}
           </Link>{' '}
-          to leave a review.
+          {t('review.loginPromptSuffix')}
         </p>
       </div>
     );
@@ -61,10 +63,10 @@ const ReviewForm = ({ product_id }) => {
         style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: '6px' }}
       >
         <p className="mb-0 fw-bold" style={{ color: '#15803d' }}>
-          Thank you! Your review is pending approval.
+          {t('review.pendingTitle')}
         </p>
         <p className="mb-0 mt-5" style={{ fontSize: '13px', color: '#555' }}>
-          Your review will be published after moderation.
+          {t('review.moderationNotice')}
         </p>
         <button
           type="button"
@@ -80,7 +82,7 @@ const ReviewForm = ({ product_id }) => {
             fontSize: '13px',
           }}
         >
-          Write another review
+          {t('review.writeAnother')}
         </button>
       </div>
     );
@@ -118,11 +120,11 @@ const ReviewForm = ({ product_id }) => {
           borderRadius: '4px',
         }}
       >
-        Your review will be published after moderation.
+        {t('review.moderationNotice')}
       </p>
 
       <div className="tp-product-details-review-form-rating d-flex align-items-center">
-        <p>Your Rating :</p>
+        <p>{t('review.yourRating')}</p>
         <div className="tp-product-details-review-form-rating-icon d-flex align-items-center">
           <Rating onClick={handleRating} allowFraction size={16} initialValue={rating} />
         </div>
@@ -134,11 +136,11 @@ const ReviewForm = ({ product_id }) => {
               {...register("comment", { required: `Comment is required!` })}
               id="comment"
               name="comment"
-              placeholder="Write your review here..."
+              placeholder={t('review.writePlaceholder')}
             />
           </div>
           <div className="tp-product-details-review-input-title">
-            <label htmlFor="comment">Your Review</label>
+            <label htmlFor="comment">{t('review.yourReview')}</label>
           </div>
           <ErrorMsg msg={errors.comment?.message} />
         </div>
@@ -149,12 +151,12 @@ const ReviewForm = ({ product_id }) => {
               name="name"
               id="name"
               type="text"
-              placeholder="Your Name"
+              placeholder={t('review.yourName')}
               defaultValue={user?.name || ''}
             />
           </div>
           <div className="tp-product-details-review-input-title">
-            <label htmlFor="name">Your Name</label>
+            <label htmlFor="name">{t('review.yourName')}</label>
           </div>
           <ErrorMsg msg={errors.name?.message} />
         </div>
@@ -170,7 +172,7 @@ const ReviewForm = ({ product_id }) => {
             />
           </div>
           <div className="tp-product-details-review-input-title">
-            <label htmlFor="email">Your Email</label>
+            <label htmlFor="email">{t('review.yourEmail')}</label>
           </div>
           <ErrorMsg msg={errors.email?.message} />
         </div>
@@ -181,7 +183,7 @@ const ReviewForm = ({ product_id }) => {
           disabled={isLoading}
           className="tp-product-details-review-btn"
         >
-          {isLoading ? 'Submitting...' : 'Submit Review'}
+          {isLoading ? t('review.submitting') : t('review.submit')}
         </button>
       </div>
     </form>

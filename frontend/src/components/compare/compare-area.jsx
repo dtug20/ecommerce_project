@@ -1,6 +1,6 @@
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
+import SafeImage from "@/components/common/safe-image";
 import { useDispatch, useSelector } from "react-redux";
 import { Rating } from "react-simple-star-rating";
 import { useTranslation } from "react-i18next";
@@ -179,17 +179,14 @@ const CompareArea = () => {
                 </button>
 
                 <div className="cl-compare__product-img">
-                  {item.img ? (
-                    <Image
-                      src={item.img}
-                      alt={item.title || "compare"}
-                      width={180}
-                      height={180}
-                      style={{ objectFit: 'contain' }}
-                    />
-                  ) : (
-                    <div style={{ width: 180, height: 180, backgroundColor: 'var(--cl-bg-gray)' }} />
-                  )}
+                  <SafeImage
+                    src={item.img}
+                    alt={item.title || "compare"}
+                    width={180}
+                    height={180}
+                    style={{ objectFit: 'contain' }}
+                    unoptimized
+                  />
                 </div>
 
                 <div className="cl-compare__product-title">

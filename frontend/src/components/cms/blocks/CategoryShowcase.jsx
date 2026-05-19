@@ -1,11 +1,13 @@
 import React from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 import { useGetProductTypeCategoryQuery } from '@/redux/features/categoryApi';
 import ErrorMsg from '@/components/common/error-msg';
+import SafeImage from '@/components/common/safe-image';
 import { ShapeLine } from '@/svg';
 
 const CategoryShowcase = ({ settings = {}, title, subtitle }) => {
+  const { t } = useTranslation();
   const productType = settings.productType || 'electronics';
   const limit = settings.limit || 10;
   const router = useRouter();
@@ -27,9 +29,9 @@ const CategoryShowcase = ({ settings = {}, title, subtitle }) => {
   if (isLoading) {
     content = <div className="d-flex justify-content-center py-5"><div className="spinner-border text-primary" /></div>;
   } else if (isError) {
-    content = <ErrorMsg msg="There was an error loading categories" />;
+    content = <ErrorMsg msg={t('error.loadingCategoriesError')} />;
   } else if (!categories?.result?.length) {
-    content = <ErrorMsg msg="No categories found" />;
+    content = <ErrorMsg msg={t('error.noCategoriesFound')} />;
   } else {
     const items = categories.result.slice(0, limit);
     content = items.map((item) => (
@@ -40,14 +42,13 @@ const CategoryShowcase = ({ settings = {}, title, subtitle }) => {
               className="cursor-pointer"
               onClick={() => handleCategoryRoute(item.parent)}
             >
-              {item.img && (
-                <Image
-                  src={item.img}
-                  alt={item.parent}
-                  width={76}
-                  height={98}
-                />
-              )}
+              <SafeImage
+                src={item.img}
+                alt={item.parent}
+                width={76}
+                height={98}
+                unoptimized
+              />
             </a>
           </div>
           <div className="tp-product-category-content">
@@ -59,14 +60,14 @@ const CategoryShowcase = ({ settings = {}, title, subtitle }) => {
                 {item.parent}
               </a>
             </h3>
-            <p>{item.products?.length || 0} Product</p>
+            <p>{t('categories.productCount', { count: item.products?.length || 0 })}</p>
           </div>
         </div>
       </div>
     ));
   }
 
-  const sectionTitle = title || 'Browse Categories';
+  const sectionTitle = title || t('categories.browseTitle');
 
   return (
     <section className="tp-product-category pt-60 pb-15">

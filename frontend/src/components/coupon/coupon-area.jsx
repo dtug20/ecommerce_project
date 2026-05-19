@@ -1,8 +1,12 @@
 import React,{useState} from "react";
+import { useTranslation } from "react-i18next";
 import ErrorMsg from "../common/error-msg";
 import { useGetOfferCouponsQuery } from "@/redux/features/coupon/couponApi";
+import useCurrency from "@/hooks/use-currency";
 
 const CouponArea = () => {
+  const { t } = useTranslation();
+  const { formatPrice } = useCurrency();
   const [copiedCode, setCopiedCode] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -23,11 +27,11 @@ const CouponArea = () => {
   }
 
   if (!isLoading && isError) {
-    content = <ErrorMsg msg="There was an error" />;
+    content = <ErrorMsg msg={t('error.generic')} />;
   }
 
   if (!isLoading && !isError && offerCoupons?.length === 0) {
-    content = <ErrorMsg msg="No Coupons found!" />;
+    content = <ErrorMsg msg={t('coupon.noCouponsFound')} />;
   }
 
   if (!isLoading && !isError && offerCoupons?.length > 0) {
@@ -38,7 +42,7 @@ const CouponArea = () => {
         <div className="tp-coupon-item d-flex align-items-center justify-content-between p-20 border rounded">
           <div>
             <h4 className="tp-coupon-title mb-5">{coupon.title || coupon.productType}</h4>
-            <p className="mb-5">{coupon.discountPercentage}% off — min. ${coupon.minimumAmount}</p>
+            <p className="mb-5">{coupon.discountPercentage}% {t('coupon.offMinimum', { amount: formatPrice(coupon.minimumAmount) })}</p>
             <span className="tp-coupon-code fw-bold">{coupon.couponCode}</span>
           </div>
           <button
@@ -46,7 +50,7 @@ const CouponArea = () => {
             className="tp-btn tp-btn-sm"
             onClick={() => handleCopied(coupon.couponCode)}
           >
-            {copied && copiedCode === coupon.couponCode ? 'Copied!' : 'Copy'}
+            {copied && copiedCode === coupon.couponCode ? t('coupon.copied') : t('coupon.copy')}
           </button>
         </div>
       </div>

@@ -251,7 +251,7 @@ const CliconBlogDetail = ({ post, latestPosts = [] }) => {
                 <button
                   className="cl-blog-detail__share-btn cl-blog-detail__share-btn--whatsapp"
                   onClick={() => openShare(shareUrls.whatsapp)}
-                  aria-label="Share on WhatsApp"
+                  aria-label={t('aria.shareOnWhatsapp')}
                   title="WhatsApp"
                 >
                   <i className="fa-brands fa-whatsapp"></i>
@@ -259,7 +259,7 @@ const CliconBlogDetail = ({ post, latestPosts = [] }) => {
                 <button
                   className="cl-blog-detail__share-btn cl-blog-detail__share-btn--facebook"
                   onClick={() => openShare(shareUrls.facebook)}
-                  aria-label="Share on Facebook"
+                  aria-label={t('aria.shareOnFacebook')}
                   title="Facebook"
                 >
                   <i className="fa-brands fa-facebook-f"></i>
@@ -267,7 +267,7 @@ const CliconBlogDetail = ({ post, latestPosts = [] }) => {
                 <button
                   className="cl-blog-detail__share-btn cl-blog-detail__share-btn--twitter"
                   onClick={() => openShare(shareUrls.twitter)}
-                  aria-label="Share on Twitter"
+                  aria-label={t('aria.shareOnTwitter')}
                   title="Twitter"
                 >
                   <i className="fa-brands fa-x-twitter"></i>
@@ -275,7 +275,7 @@ const CliconBlogDetail = ({ post, latestPosts = [] }) => {
                 <button
                   className="cl-blog-detail__share-btn cl-blog-detail__share-btn--linkedin"
                   onClick={() => openShare(shareUrls.linkedin)}
-                  aria-label="Share on LinkedIn"
+                  aria-label={t('aria.shareOnLinkedin')}
                   title="LinkedIn"
                 >
                   <i className="fa-brands fa-linkedin-in"></i>
@@ -283,7 +283,7 @@ const CliconBlogDetail = ({ post, latestPosts = [] }) => {
                 <button
                   className="cl-blog-detail__share-btn cl-blog-detail__share-btn--pinterest"
                   onClick={() => openShare(shareUrls.pinterest)}
-                  aria-label="Share on Pinterest"
+                  aria-label={t('aria.shareOnPinterest')}
                   title="Pinterest"
                 >
                   <i className="fa-brands fa-pinterest-p"></i>

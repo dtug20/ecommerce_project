@@ -1,14 +1,18 @@
 import React from 'react';
-import Image from 'next/image';
 import { Rating } from 'react-simple-star-rating';
 import Link from 'next/link';
+import SafeImage from '@/components/common/safe-image';
 // internal
 import ErrorMsg from '@/components/common/error-msg';
 import { useGetTopRatedProductsQuery } from '@/redux/features/productApi';
 import ShopTopRatedLoader from '@/components/loader/shop/top-rated-prd-loader';
+import useCurrency from '@/hooks/use-currency';
+import { useTranslation } from 'react-i18next';
 
 const TopRatedProducts = () => {
   const { data: products, isError, isLoading } = useGetTopRatedProductsQuery();
+  const { formatPrice } = useCurrency();
+  const { t } = useTranslation();
   // decide what to render
   let content = null;
 
@@ -18,10 +22,10 @@ const TopRatedProducts = () => {
     );
   }
   else if (!isLoading && isError) {
-    content = <ErrorMsg msg="There was an error" />;
+    content = <ErrorMsg msg={t('error.generic')} />;
   }
   else if (!isLoading && !isError && products?.data?.length === 0) {
-    content = <ErrorMsg msg="No Products found!" />;
+    content = <ErrorMsg msg={t('error.noProductsFound')} />;
   }
   else if (!isLoading && !isError && products?.data?.length > 0) {
     const product_items = products.data.slice(0, 3);
@@ -29,7 +33,7 @@ const TopRatedProducts = () => {
       <div key={item._id} className="tp-shop-widget-product-item d-flex align-items-center">
         <div className="tp-shop-widget-product-thumb">
           <Link href={`/product-details/${item._id}`}>
-            <Image src={item.img} alt="product img" width={70} height={70} />
+            <SafeImage src={item.img} alt={item.title || 'product img'} width={70} height={70} unoptimized />
           </Link>
         </div>
         <div className="tp-shop-widget-product-content">
@@ -45,7 +49,7 @@ const TopRatedProducts = () => {
             <Link href={`/product-details/${item._id}`}>{item.title.substring(0,20)}...</Link>
           </h4>
           <div className="tp-shop-widget-product-price-wrapper">
-            <span className="tp-shop-widget-product-price">${item.price.toFixed(2)}</span>
+            <span className="tp-shop-widget-product-price">{formatPrice(item.price)}</span>
           </div>
         </div>
       </div>
@@ -54,7 +58,7 @@ const TopRatedProducts = () => {
   return (
     <>
       <div className="tp-shop-widget mb-50">
-        <h3 className="tp-shop-widget-title">Top Rated Products</h3>
+        <h3 className="tp-shop-widget-title">{t('product.topRated')}</h3>
         <div className="tp-shop-widget-content">
           <div className="tp-shop-widget-product">
             {content}

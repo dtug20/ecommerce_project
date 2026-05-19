@@ -63,7 +63,7 @@ const CliconDealFeaturedCard = ({ product }) => {
               unoptimized
             />
           ) : (
-            <div className="cl-deal-featured__no-img" aria-label="No image available" />
+            <div className="cl-deal-featured__no-img" aria-label={t('aria.noImageAvailable')} />
           )}
         </Link>
       </div>

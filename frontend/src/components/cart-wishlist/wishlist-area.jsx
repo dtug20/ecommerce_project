@@ -115,16 +115,16 @@ const WishlistArea = () => {
       await removeFromWishlist(productId).unwrap();
       notifySuccess(`${title} removed from wishlist`);
     } catch {
-      notifyError('Failed to remove item');
+      notifyError(t('toast.failedRemoveItem'));
     }
   };
 
   const handleServerClear = async () => {
     try {
       await clearWishlist().unwrap();
-      notifySuccess('Wishlist cleared');
+      notifySuccess(t('toast.wishlistCleared'));
     } catch {
-      notifyError('Failed to clear wishlist');
+      notifyError(t('toast.failedClearWishlist'));
     }
   };
 

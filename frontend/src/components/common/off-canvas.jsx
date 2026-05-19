@@ -22,7 +22,7 @@ const OffCanvas = ({ isOffCanvasOpen, setIsCanvasOpen }) => {
       <div className={`offcanvas__area offcanvas__radius ${isOffCanvasOpen ? "offcanvas-opened" : ""}`}>
         <div className="offcanvas__wrapper">
           <div className="offcanvas__close">
-            <button onClick={() => setIsCanvasOpen(false)} className="offcanvas__close-btn offcanvas-close-btn" aria-label="Close menu">
+            <button onClick={() => setIsCanvasOpen(false)} className="offcanvas__close-btn offcanvas-close-btn" aria-label={t('aria.closeMenu')}>
               <CloseTwo />
             </button>
           </div>

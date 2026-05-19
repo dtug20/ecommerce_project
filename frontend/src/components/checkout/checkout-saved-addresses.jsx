@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import keycloak from '@/lib/keycloak';
 import { useGetAddressesQuery } from '@/redux/features/cmsApi';
 
 const CheckoutSavedAddresses = ({ setValue, onAddressSelected }) => {
+  const { t } = useTranslation();
   const isAuthenticated = keycloak.authenticated;
   const { data, isLoading } = useGetAddressesQuery(undefined, { skip: !isAuthenticated });
   const [selectedId, setSelectedId] = useState(null);
@@ -52,7 +54,7 @@ const CheckoutSavedAddresses = ({ setValue, onAddressSelected }) => {
 
   return (
     <div className="cl-checkout__addresses">
-      <p className="cl-checkout__addresses-title">Saved Addresses</p>
+      <p className="cl-checkout__addresses-title">{t('checkout.savedAddresses')}</p>
       <div className="row g-2">
         {addresses.map((addr) => (
           <div key={addr._id} className="col-md-6 mb-2">
@@ -69,7 +71,7 @@ const CheckoutSavedAddresses = ({ setValue, onAddressSelected }) => {
                   )}
                   {addr.isDefault && (
                     <span className="cl-checkout__address-badge cl-checkout__address-badge--default">
-                      Default
+                      {t('checkout.addressDefault')}
                     </span>
                   )}
                 </div>
@@ -93,7 +95,7 @@ const CheckoutSavedAddresses = ({ setValue, onAddressSelected }) => {
         ))}
         <div className="col-12 mt-1">
           <button type="button" onClick={handleManual} className="cl-checkout__address-link">
-            + Use a different address
+            {t('checkout.useDifferentAddress')}
           </button>
         </div>
       </div>

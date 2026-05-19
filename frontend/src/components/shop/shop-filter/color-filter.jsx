@@ -1,6 +1,7 @@
 import React from "react";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 // internal
 import ErrorMsg from "@/components/common/error-msg";
 import { useGetAllProductsQuery } from "@/redux/features/productApi";
@@ -8,6 +9,7 @@ import { handleFilterSidebarClose } from "@/redux/features/shop-filter-slice";
 import ShopColorLoader from "@/components/loader/shop/color-filter-loader";
 
 const ColorFilter = ({setCurrPage,shop_right=false}) => {
+  const { t } = useTranslation();
   const { data: products, isError, isLoading } = useGetAllProductsQuery();
   const router = useRouter();
   const dispatch = useDispatch()
@@ -31,10 +33,10 @@ const ColorFilter = ({setCurrPage,shop_right=false}) => {
     content = <ShopColorLoader loading={isLoading}/>;
   }
   if (!isLoading && isError) {
-    content = <ErrorMsg msg="There was an error" />;
+    content = <ErrorMsg msg={t('error.generic')} />;
   }
   if (!isLoading && !isError && products?.data?.length === 0) {
-    content = <ErrorMsg msg="No Products found!" />;
+    content = <ErrorMsg msg={t('error.noProductsFound')} />;
   }
   if (!isLoading && !isError && products?.data?.length > 0) {
     const product_items = products.data;

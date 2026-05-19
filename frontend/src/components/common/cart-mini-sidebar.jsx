@@ -2,14 +2,17 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
+import SafeImage from '@/components/common/safe-image';
 // internal
 import useCartInfo from '@/hooks/use-cart-info';
+import useCurrency from '@/hooks/use-currency';
 import empty_cart_img from '@assets/img/product/cartmini/empty-cart.png';
 import { closeCartMini, remove_product } from '@/redux/features/cartSlice';
 
 const CartMiniSidebar = () => {
   const { cart_products, cartMiniOpen } = useSelector((state) => state.cart);
   const { total } = useCartInfo();
+  const { formatPrice } = useCurrency();
   const dispatch = useDispatch();
 
   // handle remove product
@@ -41,7 +44,7 @@ const handleCloseCartMini = () => {
                 <div key={item._id} className="cartmini__widget-item">
                   <div className="cartmini__thumb">
                     <Link href={`/product-details/${item._id}`}>
-                      <Image src={item.img} width={70} height={60} alt="product img" />
+                      <SafeImage src={item.img} width={70} height={60} alt={item.title || 'product img'} unoptimized />
                     </Link>
                   </div>
                   <div className="cartmini__content">
@@ -49,7 +52,7 @@ const handleCloseCartMini = () => {
                       <Link href={`/product-details/${item._id}`}>{item.title}</Link>
                     </h5>
                     <div className="cartmini__price-wrapper">
-                      {item.discount > 0 ? <span className="cartmini__price">${(Number(item.price) - (Number(item.price) * Number(item.discount)) / 100).toFixed(2)}</span> : <span className="cartmini__price">${item.price.toFixed(2)}</span>}
+                      {item.discount > 0 ? <span className="cartmini__price">{formatPrice(Number(item.price) - (Number(item.price) * Number(item.discount)) / 100)}</span> : <span className="cartmini__price">{formatPrice(item.price)}</span>}
                       <span className="cartmini__quantity">{" "}x{item.orderQuantity}</span>
                     </div>
                   </div>
@@ -67,7 +70,7 @@ const handleCloseCartMini = () => {
           <div className="cartmini__checkout">
             <div className="cartmini__checkout-title mb-30">
               <h4>Subtotal:</h4>
-              <span>${total.toFixed(2)}</span>
+              <span>{formatPrice(total)}</span>
             </div>
             <div className="cartmini__checkout-btn">
               <Link href="/cart" onClick={handleCloseCartMini} className="tp-btn mb-10 w-100"> view cart</Link>

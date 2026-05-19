@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Tag/chip component for labels, filters, blog tags.
@@ -12,6 +13,7 @@ import React from 'react';
  * @param {string} [props.className]
  */
 const ClTag = ({ label, variant = 'default', removable = false, onRemove, onClick, className = '' }) => {
+  const { t } = useTranslation();
   const Tag = onClick ? 'button' : 'span';
 
   return (
@@ -29,7 +31,7 @@ const ClTag = ({ label, variant = 'default', removable = false, onRemove, onClic
             e.stopPropagation();
             onRemove?.();
           }}
-          aria-label={`Remove ${label}`}
+          aria-label={t('common.removeItem', { label })}
         >
           <i className="fa-solid fa-xmark" aria-hidden="true" />
         </button>

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Image Gallery block — responsive grid of images with lightbox.
  * CRM settings: { title, images: [{ url, alt, caption }] }
  */
 const ImageGallery = ({ settings = {}, title }) => {
+  const { t } = useTranslation();
   const heading = title || settings.title || '';
   const images = settings.images || [];
   const [lightbox, setLightbox] = useState(null); // index of open image
@@ -40,7 +42,7 @@ const ImageGallery = ({ settings = {}, title }) => {
           className="cl-image-gallery__lightbox"
           onClick={() => setLightbox(null)}
         >
-          <button className="cl-image-gallery__close" aria-label="Close">
+          <button className="cl-image-gallery__close" aria-label={t('aria.close')}>
             &times;
           </button>
           <img

@@ -201,6 +201,19 @@
     "resetPassword": "Đặt lại mật khẩu",
     "sendResetLink": "Gửi liên kết đặt lại"
   },
+  "toast": {
+    "failedRemoveItem": "Không thể xóa sản phẩm",
+    "wishlistCleared": "Đã xóa danh sách yêu thích",
+    "failedClearWishlist": "Không thể xóa danh sách yêu thích",
+    "wishlistSyncFailed": "Không thể đồng bộ yêu thích với máy chủ",
+    "couponEmpty": "Vui lòng nhập mã giảm giá!",
+    "somethingWentWrong": "Đã có lỗi xảy ra",
+    "couponInvalid": "Mã giảm giá không hợp lệ!",
+    "couponNotValid": "Mã giảm giá này không hợp lệ!",
+    "orderPlacedBank": "Đã đặt hàng! Vui lòng hoàn tất chuyển khoản.",
+    "orderConfirmed": "Đơn hàng đã được xác nhận!",
+    "noMoreStock": "Không còn đủ số lượng cho sản phẩm này!"
+  },
   "common": {
     "search": "Tìm kiếm sản phẩm...",
     "loading": "Đang tải...",
@@ -262,6 +275,12 @@
   "error": {
     "generic": "Đã có lỗi xảy ra",
     "uploadFailed": "Tải lên thất bại",
+    "noBrandsFound": "Không tìm thấy thương hiệu",
+    "noCategoryFound": "Không tìm thấy danh mục",
+    "noProductsFound": "Không tìm thấy sản phẩm",
+    "noCategoriesFound": "Không có danh mục nào",
+    "loadingProductsError": "Có lỗi khi tải sản phẩm",
+    "loadingCategoriesError": "Có lỗi khi tải danh mục",
     "title": "Không tìm thấy trang",
     "message": "Trang bạn tìm kiếm không tồn tại.",
     "backHome": "Về trang chủ",
@@ -298,7 +317,8 @@
     "previousCategories": "Danh mục trước",
     "nextCategories": "Danh mục sau",
     "dismiss": "Đóng",
-    "close": "Đóng"
+    "close": "Đóng",
+    "removeItem": "Xóa {{label}}"
   },
   "review": {
     "writePlaceholder": "Viết đánh giá của bạn...",
@@ -314,6 +334,20 @@
     "loginPromptSuffix": "để gửi đánh giá.",
     "submit": "Gửi đánh giá",
     "submitting": "Đang gửi..."
+  },
+  "banner": {
+    "introducing": "GIỚI THIỆU",
+    "introducingNew": "GIỚI THIỆU SẢN PHẨM MỚI",
+    "shopNow": "MUA NGAY",
+    "leftTitle": "Apple Homepod Mini\nMới ra mắt",
+    "leftDesc": "Đầy sáng tạo, HomePod mini mang lại trải nghiệm bất ngờ.",
+    "rightTitle": "Xiaomi Mi 11 Ultra\n12GB+256GB",
+    "rightDesc": "*Số liệu cung cấp bởi phòng thí nghiệm nội bộ. Đo đạc theo tiêu chuẩn ngành.",
+    "macTag": "GIẢM ĐẾN {{amount}}",
+    "macTitle": "Macbook Pro",
+    "macSpecs": "Chip Apple M1 Max. RAM 32GB, SSD 1TB",
+    "macAlt": "Macbook Pro",
+    "productAlt": "Sản phẩm"
   },
   "hero": {
     "shopNow": "MUA NGAY",
@@ -354,7 +388,10 @@
   "categories": {
     "title": "Mua Sắm Theo Danh Mục",
     "noCategories": "Không tìm thấy danh mục.",
-    "loading": "Đang tải danh mục..."
+    "loading": "Đang tải danh mục...",
+    "browseTitle": "Khám phá danh mục",
+    "productCount_one": "{{count}} sản phẩm",
+    "productCount_other": "{{count}} sản phẩm"
   },
   "trackOrder": {
     "title": "Theo Dõi Đơn Hàng",

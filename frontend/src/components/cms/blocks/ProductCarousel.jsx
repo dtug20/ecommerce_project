@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper';
 import { useGetProductTypeQuery } from '@/redux/features/productApi';
@@ -27,6 +28,7 @@ const sliderSettings = {
 };
 
 const ProductCarousel = ({ settings = {}, title, subtitle }) => {
+  const { t } = useTranslation();
   const productType = settings.productType || 'electronics';
   const queryType = settings.queryType || 'new';
   const limit = settings.limit || 8;
@@ -43,9 +45,9 @@ const ProductCarousel = ({ settings = {}, title, subtitle }) => {
   if (isLoading) {
     content = <div className="d-flex justify-content-center py-5"><div className="spinner-border text-primary" /></div>;
   } else if (isError) {
-    content = <ErrorMsg msg="There was an error loading products" />;
+    content = <ErrorMsg msg={t('error.loadingProductsError')} />;
   } else if (!products?.data?.length) {
-    content = <ErrorMsg msg="No products found" />;
+    content = <ErrorMsg msg={t('error.noProductsFound')} />;
   } else {
     const items = products.data.slice(0, limit);
     content = (
@@ -63,7 +65,7 @@ const ProductCarousel = ({ settings = {}, title, subtitle }) => {
     );
   }
 
-  const sectionTitle = title || 'Products';
+  const sectionTitle = title || t('shop.title');
 
   return (
     <section className="tp-product-arrival-area pb-55">

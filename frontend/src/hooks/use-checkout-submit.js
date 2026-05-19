@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
+import { useTranslation } from "react-i18next";
 //internal import
 import useCartInfo from "./use-cart-info";
 import { set_shipping } from "@/redux/features/order/orderSlice";
@@ -13,6 +14,7 @@ import { useGetOfferCouponsQuery } from "@/redux/features/coupon/couponApi";
 import { useValidateCouponMutation } from "@/redux/features/cmsApi";
 
 const useCheckoutSubmit = () => {
+  const { t } = useTranslation();
   // offerCoupons (client-side fallback)
   const { data: offerCoupons, isError, isLoading } = useGetOfferCouponsQuery();
   // Server-side coupon validation (Task 18.2)
@@ -112,7 +114,7 @@ const useCheckoutSubmit = () => {
 
     const couponCode = couponRef.current?.value;
     if (!couponCode) {
-      notifyError("Please Input a Coupon Code!");
+      notifyError(t("toast.couponEmpty"));
       return;
     }
 
@@ -154,7 +156,7 @@ const useCheckoutSubmit = () => {
       return;
     }
     if (isError) {
-      notifyError("Something went wrong");
+      notifyError(t("toast.somethingWentWrong"));
       return;
     }
 
@@ -163,12 +165,12 @@ const useCheckoutSubmit = () => {
     );
 
     if (!result || result.length < 1) {
-      notifyError("Please Input a Valid Coupon!");
+      notifyError(t("toast.couponInvalid"));
       return;
     }
 
     if (dayjs().isAfter(dayjs(result[0]?.endTime))) {
-      notifyError("This coupon is not valid!");
+      notifyError(t("toast.couponNotValid"));
       return;
     }
 
@@ -263,13 +265,13 @@ const useCheckoutSubmit = () => {
         setIsCheckoutSubmit(false);
         localStorage.removeItem("cart_products");
         localStorage.removeItem("couponInfo");
-        notifySuccess("Order placed! Please complete the bank transfer.");
+        notifySuccess(t("toast.orderPlacedBank"));
         router.push(`/order/${res.data?.order?._id}`);
       } else {
         localStorage.removeItem("cart_products");
         localStorage.removeItem("couponInfo");
         setIsCheckoutSubmit(false);
-        notifySuccess("Your Order Confirmed!");
+        notifySuccess(t("toast.orderConfirmed"));
         router.push(`/order/${res.data?.order?._id}`);
       }
     }).catch(() => {

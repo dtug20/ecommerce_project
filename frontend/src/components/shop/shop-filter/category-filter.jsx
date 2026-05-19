@@ -1,11 +1,13 @@
 import React from "react";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import ErrorMsg from "@/components/common/error-msg";
 import { useGetShowCategoryQuery } from "@/redux/features/categoryApi";
 import { handleFilterSidebarClose } from "@/redux/features/shop-filter-slice";
 
 const CategoryFilter = ({ setCurrPage }) => {
+  const { t } = useTranslation();
   const { data: categories, isLoading, isError } = useGetShowCategoryQuery();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -30,9 +32,9 @@ const CategoryFilter = ({ setCurrPage }) => {
       </ul>
     );
   } else if (isError) {
-    content = <ErrorMsg msg="There was an error" />;
+    content = <ErrorMsg msg={t('error.generic')} />;
   } else if (!categories?.result?.length) {
-    content = <ErrorMsg msg="No Category found!" />;
+    content = <ErrorMsg msg={t('error.noCategoryFound')} />;
   } else {
     const activeSlug = router.query.category || '';
     content = (

@@ -224,10 +224,10 @@ const DetailsWrapper = ({
         <div className="cl-pd__secondary-action">
           Share product:
           <div className="cl-pd__share-icons">
-            <a href="#" aria-label="Copy link"><i className="fa-regular fa-copy" /></a>
-            <a href="#" aria-label="Share on Facebook"><i className="fa-brands fa-facebook-f" /></a>
-            <a href="#" aria-label="Share on Twitter"><i className="fa-brands fa-twitter" /></a>
-            <a href="#" aria-label="Share on Pinterest"><i className="fa-brands fa-pinterest-p" /></a>
+            <a href="#" aria-label={t('aria.copyLink')}><i className="fa-regular fa-copy" /></a>
+            <a href="#" aria-label={t('aria.shareOnFacebook')}><i className="fa-brands fa-facebook-f" /></a>
+            <a href="#" aria-label={t('aria.shareOnTwitter')}><i className="fa-brands fa-twitter" /></a>
+            <a href="#" aria-label={t('aria.shareOnPinterest')}><i className="fa-brands fa-pinterest-p" /></a>
           </div>
         </div>
       </div>

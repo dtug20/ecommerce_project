@@ -5,12 +5,14 @@ import SEO from '@/components/seo';
 import Wrapper from '@/layout/wrapper';
 import Header from '@/layout/headers/header';
 import Footer from '@/layout/footers/footer';
+import useCurrency from '@/hooks/use-currency';
 
 /**
  * Vendor store page — server-rendered storefront for a single vendor.
  * Route: /vendor/[slug]
  */
 const VendorStorePage = ({ vendor, products, pagination }) => {
+  const { formatPrice } = useCurrency();
   const memberSince = vendor?.createdAt
     ? dayjs(vendor.createdAt).format('MMMM YYYY')
     : null;
@@ -174,19 +176,19 @@ const VendorStorePage = ({ vendor, products, pagination }) => {
                           {product.discount > 0 ? (
                             <>
                               <span className="tp-product-price old-price">
-                                ${product.price}
+                                {formatPrice(product.price)}
                               </span>
                               <span className="tp-product-price new-price">
-                                {' '}$
-                                {(
+                                {' '}
+                                {formatPrice(
                                   Number(product.price) -
                                   (Number(product.price) * Number(product.discount)) / 100
-                                ).toFixed(2)}
+                                )}
                               </span>
                             </>
                           ) : (
                             <span className="tp-product-price new-price">
-                              ${parseFloat(product.price).toFixed(2)}
+                              {formatPrice(product.price)}
                             </span>
                           )}
                         </div>

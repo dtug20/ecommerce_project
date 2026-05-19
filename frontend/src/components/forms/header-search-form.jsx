@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 // internal
 import { Search } from "@/svg";
 import NiceSelect from "@/ui/nice-select";
 import useSearchFormSubmit from "@/hooks/use-search-form-submit";
 
 const HeaderSearchForm = () => {
+  const { t } = useTranslation();
   const { setSearchText, setCategory, handleSubmit, searchText } = useSearchFormSubmit();
 
   // selectHandle
@@ -20,7 +22,7 @@ const HeaderSearchForm = () => {
             onChange={(e) => setSearchText(e.target.value)}
             value={searchText}
             type="text"
-            placeholder="Search for Products..."
+            placeholder={t("common.search")}
           />
         </div>
         <div className="tp-header-search-category">

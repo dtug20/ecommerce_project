@@ -1,19 +1,29 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import InputRange from "@/ui/input-range";
+import useCurrency from "@/hooks/use-currency";
 
 const PRICE_PRESETS = [
-  { label: 'All Price', min: 0, max: null },
-  { label: 'Under $20', min: 0, max: 20 },
-  { label: '$25 to $100', min: 25, max: 100 },
-  { label: '$100 to $300', min: 100, max: 300 },
-  { label: '$300 to $500', min: 300, max: 500 },
-  { label: '$500 to $1,000', min: 500, max: 1000 },
-  { label: '$1,000 to $10,000', min: 1000, max: 10000 },
+  { kind: 'all', min: 0, max: null },
+  { kind: 'under', cap: 20, min: 0, max: 20 },
+  { kind: 'range', min: 25, max: 100 },
+  { kind: 'range', min: 100, max: 300 },
+  { kind: 'range', min: 300, max: 500 },
+  { kind: 'range', min: 500, max: 1000 },
+  { kind: 'range', min: 1000, max: 10000 },
 ];
 
 const PriceFilter = ({ priceFilterValues, maxPrice }) => {
+  const { t } = useTranslation();
+  const { formatPrice } = useCurrency();
   const { priceValue, handleChanges } = priceFilterValues;
   const [activePreset, setActivePreset] = useState(-1);
+
+  const presetLabel = (preset) => {
+    if (preset.kind === 'all') return t('shop.allPrice');
+    if (preset.kind === 'under') return t('shop.underAmount', { amount: formatPrice(preset.cap) });
+    return t('shop.amountRange', { min: formatPrice(preset.min), max: formatPrice(preset.max) });
+  };
 
   const handlePresetClick = (preset, index) => {
     setActivePreset(index);
@@ -35,7 +45,7 @@ const PriceFilter = ({ priceFilterValues, maxPrice }) => {
 
   return (
     <div className="cl-shop__widget">
-      <h3 className="cl-shop__widget-title">Price Range</h3>
+      <h3 className="cl-shop__widget-title">{t('shop.priceRange')}</h3>
       <div className="cl-shop__price-range">
         <div className="mb-10">
           <InputRange
@@ -50,14 +60,14 @@ const PriceFilter = ({ priceFilterValues, maxPrice }) => {
           <input
             type="number"
             className="cl-shop__price-input"
-            placeholder="Min price"
+            placeholder={t('shop.minPricePlaceholder')}
             value={priceValue[0] || ''}
             onChange={handleMinChange}
           />
           <input
             type="number"
             className="cl-shop__price-input"
-            placeholder="Max price"
+            placeholder={t('shop.maxPricePlaceholder')}
             value={priceValue[1] || ''}
             onChange={handleMaxChange}
           />
@@ -72,7 +82,7 @@ const PriceFilter = ({ priceFilterValues, maxPrice }) => {
                   checked={activePreset === i}
                   onChange={() => handlePresetClick(preset, i)}
                 />
-                {preset.label}
+                {presetLabel(preset)}
               </label>
             </li>
           ))}

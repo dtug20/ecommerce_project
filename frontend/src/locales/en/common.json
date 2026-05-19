@@ -201,6 +201,19 @@
     "resetPassword": "Reset Password",
     "sendResetLink": "Send Reset Link"
   },
+  "toast": {
+    "failedRemoveItem": "Failed to remove item",
+    "wishlistCleared": "Wishlist cleared",
+    "failedClearWishlist": "Failed to clear wishlist",
+    "wishlistSyncFailed": "Failed to sync wishlist with server",
+    "couponEmpty": "Please input a coupon code!",
+    "somethingWentWrong": "Something went wrong",
+    "couponInvalid": "Please input a valid coupon!",
+    "couponNotValid": "This coupon is not valid!",
+    "orderPlacedBank": "Order placed! Please complete the bank transfer.",
+    "orderConfirmed": "Your order is confirmed!",
+    "noMoreStock": "No more quantity available for this product!"
+  },
   "common": {
     "search": "Search Products...",
     "loading": "Loading...",
@@ -262,6 +275,12 @@
   "error": {
     "generic": "There was an error",
     "uploadFailed": "Upload failed",
+    "noBrandsFound": "No Brands found!",
+    "noCategoryFound": "No Category found!",
+    "noProductsFound": "No Products found!",
+    "noCategoriesFound": "No categories found",
+    "loadingProductsError": "There was an error loading products",
+    "loadingCategoriesError": "There was an error loading categories",
     "title": "Page Not Found",
     "message": "The page you are looking for does not exist.",
     "backHome": "Back to Home",
@@ -298,7 +317,8 @@
     "previousCategories": "Previous categories",
     "nextCategories": "Next categories",
     "dismiss": "Dismiss",
-    "close": "Close"
+    "close": "Close",
+    "removeItem": "Remove {{label}}"
   },
   "review": {
     "writePlaceholder": "Write your review here...",
@@ -314,6 +334,20 @@
     "loginPromptSuffix": "to leave a review.",
     "submit": "Submit Review",
     "submitting": "Submitting..."
+  },
+  "banner": {
+    "introducing": "INTRODUCING",
+    "introducingNew": "INTRODUCING NEW",
+    "shopNow": "SHOP NOW",
+    "leftTitle": "New Apple\nHomepod Mini",
+    "leftDesc": "Jam-packed with innovation, HomePod mini delivers unexpectedly.",
+    "rightTitle": "Xiaomi Mi 11 Ultra\n12GB+256GB",
+    "rightDesc": "*Data provided by internal laboratories. Industry measurement.",
+    "macTag": "SAVE UP TO {{amount}}",
+    "macTitle": "Macbook Pro",
+    "macSpecs": "Apple M1 Max Chip. 32GB Unified Memory, 1TB SSD Storage",
+    "macAlt": "Macbook Pro",
+    "productAlt": "Product"
   },
   "hero": {
     "shopNow": "SHOP NOW",
@@ -354,7 +388,10 @@
   "categories": {
     "title": "Shop with Categories",
     "noCategories": "No categories found.",
-    "loading": "Loading categories..."
+    "loading": "Loading categories...",
+    "browseTitle": "Browse Categories",
+    "productCount_one": "{{count}} Product",
+    "productCount_other": "{{count}} Products"
   },
   "trackOrder": {
     "title": "Track Order",

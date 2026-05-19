@@ -62,7 +62,7 @@ const CliconCategoryShowcase = () => {
             <button
               type="button"
               className="cl-categories__nav cl-categories__nav--prev"
-              aria-label="Previous categories"
+              aria-label={t('aria.previousCategories')}
               data-testid="clicon-cat-prev"
             >
               <i className="fa-solid fa-chevron-left" aria-hidden="true" />
@@ -96,7 +96,7 @@ const CliconCategoryShowcase = () => {
             <button
               type="button"
               className="cl-categories__nav cl-categories__nav--next"
-              aria-label="Next categories"
+              aria-label={t('aria.nextCategories')}
               data-testid="clicon-cat-next"
             >
               <i className="fa-solid fa-chevron-right" aria-hidden="true" />

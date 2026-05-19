@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 
 const AnnouncementBar = ({ banner }) => {
+  const { t } = useTranslation();
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
@@ -65,7 +67,7 @@ const AnnouncementBar = ({ banner }) => {
             fontSize: '18px',
             padding: '4px',
           }}
-          aria-label="Dismiss"
+          aria-label={t('aria.dismiss')}
         >
           &times;
         </button>

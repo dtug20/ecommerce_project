@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 
 /**
  * CliconCategoryCard
@@ -8,6 +9,7 @@ import Link from 'next/link';
  *   category — object with shape { _id, parent (name), img, products[] }
  */
 const CliconCategoryCard = ({ category }) => {
+  const { t } = useTranslation();
   if (!category) return null;
 
   const { parent, img, products } = category;
@@ -35,7 +37,7 @@ const CliconCategoryCard = ({ category }) => {
             unoptimized
           />
         ) : (
-          <div className="cl-category-card__no-img" aria-label="No category image" />
+          <div className="cl-category-card__no-img" aria-label={t('aria.noCategoryImage')} />
         )}
       </div>
       <div className="cl-category-card__body">

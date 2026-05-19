@@ -1,11 +1,13 @@
 import React from "react";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import ErrorMsg from "@/components/common/error-msg";
 import { useGetActiveBrandsQuery } from "@/redux/features/brandApi";
 import { handleFilterSidebarClose } from "@/redux/features/shop-filter-slice";
 
 const ProductBrand = ({ setCurrPage }) => {
+  const { t } = useTranslation();
   const { data: brands, isError, isLoading } = useGetActiveBrandsQuery();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -28,9 +30,9 @@ const ProductBrand = ({ setCurrPage }) => {
       </div>
     );
   } else if (isError) {
-    content = <ErrorMsg msg="There was an error" />;
+    content = <ErrorMsg msg={t('error.generic')} />;
   } else if (!brands?.result?.length) {
-    content = <ErrorMsg msg="No Brands found!" />;
+    content = <ErrorMsg msg={t('error.noBrandsFound')} />;
   } else {
     const activeBrand = router.query.brand || '';
     const sortedBrands = brands.result

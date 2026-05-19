@@ -2,6 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
+import useCurrency from '@/hooks/use-currency';
 
 /**
  * ClichonHeroPromoCard — reusable promo card for the hero sidebar area.
@@ -24,6 +25,7 @@ const CliconHeroPromoCard = ({
   image,
 }) => {
   const { t } = useTranslation();
+  const { formatPrice } = useCurrency();
 
   return (
     <div
@@ -40,8 +42,8 @@ const CliconHeroPromoCard = ({
         </h3>
         {price != null && (
           <p className="cl-hero-promo-card__price">
-            <span className="cl-hero-promo-card__price-label">From </span>
-            <span className="cl-hero-promo-card__price-value">${price}</span>
+            <span className="cl-hero-promo-card__price-label">{t('hero.priceFrom')} </span>
+            <span className="cl-hero-promo-card__price-value">{formatPrice(price)}</span>
           </p>
         )}
         <Link
