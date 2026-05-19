@@ -6,28 +6,6 @@ const attachProxy = require('../middleware/attachProxy');
 router.use(attachProxy);
 
 // ---------------------------------------------------------------------------
-// Pages
-// ---------------------------------------------------------------------------
-
-router.get('/pages', cmsController.listPages);
-router.get('/pages/:id', cmsController.getPage);
-router.post('/pages', cmsController.createPage);
-router.post('/pages/:id/duplicate', cmsController.duplicatePage);
-router.patch('/pages/:id/blocks', cmsController.updatePageBlocks);
-router.patch('/pages/:id', cmsController.updatePage);
-router.delete('/pages/:id', cmsController.deletePage);
-
-// ---------------------------------------------------------------------------
-// Menus
-// ---------------------------------------------------------------------------
-
-router.get('/menus', cmsController.listMenus);
-router.get('/menus/:id', cmsController.getMenu);
-router.post('/menus', cmsController.createMenu);
-router.patch('/menus/:id', cmsController.updateMenu);
-router.delete('/menus/:id', cmsController.deleteMenu);
-
-// ---------------------------------------------------------------------------
 // Banners
 // Note: /banners/priority must precede /banners/:id
 // ---------------------------------------------------------------------------
