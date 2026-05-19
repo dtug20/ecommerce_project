@@ -72,31 +72,88 @@ fi
 # ----------------------------------------------------------------------------
 # 2. Force OTP in the cloned flow (self-healing on each run)
 # ----------------------------------------------------------------------------
+# We dump the full executions list once and search it locally — that lets us
+# match by either providerId (leaf authenticators) or displayName+level
+# (sub-flows). Updates go through the /flows/{alias}/executions endpoint, which
+# works for nested executions in Keycloak 26+ (the /executions/{id} endpoint
+# returns 404 for executions inside copied sub-flows).
 
-set_execution_requirement() {
-  local match_field="$1"   # 'providerId' or 'displayName'
-  local match_value="$2"
-  local requirement="$3"
-  local exec_id
-  exec_id=$($KCADM get "authentication/flows/$FLOW_ALIAS/executions" -r "$REALM" \
-    --format csv --fields "id,$match_field" --noquotes 2>/dev/null \
-    | find_id_by_field "$match_value")
-  if [[ -n "$exec_id" ]]; then
-    echo "    -> $match_value = $requirement"
-    $KCADM update "authentication/executions/$exec_id" -r "$REALM" \
-      -s "requirement=$requirement"
-  else
-    echo "    -> $match_value execution not found, skipped"
-  fi
+EXEC_CSV="/tmp/crm-mfa-execs.csv"
+EXEC_BODY="/tmp/crm-mfa-body.json"
+
+cleanup_tmp() { rm -f "$EXEC_CSV" "$EXEC_BODY"; }
+trap cleanup_tmp EXIT
+
+dump_executions() {
+  $KCADM get "authentication/flows/$FLOW_ALIAS/executions" -r "$REALM" \
+    --fields id,displayName,providerId,authenticationFlow,level,index \
+    --format csv --noquotes > "$EXEC_CSV" 2>/dev/null
 }
+
+# find_by — strategies: 'provider' (leaf), 'subflow' (displayName + authFlow=true)
+# Output: execution id, or empty string
+find_by() {
+  local strategy="$1" needle="$2"
+  while IFS=',' read -r id display provider authflow level index; do
+    [[ -z "$id" ]] && continue
+    case "$strategy" in
+      provider)
+        [[ "$provider" == "$needle" ]] && { echo "$id"; return 0; } ;;
+      subflow)
+        [[ "$authflow" == "true" && "$display" == "$needle" ]] && { echo "$id"; return 0; } ;;
+    esac
+  done < "$EXEC_CSV"
+  return 0
+}
+
+# Pick the first sub-flow at the given level — used as fallback if displayName
+# matching fails (e.g. theme/locale differences).
+find_subflow_at_level() {
+  local target_level="$1"
+  while IFS=',' read -r id display provider authflow level index; do
+    [[ -z "$id" ]] && continue
+    [[ "$authflow" == "true" && "$level" == "$target_level" ]] && { echo "$id"; return 0; }
+  done < "$EXEC_CSV"
+  return 0
+}
+
+update_requirement() {
+  local exec_id="$1" requirement="$2" label="$3"
+  if [[ -z "$exec_id" ]]; then
+    echo "    -> $label NOT FOUND, skipped"
+    return 0
+  fi
+  echo "    -> $label = $requirement (id=$exec_id)"
+  cat > "$EXEC_BODY" <<EOF
+{"id":"$exec_id","requirement":"$requirement"}
+EOF
+  $KCADM update "authentication/flows/$FLOW_ALIAS/executions" -r "$REALM" \
+    -f "$EXEC_BODY"
+}
+
+echo "==> Dumping executions for flow '$FLOW_ALIAS'"
+dump_executions
+if [[ ! -s "$EXEC_CSV" ]]; then
+  echo "ERROR: executions list is empty for '$FLOW_ALIAS'"
+  exit 1
+fi
 
 echo "==> Configuring flow executions to enforce OTP"
 # Promote the conditional 2FA sub-flow to always run.
-set_execution_requirement "displayName" "Browser - Conditional 2FA" "REQUIRED"
+SUBFLOW_ID=$(find_by subflow "Browser - Conditional 2FA")
+if [[ -z "$SUBFLOW_ID" ]]; then
+  echo "    (sub-flow name not matched, falling back to level=1 lookup)"
+  SUBFLOW_ID=$(find_subflow_at_level 1)
+fi
+update_requirement "$SUBFLOW_ID" "REQUIRED" "Conditional 2FA sub-flow"
+
 # Disable the "is user OTP configured?" gate so OTP is no longer optional.
-set_execution_requirement "providerId" "conditional-user-configured" "DISABLED"
+COND_ID=$(find_by provider "conditional-user-configured")
+update_requirement "$COND_ID" "DISABLED" "conditional-user-configured"
+
 # Belt-and-braces: ensure the OTP form itself stays REQUIRED.
-set_execution_requirement "providerId" "auth-otp-form" "REQUIRED"
+OTP_ID=$(find_by provider "auth-otp-form")
+update_requirement "$OTP_ID" "REQUIRED" "auth-otp-form"
 
 # ----------------------------------------------------------------------------
 # 3. Bind the new flow only to the shofy-crm client
