@@ -277,11 +277,11 @@
 
         /* ── Validators ── */
 
-        // Allowed characters in personal names: Unicode letters/marks, digits, space, dot, apostrophe, hyphen.
-        // Uses safe fallback for older browsers that don't support \p{L}.
+        // Allowed characters in personal names: Unicode letters/marks, space, dot, apostrophe, hyphen.
+        // Digits are explicitly NOT allowed.
         function buildNameRegex() {
-            try { return new RegExp("^[\\p{L}\\p{M}0-9 .'\\-]+$", "u"); }
-            catch (e) { return /^[A-Za-zÀ-ỹ0-9 .'\-]+$/; }
+            try { return new RegExp("^[\\p{L}\\p{M} .'\\-]+$", "u"); }
+            catch (e) { return /^[A-Za-zÀ-ỹ .'\-]+$/; }
         }
         var NAME_REGEX = buildNameRegex();
 
@@ -289,6 +289,7 @@
             var val = input.value.trim();
             if (!val)                  { showFieldError(input, V.nameRequired);     return false; }
             if (val.length > 50)       { showFieldError(input, V.nameTooLong);      return false; }
+            if (/[0-9]/.test(val))     { showFieldError(input, V.nameNoNumbers);    return false; }
             if (!NAME_REGEX.test(val)) { showFieldError(input, V.nameInvalidChars); return false; }
             clearFieldError(input);
             return true;
