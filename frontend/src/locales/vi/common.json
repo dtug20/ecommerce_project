@@ -100,7 +100,12 @@
     "filterMaxPrice": "Giá cao nhất",
     "filterSearch": "Tìm kiếm",
     "filterColor": "Màu sắc",
-    "shopGrid": "Lưới sản phẩm"
+    "shopGrid": "Lưới sản phẩm",
+    "minPricePlaceholder": "Giá thấp nhất",
+    "maxPricePlaceholder": "Giá cao nhất",
+    "allPrice": "Tất cả mức giá",
+    "underAmount": "Dưới {{amount}}",
+    "amountRange": "{{min}} đến {{max}}"
   },
   "cart": {
     "title": "Giỏ hàng",
@@ -194,11 +199,7 @@
     "haveAccount": "Đã có tài khoản?",
     "signUp": "Đăng ký",
     "resetPassword": "Đặt lại mật khẩu",
-    "sendResetLink": "Gửi liên kết đặt lại",
-    "signIn": "Đăng nhập",
-    "continueWithGoogle": "Tiếp tục với Google",
-    "orContinueWith": "Hoặc tiếp tục với",
-    "signInWithEmail": "Đăng nhập bằng email"
+    "sendResetLink": "Gửi liên kết đặt lại"
   },
   "common": {
     "search": "Tìm kiếm sản phẩm...",
@@ -301,7 +302,18 @@
   },
   "review": {
     "writePlaceholder": "Viết đánh giá của bạn...",
-    "yourName": "Tên của bạn"
+    "yourName": "Tên của bạn",
+    "yourEmail": "Email của bạn",
+    "yourReview": "Đánh giá của bạn",
+    "yourRating": "Đánh giá sao :",
+    "moderationNotice": "Đánh giá sẽ được công khai sau khi kiểm duyệt.",
+    "pendingTitle": "Cảm ơn! Đánh giá của bạn đang chờ duyệt.",
+    "writeAnother": "Viết đánh giá khác",
+    "loginPrompt": "Vui lòng",
+    "signInLink": "đăng nhập",
+    "loginPromptSuffix": "để gửi đánh giá.",
+    "submit": "Gửi đánh giá",
+    "submitting": "Đang gửi..."
   },
   "hero": {
     "shopNow": "MUA NGAY",

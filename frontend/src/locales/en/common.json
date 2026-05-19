@@ -100,7 +100,12 @@
     "filterMaxPrice": "Max Price",
     "filterSearch": "Search",
     "filterColor": "Color",
-    "shopGrid": "Shop Grid"
+    "shopGrid": "Shop Grid",
+    "minPricePlaceholder": "Min price",
+    "maxPricePlaceholder": "Max price",
+    "allPrice": "All Price",
+    "underAmount": "Under {{amount}}",
+    "amountRange": "{{min}} to {{max}}"
   },
   "cart": {
     "title": "Shopping Cart",
@@ -194,11 +199,7 @@
     "haveAccount": "Already have an account?",
     "signUp": "Sign Up",
     "resetPassword": "Reset Password",
-    "sendResetLink": "Send Reset Link",
-    "signIn": "Sign in",
-    "continueWithGoogle": "Continue with Google",
-    "orContinueWith": "Or continue with",
-    "signInWithEmail": "Sign in with email"
+    "sendResetLink": "Send Reset Link"
   },
   "common": {
     "search": "Search Products...",
@@ -301,7 +302,18 @@
   },
   "review": {
     "writePlaceholder": "Write your review here...",
-    "yourName": "Your Name"
+    "yourName": "Your Name",
+    "yourEmail": "Your Email",
+    "yourReview": "Your Review",
+    "yourRating": "Your Rating :",
+    "moderationNotice": "Your review will be published after moderation.",
+    "pendingTitle": "Thank you! Your review is pending approval.",
+    "writeAnother": "Write another review",
+    "loginPrompt": "Please",
+    "signInLink": "sign in",
+    "loginPromptSuffix": "to leave a review.",
+    "submit": "Submit Review",
+    "submitting": "Submitting..."
   },
   "hero": {
     "shopNow": "SHOP NOW",
