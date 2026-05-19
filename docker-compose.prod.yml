@@ -99,6 +99,7 @@ services:
     environment:
       MONGO_URI: mongodb://mongodb:27017/shofy
       NODE_ENV: production
+      BACKEND_API_URL: http://backend:7001
     ports:
       - "127.0.0.1:8080:8080"
     depends_on:
