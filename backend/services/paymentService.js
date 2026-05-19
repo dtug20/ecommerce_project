@@ -39,6 +39,7 @@ class PaymentService {
         return this.processCOD(order);
       case 'bank-transfer':
         return this.processBankTransfer(order);
+      case 'vnp':
       case 'vnpay':
         return this.processVNPay(order, paymentData);
       case 'momo':
@@ -99,7 +100,7 @@ class PaymentService {
   static async processVNPay(order, paymentData) {
     return {
       success: true,
-      paymentGateway: 'vnpay',
+      paymentGateway: 'vnp',
       paymentStatus: 'unpaid',
       transactionId: null,
     };

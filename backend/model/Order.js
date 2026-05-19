@@ -94,7 +94,7 @@ const orderSchema = new mongoose.Schema(
     },
     paymentGateway: {
       type: String,
-      enum: ["stripe", "paypal", "cod", "bank-transfer", "vnpay", "momo"],
+      enum: ["stripe", "paypal", "cod", "bank-transfer", "vnpay", "momo", "vnp"],
     },
     transactionId: { type: String },
     vnpayTransactionNo: { type: String },

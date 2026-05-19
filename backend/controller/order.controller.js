@@ -155,7 +155,7 @@ exports.addOrder = async (req, res, next) => {
     }).catch((err) => console.error('[email] order-confirmation send error:', err.message));
 
     let paymentUrl = null;
-    if (paymentMethod === 'vnpay') {
+    if (paymentMethod === 'vnpay' || paymentMethod === 'vnp') {
       const ipAddr =
         req.headers['x-forwarded-for'] ||
         req.connection.remoteAddress ||

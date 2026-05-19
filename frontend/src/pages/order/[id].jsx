@@ -12,6 +12,7 @@ import ShopBreadcrumb from "@/components/breadcrumb/shop-breadcrumb";
 import { useGetUserOrderByIdQuery } from "@/redux/features/order/orderApi";
 import useCurrency from "@/hooks/use-currency";
 import { OrderStatusStepper } from "@/components/clicon/composites";
+import { useKeycloak } from "@/components/providers/keycloak-provider";
 import { notifyError, notifySuccess } from "@/utils/toast";
 
 // ── Status helpers ───────────────────────────────────────────────────
@@ -101,7 +102,14 @@ const SingleOrder = ({ params }) => {
   const router = useRouter();
   const { t } = useTranslation();
   const { formatPrice } = useCurrency();
-  const { data: orderData, isError, isLoading } = useGetUserOrderByIdQuery(orderId);
+  const kc = useKeycloak();
+  const isAuthenticated = kc?.initialized && kc?.authenticated;
+
+  const { data: orderData, isError, isLoading: orderLoading } = useGetUserOrderByIdQuery(orderId, {
+    skip: !isAuthenticated,
+  });
+
+  const isLoading = !kc?.initialized || orderLoading;
 
   React.useEffect(() => {
     if (router.query.paymentStatus) {

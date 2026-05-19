@@ -30,7 +30,8 @@ const OrderStatusStepper = ({ currentStatus, className = '' }) => {
     delivered: 'fa-solid fa-circle-check',
   };
 
-  const currentIndex = STEPS.indexOf(currentStatus);
+  const statusKey = currentStatus === 'confirmed' ? 'processing' : currentStatus;
+  const currentIndex = STEPS.indexOf(statusKey);
 
   if (isCancelled) {
     return (

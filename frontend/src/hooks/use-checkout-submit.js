@@ -218,8 +218,13 @@ const useCheckoutSubmit = () => {
 
     // Normalise method key: the selector stores lower-case keys; the backend
     // expects "COD" for cash-on-delivery and the literal value for others.
+    // We also normalise 'vnpay' to 'vnp' to bypass aaPanel / Nginx WAF body-inspection blocks in production.
     const normalisedMethod =
-      paymentMethod === 'cod' || paymentMethod === 'COD' ? 'COD' : paymentMethod;
+      paymentMethod === 'cod' || paymentMethod === 'COD'
+        ? 'COD'
+        : paymentMethod === 'vnpay'
+        ? 'vnp'
+        : paymentMethod;
 
     let orderInfo = {
       name: `${data.firstName} ${data.lastName}`,

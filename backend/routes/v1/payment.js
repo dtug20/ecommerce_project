@@ -7,7 +7,7 @@ const Order = require('../../model/Order');
 const { verifyVnpaySignature } = require('../../utils/vnpay');
 const { emitOrderUpdated } = require('../../utils/socketEmitter');
 
-router.get('/vnpay/ipn', async (req, res) => {
+router.get(['/vnpay/ipn', '/vnp/ipn'], async (req, res) => {
   try {
     const vnpParams = req.query;
 
@@ -80,7 +80,7 @@ router.get('/vnpay/ipn', async (req, res) => {
   }
 });
 
-router.get('/vnpay/return', async (req, res) => {
+router.get(['/vnpay/return', '/vnp/return'], async (req, res) => {
   try {
     const isValidSignature = verifyVnpaySignature(req.query);
     const orderId = req.query.vnp_TxnRef;
