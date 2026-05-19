@@ -357,44 +357,6 @@ router.post('/orders/track', validate(trackOrderSchema), ctrl.trackOrder);
 
 /**
  * @swagger
- * /api/v1/store/pages/{slug}:
- *   get:
- *     summary: Get published CMS page by slug
- *     tags: [Store CMS]
- *     parameters:
- *       - in: path
- *         name: slug
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: CMS page with blocks
- *       404:
- *         description: Not found
- */
-router.get('/pages/:slug',      storeCmsCtrl.getPageBySlug);
-
-/**
- * @swagger
- * /api/v1/store/menus/{location}:
- *   get:
- *     summary: Get active menu by location
- *     tags: [Store CMS]
- *     parameters:
- *       - in: path
- *         name: location
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Menu with items
- */
-router.get('/menus/:location',  storeCmsCtrl.getMenuByLocation);
-
-/**
- * @swagger
  * /api/v1/store/banners:
  *   get:
  *     summary: Get active banners
