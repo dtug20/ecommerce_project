@@ -14,14 +14,15 @@ export default function NoAccessPage() {
   const [me, setMe] = useState<Me | null>(null);
 
   useEffect(() => {
-    fetch('/api/me', { credentials: 'include' })
+    const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+    fetch(`${base}/api/me`, { credentials: 'include' })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => setMe(data))
       .catch(() => setMe(null));
   }, []);
 
   const handleLogout = () => {
-    window.location.href = '/logout';
+    window.location.href = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/logout`;
   };
 
   const adminEmail = 'admin@shofy.com';

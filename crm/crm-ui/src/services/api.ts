@@ -28,9 +28,12 @@ import type {
   CustomerGrowthResponse,
 } from '@/types/index';
 
-// Axios instance with relative baseURL — proxied by Vite to the CRM backend
+// Axios baseURL follows Vite's BASE_URL so /api/* calls go through the same
+// path prefix as the UI (e.g. /admin/api/* in production, /api/* in dev).
+// In dev: BASE_URL='/' → baseURL='' → relative /api/* → vite proxy to CRM backend.
+// In prod: BASE_URL='/admin/' → baseURL='/admin' → /admin/api/* → nginx to CRM.
 const api = axios.create({
-  baseURL: '',
+  baseURL: import.meta.env.BASE_URL.replace(/\/$/, ''),
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

@@ -14,10 +14,14 @@ const queryClient = new QueryClient({
   },
 });
 
+// Vite injects import.meta.env.BASE_URL from `base` in vite.config (e.g. '/admin/').
+// React Router expects no trailing slash, so strip it.
+const routerBasename = import.meta.env.BASE_URL.replace(/\/$/, '');
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <BrowserRouter basename={routerBasename}>
         <App />
         <Toaster
           position="top-right"
