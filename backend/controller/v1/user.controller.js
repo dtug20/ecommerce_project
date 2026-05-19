@@ -128,7 +128,7 @@ exports.addReview = async (req, res, next) => {
       rating,
       comment: comment || '',
       images: images || [],
-      status: 'pending',
+      status: 'approved',
       isVerifiedPurchase,
     });
 
