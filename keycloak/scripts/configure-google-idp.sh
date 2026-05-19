@@ -51,57 +51,34 @@ if [[ -z "$FLOW_ID" ]]; then
   $KCADM create "authentication/flows/${BUILTIN_FLOW_ENC}/copy" \
     -r "$REALM" \
     -s "newName=$FLOW_ALIAS"
-
-  # Disable "Review Profile" step (UX: skip review form)
-  echo "==> Disabling 'Review Profile' step"
-  REVIEW_PROFILE_ID=$($KCADM get "authentication/flows/$FLOW_ALIAS/executions" -r "$REALM" \
-    --format csv --fields id,providerId --noquotes 2>/dev/null \
-    | find_id_by_provider "idp-review-profile")
-  if [[ -n "$REVIEW_PROFILE_ID" ]]; then
-    $KCADM update "authentication/executions/$REVIEW_PROFILE_ID" -r "$REALM" \
-      -s 'requirement=DISABLED'
-  else
-    echo "    (idp-review-profile execution not found — skipped)"
-  fi
-
-  # Auto-link existing user (no password prompt) — set ALTERNATIVE
-  echo "==> Setting 'Automatically Set Existing User' to ALTERNATIVE"
-  AUTO_SET_ID=$($KCADM get "authentication/flows/$FLOW_ALIAS/executions" -r "$REALM" \
-    --format csv --fields id,providerId --noquotes 2>/dev/null \
-    | find_id_by_provider "idp-auto-link")
-  if [[ -n "$AUTO_SET_ID" ]]; then
-    $KCADM update "authentication/executions/$AUTO_SET_ID" -r "$REALM" \
-      -s 'requirement=ALTERNATIVE'
-  else
-    echo "    (idp-auto-link execution not found — skipped)"
-  fi
-
-  # Disable "Verify existing account by Email" (Google already verified)
-  echo "==> Disabling 'Verify existing account by Email'"
-  VERIFY_EMAIL_ID=$($KCADM get "authentication/flows/$FLOW_ALIAS/executions" -r "$REALM" \
-    --format csv --fields id,providerId --noquotes 2>/dev/null \
-    | find_id_by_provider "idp-email-verification")
-  if [[ -n "$VERIFY_EMAIL_ID" ]]; then
-    $KCADM update "authentication/executions/$VERIFY_EMAIL_ID" -r "$REALM" \
-      -s 'requirement=DISABLED'
-  else
-    echo "    (idp-email-verification execution not found — skipped)"
-  fi
-
-  # Disable "Confirm link existing account" prompt
-  echo "==> Disabling 'Confirm link existing account'"
-  CONFIRM_LINK_ID=$($KCADM get "authentication/flows/$FLOW_ALIAS/executions" -r "$REALM" \
-    --format csv --fields id,providerId --noquotes 2>/dev/null \
-    | find_id_by_provider "idp-confirm-link")
-  if [[ -n "$CONFIRM_LINK_ID" ]]; then
-    $KCADM update "authentication/executions/$CONFIRM_LINK_ID" -r "$REALM" \
-      -s 'requirement=DISABLED'
-  else
-    echo "    (idp-confirm-link execution not found — skipped)"
-  fi
 else
-  echo "==> Flow '$FLOW_ALIAS' already exists, skipping flow creation"
+  echo "==> Flow '$FLOW_ALIAS' already exists, reusing"
 fi
+
+# Always (re)configure executions to enforce the desired state. This makes the
+# script self-healing if a previous run crashed mid-configuration.
+
+set_execution_requirement() {
+  local provider_id="$1"
+  local requirement="$2"
+  local exec_id
+  exec_id=$($KCADM get "authentication/flows/$FLOW_ALIAS/executions" -r "$REALM" \
+    --format csv --fields id,providerId --noquotes 2>/dev/null \
+    | find_id_by_provider "$provider_id")
+  if [[ -n "$exec_id" ]]; then
+    echo "    -> $provider_id = $requirement"
+    $KCADM update "authentication/executions/$exec_id" -r "$REALM" \
+      -s "requirement=$requirement"
+  else
+    echo "    -> $provider_id execution not found, skipped"
+  fi
+}
+
+echo "==> Configuring flow executions"
+set_execution_requirement "idp-review-profile"     "DISABLED"     # skip review-profile form (auto-create)
+set_execution_requirement "idp-auto-link"          "ALTERNATIVE"  # auto-link if email matches existing user
+set_execution_requirement "idp-email-verification" "DISABLED"     # Google already verified
+set_execution_requirement "idp-confirm-link"       "DISABLED"     # no prompt to confirm link
 
 # ----------------------------------------------------------------------------
 # 2. Create or update Google Identity Provider
