@@ -3,16 +3,6 @@ import { apiSlice } from "../api/apiSlice";
 export const cmsApi = apiSlice.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
-    // Pages
-    getPage: builder.query({
-      query: (slug) => `/api/v1/store/pages/${slug}`,
-      providesTags: ['Page'],
-    }),
-    // Menus
-    getMenu: builder.query({
-      query: (location) => `/api/v1/store/menus/${location}`,
-      providesTags: ['Menu'],
-    }),
     // Banners
     getBanners: builder.query({
       query: (params) => {
@@ -163,8 +153,6 @@ export const cmsApi = apiSlice.injectEndpoints({
 });
 
 export const {
-  useGetPageQuery,
-  useGetMenuQuery,
   useGetBannersQuery,
   useGetBlogPostsQuery,
   useGetBlogPostQuery,
