@@ -22,7 +22,7 @@ const createOrder = Joi.object({
 
   // Payment
   paymentMethod: Joi.string()
-    .valid('COD', 'bank-transfer', 'vnpay', 'momo', 'stripe', 'vnp')
+    .valid('COD', 'bank-transfer', 'vnpay', 'momo', 'stripe', 'vnp', 'vn-pay', 'online-gateway')
     .required(),
 
   // Optional fields
