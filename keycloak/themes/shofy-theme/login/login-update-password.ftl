@@ -80,6 +80,16 @@
                     <#if messagesPerField.existsError('password-new')>
                         <span class="shofy-field-error">${kcSanitize(messagesPerField.get('password-new'))?no_esc}</span>
                     </#if>
+                    <!-- Password strength meter -->
+                    <div class="shofy-strength" id="shofy-strength" aria-hidden="true">
+                        <div class="shofy-strength-bars">
+                            <span class="shofy-strength-bar"></span>
+                            <span class="shofy-strength-bar"></span>
+                            <span class="shofy-strength-bar"></span>
+                            <span class="shofy-strength-bar"></span>
+                        </div>
+                        <span class="shofy-strength-label" id="shofy-strength-label"></span>
+                    </div>
                 </div>
 
                 <!-- Confirm Password -->
@@ -122,6 +132,95 @@
             success: '${msg("shofy.toast.success")}',
             info:    '${msg("shofy.toast.info")}',
         };
+
+        /* ── Client-side validation (update password) ── */
+        var UV = {
+            passwordRequired:  '${msg("shofy.register.passwordRequired")}',
+            passwordMinLength: '${msg("shofy.register.passwordMinLength")}',
+            passwordDigit:     '${msg("shofy.register.passwordDigit")}',
+            passwordUppercase: '${msg("shofy.register.passwordUppercase")}',
+            passwordLowercase: '${msg("shofy.register.passwordLowercase")}',
+            passwordSpecial:   '${msg("shofy.register.passwordSpecial")}',
+            passwordMismatch:  '${msg("shofy.register.passwordMismatch")}',
+            strengthWeak:      '${msg("shofy.strength.weak")}',
+            strengthFair:      '${msg("shofy.strength.fair")}',
+            strengthGood:      '${msg("shofy.strength.good")}',
+            strengthStrong:    '${msg("shofy.strength.strong")}',
+        };
+
+        function uShowError(input, message) {
+            uClearError(input);
+            input.classList.add('shofy-input-error');
+            var parent = input.closest('.shofy-password-wrapper') || input;
+            var field = parent.closest('.shofy-field') || parent.parentNode;
+            var span = document.createElement('span');
+            span.className = 'shofy-field-error shofy-js-error';
+            span.textContent = message;
+            field.appendChild(span);
+        }
+        function uClearError(input) {
+            input.classList.remove('shofy-input-error');
+            var field = input.closest('.shofy-field');
+            if (field) field.querySelectorAll('.shofy-js-error').forEach(function(el){ el.remove(); });
+        }
+
+        function uValidatePassword(input) {
+            var val = input.value;
+            if (!val)                  { uShowError(input, UV.passwordRequired);  return false; }
+            if (val.length < 8)        { uShowError(input, UV.passwordMinLength); return false; }
+            if (!/[0-9]/.test(val))    { uShowError(input, UV.passwordDigit);     return false; }
+            if (!/[A-Z]/.test(val))    { uShowError(input, UV.passwordUppercase); return false; }
+            if (!/[a-z]/.test(val))    { uShowError(input, UV.passwordLowercase); return false; }
+            if (!/[^A-Za-z0-9]/.test(val)) { uShowError(input, UV.passwordSpecial); return false; }
+            uClearError(input);
+            return true;
+        }
+
+        function uScore(val) {
+            if (!val) return 0;
+            var s = 0;
+            if (val.length >= 8) s++;
+            if (/[A-Z]/.test(val) && /[a-z]/.test(val)) s++;
+            if (/[0-9]/.test(val)) s++;
+            if (val.length >= 12 || /[^A-Za-z0-9]/.test(val)) s++;
+            return Math.min(s, 4);
+        }
+        function uUpdateMeter(val) {
+            var meter = document.getElementById('shofy-strength');
+            var label = document.getElementById('shofy-strength-label');
+            if (!meter || !label) return;
+            var sc = uScore(val);
+            var bars = meter.querySelectorAll('.shofy-strength-bar');
+            meter.classList.toggle('is-visible', val.length > 0);
+            meter.setAttribute('data-score', String(sc));
+            var labels = ['', UV.strengthWeak, UV.strengthFair, UV.strengthGood, UV.strengthStrong];
+            label.textContent = val.length === 0 ? '' : labels[sc];
+            for (var i = 0; i < bars.length; i++) bars[i].classList.toggle('is-active', i < sc);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var form    = document.getElementById('kc-passwd-update-form');
+            var pwdNew  = document.getElementById('password-new');
+            var pwdConf = document.getElementById('password-confirm');
+
+            if (pwdNew) {
+                pwdNew.addEventListener('input', function() { uClearError(pwdNew); uUpdateMeter(pwdNew.value); });
+                pwdNew.addEventListener('blur',  function() { uValidatePassword(pwdNew); });
+            }
+            if (pwdConf) {
+                pwdConf.addEventListener('input', function() { uClearError(pwdConf); });
+                pwdConf.addEventListener('blur',  function() {
+                    if (!pwdConf.value || pwdConf.value !== pwdNew.value) uShowError(pwdConf, UV.passwordMismatch);
+                    else uClearError(pwdConf);
+                });
+            }
+            if (form) form.addEventListener('submit', function(e) {
+                var valid = true;
+                if (pwdNew && !uValidatePassword(pwdNew)) valid = false;
+                if (pwdConf && (!pwdConf.value || pwdConf.value !== pwdNew.value)) { uShowError(pwdConf, UV.passwordMismatch); valid = false; }
+                if (!valid) { e.preventDefault(); var first = form.querySelector('.shofy-input-error'); if (first) first.focus(); }
+            });
+        });
 
         function toggleLangMenu() {
             var switcher = document.querySelector('.shofy-lang-switcher');

@@ -87,6 +87,9 @@
                                autocomplete="off"
                                placeholder="${msg("shofy.login.usernamePlaceholder")}" />
                     </div>
+                    <#if messagesPerField.existsError('username')>
+                        <span class="shofy-field-error">${kcSanitize(messagesPerField.get('username'))?no_esc}</span>
+                    </#if>
                 </div>
 
                 <!-- Password -->
@@ -95,7 +98,7 @@
                     <div class="shofy-input-wrapper shofy-password-wrapper">
                         <input tabindex="2"
                                id="password"
-                               class="shofy-input"
+                               class="shofy-input<#if messagesPerField.existsError('password')> shofy-input-error</#if>"
                                name="password"
                                type="password"
                                autocomplete="off"
@@ -107,6 +110,9 @@
                             </svg>
                         </button>
                     </div>
+                    <#if messagesPerField.existsError('password')>
+                        <span class="shofy-field-error">${kcSanitize(messagesPerField.get('password'))?no_esc}</span>
+                    </#if>
                 </div>
 
                 <!-- Error alerts -->
@@ -153,6 +159,59 @@
             success: '${msg("shofy.toast.success")}',
             info:    '${msg("shofy.toast.info")}',
         };
+
+        /* ── Client-side validation (login) ── */
+        var LV = {
+            usernameRequired: '${msg("shofy.login.usernameRequired")}',
+            usernameInvalid:  '${msg("shofy.login.usernameInvalid")}',
+            passwordRequired: '${msg("shofy.login.passwordRequired")}',
+        };
+
+        function showLoginError(input, message) {
+            clearLoginError(input);
+            input.classList.add('shofy-input-error');
+            var parent = input.closest('.shofy-password-wrapper') || input.closest('.shofy-input-wrapper') || input;
+            var field = parent.closest('.shofy-field') || parent.parentNode;
+            var span = document.createElement('span');
+            span.className = 'shofy-field-error shofy-js-error';
+            span.textContent = message;
+            field.appendChild(span);
+        }
+        function clearLoginError(input) {
+            input.classList.remove('shofy-input-error');
+            var field = input.closest('.shofy-field');
+            if (field) field.querySelectorAll('.shofy-js-error').forEach(function(el){ el.remove(); });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var form     = document.getElementById('kc-form-login');
+            var username = document.getElementById('username');
+            var password = document.getElementById('password');
+
+            if (username) username.addEventListener('blur', function() {
+                var v = username.value.trim();
+                if (!v) { showLoginError(username, LV.usernameRequired); return; }
+                if (!/^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/.test(v)) { showLoginError(username, LV.usernameInvalid); return; }
+                clearLoginError(username);
+            });
+            if (password) password.addEventListener('blur', function() {
+                if (!password.value) { showLoginError(password, LV.passwordRequired); }
+                else { clearLoginError(password); }
+            });
+            if (username) username.addEventListener('input', function() { clearLoginError(username); });
+            if (password) password.addEventListener('input', function() { clearLoginError(password); });
+
+            if (form) form.addEventListener('submit', function(e) {
+                var valid = true;
+                if (username) {
+                    var v = username.value.trim();
+                    if (!v) { showLoginError(username, LV.usernameRequired); valid = false; }
+                    else if (!/^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/.test(v)) { showLoginError(username, LV.usernameInvalid); valid = false; }
+                }
+                if (password && !password.value) { showLoginError(password, LV.passwordRequired); valid = false; }
+                if (!valid) { e.preventDefault(); var first = form.querySelector('.shofy-input-error'); if (first) first.focus(); }
+            });
+        });
 
         function toggleLangMenu() {
             var switcher = document.querySelector('.shofy-lang-switcher');

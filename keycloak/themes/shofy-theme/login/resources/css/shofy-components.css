@@ -198,3 +198,42 @@
     max-width: none;
   }
 }
+
+/* ── Password strength meter ── */
+.shofy-strength {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+.shofy-strength.is-visible {
+  display: flex;
+}
+.shofy-strength-bars {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+.shofy-strength-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: #e5e7eb;
+  transition: background-color 0.2s ease;
+}
+.shofy-strength[data-score="1"] .shofy-strength-bar.is-active { background: #ef4444; }
+.shofy-strength[data-score="2"] .shofy-strength-bar.is-active { background: #f59e0b; }
+.shofy-strength[data-score="3"] .shofy-strength-bar.is-active { background: #10b981; }
+.shofy-strength[data-score="4"] .shofy-strength-bar.is-active { background: #059669; }
+.shofy-strength-label {
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: right;
+  color: #6b7280;
+}
+.shofy-strength[data-score="1"] .shofy-strength-label { color: #ef4444; }
+.shofy-strength[data-score="2"] .shofy-strength-label { color: #f59e0b; }
+.shofy-strength[data-score="3"] .shofy-strength-label { color: #10b981; }
+.shofy-strength[data-score="4"] .shofy-strength-label { color: #059669; }
+

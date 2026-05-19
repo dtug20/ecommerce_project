@@ -157,6 +157,16 @@
                     <#if messagesPerField.existsError('password')>
                         <span class="shofy-field-error">${kcSanitize(messagesPerField.get('password'))?no_esc}</span>
                     </#if>
+                    <!-- Password strength meter -->
+                    <div class="shofy-strength" id="shofy-strength" aria-hidden="true">
+                        <div class="shofy-strength-bars">
+                            <span class="shofy-strength-bar"></span>
+                            <span class="shofy-strength-bar"></span>
+                            <span class="shofy-strength-bar"></span>
+                            <span class="shofy-strength-bar"></span>
+                        </div>
+                        <span class="shofy-strength-label" id="shofy-strength-label"></span>
+                    </div>
                 </div>
 
                 <!-- Confirm Password -->
@@ -221,8 +231,11 @@
         var V = {
             nameNoNumbers:     '${msg("shofy.register.nameNoNumbers")}',
             nameRequired:      '${msg("shofy.register.nameRequired")}',
+            nameInvalidChars:  '${msg("shofy.register.nameInvalidChars")}',
+            nameTooLong:       '${msg("shofy.register.nameTooLong")}',
             emailRequired:     '${msg("shofy.register.emailRequired")}',
             emailInvalid:      '${msg("shofy.register.emailInvalid")}',
+            emailDisposable:   '${msg("shofy.register.emailDisposable")}',
             passwordRequired:  '${msg("shofy.register.passwordRequired")}',
             passwordMinLength: '${msg("shofy.register.passwordMinLength")}',
             passwordDigit:     '${msg("shofy.register.passwordDigit")}',
@@ -230,7 +243,15 @@
             passwordLowercase: '${msg("shofy.register.passwordLowercase")}',
             passwordSpecial:   '${msg("shofy.register.passwordSpecial")}',
             passwordMismatch:  '${msg("shofy.register.passwordMismatch")}',
+            termsRequired:     '${msg("shofy.register.termsRequired")}',
+            strengthWeak:      '${msg("shofy.strength.weak")}',
+            strengthFair:      '${msg("shofy.strength.fair")}',
+            strengthGood:      '${msg("shofy.strength.good")}',
+            strengthStrong:    '${msg("shofy.strength.strong")}',
         };
+
+        /* ── Disposable email domain blocklist (mirrors backend) ── */
+        var DISPOSABLE_DOMAINS = ['mailinator','tempmail','10minutemail','guerrillamail','yopmail','throwawaymail'];
 
         /* ── Helpers ── */
 
@@ -256,19 +277,43 @@
 
         /* ── Validators ── */
 
+        // Allowed characters in personal names: Unicode letters/marks, digits, space, dot, apostrophe, hyphen.
+        // Uses safe fallback for older browsers that don't support \p{L}.
+        function buildNameRegex() {
+            try { return new RegExp("^[\\p{L}\\p{M}0-9 .'\\-]+$", "u"); }
+            catch (e) { return /^[A-Za-zÀ-ỹ0-9 .'\-]+$/; }
+        }
+        var NAME_REGEX = buildNameRegex();
+
         function validateName(input) {
             var val = input.value.trim();
-            if (!val) { showFieldError(input, V.nameRequired); return false; }
-            if (/[0-9]/.test(val)) { showFieldError(input, V.nameNoNumbers); return false; }
+            if (!val)                  { showFieldError(input, V.nameRequired);     return false; }
+            if (val.length > 50)       { showFieldError(input, V.nameTooLong);      return false; }
+            if (!NAME_REGEX.test(val)) { showFieldError(input, V.nameInvalidChars); return false; }
             clearFieldError(input);
             return true;
+        }
+
+        function isDisposableEmail(val) {
+            var at = val.lastIndexOf('@');
+            if (at < 0) return false;
+            var domain = val.slice(at + 1).toLowerCase();
+            for (var i = 0; i < DISPOSABLE_DOMAINS.length; i++) {
+                if (domain.indexOf(DISPOSABLE_DOMAINS[i] + '.') === 0 || domain === DISPOSABLE_DOMAINS[i]) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         function validateEmail(input) {
             var val = input.value.trim();
             if (!val) { showFieldError(input, V.emailRequired); return false; }
-            // RFC-ish email pattern
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { showFieldError(input, V.emailInvalid); return false; }
+            // Tighter RFC-compatible pattern: requires letters/digits in local + domain TLD ≥ 2 chars.
+            if (!/^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/.test(val) || val.length < 5 || val.length > 254) {
+                showFieldError(input, V.emailInvalid); return false;
+            }
+            if (isDisposableEmail(val)) { showFieldError(input, V.emailDisposable); return false; }
             clearFieldError(input);
             return true;
         }
@@ -292,6 +337,47 @@
             return true;
         }
 
+        function validateTerms(input) {
+            if (!input || input.checked) {
+                if (input) input.parentNode.parentNode.querySelectorAll('.shofy-js-error').forEach(function(el){ el.remove(); });
+                return true;
+            }
+            // Insert error after the checkbox label wrapper
+            var wrapper = input.parentNode.parentNode;
+            wrapper.querySelectorAll('.shofy-js-error').forEach(function(el){ el.remove(); });
+            var span = document.createElement('span');
+            span.className = 'shofy-field-error shofy-js-error';
+            span.textContent = V.termsRequired;
+            wrapper.appendChild(span);
+            return false;
+        }
+
+        /* ── Password strength meter ── */
+        function scorePassword(val) {
+            if (!val) return 0;
+            var score = 0;
+            if (val.length >= 8) score++;
+            if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (val.length >= 12 || /[^A-Za-z0-9]/.test(val)) score++;
+            return Math.min(score, 4);
+        }
+
+        function updateStrengthMeter(val) {
+            var meter = document.getElementById('shofy-strength');
+            var label = document.getElementById('shofy-strength-label');
+            if (!meter || !label) return;
+            var score = scorePassword(val);
+            var bars = meter.querySelectorAll('.shofy-strength-bar');
+            meter.classList.toggle('is-visible', val.length > 0);
+            meter.setAttribute('data-score', String(score));
+            var labels = ['', V.strengthWeak, V.strengthFair, V.strengthGood, V.strengthStrong];
+            label.textContent = val.length === 0 ? '' : labels[score];
+            for (var i = 0; i < bars.length; i++) {
+                bars[i].classList.toggle('is-active', i < score);
+            }
+        }
+
         /* ── Wire up form ── */
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -301,6 +387,7 @@
             var email      = document.getElementById('email');
             var password   = document.getElementById('password');
             var confirmPwd = document.getElementById('password-confirm');
+            var terms      = document.getElementById('terms');
 
             // Real-time validation on blur
             if (firstName) firstName.addEventListener('blur', function() { validateName(firstName); });
@@ -310,9 +397,20 @@
             if (confirmPwd) confirmPwd.addEventListener('blur', function() { validateConfirmPassword(password, confirmPwd); });
 
             // Clear error on input
-            [firstName, lastName, email, password, confirmPwd].forEach(function(el) {
+            [firstName, lastName, email, confirmPwd].forEach(function(el) {
                 if (el) el.addEventListener('input', function() { clearFieldError(el); });
             });
+
+            // Password: clear error + live strength meter
+            if (password) {
+                password.addEventListener('input', function() {
+                    clearFieldError(password);
+                    updateStrengthMeter(password.value);
+                });
+            }
+
+            // Terms: clear error when user ticks
+            if (terms) terms.addEventListener('change', function() { validateTerms(terms); });
 
             // Submit validation
             form.addEventListener('submit', function(e) {
@@ -322,6 +420,7 @@
                 if (email     && !validateEmail(email))     valid = false;
                 if (password  && !validatePassword(password)) valid = false;
                 if (confirmPwd && !validateConfirmPassword(password, confirmPwd)) valid = false;
+                if (!validateTerms(terms)) valid = false;
 
                 if (!valid) {
                     e.preventDefault();
