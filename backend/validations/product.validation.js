@@ -48,10 +48,10 @@ const offerDateSchema = Joi.object({
 const imageURLSchema = Joi.array().items(
   Joi.object({
     color:  Joi.string().allow('', null).optional(),
-    img:    Joi.string().allow('', null).optional(),
+    img:    Joi.string().uri().allow('', null).optional(),
     images: Joi.array().items(
       Joi.object({
-        url:  Joi.string().allow('', null).optional(),
+        url:  Joi.string().uri().allow('', null).optional(),
         size: Joi.string().allow('', null).optional(),
       }).options({ stripUnknown: true })
     ).optional(),
@@ -60,17 +60,19 @@ const imageURLSchema = Joi.array().items(
 
 // ---------------------------------------------------------------------------
 // Create — required fields
+// price must be strictly positive (no free products via API)
+// img URL is required so every product has at least a thumbnail
 // ---------------------------------------------------------------------------
 const createProduct = Joi.object({
   title:       Joi.string().min(3).max(200).required(),
   description: Joi.string().allow('', null).optional(),
-  price:       Joi.number().min(0).required(),
+  price:       Joi.number().positive().required(),
   discount:    Joi.number().min(0).max(100).optional(),
   quantity:    Joi.number().integer().min(0).required(),
   status:      Joi.string().valid('in-stock', 'out-of-stock', 'discontinued').optional(),
   productType: Joi.string().required(),
   unit:        Joi.string().allow('', null).optional(),
-  img:         Joi.string().allow('', null).optional(),
+  img:         Joi.string().uri().required(),
   category:    categoryRefSchema.optional(),
   brand:       brandRefSchema.optional(),
   variants:    Joi.array().items(variantSchema).optional(),
@@ -98,7 +100,7 @@ const createProduct = Joi.object({
 // Update — all fields optional
 // ---------------------------------------------------------------------------
 const updateProduct = createProduct.fork(
-  ['title', 'price', 'quantity', 'productType'],
+  ['title', 'price', 'quantity', 'productType', 'img'],
   (field) => field.optional()
 );
 

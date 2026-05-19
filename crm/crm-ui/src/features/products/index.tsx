@@ -880,6 +880,16 @@ function ProductDrawer({ open, editingProduct, categories, onClose }: ProductDra
     }
   };
 
+  const extractApiError = (err: unknown, fallback: string): string => {
+    const e = err as { response?: { data?: { message?: string; errors?: Array<{ message: string }> } }; message?: string };
+    const apiMsg = e?.response?.data?.message;
+    const fieldErrors = e?.response?.data?.errors;
+    if (Array.isArray(fieldErrors) && fieldErrors.length > 0) {
+      return fieldErrors.map((fe) => fe.message).join('; ');
+    }
+    return apiMsg || e?.message || fallback;
+  };
+
   const createMutation = useMutation({
     mutationFn: (data: Partial<Product>) => productsApi.create(data),
     onSuccess: () => {
@@ -888,7 +898,7 @@ function ProductDrawer({ open, editingProduct, categories, onClose }: ProductDra
       onClose();
     },
     onError: (err: Error) => {
-      toast.error(err.message || 'Failed to create product');
+      toast.error(extractApiError(err, 'Failed to create product'));
     },
   });
 
@@ -901,7 +911,7 @@ function ProductDrawer({ open, editingProduct, categories, onClose }: ProductDra
       onClose();
     },
     onError: (err: Error) => {
-      toast.error(err.message || 'Failed to update product');
+      toast.error(extractApiError(err, 'Failed to update product'));
     },
   });
 
@@ -970,14 +980,25 @@ function ProductDrawer({ open, editingProduct, categories, onClose }: ProductDra
       children: (
         <>
           {/* Image upload */}
-          <Form.Item name="img" label="Product Image">
+          <Form.Item
+            name="img"
+            label="Product Image"
+            rules={[
+              { required: true, message: 'A product image is required' },
+              { type: 'url', message: 'Must be a valid URL (upload an image to generate one)' },
+            ]}
+          >
             <ImageUpload placeholder="Upload Product Image" />
           </Form.Item>
 
           <Form.Item
             name="title"
             label="Title"
-            rules={[{ required: true, message: 'Product title is required' }]}
+            rules={[
+              { required: true, message: 'Product title is required' },
+              { min: 3, message: 'Title must be at least 3 characters' },
+              { max: 200, message: 'Title must be at most 200 characters' },
+            ]}
           >
             <Input placeholder="Enter product title" />
           </Form.Item>
@@ -991,13 +1012,20 @@ function ProductDrawer({ open, editingProduct, categories, onClose }: ProductDra
               <Form.Item
                 name="price"
                 label="Price (USD)"
-                rules={[{ required: true, message: 'Required' }]}
+                rules={[
+                  { required: true, message: 'Price is required' },
+                  { type: 'number', min: 0.01, message: 'Price must be greater than 0' },
+                ]}
               >
-                <InputNumber min={0} precision={2} style={{ width: '100%' }} placeholder="0.00" prefix="$" />
+                <InputNumber min={0.01} precision={2} style={{ width: '100%' }} placeholder="0.00" prefix="$" />
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="discount" label="Discount (%)">
+              <Form.Item
+                name="discount"
+                label="Discount (%)"
+                rules={[{ type: 'number', min: 0, max: 100, message: '0–100 only' }]}
+              >
                 <InputNumber min={0} max={100} style={{ width: '100%' }} placeholder="0" />
               </Form.Item>
             </Col>
@@ -1005,7 +1033,10 @@ function ProductDrawer({ open, editingProduct, categories, onClose }: ProductDra
               <Form.Item
                 name="quantity"
                 label="Quantity"
-                rules={[{ required: true, message: 'Required' }]}
+                rules={[
+                  { required: true, message: 'Quantity is required' },
+                  { type: 'number', min: 0, message: 'Cannot be negative' },
+                ]}
               >
                 <InputNumber min={0} style={{ width: '100%' }} placeholder="0" />
               </Form.Item>

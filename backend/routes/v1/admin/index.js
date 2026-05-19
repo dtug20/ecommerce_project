@@ -34,7 +34,36 @@ try {
   vendorCtrl = null;
 }
 
-const upload = multer();
+const ALLOWED_IMAGE_MIME = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+
+const upload = multer({
+  limits: { fileSize: MAX_IMAGE_SIZE_BYTES },
+  fileFilter: (req, file, cb) => {
+    if (!ALLOWED_IMAGE_MIME.includes(file.mimetype)) {
+      const err = new Error(`Unsupported file type "${file.mimetype}". Allowed: JPEG, PNG, WebP.`);
+      err.code = 'UNSUPPORTED_MEDIA_TYPE';
+      err.status = 415;
+      return cb(err, false);
+    }
+    cb(null, true);
+  },
+});
+
+const handleUploadErrors = (err, req, res, next) => {
+  if (!err) return next();
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return respond.error(res, 'FILE_TOO_LARGE', `File exceeds maximum size of ${MAX_IMAGE_SIZE_BYTES / 1024 / 1024}MB`, 413);
+    }
+    return respond.error(res, 'UPLOAD_ERROR', err.message, 400);
+  }
+  if (err.code === 'UNSUPPORTED_MEDIA_TYPE') {
+    return respond.error(res, 'UNSUPPORTED_MEDIA_TYPE', err.message, 415);
+  }
+  return next(err);
+};
+
 const NOT_IMPLEMENTED = (req, res) =>
   respond.error(res, 'NOT_IMPLEMENTED', 'This endpoint is not yet implemented', 501);
 
@@ -347,13 +376,13 @@ router.delete('/staff/:id',       authorization('admin', 'manager'), ctrl.delete
 router.post(
   '/media/upload',
   authorization('admin', 'manager'),
-  upload.single('image'),
+  (req, res, next) => upload.single('image')(req, res, (err) => handleUploadErrors(err, req, res, next)),
   ctrl.uploadImage
 );
 router.post(
   '/media/upload-multiple',
   authorization('admin', 'manager'),
-  upload.array('images', 5),
+  (req, res, next) => upload.array('images', 5)(req, res, (err) => handleUploadErrors(err, req, res, next)),
   ctrl.uploadMultipleImages
 );
 router.delete('/media', authorization('admin', 'manager'), ctrl.deleteImage);
