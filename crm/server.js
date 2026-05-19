@@ -10,16 +10,24 @@ const app = express();
 
 // ─── Reverse proxy awareness ───────────────────────────────────
 // nginx terminates TLS and forwards `/admin/*` → CRM at `/*` (strips prefix).
-// 1. trust proxy   → req.protocol reflects X-Forwarded-Proto (https)
-// 2. originalUrl re-prepend `/admin` → keycloak-connect builds the right
-//    redirect_uri (matching the Keycloak client's allowed redirect URIs)
-//    without forcing CRM routes to be mounted under /admin.
+// 1. trust proxy → req.protocol reflects X-Forwarded-Proto (https)
+// 2. originalUrl re-prepend → keycloak-connect's *login* flow builds the
+//    redirect_uri from req.originalUrl, so the URI we send to Keycloak
+//    matches the registered https://host/admin/* pattern.
+// 3. url re-prepend ONLY for the auth_callback request → keycloak-connect's
+//    *post-auth* handler builds the clean post-login URL from req.path
+//    (derived from req.url). Without this, the user lands at `/` after login
+//    instead of `/admin/`. We must NOT modify req.url for other requests
+//    because Express route matching reads req.url.
 app.set('trust proxy', true);
 const CRM_PUBLIC_PREFIX = process.env.CRM_PUBLIC_PREFIX || '';
 if (CRM_PUBLIC_PREFIX) {
   app.use((req, _res, next) => {
     if (!req.originalUrl.startsWith(CRM_PUBLIC_PREFIX)) {
       req.originalUrl = CRM_PUBLIC_PREFIX + req.originalUrl;
+    }
+    if (req.url.indexOf('auth_callback=1') !== -1 && !req.url.startsWith(CRM_PUBLIC_PREFIX)) {
+      req.url = CRM_PUBLIC_PREFIX + req.url;
     }
     next();
   });
