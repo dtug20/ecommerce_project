@@ -82,9 +82,10 @@
                 <h2 class="crm-form-title">${msg("crm.totp.title")}</h2>
                 <p class="crm-form-subtitle">${msg("crm.totp.subtitle")}</p>
 
-                <!-- Error alerts -->
-                <#if message?has_content && (message.type != 'warning' || !isAppInitiatedAction??)>
-                    <div class="crm-alert crm-alert-${message.type}">
+                <!-- Submission errors only — the "you need to set up" warning that
+                     Keycloak auto-injects is already covered by our title. -->
+                <#if message?has_content && message.type == 'error'>
+                    <div class="crm-alert crm-alert-error">
                         ${kcSanitize(message.summary)?no_esc}
                     </div>
                 </#if>

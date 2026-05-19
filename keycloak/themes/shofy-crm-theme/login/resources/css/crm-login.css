@@ -119,13 +119,15 @@
   align-items: center;
   justify-content: center;
   padding: 40px;
-  background: #f8f9fb;
+  background: #f8f9fb !important;
+  color-scheme: light;
 }
 
 .crm-login-card {
   width: 100%;
   max-width: 420px;
-  background: #ffffff;
+  background: #ffffff !important;
+  color: #374151 !important;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 6px 24px rgba(0, 0, 0, 0.06);
   padding: 44px 40px;
@@ -421,5 +423,471 @@
 
   .crm-form-title {
     font-size: 20px;
+  }
+}
+
+/* =================================================
+   OTP / TOTP screens
+   Bundled here (instead of separate crm-otp.css) so they load
+   regardless of theme.properties cache state.
+   ================================================= */
+
+.crm-totp-card {
+  max-width: 480px !important;
+}
+
+/* ── Step indicator ── */
+.crm-step-indicator {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.crm-step {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.crm-step-dot {
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px;
+  border-radius: 50% !important;
+  background: #e5e7eb !important;
+  color: #6b7280 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.crm-step-active .crm-step-dot {
+  background: #a42c48 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(164, 44, 72, 0.12);
+}
+
+.crm-step-active .crm-step-label {
+  color: #111827;
+  font-weight: 600;
+}
+
+.crm-step-bar {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(to right, #a42c48 0%, #e5e7eb 100%);
+  border-radius: 2px;
+}
+
+/* ── Tabs (QR vs Manual) ── */
+.crm-tabs {
+  display: flex !important;
+  gap: 4px;
+  background: #f3f4f6 !important;
+  padding: 4px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.crm-tab {
+  flex: 1;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 7px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280 !important;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: none !important;
+}
+
+.crm-tab:hover {
+  color: #111827 !important;
+}
+
+.crm-tab-active {
+  background: #ffffff !important;
+  color: #111827 !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ── Panels ── */
+.crm-totp-panel {
+  margin-bottom: 24px;
+}
+
+.crm-totp-instruction {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+/* ── QR frame ── */
+.crm-qr-frame {
+  display: flex !important;
+  justify-content: center;
+  padding: 16px;
+  background: #ffffff !important;
+  border: 1.5px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  margin-bottom: 16px;
+}
+
+.crm-qr-image {
+  width: 200px !important;
+  height: 200px !important;
+  border-radius: 8px;
+  display: block;
+}
+
+/* ── Supported apps chips ── */
+.crm-totp-apps {
+  text-align: center;
+  margin-top: 8px;
+}
+
+.crm-totp-apps-label {
+  display: block !important;
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af !important;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 8px;
+}
+
+.crm-totp-apps-list {
+  display: flex !important;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.crm-totp-app-chip {
+  display: inline-flex !important;
+  align-items: center;
+  padding: 4px 10px !important;
+  background: #f9fafb !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 999px !important;
+  font-size: 11px;
+  color: #6b7280 !important;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ── Manual secret block ── */
+.crm-secret-block {
+  background: #f9fafb !important;
+  border: 1.5px solid #e5e7eb !important;
+  border-radius: 10px !important;
+  padding: 14px 16px !important;
+  margin-bottom: 12px;
+}
+
+.crm-secret-label {
+  display: block !important;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 8px;
+}
+
+.crm-secret-row {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+.crm-secret-code {
+  flex: 1;
+  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace !important;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827 !important;
+  letter-spacing: 1px;
+  word-break: break-all;
+  user-select: all;
+}
+
+.crm-copy-btn {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px !important;
+  background: #ffffff !important;
+  border: 1.5px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151 !important;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.crm-copy-btn:hover {
+  border-color: #a42c48 !important;
+  color: #a42c48 !important;
+}
+
+.crm-secret-meta {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.crm-meta-item {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px !important;
+  background: #f9fafb !important;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.crm-meta-key {
+  color: #6b7280 !important;
+}
+
+.crm-meta-val {
+  color: #111827 !important;
+  font-weight: 600;
+  font-family: 'SF Mono', 'Menlo', monospace !important;
+}
+
+/* ── Verification input ── */
+.crm-totp-form .crm-field:last-of-type {
+  margin-bottom: 0;
+}
+
+.crm-input-otp {
+  font-family: 'SF Mono', 'Menlo', monospace !important;
+  letter-spacing: 4px;
+  font-size: 17px !important;
+  font-weight: 600;
+  text-align: center;
+  padding-left: 16px !important;
+}
+
+.crm-input-otp::placeholder {
+  letter-spacing: normal;
+  font-weight: 400;
+}
+
+.crm-totp-actions {
+  display: flex !important;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.crm-totp-actions .crm-submit-btn {
+  flex: 1;
+}
+
+.crm-secondary-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  padding: 0 20px;
+  background: #ffffff !important;
+  border: 1.5px solid #e5e7eb !important;
+  border-radius: 10px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151 !important;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.crm-secondary-btn:hover {
+  background: #f9fafb !important;
+  border-color: #d1d5db !important;
+}
+
+.crm-field-error {
+  display: block;
+  font-size: 12px;
+  color: #b91c1c;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+/* ── login-otp.ftl — 6-digit verification ── */
+.crm-otp-shield {
+  width: 88px !important;
+  height: 88px !important;
+  margin: 0 auto 20px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, rgba(164, 44, 72, 0.08), rgba(164, 44, 72, 0.16)) !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.crm-otp-form .crm-field {
+  margin-bottom: 16px;
+}
+
+.crm-otp-boxes {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 8px 0 4px;
+}
+
+.crm-otp-box {
+  width: 44px !important;
+  height: 56px !important;
+  border: 1.5px solid #e5e7eb !important;
+  border-radius: 10px !important;
+  background: #ffffff !important;
+  font-family: 'SF Mono', 'Menlo', monospace !important;
+  font-size: 22px !important;
+  font-weight: 600;
+  color: #111827 !important;
+  text-align: center !important;
+  outline: none;
+  transition: all 0.2s;
+  caret-color: #a42c48;
+  padding: 0 !important;
+}
+
+.crm-otp-box:focus {
+  border-color: #a42c48 !important;
+  box-shadow: 0 0 0 3px rgba(164, 44, 72, 0.12) !important;
+  transform: translateY(-1px);
+}
+
+.crm-otp-box:not(:placeholder-shown) {
+  border-color: #a42c48 !important;
+}
+
+.crm-otp-divider {
+  color: #d1d5db;
+  font-size: 22px;
+  font-weight: 700;
+  user-select: none;
+  margin: 0 2px;
+}
+
+.crm-otp-hint {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6b7280;
+  margin: 4px 0 20px;
+}
+
+.crm-otp-hint svg {
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.crm-otp-footer-actions {
+  text-align: center;
+  margin-top: 14px;
+}
+
+/* ── Credential selector ── */
+.crm-credential-list {
+  display: flex !important;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.crm-credential-option {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px !important;
+  border: 1.5px solid #e5e7eb !important;
+  border-radius: 10px !important;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.crm-credential-option:hover {
+  border-color: #d1d5db !important;
+  background: #f9fafb !important;
+}
+
+.crm-credential-option input {
+  margin: 0;
+  accent-color: #a42c48;
+}
+
+.crm-credential-active {
+  border-color: #a42c48 !important;
+  background: rgba(164, 44, 72, 0.04) !important;
+}
+
+.crm-credential-icon {
+  color: #6b7280;
+  display: flex;
+}
+
+.crm-credential-active .crm-credential-icon {
+  color: #a42c48;
+}
+
+.crm-credential-name {
+  font-size: 14px;
+  color: #111827;
+  font-weight: 500;
+  flex: 1;
+}
+
+/* ── Hide redundant Keycloak warning on the TOTP setup page ──
+   Keycloak auto-injects "You need to set up Mobile Authenticator..." which
+   duplicates our own title. We only want to surface real submission errors. */
+body[data-page-id="login-login-config-totp"] .crm-alert-warning,
+body[data-page-id="login-login-config-totp"] .crm-alert-info {
+  display: none !important;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .crm-totp-card {
+    max-width: 100% !important;
+  }
+  .crm-qr-image {
+    width: 180px !important;
+    height: 180px !important;
+  }
+  .crm-otp-box {
+    width: 38px !important;
+    height: 50px !important;
+    font-size: 20px !important;
+  }
+  .crm-secret-meta {
+    grid-template-columns: 1fr !important;
   }
 }

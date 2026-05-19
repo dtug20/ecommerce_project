@@ -91,9 +91,31 @@ html, body {
   min-height: 0 !important;
 }
 
+/* Force light color scheme on every CRM screen — Keycloak 26.4 ships with
+   pf-v5-theme-dark by default which leaks into form panels/cards. */
+html.pf-v5-theme-dark,
+html.login-pf,
+body#keycloak-bg,
+body.pf-v5-theme-dark,
+.pf-v5-theme-dark {
+  color-scheme: light !important;
+  background: #f8f9fb !important;
+}
+
 .pf-v5-theme-dark .crm-login-card,
 .pf-v5-theme-dark .crm-page-wrapper {
-  color-scheme: light;
+  color-scheme: light !important;
+}
+
+/* Defeat PatternFly button reset on our custom buttons */
+button.crm-tab,
+button.crm-copy-btn,
+button.crm-secondary-btn,
+button.crm-submit-btn,
+button.crm-toggle-password,
+button.crm-lang-btn {
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 a { text-decoration: none; }
