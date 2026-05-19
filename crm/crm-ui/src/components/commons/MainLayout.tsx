@@ -291,7 +291,7 @@ export default function MainLayout() {
           }}
         >
           <a
-            href="/logout"
+            href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/logout`}
             style={{
               display: 'flex',
               alignItems: 'center',
