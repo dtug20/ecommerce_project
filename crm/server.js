@@ -147,13 +147,9 @@ app.use('/api/users', apiProtect, attachProxy, require('./routes/users'));
 app.use('/api/cms', apiProtect, require('./routes/cms.routes'));
 app.use('/api/coupons', apiProtect, require('./routes/coupon.routes'));
 
-// Phase 3 — Reviews
-app.use('/api/reviews', apiProtect, require('./routes/review.routes'));
-
-// Phase 4 — Vendors, Analytics, Email Templates, Activity Log
+// Phase 4 — Vendors, Analytics, Activity Log
 app.use('/api/vendors', apiProtect, require('./routes/vendor.routes'));
 app.use('/api/analytics', apiProtect, require('./routes/analytics.routes'));
-app.use('/api/email-templates', apiProtect, require('./routes/email-template.routes'));
 app.use('/api/activity-log', apiProtect, require('./routes/activity-log.routes'));
 app.use('/api/chat', apiProtect, require('./routes/chatbot.routes'));
 app.use('/api/v1/admin/media', apiProtect, require('./routes/media'));
