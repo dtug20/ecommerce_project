@@ -71,6 +71,7 @@ services:
       MONGO_URI: mongodb://mongodb:27017/shofy
       PORT: 7001
       NODE_ENV: production
+      KEYCLOAK_JWKS_URI: http://keycloak:8180/realms/shofy/protocol/openid-connect/certs
     ports:
       - "127.0.0.1:7001:7001"
     depends_on:
