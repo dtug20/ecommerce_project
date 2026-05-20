@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Upload, Button, Space, Spin } from 'antd';
-import { UploadOutlined, DeleteOutlined, PictureOutlined } from '@ant-design/icons';
+import { Upload, Button, Space, Spin, Tabs, Input } from 'antd';
+import { UploadOutlined, DeleteOutlined, PictureOutlined, LinkOutlined } from '@ant-design/icons';
 import toast from 'react-hot-toast';
 import api from '@/services/api';
 
@@ -21,6 +21,157 @@ interface ImageUploadProps {
   width?: number | string;
   /** Height of the preview area */
   height?: number | string;
+}
+
+function UrlPasteTab({
+  width,
+  height,
+  onConfirm,
+}: {
+  width: number | string;
+  height: number | string;
+  onConfirm: (url: string) => void;
+}) {
+  const [urlInput, setUrlInput] = useState('');
+  const [previewError, setPreviewError] = useState(false);
+
+  const isValidFormat = (() => {
+    if (!urlInput) return false;
+    try {
+      new URL(urlInput);
+      return true;
+    } catch {
+      return false;
+    }
+  })();
+
+  return (
+    <div>
+      <Space.Compact style={{ width: '100%' }}>
+        <Input
+          placeholder="https://example.com/image.jpg"
+          value={urlInput}
+          onChange={(e) => {
+            setUrlInput(e.target.value);
+            setPreviewError(false);
+          }}
+          prefix={<LinkOutlined />}
+        />
+        <Button
+          type="primary"
+          disabled={!isValidFormat}
+          onClick={() => {
+            if (!isValidFormat) {
+              toast.error('Invalid URL format');
+              return;
+            }
+            onConfirm(urlInput);
+          }}
+        >
+          Use
+        </Button>
+      </Space.Compact>
+
+      {isValidFormat && (
+        <div
+          style={{
+            marginTop: 12,
+            width,
+            height,
+            border: '1px solid #d9d9d9',
+            borderRadius: 8,
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#fafafa',
+            position: 'relative',
+          }}
+        >
+          {previewError ? (
+            <div style={{ color: '#ff4d4f', fontSize: 12, textAlign: 'center', padding: 12 }}>
+              Image failed to load
+              <br />
+              <span style={{ color: '#8c8c8c' }}>The URL may be unreachable</span>
+            </div>
+          ) : (
+            <img
+              src={urlInput}
+              alt="preview"
+              style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+              onError={() => setPreviewError(true)}
+            />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function UploadTab({
+  placeholder,
+  width,
+  height,
+  loading,
+  handleUpload,
+}: {
+  placeholder: string;
+  width: number | string;
+  height: number | string;
+  loading: boolean;
+  handleUpload: (file: File) => void;
+}) {
+  return (
+    <Upload
+      showUploadList={false}
+      beforeUpload={(file) => {
+        if (!ALLOWED_MIME.includes(file.type)) {
+          toast.error(`Unsupported type: ${file.type || 'unknown'}. Use JPG/PNG/WebP.`);
+          return false;
+        }
+        if (file.size > MAX_BYTES) {
+          toast.error(`File too large (${formatMB(file.size)}). Max 5MB.`);
+          return false;
+        }
+        if (file.size > WARN_BYTES) {
+          toast(`Large file (${formatMB(file.size)}) — upload may be slow`, { icon: '⚠️' });
+        }
+        handleUpload(file);
+        return false;
+      }}
+      accept="image/jpeg,image/png,image/webp"
+    >
+      <div
+        style={{
+          width,
+          height,
+          border: '2px dashed #d9d9d9',
+          borderRadius: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          background: '#fafafa',
+          transition: 'border-color 0.2s',
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#1677ff')}
+        onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#d9d9d9')}
+      >
+        {loading ? (
+          <Spin />
+        ) : (
+          <>
+            <PictureOutlined style={{ fontSize: 28, color: '#bfbfbf' }} />
+            <div style={{ marginTop: 8, color: '#8c8c8c', fontSize: 13, textAlign: 'center' }}>
+              {placeholder}
+              <div style={{ fontSize: 11, marginTop: 4 }}>JPG / PNG / WebP, max 5MB</div>
+            </div>
+          </>
+        )}
+      </div>
+    </Upload>
+  );
 }
 
 /**
@@ -119,55 +270,43 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   }
 
   return (
-    <Upload
-      showUploadList={false}
-      beforeUpload={(file) => {
-        if (!ALLOWED_MIME.includes(file.type)) {
-          toast.error(`Unsupported type: ${file.type || 'unknown'}. Use JPG/PNG/WebP.`);
-          return false;
-        }
-        if (file.size > MAX_BYTES) {
-          toast.error(`File too large (${formatMB(file.size)}). Max 5MB.`);
-          return false;
-        }
-        if (file.size > WARN_BYTES) {
-          toast(`Large file (${formatMB(file.size)}) — upload may be slow`, { icon: '⚠️' });
-        }
-        handleUpload(file);
-        return false;
-      }}
-      accept="image/jpeg,image/png,image/webp"
-    >
-      <div
-        style={{
-          width,
-          height,
-          border: '2px dashed #d9d9d9',
-          borderRadius: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          background: '#fafafa',
-          transition: 'border-color 0.2s',
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#1677ff')}
-        onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#d9d9d9')}
-      >
-        {loading ? (
-          <Spin />
-        ) : (
-          <>
-            <PictureOutlined style={{ fontSize: 28, color: '#bfbfbf' }} />
-            <div style={{ marginTop: 8, color: '#8c8c8c', fontSize: 13, textAlign: 'center' }}>
-              {placeholder}
-              <div style={{ fontSize: 11, marginTop: 4 }}>JPG / PNG / WebP, max 5MB</div>
-            </div>
-          </>
-        )}
-      </div>
-    </Upload>
+    <Tabs
+      defaultActiveKey="upload"
+      items={[
+        {
+          key: 'upload',
+          label: (
+            <span>
+              <UploadOutlined /> Upload
+            </span>
+          ),
+          children: (
+            <UploadTab
+              placeholder={placeholder}
+              width={width}
+              height={height}
+              loading={loading}
+              handleUpload={handleUpload}
+            />
+          ),
+        },
+        {
+          key: 'url',
+          label: (
+            <span>
+              <LinkOutlined /> Paste URL
+            </span>
+          ),
+          children: (
+            <UrlPasteTab
+              width={width}
+              height={height}
+              onConfirm={(url) => onChange?.(url)}
+            />
+          ),
+        },
+      ]}
+    />
   );
 };
 
