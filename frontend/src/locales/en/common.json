@@ -227,7 +227,8 @@
     "delete": "Delete",
     "edit": "Edit",
     "close": "Close",
-    "followUs": "Follow us:"
+    "followUs": "Follow us:",
+    "currency": "Currency"
   },
   "language": {
     "en": "English",
