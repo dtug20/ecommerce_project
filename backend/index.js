@@ -16,6 +16,8 @@ const morgan = require('morgan');
 const globalErrorHandler = require("./middleware/global-error-handler");
 // routes — v1 (canonical)
 const v1Routes = require("./routes/v1");
+// exchange rate cron
+const { startCron: startExchangeRateCron } = require('./services/exchangeRateService');
 
 // ---------------------------------------------------------------------------
 // CORS
@@ -215,7 +217,9 @@ io.on('connection', (socket) => {
 // Database
 // ---------------------------------------------------------------------------
 
-connectDB();
+connectDB().then(() => {
+  startExchangeRateCron();
+});
 
 // ---------------------------------------------------------------------------
 // API routes — v1 (canonical)
