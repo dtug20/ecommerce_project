@@ -108,6 +108,11 @@ const userSchema = mongoose.Schema(
       },
       rejectionReason: { type: String },
     },
+
+    preferences: {
+      currency: { type: String, enum: ['VND', 'USD', 'EUR', 'GBP', 'JPY'], default: 'VND' },
+      language: { type: String, enum: ['vi', 'en'], default: 'vi' },
+    },
   },
   {
     timestamps: true,
