@@ -29,7 +29,7 @@ const Header = () => {
   const { t } = useTranslation();
   const { data: settingsData } = useGetSettingsQuery();
   const { formatPrice } = useCurrency();
-  const thresholdVnd = settingsData?.data?.shipping?.freeShippingThreshold || 5000000;
+  const thresholdVnd = settingsData?.data?.shipping?.freeShippingThreshold ?? 5000000;
   const formattedThreshold = formatPrice(thresholdVnd);
   return (
     <>
