@@ -1,7 +1,7 @@
 const categories = [
   {
     _id: "641d424bdbfab7b02ab28b95",
-    img: "https://i.ibb.co/sVxYFDY/product-cat-1.png",
+    img: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     parent: "Headphones",
     children: [
       "Kids Headphones",
@@ -18,7 +18,7 @@ const categories = [
   },
   {
     _id: "6419723bd7dc5155c04350d4",
-    img: "https://i.ibb.co/xHFpQTV/product-cat-2.png",
+    img: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     parent: "Mobile Tablets",
     children: [
       "Samsung",
@@ -34,7 +34,7 @@ const categories = [
   },
   {
     _id: "6419723bd7dc5155c04350d5",
-    img: "https://i.ibb.co/S0GjZdp/product-cat-3.png",
+    img: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     parent: "CPU Heat Pipes",
     children: [
       "CPU Cooler",
@@ -49,7 +49,7 @@ const categories = [
   },
   {
     _id: "6419723bd7dc5155c04350d6",
-    img: "https://i.ibb.co/g3YK8H2/product-cat-4.png",
+    img: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     parent: "Smart Watch",
     children: [
       "Sports Smart Watch",
@@ -66,7 +66,7 @@ const categories = [
   },
   {
     _id: "6419723bd7dc5155c04350d7",
-    img: "https://i.ibb.co/D9qfYWX/product-cat-5.png",
+    img: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     parent: "Bluetooth",
     children: [
       "Wireless Bluetooth",
@@ -81,7 +81,7 @@ const categories = [
   },
   {
     _id: "64200cb921162f8b15beae3e",
-    img: "https://i.ibb.co/ZWfqMXs/fashion-cat-1.jpg",
+    img: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     parent: "Clothing",
     children: [
       "Men's",
@@ -100,7 +100,7 @@ const categories = [
   },
   {
     _id: "64200cef21162f8b15beae40",
-    img: "https://i.ibb.co/GsDLfnh/fashion-cat-2.jpg",
+    img: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     parent: "Bags",
     children: [
       "HandBag",
@@ -115,7 +115,7 @@ const categories = [
   },
   {
     _id: "64200d2421162f8b15beae42",
-    img: "https://i.ibb.co/H2NsVHm/fashion-cat-3.jpg",
+    img: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     parent: "Shoes",
     children: [
       "Men's",
@@ -130,7 +130,7 @@ const categories = [
   },
   {
     _id: "64240b66253d81bc860d4cf2",
-    img: "https://i.ibb.co/7yg7yg9/beauty-category-1.jpg",
+    img: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     parent: "Discover Skincare",
     children: [
       "Makeup Brush",
@@ -145,7 +145,7 @@ const categories = [
   },
   {
     _id: "64240ca8253d81bc860d4cf4",
-    img: "https://i.ibb.co/8YdfXmn/beauty-category-2.jpg",
+    img: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     parent: "Beauty of Skin",
     children: [
       "Skin",
@@ -160,7 +160,7 @@ const categories = [
   },
   {
     _id: "64240e13253d81bc860d4cf6",
-    img: "https://i.ibb.co/1dZNNGh/beauty-category-3.jpg",
+    img: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     parent: "Awesome Lip Care",
     children: [
       "Cosmetics",
@@ -175,7 +175,7 @@ const categories = [
   },
   {
     _id: "64240fb4253d81bc860d4cf8",
-    img: "https://i.ibb.co/nkQK0Xr/beauty-category-4.jpg",
+    img: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     parent: "Facial Care",
     children: [
       "Powder",

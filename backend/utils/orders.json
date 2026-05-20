@@ -14,7 +14,7 @@
         },
         "_id": "641e887d05f9ee1717e1348a",
         "sku": "NTB7SDVX44",
-        "img": "https://i.ibb.co/WVdTgR8/headphone-1.png",
+        "img": "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
         "title": "Headphones Wireless.",
         "slug": "headphones-wireless.",
         "unit": "3pcs",
@@ -24,7 +24,7 @@
               "name": "Purply Blue",
               "clrCode": "#C1BAE4"
             },
-            "img": "https://i.ibb.co/WVdTgR8/headphone-1.png",
+            "img": "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
             "_id": "641e887d05f9ee1717e1348b"
           },
           {
@@ -32,7 +32,7 @@
               "name": "Light Grey",
               "clrCode": "#D8D7DD"
             },
-            "img": "https://i.ibb.co/zh9x3Q0/headphone-2.png",
+            "img": "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
             "_id": "641e887d05f9ee1717e1348c"
           },
           {
@@ -40,7 +40,7 @@
               "name": "Baby Pink",
               "clrCode": "#F3C0D1"
             },
-            "img": "https://i.ibb.co/JBZk7sS/headphone-3.png",
+            "img": "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
             "_id": "641e887d05f9ee1717e1348d"
           },
           {
@@ -48,7 +48,7 @@
               "name": "Bluish Cyan",
               "clrCode": "#64BFD1"
             },
-            "img": "https://i.ibb.co/SrPq3r0/headphone-4.png",
+            "img": "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
             "_id": "641e887d05f9ee1717e1348e"
           }
         ],

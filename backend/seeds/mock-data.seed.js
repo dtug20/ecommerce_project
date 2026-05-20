@@ -162,13 +162,13 @@ async function seed() {
                    : undefined;
     const doc = {
       sku: 'SKU-' + slug.toUpperCase().slice(0, 12) + '-' + Math.floor(Math.random() * 1000),
-      img: 'https://i.ibb.co/placeholder/600x600.jpg',
+      img: 'https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png',
       title: p.title,
       slug,
       unit: 'piece',
       imageURLs: [{
         color: { name: 'Default', clrCode: '#000000' },
-        img: 'https://i.ibb.co/placeholder/600x600.jpg',
+        img: 'https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png',
         sizes: ['S', 'M', 'L'],
       }],
       parent: cat.parent,
@@ -217,8 +217,8 @@ async function seed() {
           title: 'Hero Slider',
           settings: {
             slides: [
-              { headline: 'New Season Arrivals',      subheadline: 'Up to 30% off',  buttonText: 'Shop Now', buttonUrl: '/shop', image: 'https://i.ibb.co/placeholder/1920x600.jpg' },
-              { headline: 'Tech That Inspires',       subheadline: 'Latest gadgets', buttonText: 'Explore',  buttonUrl: '/shop?category=electronics', image: 'https://i.ibb.co/placeholder/1920x600.jpg' },
+              { headline: 'New Season Arrivals',      subheadline: 'Up to 30% off',  buttonText: 'Shop Now', buttonUrl: '/shop', image: 'https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png' },
+              { headline: 'Tech That Inspires',       subheadline: 'Latest gadgets', buttonText: 'Explore',  buttonUrl: '/shop?category=electronics', image: 'https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png' },
             ],
           },
         },
@@ -308,7 +308,7 @@ async function seed() {
     {
       title: 'Spring Sale Hero',
       type: 'hero-slide',
-      content: { text: 'Spring Sale — Up to 40% Off', textVi: 'Khuyến mãi mùa xuân — Giảm tới 40%', buttonText: 'Shop Now', buttonTextVi: 'Mua ngay', buttonUrl: '/shop', image: 'https://i.ibb.co/placeholder/1920x600.jpg' },
+      content: { text: 'Spring Sale — Up to 40% Off', textVi: 'Khuyến mãi mùa xuân — Giảm tới 40%', buttonText: 'Shop Now', buttonTextVi: 'Mua ngay', buttonUrl: '/shop', image: 'https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png' },
       priority: 10,
     },
     {

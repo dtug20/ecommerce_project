@@ -9,7 +9,7 @@ const brands = [
     website: "logitech.com",
     location: "Apples, Switzerland",
     status: "active",
-    logo: "https://i.ibb.co/Ydf3C1H/brand-1.png",
+    logo: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
   },
   {
     _id: "641522d9cd2724817c1c7c38",
@@ -28,7 +28,7 @@ const brands = [
     website: "sony.com",
     location: "Apples, America",
     status: "active",
-    logo: "https://i.ibb.co/GTzWqnP/brand-2.png",
+    logo: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
   },
   {
     _id: "64153eb3707ca6a96638c13b",
@@ -40,7 +40,7 @@ const brands = [
     website: "samsung.com",
     location: "Samsung, US",
     status: "active",
-    logo: "https://i.ibb.co/YPzHpCD/brand-3.png",
+    logo: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
   },
   {
     _id: "6415479cfba1a43da8287e20",
@@ -56,7 +56,7 @@ const brands = [
     website: "apple.com",
     location: "Apple, US",
     status: "active",
-    logo: "https://i.ibb.co/n3Wktzh/brand-4.png",
+    logo: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
   },
   {
     _id: "64154ee693b3f0f2c7ec7ff8",
@@ -68,7 +68,7 @@ const brands = [
     website: "deepcool.com",
     location: "Deepcool, US",
     status: "active",
-    logo: "https://i.ibb.co/xqTCvsL/brand-5.png",
+    logo: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
   },
   {
     _id: "6415545493b3f0f2c7ec7ffa",
@@ -80,7 +80,7 @@ const brands = [
     website: "antec.com",
     location: "Antec, US",
     status: "active",
-    logo: "https://i.ibb.co/SfBRy61/brand-6.png",
+    logo: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
   },
   {
     _id: "6415796b0bb49c3eb913bd50",
@@ -92,7 +92,7 @@ const brands = [
     website: "lenovo.com",
     location: "lenovo, US",
     status: "active",
-    logo: "https://i.ibb.co/LNymxGk/brand-7.png",
+    logo: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
   },
   {
     _id: "641feafc19436d47078261a3",
@@ -109,7 +109,7 @@ const brands = [
       "6421650a02240f90b1138e1e",
       "64228862253d81bc860d2092",
     ],
-    logo: "https://i.ibb.co/mCqwRnT/brand-8.png",
+    logo: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
   },
   {
     _id: "64200b8221162f8b15beae3c",
@@ -121,7 +121,7 @@ const brands = [
     location: "Nike, US",
     status: "active",
     products: ["64216e2f02240f90b1138e96", "6421700802240f90b1138e9e"],
-    logo: "https://i.ibb.co/GTzWqnP/brand-2.png",
+    logo: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
   },
   {
     _id: "642508be253d81bc860d4d24",
@@ -141,7 +141,7 @@ const brands = [
       "6426adba253d81bc860d6132",
       "6426b217253d81bc860d6217",
     ],
-    logo: "https://i.ibb.co/n3Wktzh/brand-4.png",
+    logo: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
   },
   {
     _id: "643134d4e2c1bd22cebb2130",
@@ -162,7 +162,7 @@ const brands = [
       "643249b49814bb139594c454",
       "64324f0c9814bb139594c47c",
     ],
-    logo: "https://i.ibb.co/mCqwRnT/brand-8.png",
+    logo: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
   },
 ];
 

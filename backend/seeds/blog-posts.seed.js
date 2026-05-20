@@ -37,7 +37,7 @@ const blogPosts = [
 <li>Decorative plates as wall art</li>
 </ul>
 <p>Whether you're a collector or just starting to explore, ceramics add warmth and character to any room.</p>`,
-    featuredImage: "https://i.ibb.co/WVdTgR8/headphone-1.png",
+    featuredImage: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     category: "Electronics",
     tags: ["Design", "Home Décor", "Trending"],
     status: "published",
@@ -69,7 +69,7 @@ const blogPosts = [
 <li><strong>Care for your clothes:</strong> Wash less, air dry, and repair when possible</li>
 </ul>
 <p>Every small change adds up. By being more intentional about our wardrobes, we can help reduce fashion's environmental footprint.</p>`,
-    featuredImage: "https://i.ibb.co/n1YRvWJ/headphone-5.png",
+    featuredImage: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     category: "Fashion",
     tags: ["Fashion", "Sustainability", "Environment"],
     status: "published",
@@ -95,7 +95,7 @@ const blogPosts = [
 <h3>Legacy in Modern Streetwear</h3>
 <p>Today's streetwear brands owe much to the punk DIY ethos that McLaren championed. From Supreme to Off-White, the idea that fashion should provoke and inspire remains central to contemporary design.</p>
 <p>The lesson? True style isn't about following trends — it's about making a statement.</p>`,
-    featuredImage: "https://i.ibb.co/5FPhGtq/headphone-8.png",
+    featuredImage: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     category: "Fashion",
     tags: ["Fashion", "Music", "Culture"],
     status: "published",
@@ -126,7 +126,7 @@ const blogPosts = [
 <h3>5. Health Monitoring Smartwatches</h3>
 <p>Blood pressure, blood oxygen, ECG, and now blood glucose estimation — wrist-worn health tech keeps getting better.</p>
 <p>Stay tuned for the full list in our next update!</p>`,
-    featuredImage: "https://i.ibb.co/jvGv6qf/mobile-1.png",
+    featuredImage: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     category: "Electronics",
     tags: ["Technology", "Gadgets", "Reviews"],
     status: "published",
@@ -155,7 +155,7 @@ const blogPosts = [
 <h3>Winter: Hydrate</h3>
 <p>Cold air strips moisture from your skin. Layer on richer creams and consider adding a facial oil to lock in hydration.</p>
 <p>The key is listening to your skin and adjusting as needed. What works in July probably won't work in January.</p>`,
-    featuredImage: "https://i.ibb.co/bdKTWYy/skin-1.png",
+    featuredImage: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     category: "Beauty",
     tags: ["Beauty", "Skincare", "Health"],
     status: "published",
@@ -184,7 +184,7 @@ const blogPosts = [
 <h3>Lighting Matters</h3>
 <p>Swap harsh overhead lighting for warm-toned lamps and string lights. Good lighting can make even the simplest room feel cosy and inviting.</p>
 <p>Remember: a beautiful home isn't about how much you spend — it's about how thoughtfully you curate your space.</p>`,
-    featuredImage: "https://i.ibb.co/3WMPkkf/mobile-5.png",
+    featuredImage: "https://res.cloudinary.com/PLACEHOLDER/image/upload/v1/shofy/seed/placeholder.png",
     category: "Lifestyle",
     tags: ["Home", "Design", "Budget"],
     status: "published",
