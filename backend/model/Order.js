@@ -112,6 +112,8 @@ const orderSchema = new mongoose.Schema(
     splitOrders: [{ type: mongoose.Schema.Types.ObjectId, ref: "Order" }],
     parentOrder: { type: mongoose.Schema.Types.ObjectId, ref: "Order" },
     shipper: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    displayCurrency: { type: String, default: 'VND' },
+    exchangeRate: { type: Number, default: 1 },
     statusHistory: [
       {
         status: { type: String },
