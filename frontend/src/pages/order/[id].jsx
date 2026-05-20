@@ -10,7 +10,7 @@ import ErrorMsg from "@/components/common/error-msg";
 import PrdDetailsLoader from "@/components/loader/prd-details-loader";
 import ShopBreadcrumb from "@/components/breadcrumb/shop-breadcrumb";
 import { useGetUserOrderByIdQuery } from "@/redux/features/order/orderApi";
-import useCurrency from "@/hooks/use-currency";
+import formatOrderAmount from "@/utils/formatOrderAmount";
 import { OrderStatusStepper } from "@/components/clicon/composites";
 import { useKeycloak } from "@/components/providers/keycloak-provider";
 import { notifyError, notifySuccess } from "@/utils/toast";
@@ -101,7 +101,7 @@ const SingleOrder = ({ params }) => {
   const orderId = params.id;
   const router = useRouter();
   const { t } = useTranslation();
-  const { formatPrice } = useCurrency();
+
   const kc = useKeycloak();
   const isAuthenticated = kc?.initialized && kc?.authenticated;
 
@@ -246,7 +246,7 @@ const SingleOrder = ({ params }) => {
                 {dayjs(createdAt).format("D MMM, YYYY [at] h:mm A")}
               </div>
             </div>
-            <div className="cl-od-summary__amount">{formatPrice(totalAmount || 0)}</div>
+            <div className="cl-od-summary__amount">{formatOrderAmount(totalAmount || 0, orderData?.order)}</div>
           </div>
 
           {/* Estimated Arrival */}
@@ -344,10 +344,10 @@ const SingleOrder = ({ params }) => {
                                 </div>
                               </div>
                             </td>
-                            <td>{formatPrice(item.price || 0)}</td>
+                            <td>{formatOrderAmount(item.price || 0, orderData?.order)}</td>
                             <td>x{item.orderQuantity || 1}</td>
                             <td style={{ paddingRight: 24, fontWeight: 600 }}>
-                              {formatPrice((item.price || 0) * (item.orderQuantity || 1))}
+                              {formatOrderAmount((item.price || 0) * (item.orderQuantity || 1), orderData?.order)}
                             </td>
                           </tr>
                         );
