@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useSelector, useDispatch } from "react-redux";
+import Cookies from "js-cookie";
 import { setCurrency, selectCurrency } from "@/redux/features/currencySlice";
+import { usePatchUserPreferencesMutation } from "@/redux/features/userPreferencesApi";
 
 const LANGUAGES = [
   { code: "en", label: "English", flag: "🇺🇸" },
@@ -9,14 +11,18 @@ const LANGUAGES = [
 ];
 
 const CURRENCIES = [
-  { code: "USD", label: "Dollar (USD)" },
   { code: "VND", label: "Đồng (VND)" },
+  { code: "USD", label: "Dollar (USD)" },
+  { code: "EUR", label: "Euro (EUR)" },
+  { code: "GBP", label: "Pound (GBP)" },
+  { code: "JPY", label: "Yen (JPY)" },
 ];
 
 const CliconWelcomeBar = () => {
   const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
   const currentCurrency = useSelector(selectCurrency);
+  const [patchPrefs] = usePatchUserPreferencesMutation();
   const [activeDrop, setActiveDrop] = useState("");
   const [mounted, setMounted] = useState(false);
   const langRef = useRef(null);
@@ -48,9 +54,13 @@ const CliconWelcomeBar = () => {
     setActiveDrop("");
   };
 
-  const handleChangeCurrency = (code) => {
+  const handleChangeCurrency = async (code) => {
     dispatch(setCurrency(code));
     setActiveDrop("");
+    try {
+      const userInfo = JSON.parse(Cookies.get("userInfo") || "{}");
+      if (userInfo.accessToken) await patchPrefs({ currency: code }).unwrap();
+    } catch { /* ignore */ }
   };
 
   return (
