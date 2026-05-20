@@ -14,7 +14,8 @@ const CheckoutPage = () => {
   const router = useRouter();
   useEffect(() => {
     if (!keycloak.authenticated) {
-      keycloak.login({ redirectUri: window.location.href });
+      const locale = (router.locale || "en").startsWith("vi") ? "vi" : "en";
+      keycloak.login({ redirectUri: window.location.href, locale });
     }
   }, [router]);
 

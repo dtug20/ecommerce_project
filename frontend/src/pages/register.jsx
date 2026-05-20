@@ -10,8 +10,10 @@ const RegisterPage = () => {
     if (keycloak.authenticated) {
       router.push("/");
     } else {
+      const locale = (router.locale || "en").startsWith("vi") ? "vi" : "en";
       keycloak.register({
         redirectUri: window.location.origin + "/",
+        locale,
       });
     }
   }, [router]);

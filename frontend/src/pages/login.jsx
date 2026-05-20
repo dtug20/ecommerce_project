@@ -22,8 +22,10 @@ const LoginPage = () => {
     if (keycloak.authenticated) {
       router.push(safeRedirect);
     } else {
+      const locale = (router.locale || "en").startsWith("vi") ? "vi" : "en";
       keycloak.login({
         redirectUri: window.location.origin + safeRedirect,
+        locale,
       });
     }
   }, [kc?.initialized, router]);
