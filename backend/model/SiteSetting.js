@@ -84,14 +84,6 @@ const paymentSchema = new mongoose.Schema(
       type: [String],
       default: ["stripe", "cod"],
     },
-    currency: {
-      type: String,
-      default: "USD",
-    },
-    currencySymbol: {
-      type: String,
-      default: "$",
-    },
   },
   { _id: false }
 );
@@ -126,20 +118,6 @@ const maintenanceSchema = new mongoose.Schema(
     },
     message: {
       type: String,
-    },
-  },
-  { _id: false }
-);
-
-const i18nSchema = new mongoose.Schema(
-  {
-    defaultLanguage: {
-      type: String,
-      default: "en",
-    },
-    supportedLanguages: {
-      type: [String],
-      default: ["en", "vi"],
     },
   },
   { _id: false }
@@ -186,10 +164,6 @@ const siteSettingSchema = new mongoose.Schema(
     },
     maintenance: {
       type: maintenanceSchema,
-      default: () => ({}),
-    },
-    i18n: {
-      type: i18nSchema,
       default: () => ({}),
     },
     chatbot: {
