@@ -9,6 +9,7 @@ const express = require('express');
 const router = express.Router();
 const ctrl = require('../../../controller/v1/user.controller');
 const wishlistCtrl = require('../../../controller/v1/wishlist.controller');
+const userPrefsCtrl = require('../../../controller/v1/userPreferences.controller');
 const { validate } = require('../../../middleware/validate');
 const v = require('../../../validations');
 
@@ -31,6 +32,13 @@ const v = require('../../../validations');
  *         description: Unauthorized
  */
 router.get('/profile', ctrl.getProfile);
+
+// ---------------------------------------------------------------------------
+// Preferences
+// ---------------------------------------------------------------------------
+
+router.get('/preferences',   userPrefsCtrl.getPreferences);
+router.patch('/preferences', userPrefsCtrl.updatePreferences);
 
 /**
  * @swagger
