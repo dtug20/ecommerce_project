@@ -81,11 +81,15 @@ const CliconMainHeader = ({ setIsCanvasOpen }) => {
           {/* Action icons */}
           <div className="cl-main-header__actions">
             {/* Cart */}
-            <button
-              onClick={() => dispatch(openCartMini())}
-              type="button"
+            <Link
+              href="/cart"
               className="cl-header-icon"
               aria-label="Cart"
+              onClick={(e) => {
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+                e.preventDefault();
+                dispatch(openCartMini());
+              }}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M7.5 7.67V6.7c0-2.25 1.81-4.46 4.06-4.67a4.5 4.5 0 0 1 4.94 4.48v1.38" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
@@ -93,7 +97,7 @@ const CliconMainHeader = ({ setIsCanvasOpen }) => {
                 <path d="M15.5 12h.01M8.5 12h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               {quantity > 0 && <span className="cl-header-icon__badge">{quantity}</span>}
-            </button>
+            </Link>
 
             {/* Wishlist */}
             <Link href="/wishlist" className="cl-header-icon" aria-label="Wishlist">
