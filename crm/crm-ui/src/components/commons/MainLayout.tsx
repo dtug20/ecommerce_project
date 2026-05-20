@@ -22,6 +22,7 @@ import {
 } from '@ant-design/icons';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import useAppStore from '@/stores/appStore';
+import CurrencySwitcher from './CurrencySwitcher';
 
 const { Sider, Content, Header } = Layout;
 
@@ -326,6 +327,9 @@ export default function MainLayout() {
               { title: pageTitle },
             ]}
           />
+          <div style={{ marginLeft: 'auto' }}>
+            <CurrencySwitcher />
+          </div>
         </Header>
 
         <Content
