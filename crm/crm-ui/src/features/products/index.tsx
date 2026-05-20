@@ -1013,13 +1013,14 @@ function ProductDrawer({ open, editingProduct, categories, onClose }: ProductDra
             <Col span={8}>
               <Form.Item
                 name="price"
-                label="Price (USD)"
+                label="Price (VND, base currency)"
+                tooltip="All prices stored as VND. CRM/storefront will display in user's chosen currency via live exchange rate."
                 rules={[
                   { required: true, message: 'Price is required' },
-                  { type: 'number', min: 0.01, message: 'Price must be greater than 0' },
+                  { type: 'number', min: 1, message: 'Price must be ≥ 1' },
                 ]}
               >
-                <InputNumber min={0.01} precision={2} style={{ width: '100%' }} placeholder="0.00" prefix="$" />
+                <InputNumber min={1} precision={0} style={{ width: '100%' }} placeholder="0" prefix="₫" />
               </Form.Item>
             </Col>
             <Col span={8}>

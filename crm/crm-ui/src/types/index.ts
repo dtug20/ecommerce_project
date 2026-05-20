@@ -102,6 +102,8 @@ export interface Order {
   estimatedDelivery?: string;
   statusHistory?: OrderStatusHistory[];
   notes?: string;
+  displayCurrency?: 'VND' | 'USD' | 'EUR' | 'GBP' | 'JPY';
+  exchangeRate?: number;
   createdAt: string;
   updatedAt: string;
 }

@@ -431,6 +431,19 @@ function OrderDetailModal({
                 <Text strong>Total:</Text>
                 <Text strong>{formatCurrency(total)}</Text>
               </Row>
+              {order.displayCurrency && order.displayCurrency !== 'VND' && (order.exchangeRate ?? 0) > 0 && (
+                <Typography.Text type="secondary" style={{ display: 'block', marginTop: 4 }}>
+                  Customer paid:{' '}
+                  {new Intl.NumberFormat(
+                    order.displayCurrency === 'USD' ? 'en-US' :
+                    order.displayCurrency === 'EUR' ? 'de-DE' :
+                    order.displayCurrency === 'GBP' ? 'en-GB' :
+                    order.displayCurrency === 'JPY' ? 'ja-JP' : 'en-US',
+                    { style: 'currency', currency: order.displayCurrency }
+                  ).format((order.totalAmount ?? 0) / (order.exchangeRate ?? 1))}{' '}
+                  ({order.displayCurrency} @ {(order.exchangeRate ?? 1).toLocaleString('vi-VN')} VND)
+                </Typography.Text>
+              )}
             </Space>
           </Card>
         </Col>
