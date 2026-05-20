@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { userLoggedOut } from "@/redux/features/auth/authSlice";
 import { useKeycloak } from "@/components/providers/keycloak-provider";
+import CurrencySwitcher from "@/components/common/CurrencySwitcher";
 
 // language switcher
 function Language({ active, handleActive }) {
@@ -41,35 +42,6 @@ function Language({ active, handleActive }) {
           >
             {t("language.vi")}
           </a>
-        </li>
-      </ul>
-    </div>
-  );
-}
-
-// currency
-function Currency({ active, handleActive }) {
-  return (
-    <div className="tp-header-top-menu-item tp-header-currency">
-      <span
-        onClick={() => handleActive("currency")}
-        className="tp-header-currency-toggle"
-        id="tp-header-currency-toggle"
-      >
-        USD
-      </span>
-      <ul className={active === "currency" ? "tp-currency-list-open" : ""}>
-        <li>
-          <a href="#">EUR</a>
-        </li>
-        <li>
-          <a href="#">CHF</a>
-        </li>
-        <li>
-          <a href="#">GBP</a>
-        </li>
-        <li>
-          <a href="#">KWD</a>
         </li>
       </ul>
     </div>
@@ -145,7 +117,9 @@ const HeaderTopRight = () => {
   return (
     <div className="tp-header-top-menu d-flex align-items-center justify-content-end">
       <Language active={active} handleActive={handleActive} />
-      <Currency active={active} handleActive={handleActive} />
+      <div className="tp-header-top-menu-item tp-header-currency">
+        <CurrencySwitcher />
+      </div>
       <ProfileSetting active={active} handleActive={handleActive} />
     </div>
   );
