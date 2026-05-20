@@ -12,6 +12,7 @@ import { notifyError, notifySuccess } from "@/utils/toast";
 import { useSaveOrderMutation } from "@/redux/features/order/orderApi";
 import { useGetOfferCouponsQuery } from "@/redux/features/coupon/couponApi";
 import { useValidateCouponMutation } from "@/redux/features/cmsApi";
+import { selectCurrency } from "@/redux/features/currencySlice";
 
 const useCheckoutSubmit = () => {
   const { t } = useTranslation();
@@ -27,6 +28,8 @@ const useCheckoutSubmit = () => {
   const { user } = useSelector((state) => state.auth);
   // shipping_info
   const { shipping_info } = useSelector((state) => state.order);
+  // displayCurrency — storefront-selected display currency sent with the order payload
+  const displayCurrency = useSelector(selectCurrency);
   // total amount
   const { total, setTotal } = useCartInfo();
   // couponInfo
@@ -241,6 +244,7 @@ const useCheckoutSubmit = () => {
       status: "Pending",
       cart: cart_products,
       paymentMethod: normalisedMethod,
+      displayCurrency, // VND-base order; storefront-selected display currency
       subTotal: total,
       shippingCost: shippingCost,
       discount: discountAmount,
