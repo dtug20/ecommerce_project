@@ -2,7 +2,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
-const Product = require('../model/Product');
+const Product = require('../model/Products');
 
 const SLUG_RE = /^[a-z0-9-]+$/;
 
