@@ -218,7 +218,10 @@ io.on('connection', (socket) => {
 // ---------------------------------------------------------------------------
 
 connectDB().then(() => {
-  startExchangeRateCron();
+  // Skip cron in test environment — prevents open handle leaks across Jest suites
+  if (process.env.NODE_ENV !== 'test') {
+    startExchangeRateCron();
+  }
 });
 
 // ---------------------------------------------------------------------------
