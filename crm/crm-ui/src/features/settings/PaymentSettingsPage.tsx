@@ -3,13 +3,8 @@ import {
   Button,
   Card,
   Form,
-  Input,
-  Select,
   Checkbox,
   Typography,
-  Divider,
-  Row,
-  Col,
   Space,
   Spin,
   Tag,
@@ -62,12 +57,6 @@ const GATEWAYS = [
   },
 ];
 
-const CURRENCY_OPTIONS = [
-  { value: 'USD', label: 'USD — US Dollar' },
-  { value: 'VND', label: 'VND — Vietnamese Dong' },
-  { value: 'EUR', label: 'EUR — Euro' },
-  { value: 'GBP', label: 'GBP — British Pound' },
-];
 
 export default function PaymentSettingsPage() {
   const [form] = Form.useForm();
@@ -83,8 +72,6 @@ export default function PaymentSettingsPage() {
       const s = data.data;
       form.setFieldsValue({
         enabledGateways: s.payment?.enabledGateways ?? ['stripe', 'cod'],
-        currency: s.payment?.currency ?? 'USD',
-        currencySymbol: s.payment?.currencySymbol ?? '$',
       });
     }
   }, [data, form]);
@@ -95,8 +82,6 @@ export default function PaymentSettingsPage() {
       return settingsApi.update({
         payment: {
           enabledGateways: values.enabledGateways ?? [],
-          currency: values.currency,
-          currencySymbol: values.currencySymbol,
         },
       });
     },
@@ -174,33 +159,6 @@ export default function PaymentSettingsPage() {
           </Form.Item>
         </Card>
 
-        {/* Currency */}
-        <Card
-          title={<Title level={5} style={{ margin: 0 }}>Currency</Title>}
-          size="small"
-        >
-          <Divider />
-          <Row gutter={16}>
-            <Col xs={24} sm={12}>
-              <Form.Item
-                name="currency"
-                label="Currency"
-                rules={[{ required: true, message: 'Currency is required' }]}
-              >
-                <Select options={CURRENCY_OPTIONS} />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={12}>
-              <Form.Item
-                name="currencySymbol"
-                label="Currency Symbol"
-                rules={[{ required: true, message: 'Symbol is required' }]}
-              >
-                <Input placeholder="$" style={{ width: 100 }} />
-              </Form.Item>
-            </Col>
-          </Row>
-        </Card>
       </Form>
     </div>
   );

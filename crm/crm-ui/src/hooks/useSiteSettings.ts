@@ -3,8 +3,7 @@ import api from '@/services/api';
 
 export interface PublicPaymentSettings {
   enabledGateways?: string[];
-  currency?: string;
-  currencySymbol?: string;
+  // currency + currencySymbol removed — superseded by Zustand store + /exchange-rates
 }
 
 export interface PublicSettings {
