@@ -147,7 +147,8 @@ exports.getAllProducts = async (req, res, next) => {
     if (q.search) {
       try {
         [totalItems, data] = await runQuery({ $text: { $search: q.search } });
-      } catch (_textErr) {
+      } catch (textErr) {
+        console.error('getAllProducts $text query failed:', textErr.message);
         totalItems = 0;
       }
       if (totalItems === 0) {
@@ -189,9 +190,10 @@ exports.searchProducts = async (req, res, next) => {
 
     const { page, limit, skip } = getPaginationParams(req.query);
 
-    const baseFilter = { status: 'active' };
+    const baseFilter = { status: { $in: ['in-stock', 'out-of-stock'] } };
     if (req.query.productType) {
-      baseFilter.productType = req.query.productType;
+      const ptEsc = String(req.query.productType).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      baseFilter.productType = { $regex: `^${ptEsc}$`, $options: 'i' };
     }
 
     let totalItems = 0;
@@ -210,6 +212,7 @@ exports.searchProducts = async (req, res, next) => {
       ]);
     } catch (textErr) {
       // No $text index on the collection — fall through to regex.
+      console.error('searchProducts $text query failed:', textErr.message);
       usedFallback = true;
     }
 

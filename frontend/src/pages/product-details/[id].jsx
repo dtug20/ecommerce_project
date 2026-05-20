@@ -28,11 +28,15 @@ const ProductDetailsPage = ({ product, relatedProducts, error }) => {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
 
+  const categorySlug = product.category?.name
+    ? product.category.name.toLowerCase().replace("&", "").split(" ").join("-")
+    : "";
+
   const breadcrumbs = [
     { name: "Home", url: "/" },
     { name: "Shop", url: "/shop" },
     ...(product.category?.name
-      ? [{ name: product.category.name, url: `/shop?category=${product.category.name}` }]
+      ? [{ name: product.category.name, url: `/shop?category=${categorySlug}` }]
       : []),
     { name: product.title },
   ];
@@ -54,7 +58,7 @@ const ProductDetailsPage = ({ product, relatedProducts, error }) => {
           { label: t('breadcrumb.home'), href: '/' },
           { label: t('breadcrumb.shopGrid'), href: '/shop' },
           ...(product.category?.name
-            ? [{ label: product.category.name, href: `/shop?category=${product.category.name}` }]
+            ? [{ label: product.category.name, href: `/shop?category=${categorySlug}` }]
             : []),
           { label: product.title },
         ]}
