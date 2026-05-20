@@ -4,6 +4,12 @@ import { UploadOutlined, DeleteOutlined, PictureOutlined } from '@ant-design/ico
 import toast from 'react-hot-toast';
 import api from '@/services/api';
 
+const MAX_BYTES = 5 * 1024 * 1024;        // hard limit (matches backend multer)
+const WARN_BYTES = 3 * 1024 * 1024;       // soft warning threshold
+const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
+
+const formatMB = (bytes: number) => (bytes / 1024 / 1024).toFixed(1) + 'MB';
+
 interface ImageUploadProps {
   value?: string;
   onChange?: (url: string) => void;
@@ -84,10 +90,21 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           <Upload
             showUploadList={false}
             beforeUpload={(file) => {
+              if (!ALLOWED_MIME.includes(file.type)) {
+                toast.error(`Unsupported type: ${file.type || 'unknown'}. Use JPG/PNG/WebP.`);
+                return false;
+              }
+              if (file.size > MAX_BYTES) {
+                toast.error(`File too large (${formatMB(file.size)}). Max 5MB.`);
+                return false;
+              }
+              if (file.size > WARN_BYTES) {
+                toast(`Large file (${formatMB(file.size)}) — upload may be slow`, { icon: '⚠️' });
+              }
               handleUpload(file);
               return false;
             }}
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp"
           >
             <Button size="small" icon={<UploadOutlined />} loading={loading}>
               Replace
@@ -105,10 +122,21 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     <Upload
       showUploadList={false}
       beforeUpload={(file) => {
+        if (!ALLOWED_MIME.includes(file.type)) {
+          toast.error(`Unsupported type: ${file.type || 'unknown'}. Use JPG/PNG/WebP.`);
+          return false;
+        }
+        if (file.size > MAX_BYTES) {
+          toast.error(`File too large (${formatMB(file.size)}). Max 5MB.`);
+          return false;
+        }
+        if (file.size > WARN_BYTES) {
+          toast(`Large file (${formatMB(file.size)}) — upload may be slow`, { icon: '⚠️' });
+        }
         handleUpload(file);
         return false;
       }}
-      accept="image/*"
+      accept="image/jpeg,image/png,image/webp"
     >
       <div
         style={{
@@ -132,7 +160,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         ) : (
           <>
             <PictureOutlined style={{ fontSize: 28, color: '#bfbfbf' }} />
-            <div style={{ marginTop: 8, color: '#8c8c8c', fontSize: 13 }}>{placeholder}</div>
+            <div style={{ marginTop: 8, color: '#8c8c8c', fontSize: 13, textAlign: 'center' }}>
+              {placeholder}
+              <div style={{ fontSize: 11, marginTop: 4 }}>JPG / PNG / WebP, max 5MB</div>
+            </div>
           </>
         )}
       </div>
