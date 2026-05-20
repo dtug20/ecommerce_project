@@ -11,9 +11,9 @@ const FooterClicon = () => {
   const { data: settingsData } = useGetSettingsQuery();
   const { data: categories } = useGetShowCategoryQuery();
   const settings = settingsData?.data;
-  const phone = settings?.contact?.phone || "(629) 555-0129";
-  const email = settings?.contact?.email || "info@shofy.com";
-  const address = settings?.contact?.address || "Ho Chi Minh City, Vietnam";
+  const phone = settings?.contact?.phone || "+84 28 7106 1234";
+  const email = settings?.contact?.email || "support@tychicus.id.vn";
+  const address = settings?.contact?.address || "Hồ Chí Minh, Việt Nam";
 
   const categoryItems = (categories?.result || []).slice(0, 6);
   const year = new Date().getFullYear();

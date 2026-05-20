@@ -10,7 +10,7 @@ const CliconNavBar = () => {
   const dropdownRef = useRef(null);
   const { data: settingsData } = useGetSettingsQuery();
   const { data: categories } = useGetShowCategoryQuery();
-  const phone = settingsData?.data?.contact?.phone || "+1-202-555-0104";
+  const phone = settingsData?.data?.contact?.phone || "+84 28 7106 1234";
 
   const categoryItems = (categories?.result || []).slice(0, 8);
 

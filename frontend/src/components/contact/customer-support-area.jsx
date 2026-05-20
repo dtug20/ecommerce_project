@@ -30,8 +30,8 @@ const CustomerSupportArea = () => {
   const { t } = useTranslation();
   const { data: settingsData } = useGetSettingsQuery();
   const settings = settingsData?.data || {};
-  const phone = settings.contact?.phone || settings.contactPhone || "+1-202-555-0126";
-  const email = settings.contact?.email || settings.contactEmail || "Support@clicon.com";
+  const phone = settings.contact?.phone || settings.contactPhone || "+84 28 7106 1234";
+  const email = settings.contact?.email || settings.contactEmail || "support@tychicus.id.vn";
 
   const [search, setSearch] = useState("");
 

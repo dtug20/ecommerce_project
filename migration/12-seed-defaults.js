@@ -53,9 +53,9 @@ const DEFAULT_SITE_SETTING = {
     footerStyle:    'default',
   },
   contact: {
-    email:       null,
-    phone:       null,
-    address:     null,
+    email:       'support@tychicus.id.vn',
+    phone:       '+84 28 7106 1234',
+    address:     'Hồ Chí Minh, Việt Nam',
     socialLinks: [],
   },
   shipping: {
