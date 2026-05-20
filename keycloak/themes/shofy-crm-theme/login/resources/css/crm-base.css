@@ -27,12 +27,41 @@ html, body {
 .pf-v5-c-brand,
 .pf-v5-c-login__main-header,
 .pf-v5-c-login__main-footer,
+.pf-v5-c-login__main-footer-band,
 .pf-v5-c-alert-group,
 #kc-locale,
 #kc-info,
 #kc-info-wrapper,
-.kc-feedback-text {
+#kc-restart-login,
+#kc-cancel,
+#kc-form-options,
+.kc-feedback-text,
+a[id*="kc-restart"],
+a[href*="restart-credentials"],
+a[href*="restart-flow"] {
   display: none !important;
+}
+
+/* Defeat PatternFly's .pf-v5-c-form grid that breaks horizontal layouts */
+#kc-form-login,
+#kc-otp-login-form,
+#kc-totp-settings-form,
+form.crm-otp-form,
+form.crm-totp-form,
+form.pf-v5-c-form {
+  display: block !important;
+  grid-template-columns: none !important;
+  grid-template-rows: none !important;
+  grid-row-gap: 0 !important;
+  grid-column-gap: 0 !important;
+}
+
+/* Make sure crm-field children don't get forced to width:100% by pf rules */
+.crm-otp-boxes input,
+.crm-otp-boxes > input {
+  width: auto !important;
+  max-width: 44px !important;
+  flex: 0 0 44px !important;
 }
 
 .pf-v5-c-login {
