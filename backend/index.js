@@ -260,7 +260,10 @@ app.use(globalErrorHandler);
 // Start the chatbot embedding re-queue (debounced re-embed of products/blogs)
 require('./services/chatbot/embedQueue').start();
 
-server.listen(PORT, () => console.log(`server running on port ${PORT}`));
+// Only bind the port when this file is run directly (not when required by tests)
+if (require.main === module) {
+  server.listen(PORT, () => console.log(`server running on port ${PORT}`));
+}
 
 module.exports = app;
 // Force nodemon reload to read new return URL

@@ -12,6 +12,7 @@ const express = require('express');
 const router = express.Router();
 const ctrl = require('../../../controller/v1/store.controller');
 const storeCmsCtrl = require('../../../controller/v1/store-cms.controller');
+const exchangeRateCtrl = require('../../../controller/v1/exchangeRate.controller');
 const reviewCtrl = require('../../../controller/v1/review.controller');
 const Category = require('../../../model/Category');
 const respond = require('../../../utils/respond');
@@ -428,6 +429,22 @@ router.get('/blog',             storeCmsCtrl.listPublishedBlogPosts);
  *         description: Public settings object
  */
 router.get('/settings',         storeCmsCtrl.getPublicSettings);
+
+// ---------------------------------------------------------------------------
+// Exchange Rates
+// ---------------------------------------------------------------------------
+
+/**
+ * @swagger
+ * /api/v1/store/exchange-rates:
+ *   get:
+ *     summary: Get current exchange rates with VND as base currency
+ *     tags: [Store]
+ *     responses:
+ *       200:
+ *         description: Exchange rates document (cached 1 hour client-side)
+ */
+router.get('/exchange-rates', exchangeRateCtrl.getExchangeRates);
 
 // ---------------------------------------------------------------------------
 // AI Chatbot
