@@ -189,13 +189,18 @@ exports.searchProducts = async (req, res, next) => {
 
     const { page, limit, skip } = getPaginationParams(req.query);
 
+    const baseFilter = { status: 'active' };
+    if (req.query.productType) {
+      baseFilter.productType = req.query.productType;
+    }
+
     let totalItems = 0;
     let data = [];
     let usedFallback = false;
 
     // 1. Try $text index (ranked by score)
     try {
-      const textFilter = { $text: { $search: searchTerm } };
+      const textFilter = { ...baseFilter, $text: { $search: searchTerm } };
       [totalItems, data] = await Promise.all([
         Product.countDocuments(textFilter),
         Product.find(textFilter, { score: { $meta: 'textScore' } })
@@ -213,6 +218,7 @@ exports.searchProducts = async (req, res, next) => {
       const escaped = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = { $regex: escaped, $options: 'i' };
       const regexFilter = {
+        ...baseFilter,
         $or: [{ title: regex }, { description: regex }, { tags: regex }],
       };
       [totalItems, data] = await Promise.all([
