@@ -1,8 +1,17 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import ReviewForm from '../forms/review-form';
 import { ReviewCard } from '@/components/clicon/composites';
 import ReviewRatingBreakdown from './review-rating-breakdown';
 import { useGetProductReviewsQuery } from '@/redux/features/cmsApi';
+import useCurrency from "@/hooks/use-currency";
+
+// Base-currency (VND) values; convert at display time
+const SHIPPING_RATES_VND = {
+  local: 450000,
+  upsGround: 700000,
+  unishopGlobal: 950000,
+};
 
 const TABS = [
   { id: 'desc', label: 'DESCRIPTION' },
@@ -16,6 +25,8 @@ const DetailsTabNav = ({ product }) => {
   const [activeTab, setActiveTab] = useState('desc');
   const [page, setPage] = useState(1);
   const LIMIT = 10;
+  const { t } = useTranslation();
+  const { formatPrice } = useCurrency();
 
   const {
     data: reviewsData,
@@ -65,11 +76,11 @@ const DetailsTabNav = ({ product }) => {
               </ul>
             </div>
             <div className="cl-pd__shipping-info">
-              <h4>Shipping Information</h4>
-              <p><strong>Courier:</strong> 2-4 days, free shipping</p>
-              <p><strong>Local Shipping:</strong> up to one week, $19.00</p>
-              <p><strong>UPS Ground Shipping:</strong> 4-6 days, $29.00</p>
-              <p><strong>Unishop Global Export:</strong> 3-4 days, $39.00</p>
+              <h4>{t("product.shippingInfo")}</h4>
+              <p><strong>{t("product.courierLabel")}</strong> {t("product.courierValue")}</p>
+              <p><strong>{t("product.localShipping")}</strong> {t("product.localShippingValue", { amount: formatPrice(SHIPPING_RATES_VND.local) })}</p>
+              <p><strong>{t("product.upsGround")}</strong> {t("product.upsGroundValue", { amount: formatPrice(SHIPPING_RATES_VND.upsGround) })}</p>
+              <p><strong>{t("product.unishopGlobal")}</strong> {t("product.unishopGlobalValue", { amount: formatPrice(SHIPPING_RATES_VND.unishopGlobal) })}</p>
             </div>
           </div>
         )}

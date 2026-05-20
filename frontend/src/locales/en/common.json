@@ -1,6 +1,6 @@
 {
   "header": {
-    "freeShipping": "FREE Express Shipping On Orders $570+",
+    "freeShipping": "FREE Express Shipping On Orders {{amount}}+",
     "allProductTypes": "All Product Types",
     "hotline": "Hotline:",
     "hello": "Hello,",
@@ -76,7 +76,16 @@
     "soldBy": "Sold by:",
     "askQuestion": "Ask a question",
     "ratingLabel": "{{value}} out of {{max}} stars",
-    "actions": "Product actions"
+    "actions": "Product actions",
+    "shippingInfo": "Shipping Information",
+    "courierLabel": "Courier:",
+    "courierValue": "2-4 days, free shipping",
+    "localShipping": "Local Shipping:",
+    "localShippingValue": "up to one week, {{amount}}",
+    "upsGround": "UPS Ground Shipping:",
+    "upsGroundValue": "4-6 days, {{amount}}",
+    "unishopGlobal": "Unishop Global Export:",
+    "unishopGlobalValue": "3-4 days, {{amount}}"
   },
   "shop": {
     "title": "Shop",

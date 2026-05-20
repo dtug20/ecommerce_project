@@ -16,6 +16,8 @@ import HeaderMainRight from "./header-com/header-main-right";
 import CartMiniSidebar from "@/components/common/cart-mini-sidebar";
 import HeaderSearchForm from "@/components/forms/header-search-form";
 import { CartTwo, CategoryMenu, Compare, Menu, Phone, ShippingCar, Wishlist } from "@/svg";
+import useCurrency from "@/hooks/use-currency";
+import { useGetSettingsQuery } from "@/redux/features/cmsApi";
 
 const Header = () => {
   const { wishlist } = useSelector((state) => state.wishlist);
@@ -25,6 +27,10 @@ const Header = () => {
   const { sticky } = useSticky();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const { data: settingsData } = useGetSettingsQuery();
+  const { formatPrice } = useCurrency();
+  const thresholdVnd = settingsData?.data?.shipping?.freeShippingThreshold || 5000000;
+  const formattedThreshold = formatPrice(thresholdVnd);
   return (
     <>
       <header>
@@ -38,7 +44,7 @@ const Header = () => {
                     <span>
                       <ShippingCar />
                     </span>
-                    <p>{t("header.freeShipping")}</p>
+                    <p>{t("header.freeShipping", { amount: formattedThreshold })}</p>
                   </div>
                 </div>
                 <div className="col-md-6">

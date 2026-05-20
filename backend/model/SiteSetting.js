@@ -60,16 +60,20 @@ const contactSchema = new mongoose.Schema(
   { _id: false }
 );
 
+/**
+ * Shipping config. All amounts are stored in the platform base currency (VND).
+ * The frontend converts to the user's display currency via useCurrency().formatPrice().
+ */
 const shippingSchema = new mongoose.Schema(
   {
     freeShippingThreshold: {
       type: Number,
       default: 0,
-    },
+    }, // VND
     defaultShippingCost: {
       type: Number,
       default: 0,
-    },
+    }, // VND
     enabledMethods: {
       type: [String],
       default: [],

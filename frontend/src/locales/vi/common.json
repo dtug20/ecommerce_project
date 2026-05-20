@@ -1,6 +1,6 @@
 {
   "header": {
-    "freeShipping": "MIỄN PHÍ vận chuyển nhanh cho đơn hàng từ $570+",
+    "freeShipping": "MIỄN PHÍ vận chuyển nhanh cho đơn hàng từ {{amount}}+",
     "allProductTypes": "Tất cả loại sản phẩm",
     "hotline": "Đường dây nóng:",
     "hello": "Xin chào,",
@@ -76,7 +76,16 @@
     "soldBy": "Bán bởi:",
     "askQuestion": "Đặt câu hỏi",
     "ratingLabel": "{{value}} trên {{max}} sao",
-    "actions": "Thao tác sản phẩm"
+    "actions": "Thao tác sản phẩm",
+    "shippingInfo": "Thông tin vận chuyển",
+    "courierLabel": "Chuyển phát nhanh:",
+    "courierValue": "2-4 ngày, miễn phí",
+    "localShipping": "Vận chuyển nội địa:",
+    "localShippingValue": "tối đa 1 tuần, {{amount}}",
+    "upsGround": "UPS Ground:",
+    "upsGroundValue": "4-6 ngày, {{amount}}",
+    "unishopGlobal": "Unishop Global Export:",
+    "unishopGlobalValue": "3-4 ngày, {{amount}}"
   },
   "shop": {
     "title": "Cửa hàng",

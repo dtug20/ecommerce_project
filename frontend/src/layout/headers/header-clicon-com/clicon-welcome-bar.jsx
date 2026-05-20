@@ -4,6 +4,8 @@ import { useSelector, useDispatch } from "react-redux";
 import keycloak from "@/lib/keycloak";
 import { setCurrency, selectCurrency } from "@/redux/features/currencySlice";
 import { usePatchUserPreferencesMutation } from "@/redux/features/userPreferencesApi";
+import useCurrency from "@/hooks/use-currency";
+import { useGetSettingsQuery } from "@/redux/features/cmsApi";
 
 const LANGUAGES = [
   { code: "en", label: "English", flag: "🇺🇸" },
@@ -23,6 +25,10 @@ const CliconWelcomeBar = () => {
   const dispatch = useDispatch();
   const currentCurrency = useSelector(selectCurrency);
   const [patchPrefs] = usePatchUserPreferencesMutation();
+  const { data: settingsData } = useGetSettingsQuery();
+  const { formatPrice } = useCurrency();
+  const thresholdVnd = settingsData?.data?.shipping?.freeShippingThreshold || 5000000;
+  const formattedThreshold = formatPrice(thresholdVnd);
   const [activeDrop, setActiveDrop] = useState("");
   const [mounted, setMounted] = useState(false);
   const langRef = useRef(null);
@@ -67,7 +73,7 @@ const CliconWelcomeBar = () => {
       <div className="container">
         <div className="cl-welcome-bar__inner">
           <p className="cl-welcome-bar__text">
-            {t("header.freeShipping")}
+            {t("header.freeShipping", { amount: formattedThreshold })}
           </p>
           <div className="cl-welcome-bar__right">
             {/* Social icons */}

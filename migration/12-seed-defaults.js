@@ -59,9 +59,9 @@ const DEFAULT_SITE_SETTING = {
     socialLinks: [],
   },
   shipping: {
-    freeShippingThreshold: 0,
-    defaultShippingCost:   0,
-    enabledMethods:        [],
+    freeShippingThreshold: 5000000,  // 5,000,000 VND ≈ $200 USD
+    defaultShippingCost:   30000,    // 30,000 VND ≈ $1.20 USD
+    enabledMethods:        ['standard', 'express'],
   },
   payment: {
     enabledGateways: ['cod'],
