@@ -3,8 +3,10 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 const Product = require('../model/Products');
+const ExchangeRate = require('../model/ExchangeRate');
 
 const SLUG_RE = /^[a-z0-9-]+$/;
+const SUSPECT_USD_THRESHOLD = 5000;
 
 function isUrl(v) {
   if (typeof v !== 'string' || !v.trim()) return false;
@@ -20,74 +22,6 @@ function truncate(s, n) {
   const str = String(s ?? '');
   return str.length > n ? str.slice(0, n) + '…' : str;
 }
-
-const CHECKS = [
-  {
-    code: 'MISSING_IMG',
-    sev: 'high',
-    test: (p) => !p.img || !String(p.img).trim(),
-    detail: () => 'img field empty or whitespace-only',
-  },
-  {
-    code: 'INVALID_IMG_URL',
-    sev: 'high',
-    test: (p) => p.img && String(p.img).trim() && !isUrl(p.img),
-    detail: (p) => `Cannot parse URL: ${truncate(p.img, 60)}`,
-  },
-  {
-    code: 'INVALID_PRICE',
-    sev: 'high',
-    test: (p) => !Number.isFinite(p.price) || p.price <= 0,
-    detail: (p) => `price=${p.price}`,
-  },
-  {
-    code: 'NEGATIVE_QTY',
-    sev: 'high',
-    test: (p) => typeof p.quantity === 'number' && p.quantity < 0,
-    detail: (p) => `quantity=${p.quantity}`,
-  },
-  {
-    code: 'MISSING_TITLE',
-    sev: 'high',
-    test: (p) => !p.title || !String(p.title).trim(),
-    detail: () => 'title empty or whitespace-only',
-  },
-  {
-    code: 'MISSING_CATEGORY',
-    sev: 'medium',
-    test: (p) => !p.category,
-    detail: () => 'category ref missing or populate returned null',
-  },
-  {
-    code: 'MISSING_BRAND',
-    sev: 'medium',
-    test: (p) => !p.brand,
-    detail: () => 'brand ref missing or populate returned null',
-  },
-  {
-    code: 'DISCOUNT_OUT_OF_RANGE',
-    sev: 'medium',
-    test: (p) => typeof p.discount === 'number' && (p.discount < 0 || p.discount > 100),
-    detail: (p) => `discount=${p.discount}`,
-  },
-  {
-    code: 'INVALID_SLUG',
-    sev: 'low',
-    test: (p) => !p.slug || !SLUG_RE.test(p.slug),
-    detail: (p) => `slug=${truncate(p.slug, 40)}`,
-  },
-  {
-    code: 'OFFER_DATE_INVALID',
-    sev: 'low',
-    test: (p) => {
-      const s = p.offerDate?.start;
-      const e = p.offerDate?.end;
-      return s && e && new Date(s) > new Date(e);
-    },
-    detail: (p) =>
-      `offerDate.start=${p.offerDate?.start} > end=${p.offerDate?.end}`,
-  },
-];
 
 const CSV_HEADERS = [
   '_id',
@@ -122,6 +56,94 @@ async function main() {
   console.log(`Connecting to: ${maskMongoUri(uri)}`);
   await mongoose.connect(uri);
   console.log('Connected. Scanning products…');
+
+  const rateDoc = await ExchangeRate.findOne({}).lean();
+  const usdRate = rateDoc?.rates?.USD ?? null;
+  if (usdRate) console.log(`Using USD rate: ${usdRate}`);
+  else console.log('No ExchangeRate doc found — suggested VND prices will be omitted');
+
+  const CHECKS = [
+    {
+      code: 'MISSING_IMG',
+      sev: 'high',
+      test: (p) => !p.img || !String(p.img).trim(),
+      detail: () => 'img field empty or whitespace-only',
+    },
+    {
+      code: 'INVALID_IMG_URL',
+      sev: 'high',
+      test: (p) => p.img && String(p.img).trim() && !isUrl(p.img),
+      detail: (p) => `Cannot parse URL: ${truncate(p.img, 60)}`,
+    },
+    {
+      code: 'INVALID_PRICE',
+      sev: 'high',
+      test: (p) => !Number.isFinite(p.price) || p.price <= 0,
+      detail: (p) => `price=${p.price}`,
+    },
+    {
+      code: 'NEGATIVE_QTY',
+      sev: 'high',
+      test: (p) => typeof p.quantity === 'number' && p.quantity < 0,
+      detail: (p) => `quantity=${p.quantity}`,
+    },
+    {
+      code: 'MISSING_TITLE',
+      sev: 'high',
+      test: (p) => !p.title || !String(p.title).trim(),
+      detail: () => 'title empty or whitespace-only',
+    },
+    {
+      code: 'MISSING_CATEGORY',
+      sev: 'medium',
+      test: (p) => !p.category,
+      detail: () => 'category ref missing or populate returned null',
+    },
+    {
+      code: 'MISSING_BRAND',
+      sev: 'medium',
+      test: (p) => !p.brand,
+      detail: () => 'brand ref missing or populate returned null',
+    },
+    {
+      code: 'DISCOUNT_OUT_OF_RANGE',
+      sev: 'medium',
+      test: (p) => typeof p.discount === 'number' && (p.discount < 0 || p.discount > 100),
+      detail: (p) => `discount=${p.discount}`,
+    },
+    {
+      code: 'INVALID_SLUG',
+      sev: 'low',
+      test: (p) => !p.slug || !SLUG_RE.test(p.slug),
+      detail: (p) => `slug=${truncate(p.slug, 40)}`,
+    },
+    {
+      code: 'OFFER_DATE_INVALID',
+      sev: 'low',
+      test: (p) => {
+        const s = p.offerDate?.start;
+        const e = p.offerDate?.end;
+        return s && e && new Date(s) > new Date(e);
+      },
+      detail: (p) =>
+        `offerDate.start=${p.offerDate?.start} > end=${p.offerDate?.end}`,
+    },
+    {
+      code: 'SUSPECTED_USD',
+      sev: 'low',
+      test: (p) =>
+        Number.isFinite(p.price) &&
+        p.price > 0 &&
+        p.price < SUSPECT_USD_THRESHOLD &&
+        !p.currencyReviewedAt,
+      detail: (p) => {
+        const suggested = usdRate ? Math.round(p.price * usdRate) : null;
+        return suggested
+          ? `price=${p.price} suspected USD → suggested VND=${suggested}`
+          : `price=${p.price} suspected USD (rate doc unavailable)`;
+      },
+    },
+  ];
 
   const rows = [];
   let total = 0;
