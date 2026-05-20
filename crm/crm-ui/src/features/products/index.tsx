@@ -51,7 +51,7 @@ import toast from 'react-hot-toast';
 import { productsApi, categoriesApi } from '@/services/api';
 import ImageUpload from '@/components/commons/ImageUpload';
 import type { Product, Category, ProductVariant, ProductSeo, ProductStats } from '@/types';
-import { formatCurrency, formatDate } from '@/hooks/useFormatters';
+import { useFormatters } from '@/hooks/useFormatters';
 import StatusBadge from '@/components/commons/StatusBadge';
 import PageHeader from '@/components/commons/PageHeader';
 
@@ -233,6 +233,7 @@ interface VariantsTabProps {
 }
 
 function VariantsTab({ variants, onChange }: VariantsTabProps) {
+  const { formatCurrency } = useFormatters();
   const [addingVariant, setAddingVariant] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [variantForm] = Form.useForm<VariantFormState>();
@@ -551,6 +552,7 @@ function ProductDetail({
 }: {
   product: Product;
 }) {
+  const { formatCurrency, formatDate } = useFormatters();
   const stockStatus = getStockStatus(product.quantity ?? 0);
   const hasDiscount = (product.discount ?? 0) > 0;
   const finalPrice = hasDiscount
@@ -1196,6 +1198,7 @@ function ProductDrawer({ open, editingProduct, categories, onClose }: ProductDra
 
 export default function ProductsPage() {
   const queryClient = useQueryClient();
+  const { formatCurrency } = useFormatters();
 
   // Pagination
   const [page, setPage] = useState(1);

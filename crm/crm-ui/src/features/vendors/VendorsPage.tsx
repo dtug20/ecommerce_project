@@ -43,7 +43,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { vendorsApi } from '@/services/api';
 import type { Vendor, Payout, Product, Order } from '@/types';
 import PageHeader from '@/components/commons/PageHeader';
-import { formatCurrency, formatDate } from '@/hooks/useFormatters';
+import { useFormatters } from '@/hooks/useFormatters';
 
 const { Text, Paragraph } = Typography;
 const PAGE_SIZE = 10;
@@ -225,6 +225,7 @@ interface ProcessPayoutModalProps {
 }
 
 function ProcessPayoutModal({ vendorId, payout, open, onClose }: ProcessPayoutModalProps) {
+  const { formatCurrency } = useFormatters();
   const [form] = Form.useForm<{ transactionRef: string; note?: string }>();
   const queryClient = useQueryClient();
 
@@ -304,6 +305,7 @@ interface VendorDrawerProps {
 }
 
 function VendorDrawer({ vendor, open, onClose }: VendorDrawerProps) {
+  const { formatCurrency, formatDate } = useFormatters();
   const [payoutToProcess, setPayoutToProcess] = useState<Payout | null>(null);
   const [processOpen, setProcessOpen] = useState(false);
 

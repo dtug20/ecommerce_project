@@ -42,7 +42,7 @@ import type { MenuProps } from 'antd';
 
 import { usersApi } from '@/services/api';
 import type { User, Order } from '@/types';
-import { formatCurrency, formatDate } from '@/hooks/useFormatters';
+import { useFormatters } from '@/hooks/useFormatters';
 import StatusBadge from '@/components/commons/StatusBadge';
 import PageHeader from '@/components/commons/PageHeader';
 
@@ -448,6 +448,7 @@ interface UserDetailModalProps {
 }
 
 function UserDetailModal({ user, open, onClose }: UserDetailModalProps) {
+  const { formatCurrency, formatDate } = useFormatters();
   const ordersQuery = useQuery({
     queryKey: ['user-orders', user?._id],
     queryFn: () => usersApi.getUserOrders(user!._id, { limit: 5 }),
@@ -650,6 +651,7 @@ const DEFAULT_FILTERS: Filters = {
 
 export default function UsersPage() {
   const queryClient = useQueryClient();
+  const { formatDate } = useFormatters();
 
   // Pagination
   const [page, setPage] = useState(1);

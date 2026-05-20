@@ -48,7 +48,7 @@ import toast from 'react-hot-toast';
 import type { TableProps } from 'antd';
 import type { Category, CategoryStats } from '@/types';
 import { categoriesApi } from '@/services/api';
-import { formatDate } from '@/hooks/useFormatters';
+import { useFormatters } from '@/hooks/useFormatters';
 import StatusBadge from '@/components/commons/StatusBadge';
 import PageHeader from '@/components/commons/PageHeader';
 import ImageUpload from '@/components/commons/ImageUpload';
@@ -330,6 +330,7 @@ function StatsCards({
 // ---------------------------------------------------------------------------
 
 function CategoryDetail({ category }: { category: Category }) {
+  const { formatDate } = useFormatters();
   const productCount = category.products?.length ?? 0;
 
   return (
@@ -429,6 +430,7 @@ function CategoryDetail({ category }: { category: Category }) {
 
 export default function CategoriesPage() {
   const queryClient = useQueryClient();
+  const { formatDate } = useFormatters();
 
   // View mode
   const [viewMode, setViewMode] = useState<'table' | 'tree'>('table');

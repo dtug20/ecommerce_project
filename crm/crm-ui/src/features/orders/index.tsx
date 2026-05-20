@@ -35,7 +35,7 @@ import type { MenuProps } from 'antd';
 
 import { ordersApi } from '@/services/api';
 import type { Order, OrderItem } from '@/types';
-import { formatCurrency, formatDate } from '@/hooks/useFormatters';
+import { useFormatters } from '@/hooks/useFormatters';
 import StatusBadge from '@/components/commons/StatusBadge';
 import PageHeader from '@/components/commons/PageHeader';
 import useAppStore from '@/stores/appStore';
@@ -138,6 +138,7 @@ function OrderDetailModal({
   isUpdatingTracking,
 }: OrderDetailModalProps) {
   const [trackingForm] = Form.useForm();
+  const { formatCurrency, formatDate } = useFormatters();
 
   if (!order) return null;
 
@@ -469,6 +470,7 @@ const INITIAL_FILTERS: Filters = {
 export default function OrdersPage() {
   const queryClient = useQueryClient();
   const { user } = useAppStore();
+  const { formatCurrency, formatDate } = useFormatters();
 
   // Detect shipper-only role
   const roles = user?.roles || [];

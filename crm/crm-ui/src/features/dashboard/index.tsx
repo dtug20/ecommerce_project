@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -45,7 +45,7 @@ import {
   ordersApi,
   analyticsApi,
 } from '@/services/api';
-import { formatCurrency, formatDate } from '@/hooks/useFormatters';
+import { useFormatters } from '@/hooks/useFormatters';
 import StatusBadge from '@/components/commons/StatusBadge';
 import type { Order, Product, MonthlyStats, RevenueDataPoint, RevenueResponse, CustomerGrowthResponse } from '@/types/index';
 
@@ -80,43 +80,7 @@ function monthLabel(stat: MonthlyStats): string {
 // Recent Orders columns
 // ---------------------------------------------------------------------------
 
-const recentOrderColumns: ColumnsType<Order> = [
-  {
-    title: 'Order #',
-    key: 'orderNumber',
-    width: 90,
-    render: (_: unknown, record: Order) =>
-      record.invoice != null ? `#${record.invoice}` : (record.orderNumber ?? '—'),
-  },
-  {
-    title: 'Customer',
-    key: 'customer',
-    render: (_: unknown, record: Order) => record.user?.name ?? record.name ?? '—',
-    ellipsis: true,
-  },
-  {
-    title: 'Amount',
-    key: 'amount',
-    render: (_: unknown, record: Order) =>
-      formatCurrency(record.finalAmount ?? record.totalAmount ?? record.subTotal ?? 0),
-  },
-  {
-    title: 'Status',
-    key: 'status',
-    render: (_: unknown, record: Order) => (
-      <StatusBadge
-        status={record.orderStatus ?? record.status ?? 'pending'}
-        type="order"
-      />
-    ),
-  },
-  {
-    title: 'Date',
-    key: 'date',
-    render: (_: unknown, record: Order) => formatDate(record.createdAt),
-    ellipsis: true,
-  },
-];
+// recentOrderColumns is defined inside Dashboard() via useMemo (uses formatCurrency/formatDate from useFormatters hook)
 
 // ---------------------------------------------------------------------------
 // Low Stock Products columns
@@ -173,6 +137,45 @@ const PERIOD_CONFIG: Record<RevenuePeriod, PeriodConfig> = {
 export default function Dashboard() {
   const navigate = useNavigate();
   const [revenuePeriod, setRevenuePeriod] = useState<RevenuePeriod>('30d');
+  const { formatCurrency, formatDate } = useFormatters();
+
+  const recentOrderColumns = useMemo<ColumnsType<Order>>(() => [
+    {
+      title: 'Order #',
+      key: 'orderNumber',
+      width: 90,
+      render: (_: unknown, record: Order) =>
+        record.invoice != null ? `#${record.invoice}` : (record.orderNumber ?? '—'),
+    },
+    {
+      title: 'Customer',
+      key: 'customer',
+      render: (_: unknown, record: Order) => record.user?.name ?? record.name ?? '—',
+      ellipsis: true,
+    },
+    {
+      title: 'Amount',
+      key: 'amount',
+      render: (_: unknown, record: Order) =>
+        formatCurrency(record.finalAmount ?? record.totalAmount ?? record.subTotal ?? 0),
+    },
+    {
+      title: 'Status',
+      key: 'status',
+      render: (_: unknown, record: Order) => (
+        <StatusBadge
+          status={record.orderStatus ?? record.status ?? 'pending'}
+          type="order"
+        />
+      ),
+    },
+    {
+      title: 'Date',
+      key: 'date',
+      render: (_: unknown, record: Order) => formatDate(record.createdAt),
+      ellipsis: true,
+    },
+  ], [formatCurrency, formatDate]);
 
   // ----- Analytics query (new unified endpoint) -----
 
