@@ -21,6 +21,7 @@ const nextConfig = {
       { source: '/product-details-countdown', destination: '/', permanent: true },
       { source: '/product-details-swatches', destination: '/', permanent: true },
       { source: '/product-details-video', destination: '/', permanent: true },
+      { source: '/order', destination: '/track-order', permanent: true },
     ];
   },
 }
