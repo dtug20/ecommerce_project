@@ -179,6 +179,8 @@ const productsSchema = mongoose.Schema({
   // Vector search fields
   embedding: { type: [Number], default: null, select: false },
   embeddedAt: { type: Date, default: null },
+
+  currencyReviewedAt: { type: Date, default: null },
 }, {
   timestamps: true,
 })
