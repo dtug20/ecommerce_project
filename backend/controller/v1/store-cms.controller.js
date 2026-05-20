@@ -151,8 +151,8 @@ exports.getBlogPostBySlug = async (req, res, next) => {
 /**
  * GET /api/v1/store/settings
  * Returns only the public-safe fields from SiteSetting.
- * Includes: payment.{enabledGateways, currency, currencySymbol} (no secrets).
- * Excludes: maintenance config, shipping internals, i18n internals.
+ * Includes: payment.enabledGateways (no secrets).
+ * Excludes: maintenance config, shipping internals.
  */
 exports.getPublicSettings = async (req, res, next) => {
   try {
@@ -184,7 +184,7 @@ exports.getPublicSettings = async (req, res, next) => {
           theme: {},
           contact: {},
           seo: {},
-          payment: { enabledGateways: ['stripe', 'cod'], currency: 'USD', currencySymbol: '$' },
+          payment: { enabledGateways: ['stripe', 'cod'] },
         },
         'Settings retrieved successfully'
       );
