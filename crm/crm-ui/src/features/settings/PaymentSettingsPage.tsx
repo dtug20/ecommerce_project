@@ -102,6 +102,7 @@ export default function PaymentSettingsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['site-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['site-settings', 'public'] });
       toast.success('Payment settings saved');
     },
     onError: () => toast.error('Failed to save payment settings'),

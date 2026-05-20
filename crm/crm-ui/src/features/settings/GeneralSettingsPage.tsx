@@ -46,6 +46,20 @@ const LANGUAGE_OPTIONS = [
   { value: 'vi', label: 'Vietnamese' },
 ];
 
+const CURRENCY_OPTIONS = [
+  { value: 'USD', label: 'USD — US Dollar' },
+  { value: 'VND', label: 'VND — Vietnamese Dong' },
+  { value: 'EUR', label: 'EUR — Euro' },
+  { value: 'GBP', label: 'GBP — British Pound' },
+];
+
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: '$',
+  VND: '₫',
+  EUR: '€',
+  GBP: '£',
+};
+
 export default function GeneralSettingsPage() {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
@@ -70,6 +84,8 @@ export default function GeneralSettingsPage() {
         maintenanceMessage: s.maintenance?.message ?? '',
         defaultLanguage: s.i18n?.defaultLanguage ?? 'en',
         supportedLanguages: s.i18n?.supportedLanguages ?? ['en'],
+        currency: s.payment?.currency ?? 'USD',
+        currencySymbol: s.payment?.currencySymbol ?? '$',
         chatbotWelcomeEn: s.chatbot?.welcomeMessage?.en ?? '',
         chatbotWelcomeVi: s.chatbot?.welcomeMessage?.vi ?? '',
       });
@@ -82,6 +98,7 @@ export default function GeneralSettingsPage() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       const values = await form.validateFields();
+      const existingPayment = data?.data?.payment ?? {};
       return settingsApi.update({
         siteName: values.siteName,
         siteDescription: values.siteDescription,
@@ -99,6 +116,11 @@ export default function GeneralSettingsPage() {
           defaultLanguage: values.defaultLanguage,
           supportedLanguages: values.supportedLanguages,
         },
+        payment: {
+          ...existingPayment,
+          currency: values.currency,
+          currencySymbol: values.currencySymbol,
+        },
         chatbot: {
           enabled: chatbotEnabled,
           welcomeMessage: {
@@ -110,6 +132,7 @@ export default function GeneralSettingsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['site-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['site-settings', 'public'] });
       toast.success('General settings saved');
     },
     onError: () => toast.error('Failed to save settings'),
@@ -345,6 +368,33 @@ export default function GeneralSettingsPage() {
                   options={LANGUAGE_OPTIONS}
                   placeholder="Select supported languages"
                 />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col xs={24} sm={12}>
+              <Form.Item
+                name="currency"
+                label="Currency"
+                rules={[{ required: true, message: 'Currency is required' }]}
+                tooltip="Used to format prices across CRM and storefront"
+              >
+                <Select
+                  options={CURRENCY_OPTIONS}
+                  onChange={(value: string) => {
+                    const symbol = CURRENCY_SYMBOLS[value];
+                    if (symbol) form.setFieldValue('currencySymbol', symbol);
+                  }}
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12}>
+              <Form.Item
+                name="currencySymbol"
+                label="Currency Symbol"
+                rules={[{ required: true, message: 'Symbol is required' }]}
+              >
+                <Input placeholder="$" style={{ width: 100 }} />
               </Form.Item>
             </Col>
           </Row>
