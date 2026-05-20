@@ -2,6 +2,9 @@
 
 const request = require('supertest');
 const app = require('../index');
+const closeMongo = require('./_helpers/closeMongo');
+
+afterAll(closeMongo);
 
 describe('Currency audit endpoints', () => {
   test('GET /api/v1/admin/products/currency-audit requires admin auth', async () => {

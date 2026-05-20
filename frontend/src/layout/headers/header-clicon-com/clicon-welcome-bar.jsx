@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useSelector, useDispatch } from "react-redux";
-import keycloak from "@/lib/keycloak";
-import { setCurrency, selectCurrency } from "@/redux/features/currencySlice";
-import { usePatchUserPreferencesMutation } from "@/redux/features/userPreferencesApi";
+import { useSelector } from "react-redux";
+import { selectCurrency } from "@/redux/features/currencySlice";
+import useSetCurrency from "@/hooks/use-set-currency";
 import useCurrency from "@/hooks/use-currency";
 import { useGetSettingsQuery } from "@/redux/features/cmsApi";
 
@@ -22,9 +21,8 @@ const CURRENCIES = [
 
 const CliconWelcomeBar = () => {
   const { t, i18n } = useTranslation();
-  const dispatch = useDispatch();
   const currentCurrency = useSelector(selectCurrency);
-  const [patchPrefs] = usePatchUserPreferencesMutation();
+  const setCurrency = useSetCurrency();
   const { data: settingsData } = useGetSettingsQuery();
   const { formatPrice } = useCurrency();
   const thresholdVnd = settingsData?.data?.shipping?.freeShippingThreshold ?? 5000000;
@@ -60,12 +58,9 @@ const CliconWelcomeBar = () => {
     setActiveDrop("");
   };
 
-  const handleChangeCurrency = async (code) => {
-    dispatch(setCurrency(code));
+  const handleChangeCurrency = (code) => {
+    setCurrency(code);
     setActiveDrop("");
-    try {
-      if (keycloak.authenticated) await patchPrefs({ currency: code }).unwrap();
-    } catch { /* ignore */ }
   };
 
   return (

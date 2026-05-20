@@ -1,5 +1,8 @@
 const request = require('supertest');
 const app = require('../index');
+const closeMongo = require('./_helpers/closeMongo');
+
+afterAll(closeMongo);
 
 describe('Store CMS Endpoints', () => {
   test('GET /api/v1/store/settings returns public settings', async () => {

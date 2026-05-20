@@ -2,6 +2,9 @@
 
 const request = require('supertest');
 const app = require('../index');
+const closeMongo = require('./_helpers/closeMongo');
+
+afterAll(closeMongo);
 
 describe('User preferences endpoints', () => {
   test('GET /api/v1/user/preferences requires auth', async () => {

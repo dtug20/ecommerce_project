@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working in the 
 
 ## Project Overview
 
-Shofy Storefront is the customer-facing web app. Next.js 13 **Pages Router** (not App Router) on port `3000`. Renders SSR/ISR pages backed by the Express API at `:7001`, with a CMS-driven homepage and Redux Toolkit + RTK Query for state.
+Shofy Storefront is the customer-facing web app. Next.js 13 **Pages Router** (not App Router) on port `3001`. Renders SSR/ISR pages backed by the Express API at `:7001`, with a CMS-driven homepage and Redux Toolkit + RTK Query for state.
 
 ## Development Commands
 

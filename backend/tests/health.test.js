@@ -1,5 +1,8 @@
 const request = require('supertest');
 const app = require('../index');
+const closeMongo = require('./_helpers/closeMongo');
+
+afterAll(closeMongo);
 
 describe('Health Endpoint', () => {
   test('GET /health returns 200 with status ok', async () => {

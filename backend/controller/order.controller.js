@@ -4,6 +4,7 @@ const Order = require("../model/Order");
 const Product = require("../model/Products");
 const Coupon = require("../model/Coupon");
 const ExchangeRate = require("../model/ExchangeRate");
+const User = require("../model/User");
 const { emitOrderCreated, emitOrderUpdated } = require("../utils/socketEmitter");
 const PaymentService = require("../services/paymentService");
 const { sendTemplatedEmail } = require("../utils/emailService");
@@ -111,7 +112,10 @@ exports.addOrder = async (req, res, next) => {
 
     // Snapshot display currency and exchange rate at order time so historical
     // orders are not affected by future rate fluctuations.
-    const displayCurrency = req.body.displayCurrency || 'VND';
+    // Source of truth is the authenticated user's saved preference — never trust
+    // the request body, which a client could tamper with to mismatch the rate.
+    const userDoc = await User.findById(req.user._id).select('preferences.currency').lean();
+    const displayCurrency = userDoc?.preferences?.currency || 'VND';
     let exchangeRate = 1;
     if (displayCurrency !== 'VND') {
       const rateDoc = await ExchangeRate.findOne({});
