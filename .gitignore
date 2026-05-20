@@ -63,3 +63,9 @@ audit-products-*.csv
 
 # Local DB snapshots (Phase 1b/3b rollback artifacts)
 backups/
+
+# Playwright test artifacts
+frontend/test-results/
+
+# Vendor reference template (Clicon HTML starter)
+clicon-html/
