@@ -347,8 +347,6 @@ export interface SiteSettings {
   };
   payment: {
     enabledGateways: string[];
-    currency: string;
-    currencySymbol: string;
   };
   seo: {
     defaultTitle?: string;

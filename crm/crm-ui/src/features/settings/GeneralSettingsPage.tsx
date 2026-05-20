@@ -83,7 +83,7 @@ export default function GeneralSettingsPage() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       const values = await form.validateFields();
-      const existingPayment = data?.data?.payment ?? {};
+      const existingPayment = data?.data?.payment ?? { enabledGateways: [] };
       return settingsApi.update({
         siteName: values.siteName,
         siteDescription: values.siteDescription,
