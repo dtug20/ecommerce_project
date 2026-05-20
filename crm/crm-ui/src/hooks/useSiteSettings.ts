@@ -21,7 +21,7 @@ export interface PublicSettings {
 
 export function useSiteSettings() {
   return useQuery<PublicSettings>({
-    queryKey: ['site-settings'],
+    queryKey: ['site-settings', 'public'],
     queryFn: async () => {
       const res = await api.get('/api/v1/store/settings');
       return (res.data?.data ?? {}) as PublicSettings;
