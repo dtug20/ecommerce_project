@@ -6,14 +6,14 @@ module.exports = defineConfig({
   timeout: 30000,
   retries: 1,
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3001',
     screenshot: 'only-on-failure',
     trace: 'on-first-retry',
   },
   webServer: {
     command: 'npm run dev',
-    port: 3000,
+    port: 3001,
     reuseExistingServer: true,
-    timeout: 60000,
+    timeout: 120000,
   },
 });
