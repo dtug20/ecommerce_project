@@ -3,6 +3,7 @@ const { secret } = require("../config/secret");
 const Order = require("../model/Order");
 const Product = require("../model/Products");
 const Coupon = require("../model/Coupon");
+const ExchangeRate = require("../model/ExchangeRate");
 const { emitOrderCreated, emitOrderUpdated } = require("../utils/socketEmitter");
 const PaymentService = require("../services/paymentService");
 const { sendTemplatedEmail } = require("../utils/emailService");
@@ -108,6 +109,15 @@ exports.addOrder = async (req, res, next) => {
       }
     }
 
+    // Snapshot display currency and exchange rate at order time so historical
+    // orders are not affected by future rate fluctuations.
+    const displayCurrency = req.body.displayCurrency || 'VND';
+    let exchangeRate = 1;
+    if (displayCurrency !== 'VND') {
+      const rateDoc = await ExchangeRate.findOne({});
+      exchangeRate = rateDoc?.rates?.[displayCurrency] ?? 1;
+    }
+
     const orderItems = await Order.create({
       user: req.user._id,
       cart, name, address, email, contact, city, country, zipCode,
@@ -117,6 +127,8 @@ exports.addOrder = async (req, res, next) => {
       paymentGateway: paymentResult.paymentGateway || paymentMethod.toLowerCase(),
       paymentStatus: paymentResult.paymentStatus || 'unpaid',
       transactionId: paymentResult.transactionId || null,
+      displayCurrency,
+      exchangeRate,
     });
 
     // Deduct stock for each cart item

@@ -28,6 +28,7 @@ const createOrder = Joi.object({
   // Optional fields
   orderNote:  Joi.string().max(500).allow('', null).optional(),
   couponCode: Joi.string().allow('', null).optional(),
+  displayCurrency: Joi.string().valid('VND', 'USD', 'EUR', 'GBP', 'JPY').default('VND'),
 
   // Stripe payment intent — passed when method is 'stripe'
   paymentIntent: Joi.alternatives().try(
