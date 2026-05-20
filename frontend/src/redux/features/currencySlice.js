@@ -1,55 +1,44 @@
-import { createSlice } from "@reduxjs/toolkit";
+// frontend/src/redux/features/currencySlice.js
+import { createSlice } from '@reduxjs/toolkit';
+import Cookies from 'js-cookie';
 
-// Exchange rates relative to USD (base)
-const EXCHANGE_RATES = {
-  USD: 1,
-  VND: 25450, // 1 USD ≈ 25,450 VND (update periodically)
+export const CURRENCY_CONFIG = {
+  VND: { code: 'VND', symbol: '₫', locale: 'vi-VN', decimals: 0 },
+  USD: { code: 'USD', symbol: '$', locale: 'en-US', decimals: 2 },
+  EUR: { code: 'EUR', symbol: '€', locale: 'de-DE', decimals: 2 },
+  GBP: { code: 'GBP', symbol: '£', locale: 'en-GB', decimals: 2 },
+  JPY: { code: 'JPY', symbol: '¥', locale: 'ja-JP', decimals: 0 },
 };
 
-const CURRENCY_CONFIG = {
-  USD: { code: 'USD', symbol: '$', locale: 'en-US' },
-  VND: { code: 'VND', symbol: '₫', locale: 'vi-VN' },
-};
+const COOKIE_NAME = 'display_currency';
 
 const currencySlice = createSlice({
   name: 'currency',
-  // Always start with USD to match SSR — localStorage is loaded after hydration
-  initialState: {
-    currency: 'USD',
-    rates: EXCHANGE_RATES,
-    config: CURRENCY_CONFIG,
-  },
+  initialState: { currency: 'VND' },  // SSR-safe default
   reducers: {
     setCurrency: (state, action) => {
       const code = action.payload;
       if (CURRENCY_CONFIG[code]) {
         state.currency = code;
         if (typeof window !== 'undefined') {
-          try {
-            localStorage.setItem('selected_currency', code);
-          } catch { /* ignore */ }
+          try { Cookies.set(COOKIE_NAME, code, { expires: 365 }); } catch { /* ignore */ }
         }
       }
     },
-    // Called once after hydration to restore from localStorage
-    hydrateCurrency: (state) => {
+    hydrateCurrencyFromCookie: (state) => {
       if (typeof window !== 'undefined') {
         try {
-          const saved = localStorage.getItem('selected_currency');
-          if (saved && CURRENCY_CONFIG[saved]) {
-            state.currency = saved;
-          }
+          const saved = Cookies.get(COOKIE_NAME);
+          if (saved && CURRENCY_CONFIG[saved]) state.currency = saved;
         } catch { /* ignore */ }
       }
     },
   },
 });
 
-export const { setCurrency, hydrateCurrency } = currencySlice.actions;
+export const { setCurrency, hydrateCurrencyFromCookie } = currencySlice.actions;
 
-// Selectors
 export const selectCurrency = (state) => state.currency.currency;
-export const selectCurrencyConfig = (state) => state.currency.config[state.currency.currency];
-export const selectExchangeRate = (state) => state.currency.rates[state.currency.currency] || 1;
+export const selectCurrencyConfig = (state) => CURRENCY_CONFIG[state.currency.currency];
 
 export default currencySlice.reducer;
