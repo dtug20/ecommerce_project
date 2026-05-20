@@ -59,3 +59,32 @@ exports.getProductStats = async (req, res) => {
     handleError(res, error);
   }
 };
+
+// Currency audit (Phase 2)
+
+exports.listCurrencyAudit = async (req, res) => {
+  try {
+    const result = await req.api.get('/api/v1/admin/products/currency-audit', req.query);
+    res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+exports.normalizeCurrencyOne = async (req, res) => {
+  try {
+    const result = await req.api.post(`/api/v1/admin/products/${req.params.id}/normalize-currency`, req.body);
+    res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+exports.normalizeCurrencyBulk = async (req, res) => {
+  try {
+    const result = await req.api.post('/api/v1/admin/products/bulk-normalize-currency', req.body);
+    res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
