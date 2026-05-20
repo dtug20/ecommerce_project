@@ -60,3 +60,6 @@ Thumbs.db
 
 # Audit script output
 audit-products-*.csv
+
+# Local DB snapshots (Phase 1b/3b rollback artifacts)
+backups/
