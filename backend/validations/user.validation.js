@@ -84,4 +84,12 @@ const addStaff = Joi.object({
   image:       Joi.string().allow('', null).optional(),
 }).options({ stripUnknown: true });
 
-module.exports = { updateUser, updateUserStatus, vendorApplication, createUser, addStaff, passwordSchema };
+// ---------------------------------------------------------------------------
+// Update own preferences (currency / language)
+// ---------------------------------------------------------------------------
+const updatePreferences = Joi.object({
+  currency: Joi.string().valid('VND', 'USD', 'EUR', 'GBP', 'JPY'),
+  language: Joi.string().valid('vi', 'en'),
+}).min(1).options({ stripUnknown: true });
+
+module.exports = { updateUser, updateUserStatus, vendorApplication, createUser, addStaff, passwordSchema, updatePreferences };

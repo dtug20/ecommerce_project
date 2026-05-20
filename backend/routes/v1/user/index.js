@@ -38,7 +38,7 @@ router.get('/profile', ctrl.getProfile);
 // ---------------------------------------------------------------------------
 
 router.get('/preferences',   userPrefsCtrl.getPreferences);
-router.patch('/preferences', userPrefsCtrl.updatePreferences);
+router.patch('/preferences', validate(v.updatePreferences), userPrefsCtrl.updatePreferences);
 
 /**
  * @swagger

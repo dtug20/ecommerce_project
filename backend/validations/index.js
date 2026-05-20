@@ -25,11 +25,12 @@ module.exports = {
   createOrder: order.createOrder,
 
   // User
-  updateUser:       user.updateUser,
-  updateUserStatus: user.updateUserStatus,
-  vendorApplication: user.vendorApplication,
-  createUser:       user.createUser,
-  addStaff:         user.addStaff,
+  updateUser:         user.updateUser,
+  updateUserStatus:   user.updateUserStatus,
+  vendorApplication:  user.vendorApplication,
+  createUser:         user.createUser,
+  addStaff:           user.addStaff,
+  updatePreferences:  user.updatePreferences,
 
   // Review
   createReview:  review.createReview,

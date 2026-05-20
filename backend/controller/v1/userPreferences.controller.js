@@ -2,10 +2,6 @@
 
 const User = require('../../model/User');
 const respond = require('../../utils/respond');
-const ApiError = require('../../errors/api-error');
-
-const CURRENCY_ENUM = ['VND', 'USD', 'EUR', 'GBP', 'JPY'];
-const LANGUAGE_ENUM = ['vi', 'en'];
 
 exports.getPreferences = async (req, res, next) => {
   try {
@@ -20,16 +16,8 @@ exports.updatePreferences = async (req, res, next) => {
   try {
     const { currency, language } = req.body;
     const update = {};
-
-    if (currency !== undefined) {
-      if (!CURRENCY_ENUM.includes(currency)) throw new ApiError(400, 'Invalid currency');
-      update['preferences.currency'] = currency;
-    }
-    if (language !== undefined) {
-      if (!LANGUAGE_ENUM.includes(language)) throw new ApiError(400, 'Invalid language');
-      update['preferences.language'] = language;
-    }
-    if (Object.keys(update).length === 0) throw new ApiError(400, 'No fields to update');
+    if (currency !== undefined) update['preferences.currency'] = currency;
+    if (language !== undefined) update['preferences.language'] = language;
 
     const user = await User.findByIdAndUpdate(
       req.user._id,
@@ -39,6 +27,7 @@ exports.updatePreferences = async (req, res, next) => {
       .select('preferences')
       .lean();
 
+    if (!user) return respond.notFound(res, 'USER_NOT_FOUND', 'User not found');
     return respond.success(res, user.preferences, 'Preferences updated');
   } catch (err) {
     next(err);
