@@ -84,6 +84,25 @@ identifies the root cause of each bug.
   - Frontend maps `'Low to High'` to `sortOrder=desc` (inverted).
   - Backend `utils/pagination.js:28-29` flips `'asc' → -1`.
 
+## Index check (Task 8.3 step 1)
+
+Ran:
+
+```bash
+node -e "const m=require('mongoose'); require('dotenv').config();
+(async()=>{ await m.connect(process.env.MONGO_URI, {serverSelectionTimeoutMS: 5000});
+const idx = await m.connection.db.collection('products').indexes();
+console.log(idx.filter(i => i.weights).map(i => i.name)); await m.disconnect(); })();"
+```
+
+Result: `Server selection timed out after 5000 ms` — the prod MongoDB at
+`mongodb://187.124.3.207:27017/shofy` is not reachable from this
+environment. We cannot confirm the `$text` index existence directly from
+here; that confirmation lives with Phase 16 prod-deploy step. Either way,
+the regex fallback added in Task 8.3 step 2 is the safety net for any
+environment (Atlas / non-Atlas / index-missing) where `$text` returns
+zero matches.
+
 ## Next steps
 
 1. Task 8.2 — switch `search.jsx` to `useSearchProductsQuery`, fix the

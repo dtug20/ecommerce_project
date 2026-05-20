@@ -108,11 +108,6 @@ exports.getAllProducts = async (req, res, next) => {
       filter.status = q.status;
     }
 
-    // text search
-    if (q.search) {
-      filter.$text = { $search: q.search };
-    }
-
     // tag
     if (q.tag) {
       filter.tags = q.tag;
@@ -120,18 +115,44 @@ exports.getAllProducts = async (req, res, next) => {
 
     const sortObj = { [sortBy]: sortOrder === 'asc' ? 1 : -1 };
 
-    const [totalItems, data] = await Promise.all([
-      Product.countDocuments(filter),
-      Product.find(filter)
-        .sort(sortObj)
-        .skip(skip)
-        .limit(limit)
-        .populate({
-          path: 'reviews',
-          populate: { path: 'userId', select: 'name' },
-        })
-        .populate('vendor', 'name vendorProfile.storeName vendorProfile.storeSlug'),
-    ]);
+    // text search — try $text first, fall back to regex if no $text index
+    // or zero matches. Keeps the shop-page "Search for anything..." input
+    // working on environments without the compound text index.
+    const runQuery = async (extra) => {
+      const finalFilter = extra ? { ...filter, ...extra } : filter;
+      return Promise.all([
+        Product.countDocuments(finalFilter),
+        Product.find(finalFilter)
+          .sort(sortObj)
+          .skip(skip)
+          .limit(limit)
+          .populate({
+            path: 'reviews',
+            populate: { path: 'userId', select: 'name' },
+          })
+          .populate('vendor', 'name vendorProfile.storeName vendorProfile.storeSlug'),
+      ]);
+    };
+
+    let totalItems = 0;
+    let data = [];
+
+    if (q.search) {
+      try {
+        [totalItems, data] = await runQuery({ $text: { $search: q.search } });
+      } catch (_textErr) {
+        totalItems = 0;
+      }
+      if (totalItems === 0) {
+        const escaped = String(q.search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = { $regex: escaped, $options: 'i' };
+        [totalItems, data] = await runQuery({
+          $or: [{ title: regex }, { description: regex }, { tags: regex }],
+        });
+      }
+    } else {
+      [totalItems, data] = await runQuery();
+    }
 
     const pagination = buildPagination(page, limit, totalItems);
     return respond.paginated(res, data, pagination, 'Products retrieved successfully');
@@ -143,6 +164,13 @@ exports.getAllProducts = async (req, res, next) => {
 /**
  * GET /api/v1/store/products/search
  * Full-text search with score-based ranking.
+ *
+ * Tries the $text index first. If it errors (collection has no $text
+ * index) OR returns 0 results, falls back to a case-insensitive regex
+ * search across title / description / tags. This keeps search working on
+ * non-Atlas environments and degrades gracefully when the index hasn't
+ * been built yet.
+ *
  * Query params: q (search term), page, limit
  */
 exports.searchProducts = async (req, res, next) => {
@@ -153,18 +181,49 @@ exports.searchProducts = async (req, res, next) => {
     }
 
     const { page, limit, skip } = getPaginationParams(req.query);
-    const filter = { $text: { $search: searchTerm } };
 
-    const [totalItems, data] = await Promise.all([
-      Product.countDocuments(filter),
-      Product.find(filter, { score: { $meta: 'textScore' } })
-        .sort({ score: { $meta: 'textScore' } })
-        .skip(skip)
-        .limit(limit),
-    ]);
+    let totalItems = 0;
+    let data = [];
+    let usedFallback = false;
+
+    // 1. Try $text index (ranked by score)
+    try {
+      const textFilter = { $text: { $search: searchTerm } };
+      [totalItems, data] = await Promise.all([
+        Product.countDocuments(textFilter),
+        Product.find(textFilter, { score: { $meta: 'textScore' } })
+          .sort({ score: { $meta: 'textScore' } })
+          .skip(skip)
+          .limit(limit),
+      ]);
+    } catch (textErr) {
+      // No $text index on the collection — fall through to regex.
+      usedFallback = true;
+    }
+
+    // 2. Fallback to regex if $text returned nothing or threw
+    if (totalItems === 0) {
+      const escaped = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = { $regex: escaped, $options: 'i' };
+      const regexFilter = {
+        $or: [{ title: regex }, { description: regex }, { tags: regex }],
+      };
+      [totalItems, data] = await Promise.all([
+        Product.countDocuments(regexFilter),
+        Product.find(regexFilter).skip(skip).limit(limit),
+      ]);
+      usedFallback = true;
+    }
 
     const pagination = buildPagination(page, limit, totalItems);
-    return respond.paginated(res, data, pagination, 'Search results retrieved successfully');
+    return respond.paginated(
+      res,
+      data,
+      pagination,
+      usedFallback
+        ? 'Search results retrieved successfully (regex fallback)'
+        : 'Search results retrieved successfully'
+    );
   } catch (err) {
     next(err);
   }
