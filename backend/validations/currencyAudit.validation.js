@@ -13,7 +13,7 @@ const normalizeCurrency = Joi.object({
  * Body schema for POST /api/v1/admin/products/bulk-normalize-currency
  */
 const bulkNormalizeCurrency = Joi.object({
-  ids: Joi.array().items(Joi.string()).min(1).required(),
+  ids: Joi.array().items(Joi.string()).min(1).max(100).required(),
   fromCurrency: Joi.string().valid('USD', 'VND').required(),
 });
 
