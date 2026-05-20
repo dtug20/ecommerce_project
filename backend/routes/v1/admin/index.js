@@ -18,6 +18,7 @@ const { validate } = require('../../../middleware/validate');
 const v = require('../../../validations');
 const ctrl = require('../../../controller/v1/admin.controller');
 const cmsCtrl = require('../../../controller/v1/cms.controller');
+const currencyAuditCtrl = require('../../../controller/v1/currencyAudit.controller');
 const analyticsCtrl = require('../../../controller/v1/analytics.controller');
 const activityLogCtrl = require('../../../controller/v1/activityLog.controller');
 const chatbotAdminCtrl = require('../../../controller/v1/chatbot-admin.controller');
@@ -95,6 +96,11 @@ router.use((req, res, next) => {
  *         description: Unauthorized
  */
 router.get('/products/stats',  ctrl.getProductStats);
+
+// Currency audit — must be declared before /products/:id to avoid `:id` capturing the literal segments
+router.get('/products/currency-audit',              authorization('admin', 'manager'), currencyAuditCtrl.listAuditCandidates);
+router.post('/products/bulk-normalize-currency',    authorization('admin', 'manager'), validate(v.bulkNormalizeCurrency), currencyAuditCtrl.normalizeBulk);
+router.post('/products/:id/normalize-currency',     authorization('admin', 'manager'), validate(v.normalizeCurrency), currencyAuditCtrl.normalizeOne);
 
 /**
  * @swagger

@@ -8,13 +8,14 @@
  *   router.post('/products', validate(v.createProduct), ctrl.createProduct);
  */
 
-const product = require('./product.validation');
-const order   = require('./order.validation');
-const user    = require('./user.validation');
-const review  = require('./review.validation');
-const coupon  = require('./coupon.validation');
-const vendor  = require('./vendor.validation');
-const cms     = require('./cms.validation');
+const product      = require('./product.validation');
+const order        = require('./order.validation');
+const user         = require('./user.validation');
+const review       = require('./review.validation');
+const coupon       = require('./coupon.validation');
+const vendor       = require('./vendor.validation');
+const cms          = require('./cms.validation');
+const currencyAudit = require('./currencyAudit.validation');
 
 module.exports = {
   // Product
@@ -53,4 +54,8 @@ module.exports = {
   createBlogPost: cms.createBlogPost,
   updateBlogPost: cms.updateBlogPost,
   updateSettings: cms.updateSettings,
+
+  // Currency Audit
+  normalizeCurrency:     currencyAudit.normalizeCurrency,
+  bulkNormalizeCurrency: currencyAudit.bulkNormalizeCurrency,
 };
