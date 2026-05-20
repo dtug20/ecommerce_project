@@ -280,7 +280,11 @@
     "priceHighLow": "Price high to low",
     "loadMore": "Load More",
     "showingResults": "Showing 1-{{count}} of {{total}} results",
-    "noMatch": "Sorry, nothing matched your search terms"
+    "noMatch": "Sorry, nothing matched your search terms",
+    "noResults": "No results for \"{{query}}\"",
+    "loading": "Searching…",
+    "error": "There was a problem with your search. Please try again.",
+    "promptEnter": "Type a search term to find products."
   },
   "error": {
     "generic": "There was an error",

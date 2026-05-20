@@ -280,7 +280,11 @@
     "priceHighLow": "Giá cao đến thấp",
     "loadMore": "Xem thêm",
     "showingResults": "Hiển thị 1-{{count}} trong {{total}} kết quả",
-    "noMatch": "Xin lỗi, không tìm thấy kết quả phù hợp"
+    "noMatch": "Xin lỗi, không tìm thấy kết quả phù hợp",
+    "noResults": "Không có kết quả cho \"{{query}}\"",
+    "loading": "Đang tìm kiếm…",
+    "error": "Đã xảy ra lỗi khi tìm kiếm. Vui lòng thử lại.",
+    "promptEnter": "Nhập từ khoá để tìm sản phẩm."
   },
   "error": {
     "generic": "Đã có lỗi xảy ra",

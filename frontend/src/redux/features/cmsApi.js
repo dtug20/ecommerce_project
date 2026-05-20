@@ -49,9 +49,13 @@ export const cmsApi = apiSlice.injectEndpoints({
       providesTags: ['Products'],
     }),
     searchProducts: builder.query({
-      query: (params = {}) => {
+      // Accepts either a raw string query or { q, productType, page, limit }.
+      // The backend search handler reads req.query.q — we MUST send the
+      // search term under the key `q`, not `search`.
+      query: (arg = {}) => {
+        const params = typeof arg === 'string' ? { q: arg } : arg;
         const searchParams = new URLSearchParams();
-        if (params.q) searchParams.set('search', params.q);
+        if (params.q) searchParams.set('q', params.q);
         if (params.productType) searchParams.set('productType', params.productType);
         if (params.page) searchParams.set('page', params.page);
         if (params.limit) searchParams.set('limit', params.limit);
