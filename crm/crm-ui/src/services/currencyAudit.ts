@@ -27,8 +27,14 @@ export interface BulkNormalizeResponse {
   invalidIds: string[];
 }
 
+export interface AuditResponse {
+  items: AuditProduct[];
+  currentRate: number;
+  pagination: AuditPagination;
+}
+
 export const currencyAuditApi = {
-  list: async (params: { page?: number; limit?: number; showReviewed?: boolean }) => {
+  list: async (params: { page?: number; limit?: number; showReviewed?: boolean }): Promise<AuditResponse> => {
     const res = await api.get('/api/products/currency-audit', { params });
     // Backend returns { success, message, data: { items, currentRate }, pagination }
     // pagination is at top level, not nested under data
