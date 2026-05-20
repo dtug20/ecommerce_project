@@ -7,6 +7,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 // Existing pages
 const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage'));
 const ProductsPage = lazy(() => import('@/features/products/ProductsPage'));
+const CurrencyAuditPage = lazy(() => import('@/features/products/CurrencyAuditPage'));
 const CategoriesPage = lazy(() => import('@/features/categories/CategoriesPage'));
 const OrdersPage = lazy(() => import('@/features/orders/OrdersPage'));
 const UsersPage = lazy(() => import('@/features/users/UsersPage'));
@@ -77,6 +78,7 @@ export default function App() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<SuspenseRoute><DashboardPage /></SuspenseRoute>} />
           <Route path="/products" element={<SuspenseRoute><ProductsPage /></SuspenseRoute>} />
+          <Route path="/products/currency-audit" element={<SuspenseRoute><CurrencyAuditPage /></SuspenseRoute>} />
           <Route path="/categories" element={<SuspenseRoute><CategoriesPage /></SuspenseRoute>} />
           <Route path="/orders" element={<SuspenseRoute><OrdersPage /></SuspenseRoute>} />
           <Route path="/users" element={<SuspenseRoute><UsersPage /></SuspenseRoute>} />

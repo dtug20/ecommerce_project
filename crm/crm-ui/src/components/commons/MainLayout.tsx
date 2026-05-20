@@ -18,6 +18,7 @@ import {
   PictureOutlined,
   AuditOutlined,
   MessageOutlined,
+  DollarOutlined,
 } from '@ant-design/icons';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import useAppStore from '@/stores/appStore';
@@ -38,6 +39,7 @@ interface FlatNavItem {
 const FLAT_NAV: FlatNavItem[] = [
   { key: '/', label: 'Dashboard', path: '/' },
   { key: '/products', label: 'Products', path: '/products' },
+  { key: '/products/currency-audit', label: 'Currency Audit', path: '/products/currency-audit' },
   { key: '/categories', label: 'Categories', path: '/categories' },
   { key: '/orders', label: 'Orders', path: '/orders' },
   { key: '/users', label: 'Users', path: '/users' },
@@ -90,6 +92,11 @@ const MENU_ITEMS: ItemType[] = [
     key: '/products',
     icon: <ShoppingOutlined />,
     label: 'Products',
+  },
+  {
+    key: '/products/currency-audit',
+    icon: <DollarOutlined />,
+    label: 'Currency Audit',
   },
   {
     key: '/categories',
