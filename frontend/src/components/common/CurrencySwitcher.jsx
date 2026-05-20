@@ -1,6 +1,6 @@
 // frontend/src/components/common/CurrencySwitcher.jsx
 import { useDispatch, useSelector } from 'react-redux';
-import Cookies from 'js-cookie';
+import keycloak from '@/lib/keycloak';
 import { useTranslation } from 'react-i18next';
 import { selectCurrency, setCurrency, CURRENCY_CONFIG } from '@/redux/features/currencySlice';
 import { usePatchUserPreferencesMutation } from '@/redux/features/userPreferencesApi';
@@ -17,8 +17,7 @@ export default function CurrencySwitcher() {
     const code = e.target.value;
     dispatch(setCurrency(code));
     try {
-      const userInfo = JSON.parse(Cookies.get('userInfo') || '{}');
-      if (userInfo.accessToken) await patchPrefs({ currency: code }).unwrap();
+      if (keycloak.authenticated) await patchPrefs({ currency: code }).unwrap();
     } catch { /* ignore */ }
   };
 

@@ -46,7 +46,7 @@ const Wrapper = ({ children }) => {
   // API responds — ensuring the ordering: SSR default → cookie → DB.
   useEffect(() => {
     if (prefs?.currency) dispatch(setCurrency(prefs.currency));
-  }, [prefs, dispatch]);
+  }, [prefs?.currency, dispatch]);
 
   const chatbotEnabled = settingsData?.data?.chatbot?.enabled !== false;
 

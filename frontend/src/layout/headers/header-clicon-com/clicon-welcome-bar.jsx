@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useSelector, useDispatch } from "react-redux";
-import Cookies from "js-cookie";
+import keycloak from "@/lib/keycloak";
 import { setCurrency, selectCurrency } from "@/redux/features/currencySlice";
 import { usePatchUserPreferencesMutation } from "@/redux/features/userPreferencesApi";
 
@@ -58,8 +58,7 @@ const CliconWelcomeBar = () => {
     dispatch(setCurrency(code));
     setActiveDrop("");
     try {
-      const userInfo = JSON.parse(Cookies.get("userInfo") || "{}");
-      if (userInfo.accessToken) await patchPrefs({ currency: code }).unwrap();
+      if (keycloak.authenticated) await patchPrefs({ currency: code }).unwrap();
     } catch { /* ignore */ }
   };
 
