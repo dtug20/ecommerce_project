@@ -42,9 +42,16 @@ exports.getAllProducts = async (req, res, next) => {
     const q = req.query;
     const filter = {};
 
-    // category — accept ObjectId, slug, or raw parent name.
+    // category — accept ObjectId or slugified parent name.
     // Frontend slugifies parent as: lowercase, '&' stripped, spaces → '-'.
     // Reverse it by resolving against Category.parent.
+    //
+    // STRICT MATCH: we match ONLY by category.id. The previous implementation
+    // used a $or that also matched by the product's parent-name string,
+    // which leaked products from unrelated categories that happened to
+    // share a parent name (Flow A3). If the slug doesn't resolve to a
+    // known category, the query is short-circuited to return no rows
+    // rather than falling back to a wide regex on `parent`.
     if (q.category) {
       if (mongoose.Types.ObjectId.isValid(q.category)) {
         filter['category.id'] = new mongoose.Types.ObjectId(q.category);
@@ -54,10 +61,10 @@ exports.getAllProducts = async (req, res, next) => {
         const cats = await Category.find({}, { _id: 1, parent: 1 }).lean();
         const matched = cats.find((c) => slugify(c.parent) === q.category);
         if (matched) {
-          filter.$or = [{ 'category.id': matched._id }, { parent: matched.parent }];
+          filter['category.id'] = matched._id;
         } else {
-          // Fallback: case-insensitive substring on parent (legacy behaviour)
-          filter.parent = { $regex: q.category, $options: 'i' };
+          // Unknown slug — return empty rather than scanning all products.
+          filter._id = null;
         }
       }
     }
