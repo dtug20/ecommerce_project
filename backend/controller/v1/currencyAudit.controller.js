@@ -39,10 +39,14 @@ exports.listAuditCandidates = async (req, res, next) => {
       suggestedVndPrice: Math.round(p.price * usdRate),
     }));
 
-    return respond.success(res, {
-      items: enriched,
-      pagination: { page, limit, totalItems, totalPages: Math.ceil(totalItems / limit) },
-      currentRate: usdRate,
+    const totalPages = Math.ceil(totalItems / limit);
+    return respond.paginated(res, { items: enriched, currentRate: usdRate }, {
+      page,
+      limit,
+      totalItems,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
     });
   } catch (err) {
     next(err);
@@ -96,20 +100,26 @@ exports.normalizeBulk = async (req, res, next) => {
     const rate = rateDoc?.rates?.USD;
     if (fromCurrency === 'USD' && !rate) throw new ApiError(500, 'Exchange rate unavailable');
 
-    let updated = 0;
+    const results = { updated: 0, notFound: [], invalidIds: [] };
     for (const id of ids) {
-      if (!mongoose.isValidObjectId(id)) continue;
+      if (!mongoose.isValidObjectId(id)) {
+        results.invalidIds.push(id);
+        continue;
+      }
       const product = await Products.findById(id);
-      if (!product) continue;
+      if (!product) {
+        results.notFound.push(id);
+        continue;
+      }
       if (fromCurrency === 'USD') {
         product.price = Math.round(product.price * rate);
       }
       product.currencyReviewedAt = new Date();
       await product.save();
-      updated++;
+      results.updated++;
     }
 
-    return respond.success(res, { updated }, `${updated} product(s) normalized`);
+    return respond.success(res, results, `${results.updated} product(s) normalized`);
   } catch (err) {
     next(err);
   }

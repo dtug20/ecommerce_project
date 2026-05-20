@@ -99,8 +99,8 @@ router.get('/products/stats',  ctrl.getProductStats);
 
 // Currency audit — must be declared before /products/:id to avoid `:id` capturing the literal segments
 router.get('/products/currency-audit',              authorization('admin', 'manager'), currencyAuditCtrl.listAuditCandidates);
-router.post('/products/bulk-normalize-currency',    authorization('admin', 'manager'), validate(v.bulkNormalizeCurrency), currencyAuditCtrl.normalizeBulk);
-router.post('/products/:id/normalize-currency',     authorization('admin', 'manager'), validate(v.normalizeCurrency), currencyAuditCtrl.normalizeOne);
+router.post('/products/bulk-normalize-currency',    authorization('admin', 'manager'), validate(v.bulkNormalizeCurrency), logActivity('currency-normalize', 'product'), currencyAuditCtrl.normalizeBulk);
+router.post('/products/:id/normalize-currency',     authorization('admin', 'manager'), validate(v.normalizeCurrency), logActivity('currency-normalize', 'product'), currencyAuditCtrl.normalizeOne);
 
 /**
  * @swagger
