@@ -1,42 +1,42 @@
-import { useSelector } from "react-redux";
-import { selectCurrency, selectCurrencyConfig, selectExchangeRate } from "@/redux/features/currencySlice";
+// frontend/src/hooks/use-currency.js
+import { useSelector } from 'react-redux';
+import { selectCurrency, selectCurrencyConfig } from '@/redux/features/currencySlice';
+import { useGetExchangeRatesQuery } from '@/redux/features/exchangeRateApi';
 
 /**
- * Hook that returns a `formatPrice` function respecting the user's selected currency.
- *
- * All product prices in the database are stored in USD.
- * When the user picks VND, we multiply by the exchange rate and format accordingly.
- *
- * Usage:
- *   const { formatPrice, currency } = useCurrency();
- *   <span>{formatPrice(product.price)}</span>
+ * formatPrice(amountVnd) — converts a VND-base amount to the user's selected
+ * currency and formats it with Intl.NumberFormat. If rates are unavailable,
+ * falls back to rendering the input as VND.
  */
 const useCurrency = () => {
   const currency = useSelector(selectCurrency);
   const config = useSelector(selectCurrencyConfig);
-  const rate = useSelector(selectExchangeRate);
+  const { data: ratesData } = useGetExchangeRatesQuery();
+  const rate = currency === 'VND' ? 1 : (ratesData?.rates?.[currency] ?? null);
 
-  const formatPrice = (amount) => {
-    const num = Number(amount);
-    if (isNaN(num)) return config?.symbol ? `${config.symbol}0` : '$0.00';
+  const formatPrice = (amountVnd) => {
+    const num = Number(amountVnd);
+    if (!Number.isFinite(num)) return '';
 
-    const converted = num * rate;
-
-    try {
-      // VND typically has no decimal places
-      const fractionDigits = currency === 'VND' ? 0 : 2;
-      return new Intl.NumberFormat(config?.locale || 'en-US', {
-        style: 'currency',
-        currency: config?.code || 'USD',
-        minimumFractionDigits: fractionDigits,
-        maximumFractionDigits: fractionDigits,
-      }).format(converted);
-    } catch {
-      return `${config?.symbol || '$'}${converted.toFixed(currency === 'VND' ? 0 : 2)}`;
+    if (currency === 'VND' || !rate) {
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num);
     }
+    const converted = num / rate;
+    return new Intl.NumberFormat(config.locale, {
+      style: 'currency',
+      currency: config.code,
+      minimumFractionDigits: config.decimals,
+      maximumFractionDigits: config.decimals,
+    }).format(converted);
   };
 
-  return { formatPrice, currency, config, rate };
+  return {
+    formatPrice,
+    currency,
+    config,
+    rate,
+    isStale: ratesData?.stale ?? false,
+  };
 };
 
 export default useCurrency;
