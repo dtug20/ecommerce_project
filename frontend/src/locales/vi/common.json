@@ -291,10 +291,13 @@
   },
   "coupon": {
     "noCouponsFound": "Không tìm thấy mã giảm giá",
+    "noCouponsHint": "Hãy quay lại sau để xem ưu đãi mới.",
     "copied": "Đã sao chép!",
     "copy": "Sao chép",
     "offMinimum": "giảm — tối thiểu {{amount}}",
     "availableCoupons": "Mã giảm giá khả dụng",
+    "heroTitle": "Nhận ưu đãi tốt nhất",
+    "heroSubtitle": "Nhập mã khi thanh toán để tiết kiệm ngay trên các sản phẩm yêu thích của bạn",
     "off": "giảm",
     "onOrdersOver": "cho đơn từ {{amount}}",
     "appliesTo": "Áp dụng",

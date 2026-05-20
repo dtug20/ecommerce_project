@@ -291,10 +291,13 @@
   },
   "coupon": {
     "noCouponsFound": "No Coupons found!",
+    "noCouponsHint": "Check back later for new offers.",
     "copied": "Copied!",
     "copy": "Copy",
     "offMinimum": "off — min. {{amount}}",
     "availableCoupons": "Available Coupons",
+    "heroTitle": "Grab Best Offers",
+    "heroSubtitle": "Apply codes at checkout to save instantly on your favorite products",
     "off": "off",
     "onOrdersOver": "on orders over {{amount}}",
     "appliesTo": "On",

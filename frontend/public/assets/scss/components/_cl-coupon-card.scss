@@ -1,0 +1,316 @@
+@use "../utils" as *;
+
+/*----------------------------------------*/
+/*  Clicon Coupon Card
+/*----------------------------------------*/
+
+.cl-coupon-hero {
+  background: linear-gradient(135deg, var(--cl-header-bg) 0%, var(--cl-header-bg-dark) 100%);
+  padding: 40px 0;
+  color: var(--cl-text-white);
+  margin-bottom: var(--cl-spacing-2xl);
+
+  &__title {
+    font-size: var(--cl-fs-h1);
+    font-weight: var(--cl-fw-bold);
+    color: var(--cl-text-white);
+    margin-bottom: var(--cl-spacing-sm);
+  }
+
+  &__subtitle {
+    font-size: var(--cl-fs-body);
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+  }
+}
+
+.cl-coupons-section {
+  padding-bottom: var(--cl-spacing-3xl);
+
+  .row > [class*="col-"] {
+    margin-bottom: var(--cl-spacing-lg);
+  }
+}
+
+.cl-coupon-card {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  background: var(--cl-bg-white);
+  border: 1px solid var(--cl-border);
+  border-radius: var(--cl-radius-lg);
+  overflow: hidden;
+  transition: box-shadow var(--cl-transition-normal), transform var(--cl-transition-normal);
+  min-height: 180px;
+
+  &:hover {
+    box-shadow: var(--cl-shadow-md);
+    transform: translateY(-2px);
+
+    .cl-coupon-card__media img {
+      transform: scale(1.04);
+    }
+  }
+
+  &__media {
+    flex: 0 0 30%;
+    background: var(--cl-bg-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--cl-spacing-md);
+    position: relative;
+
+    img {
+      max-width: 100px;
+      max-height: 100px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      transition: transform var(--cl-transition-normal);
+    }
+  }
+
+  &__badge-type {
+    position: absolute;
+    top: var(--cl-spacing-sm);
+    left: var(--cl-spacing-sm);
+    background: var(--cl-primary);
+    color: var(--cl-text-white);
+    font-size: var(--cl-fs-caption);
+    font-weight: var(--cl-fw-semibold);
+    padding: 2px 8px;
+    border-radius: var(--cl-radius-sm);
+    text-transform: capitalize;
+    letter-spacing: 0.3px;
+  }
+
+  /* Perforated dashed divider — ticket effect */
+  &__perforation {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 30%;
+    width: 2px;
+    background-image: linear-gradient(
+      to bottom,
+      var(--cl-border) 0,
+      var(--cl-border) 6px,
+      transparent 6px,
+      transparent 12px
+    );
+    background-size: 2px 12px;
+    z-index: 1;
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      width: 18px;
+      height: 18px;
+      background: var(--cl-bg-gray);
+      border-radius: 50%;
+      transform: translateX(-50%);
+    }
+
+    &::before {
+      top: -9px;
+    }
+
+    &::after {
+      bottom: -9px;
+    }
+  }
+
+  &__body {
+    flex: 1 1 70%;
+    padding: var(--cl-spacing-lg);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--cl-spacing-sm);
+  }
+
+  &__discount {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    color: var(--cl-primary);
+    line-height: 1;
+
+    .num {
+      font-size: 32px;
+      font-weight: var(--cl-fw-bold);
+    }
+
+    .off {
+      font-size: var(--cl-fs-h6);
+      font-weight: var(--cl-fw-semibold);
+      letter-spacing: 0.5px;
+    }
+  }
+
+  &__title {
+    font-size: var(--cl-fs-h4);
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+    margin: 0;
+  }
+
+  &__meta {
+    font-size: var(--cl-fs-body-sm);
+    color: var(--cl-text-secondary);
+    margin: 0;
+  }
+
+  &__expires {
+    font-size: var(--cl-fs-caption);
+    color: var(--cl-text-secondary);
+    margin: 0;
+
+    .label {
+      color: var(--cl-text-body);
+      font-weight: var(--cl-fw-medium);
+    }
+
+    &.cl-coupon-card__expires--expired {
+      color: var(--cl-error);
+      font-weight: var(--cl-fw-medium);
+    }
+  }
+
+  &__code-row {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-spacing-sm);
+    margin-top: var(--cl-spacing-sm);
+  }
+
+  &__code {
+    flex: 1;
+    background: var(--cl-bg-gray);
+    border: 1px dashed var(--cl-primary);
+    color: var(--cl-text-heading);
+    font-family: 'Courier New', monospace;
+    font-weight: var(--cl-fw-bold);
+    font-size: var(--cl-fs-h5);
+    letter-spacing: 1.5px;
+    text-align: center;
+    padding: 10px var(--cl-spacing-sm);
+    border-radius: var(--cl-radius-sm);
+    user-select: all;
+  }
+
+  @media #{$md, $sm, $xs} {
+    &__media {
+      flex: 0 0 35%;
+      img {
+        max-width: 80px;
+        max-height: 80px;
+      }
+    }
+    &__perforation {
+      left: 35%;
+    }
+    &__discount .num {
+      font-size: 26px;
+    }
+    &__body {
+      padding: var(--cl-spacing-md);
+    }
+  }
+
+  @media #{$xs} {
+    flex-direction: column;
+    min-height: auto;
+
+    &__media {
+      flex: 0 0 auto;
+      padding: var(--cl-spacing-lg);
+      img {
+        max-width: 90px;
+        max-height: 90px;
+      }
+    }
+
+    &__perforation {
+      top: auto;
+      bottom: auto;
+      left: 0;
+      right: 0;
+      top: 30%;
+      width: 100%;
+      height: 2px;
+      background-image: linear-gradient(
+        to right,
+        var(--cl-border) 0,
+        var(--cl-border) 6px,
+        transparent 6px,
+        transparent 12px
+      );
+      background-size: 12px 2px;
+
+      &::before,
+      &::after {
+        top: 50%;
+        bottom: auto;
+        transform: translate(0, -50%);
+        left: -9px;
+      }
+
+      &::after {
+        left: auto;
+        right: -9px;
+      }
+    }
+  }
+}
+
+/* Empty / loading / error states aligned with Clicon */
+.cl-coupons-empty {
+  text-align: center;
+  padding: var(--cl-spacing-3xl) var(--cl-spacing-md);
+  color: var(--cl-text-secondary);
+
+  .icon {
+    font-size: 56px;
+    color: var(--cl-border);
+    margin-bottom: var(--cl-spacing-md);
+  }
+
+  .title {
+    font-size: var(--cl-fs-h4);
+    font-weight: var(--cl-fw-semibold);
+    color: var(--cl-text-heading);
+    margin-bottom: var(--cl-spacing-xs);
+  }
+
+  .text {
+    font-size: var(--cl-fs-body);
+    margin: 0;
+  }
+}
+
+.cl-coupons-loading {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--cl-spacing-lg);
+
+  @media #{$md, $sm, $xs} {
+    grid-template-columns: 1fr;
+  }
+
+  .cl-coupon-skeleton {
+    height: 180px;
+    background: linear-gradient(90deg, var(--cl-bg-gray) 25%, #e8eaec 50%, var(--cl-bg-gray) 75%);
+    background-size: 200% 100%;
+    animation: cl-coupon-shimmer 1.4s infinite;
+    border-radius: var(--cl-radius-lg);
+  }
+}
+
+@keyframes cl-coupon-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

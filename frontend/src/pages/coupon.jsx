@@ -1,19 +1,27 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import SEO from '@/components/seo';
-import HeaderTwo from '@/layout/headers/header-2';
-import Footer from '@/layout/footers/footer';
+import HeaderClicon from '@/layout/headers/header-clicon';
+import FooterClicon from '@/layout/footers/footer-clicon';
 import Wrapper from '@/layout/wrapper';
-import CommonBreadcrumb from '@/components/breadcrumb/common-breadcrumb';
+import ShopBreadcrumb from '@/components/breadcrumb/shop-breadcrumb';
 import CouponArea from '@/components/coupon/coupon-area';
 
 const CouponPage = () => {
+  const { t } = useTranslation();
+
   return (
     <Wrapper>
-      <SEO pageTitle="Coupon" />
-      <HeaderTwo style_2={true} />
-      <CommonBreadcrumb title="Grab Best Offer" subtitle="Coupon" />
-      <CouponArea/>
-      <Footer primary_style={true} />
+      <SEO pageTitle={t('coupon.heroTitle', 'Coupons')} />
+      <HeaderClicon />
+      <ShopBreadcrumb
+        links={[
+          { label: t('breadcrumb.home', 'Home'), href: '/' },
+          { label: t('coupon.heroTitle', 'Coupons') },
+        ]}
+      />
+      <CouponArea />
+      <FooterClicon />
     </Wrapper>
   );
 };

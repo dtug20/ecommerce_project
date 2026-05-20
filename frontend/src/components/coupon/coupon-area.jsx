@@ -1,68 +1,146 @@
-import React,{useState} from "react";
-import { useTranslation } from "react-i18next";
-import ErrorMsg from "../common/error-msg";
-import { useGetOfferCouponsQuery } from "@/redux/features/coupon/couponApi";
-import useCurrency from "@/hooks/use-currency";
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useGetOfferCouponsQuery } from '@/redux/features/coupon/couponApi';
+import useCurrency from '@/hooks/use-currency';
+import { ClButton } from '@/components/clicon/ui';
+
+const formatExpiryDate = (iso, locale = 'en') => {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  });
+};
+
+const CouponCard = ({ coupon, copied, onCopy, t, formatPrice, locale }) => {
+  const isExpired = coupon.endTime && new Date(coupon.endTime).getTime() < Date.now();
+  const expiry = formatExpiryDate(coupon.endTime, locale);
+
+  return (
+    <article className="cl-coupon-card" data-testid="coupon-card">
+      <div className="cl-coupon-card__media">
+        {coupon.productType && (
+          <span className="cl-coupon-card__badge-type">{coupon.productType}</span>
+        )}
+        {coupon.logo ? (
+          <img src={coupon.logo} alt={coupon.title || coupon.couponCode} loading="lazy" />
+        ) : (
+          <i className="fa-regular fa-ticket" aria-hidden="true" style={{ fontSize: 48, color: 'var(--cl-text-secondary)' }} />
+        )}
+      </div>
+      <span className="cl-coupon-card__perforation" aria-hidden="true" />
+      <div className="cl-coupon-card__body">
+        <div>
+          <div className="cl-coupon-card__discount">
+            <span className="num">{coupon.discountPercentage}%</span>
+            <span className="off">{t('coupon.off')}</span>
+          </div>
+          <h3 className="cl-coupon-card__title">{coupon.title || coupon.couponCode}</h3>
+          <p className="cl-coupon-card__meta">
+            {t('coupon.onOrdersOver', { amount: formatPrice(coupon.minimumAmount || 0) })}
+          </p>
+          {expiry && (
+            <p className={`cl-coupon-card__expires${isExpired ? ' cl-coupon-card__expires--expired' : ''}`}>
+              <span className="label">{t('coupon.expires')}:</span> {expiry}
+            </p>
+          )}
+        </div>
+        <div className="cl-coupon-card__code-row">
+          <div className="cl-coupon-card__code" aria-label={t('coupon.copy')}>
+            {coupon.couponCode}
+          </div>
+          <ClButton
+            variant={copied ? 'outlined' : 'primary'}
+            size="sm"
+            onClick={() => onCopy(coupon.couponCode)}
+            disabled={isExpired}
+            data-testid="coupon-copy"
+          >
+            {copied ? t('coupon.copied') : t('coupon.copy')}
+          </ClButton>
+        </div>
+      </div>
+    </article>
+  );
+};
 
 const CouponArea = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { formatPrice } = useCurrency();
-  const [copiedCode, setCopiedCode] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [copiedCode, setCopiedCode] = useState('');
 
-  const handleCopied = (code) => {
+  const handleCopy = async (code) => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(code);
+      }
+    } catch {
+      // ignore — still show "Copied!" feedback
+    }
     setCopiedCode(code);
-    setCopied(true);
-    setTimeout(() => {
-      setCopied(false);
-    }, 3000);
+    setTimeout(() => setCopiedCode(''), 2500);
   };
 
   const { data: offerCoupons, isError, isLoading } = useGetOfferCouponsQuery();
-  // decide what to render
+
   let content = null;
 
   if (isLoading) {
-    content = <div className="d-flex justify-content-center py-5"><div className="spinner-border text-primary" /></div>;
-  }
-
-  if (!isLoading && isError) {
-    content = <ErrorMsg msg={t('error.generic')} />;
-  }
-
-  if (!isLoading && !isError && offerCoupons?.length === 0) {
-    content = <ErrorMsg msg={t('coupon.noCouponsFound')} />;
-  }
-
-  if (!isLoading && !isError && offerCoupons?.length > 0) {
-    const coupon_items = offerCoupons;
-    // const coupon_items = offerCoupons.slice(0, 2);
-    content = coupon_items.map((coupon) => (
-      <div key={coupon._id} className="col-xl-6 col-md-6 mb-30">
-        <div className="tp-coupon-item d-flex align-items-center justify-content-between p-20 border rounded">
-          <div>
-            <h4 className="tp-coupon-title mb-5">{coupon.title || coupon.productType}</h4>
-            <p className="mb-5">{coupon.discountPercentage}% {t('coupon.offMinimum', { amount: formatPrice(coupon.minimumAmount) })}</p>
-            <span className="tp-coupon-code fw-bold">{coupon.couponCode}</span>
-          </div>
-          <button
-            type="button"
-            className="tp-btn tp-btn-sm"
-            onClick={() => handleCopied(coupon.couponCode)}
-          >
-            {copied && copiedCode === coupon.couponCode ? t('coupon.copied') : t('coupon.copy')}
-          </button>
-        </div>
+    content = (
+      <div className="cl-coupons-loading" aria-busy="true">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="cl-coupon-skeleton" />
+        ))}
       </div>
-    ));
+    );
+  } else if (isError) {
+    content = (
+      <div className="cl-coupons-empty">
+        <div className="icon"><i className="fa-regular fa-circle-exclamation" aria-hidden="true" /></div>
+        <h3 className="title">{t('error.generic')}</h3>
+      </div>
+    );
+  } else if (!offerCoupons || offerCoupons.length === 0) {
+    content = (
+      <div className="cl-coupons-empty">
+        <div className="icon"><i className="fa-regular fa-ticket" aria-hidden="true" /></div>
+        <h3 className="title">{t('coupon.noCouponsFound')}</h3>
+        <p className="text">{t('coupon.noCouponsHint')}</p>
+      </div>
+    );
+  } else {
+    content = (
+      <div className="row">
+        {offerCoupons.map((coupon) => (
+          <div key={coupon._id} className="col-xl-6 col-lg-6 col-md-12">
+            <CouponCard
+              coupon={coupon}
+              copied={copiedCode === coupon.couponCode}
+              onCopy={handleCopy}
+              t={t}
+              formatPrice={formatPrice}
+              locale={i18n.language}
+            />
+          </div>
+        ))}
+      </div>
+    );
   }
+
   return (
     <>
-      <div className="tp-coupon-area pb-120">
+      <section className="cl-coupon-hero">
         <div className="container">
-          <div className="row">{content}</div>
+          <h1 className="cl-coupon-hero__title">{t('coupon.heroTitle')}</h1>
+          <p className="cl-coupon-hero__subtitle">{t('coupon.heroSubtitle')}</p>
         </div>
-      </div>
+      </section>
+      <section className="cl-coupons-section">
+        <div className="container">{content}</div>
+      </section>
     </>
   );
 };
