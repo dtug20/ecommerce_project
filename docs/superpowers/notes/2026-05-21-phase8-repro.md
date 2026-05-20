@@ -73,16 +73,31 @@ identifies the root cause of each bug.
 ## A4 — "Price: Low to High" returns descending prices
 
 - **User action:** Change shop sort dropdown to "Price: Low to High".
-- **Reproducibility:** Not yet reproduced manually in this session. Static
-  analysis of `frontend/src/pages/shop.jsx` and
-  `frontend/src/components/shop/shop-top-right.jsx` is the next step in Task
-  8.5; if the trace does not show an inverted mapping or desynced state,
-  Task 8.5 will be skipped and recorded here.
-- **Possible root causes per the spec:**
-  - `selectValue` state not synced with `router.query.sort` — after
-    navigation the dropdown resets to a default that doesn't match the URL.
-  - Frontend maps `'Low to High'` to `sortOrder=desc` (inverted).
-  - Backend `utils/pagination.js:28-29` flips `'asc' → -1`.
+- **Reproducibility from static analysis:** NOT REPRODUCIBLE. The mapping
+  chain is internally consistent and produces ascending prices for "Low to
+  High":
+  - `frontend/src/components/shop/shop-top-right.jsx` lists options with
+    values `'Default Sorting' | 'Low to High' | 'High to Low' | 'New Added'`.
+  - `frontend/src/pages/shop.jsx:34-42` maps `query.sort === 'Low to High'`
+    to `{ sortBy: 'price', sortOrder: 'asc' }`. Anything else (including
+    'High to Low') resolves to `sortOrder: 'desc'`.
+  - `backend/utils/pagination.js:28-29` returns `sortOrder: 'asc'` when the
+    incoming query string is `'asc'`.
+  - `backend/controller/v1/store.controller.js:121` builds
+    `{ [sortBy]: sortOrder === 'asc' ? 1 : -1 }`. In Mongo, `1` = ascending
+    → cheapest first. Correct.
+- **Per spec:** "If A4 is NOT reproducible, mark it not-reproducible and
+  skip Task 8.5." → **Skipping Task 8.5.**
+- **Adjacent observation, NOT in scope this phase:** `shop-top-right.jsx`
+  uses `defaultValue="Default Sorting"` instead of a controlled
+  `value={selectValue}` read from URL state. After navigating to
+  `/shop?sort=Low%20to%20High`, the dropdown still LABELS "Most Popular"
+  even though the data is sorted correctly server-side. That's a UI label
+  desync, not a sort-inversion bug. If the QA report's "sort wrong"
+  observation was actually based on the dropdown label rather than the
+  product order, the real fix is to control the `<select>` value from the
+  URL. Recording for follow-up — this sprint's Phase 8 leaves the sort
+  pipeline untouched per the not-reproducible decision.
 
 ## Index check (Task 8.3 step 1)
 
