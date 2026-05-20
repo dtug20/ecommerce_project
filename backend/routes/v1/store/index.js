@@ -439,8 +439,8 @@ router.get('/settings',         storeCmsCtrl.getPublicSettings);
  * /api/v1/store/exchange-rates:
  *   get:
  *     summary: Get current exchange rates (VND base)
- *     description: Returns VND→{USD,EUR,GBP,JPY} rates. Public, cached server-side via cron.
- *     tags: [Store]
+ *     description: Returns the amount of VND per 1 unit of each foreign currency (USD, EUR, GBP, JPY). Public, refreshed server-side via cron.
+ *     tags: [Store CMS]
  *     responses:
  *       200:
  *         description: Rates document
