@@ -135,7 +135,7 @@ Add a new block: register the component in `BlockRenderer.jsx`, add the editor s
 - Pages: `src/pages/**/*.jsx`
 - Path alias: `@/components/X` resolves to `src/components/X`
 - Asset alias: `@assets/images/Y` resolves to `public/assets/images/Y`
-- Image domains whitelist: `i.ibb.co`, `lh3.googleusercontent.com`, `res.cloudinary.com`
+- Image domains whitelist: `lh3.googleusercontent.com`, `res.cloudinary.com`
 
 ### Auth flow on the frontend
 

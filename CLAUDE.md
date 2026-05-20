@@ -395,7 +395,7 @@ Events emitted by controllers on CRUD operations:
 
 - **Next.js Pages Router** (not App Router) — all pages in `src/pages/`
 - **Path aliases:** `@/*` → `./src/*`, `@assets/*` → `./public/assets/*` (jsconfig.json)
-- **Image domains:** `i.ibb.co`, `lh3.googleusercontent.com`, `res.cloudinary.com`
+- **Image domains:** `lh3.googleusercontent.com`, `res.cloudinary.com`
 - **API base URL:** `process.env.NEXT_PUBLIC_API_BASE_URL` (default: `http://localhost:7001`)
 
 ### State Management — Redux Toolkit + RTK Query
