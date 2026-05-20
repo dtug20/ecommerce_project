@@ -37,7 +37,59 @@ router.get('/profile', ctrl.getProfile);
 // Preferences
 // ---------------------------------------------------------------------------
 
+/**
+ * @swagger
+ * /api/v1/user/preferences:
+ *   get:
+ *     summary: Get authenticated user's preferences
+ *     description: Returns the user.preferences subdocument (currency, language).
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User preferences
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     currency: { type: string, example: USD, enum: [VND, USD, EUR, GBP, JPY] }
+ *                     language: { type: string, example: en, enum: [en, vi] }
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/preferences',   userPrefsCtrl.getPreferences);
+/**
+ * @swagger
+ * /api/v1/user/preferences:
+ *   patch:
+ *     summary: Update authenticated user's preferences
+ *     description: Accepts a partial preferences object. Returns the updated preferences.
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               currency: { type: string, enum: [VND, USD, EUR, GBP, JPY] }
+ *               language: { type: string, enum: [en, vi] }
+ *     responses:
+ *       200:
+ *         description: Updated preferences
+ *       401:
+ *         description: Unauthorized
+ *       422:
+ *         description: Validation failed
+ */
 router.patch('/preferences', validate(v.updatePreferences), userPrefsCtrl.updatePreferences);
 
 /**

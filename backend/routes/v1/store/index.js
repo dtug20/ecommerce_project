@@ -438,11 +438,29 @@ router.get('/settings',         storeCmsCtrl.getPublicSettings);
  * @swagger
  * /api/v1/store/exchange-rates:
  *   get:
- *     summary: Get current exchange rates with VND as base currency
+ *     summary: Get current exchange rates (VND base)
+ *     description: Returns VND→{USD,EUR,GBP,JPY} rates. Public, cached server-side via cron.
  *     tags: [Store]
  *     responses:
  *       200:
- *         description: Exchange rates document (cached 1 hour client-side)
+ *         description: Rates document
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 message: { type: string }
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     base: { type: string, example: VND }
+ *                     rates:
+ *                       type: object
+ *                       additionalProperties: { type: number }
+ *                       example: { USD: 25450, EUR: 27500, GBP: 32000, JPY: 170 }
+ *                     stale: { type: boolean, description: True if rates were last updated > 24h ago }
+ *                     updatedAt: { type: string, format: date-time }
  */
 router.get('/exchange-rates', exchangeRateCtrl.getExchangeRates);
 

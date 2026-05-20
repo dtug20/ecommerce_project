@@ -98,8 +98,106 @@ router.use((req, res, next) => {
 router.get('/products/stats',  ctrl.getProductStats);
 
 // Currency audit — must be declared before /products/:id to avoid `:id` capturing the literal segments
+/**
+ * @swagger
+ * /api/v1/admin/products/currency-audit:
+ *   get:
+ *     summary: List products with suspected non-VND prices
+ *     description: |
+ *       Returns products whose `price` is likely USD-denominated (heuristic: price < 5000
+ *       VND-equivalent). Used by the CRM Currency Audit page to surface candidates for
+ *       per-product or bulk normalization.
+ *     tags: [Admin Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 50, maximum: 100 }
+ *     responses:
+ *       200:
+ *         description: Paginated list of audit candidates
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (admin/manager only)
+ */
 router.get('/products/currency-audit',              authorization('admin', 'manager'), currencyAuditCtrl.listAuditCandidates);
+/**
+ * @swagger
+ * /api/v1/admin/products/bulk-normalize-currency:
+ *   post:
+ *     summary: Bulk-normalize a set of products' prices from a source currency to VND
+ *     description: |
+ *       Same effect as the single-product normalize, applied to an array of product
+ *       IDs. The endpoint caps the input to at most 100 IDs per request.
+ *     tags: [Admin Products]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [ids, sourceCurrency]
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 maxItems: 100
+ *                 items: { type: string }
+ *               sourceCurrency: { type: string, enum: [USD, EUR, GBP, JPY] }
+ *     responses:
+ *       200:
+ *         description: Bulk normalization result with per-id status
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       422:
+ *         description: Validation failed (e.g. > 100 ids)
+ */
 router.post('/products/bulk-normalize-currency',    authorization('admin', 'manager'), validate(v.bulkNormalizeCurrency), logActivity('currency-normalize', 'product'), currencyAuditCtrl.normalizeBulk);
+/**
+ * @swagger
+ * /api/v1/admin/products/{id}/normalize-currency:
+ *   post:
+ *     summary: Multiply a product's price by the current USD→VND rate
+ *     description: |
+ *       Takes a product whose `price` is in USD and rewrites it as VND using the live
+ *       USD→VND rate from the ExchangeRate cache. Sets `currencyReviewedAt = now`.
+ *     tags: [Admin Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [sourceCurrency]
+ *             properties:
+ *               sourceCurrency: { type: string, enum: [USD, EUR, GBP, JPY] }
+ *     responses:
+ *       200:
+ *         description: Product normalized
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Product not found
+ *       422:
+ *         description: Validation failed
+ */
 router.post('/products/:id/normalize-currency',     authorization('admin', 'manager'), validate(v.normalizeCurrency), logActivity('currency-normalize', 'product'), currencyAuditCtrl.normalizeOne);
 
 /**
