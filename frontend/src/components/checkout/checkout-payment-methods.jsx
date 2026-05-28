@@ -158,6 +158,22 @@ const CheckoutPaymentMethods = ({ selectedMethod, onMethodChange, bankDetails })
               {bankDetails.accountName && (
                 <p><strong>{t('checkout.nameLabel')}</strong> {bankDetails.accountName}</p>
               )}
+              {bankDetails.branch && (
+                <p><strong>{t('checkout.branchLabel')}</strong> {bankDetails.branch}</p>
+              )}
+              {bankDetails.qrImageUrl && (
+                <div className="cl-checkout__bank-qr">
+                  <p><strong>{t('checkout.scanQrLabel')}</strong></p>
+                  <img src={bankDetails.qrImageUrl} alt="VietQR" width={180} height={180} />
+                </div>
+              )}
+              {bankDetails.transferContentTemplate && (
+                <p className="cl-checkout__bank-content">
+                  <strong>{t('checkout.transferContentLabel')}</strong>{' '}
+                  <code>{bankDetails.transferContentTemplate}</code>
+                  <span className="cl-checkout__hint"> — {t('checkout.transferContentHint')}</span>
+                </p>
+              )}
             </>
           ) : (
             <p>{t('checkout.bankContactUs')}</p>
