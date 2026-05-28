@@ -14,8 +14,9 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const authorization = require('../../../middleware/authorization');
-const { validate } = require('../../../middleware/validate');
+const { validate, validateQuery } = require('../../../middleware/validate');
 const v = require('../../../validations');
+const cmsValidation = require('../../../validations/cms.validation');
 const ctrl = require('../../../controller/v1/admin.controller');
 const cmsCtrl = require('../../../controller/v1/cms.controller');
 const currencyAuditCtrl = require('../../../controller/v1/currencyAudit.controller');
@@ -547,7 +548,13 @@ router.delete('/blog/:id',           authorization('admin', 'manager'), logActiv
 // ---------------------------------------------------------------------------
 
 router.get('/settings',     cmsCtrl.getSettings);
-router.patch('/settings',   authorization('admin', 'manager'), logActivity('update', 'setting'), cmsCtrl.updateSettings);
+router.patch(
+  '/settings',
+  authorization('admin', 'manager'),
+  validate(cmsValidation.updateSettings),
+  logActivity('update', 'setting'),
+  cmsCtrl.updateSettings
+);
 
 // ---------------------------------------------------------------------------
 // Activity Log — Phase 4
