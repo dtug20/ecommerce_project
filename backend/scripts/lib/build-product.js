@@ -8,6 +8,9 @@ function buildProductDoc(dj, ctx) {
   const title = ((ctx.translation && ctx.translation.title_vi) || dj.title || '').slice(0, 200);
   const description = (ctx.translation && ctx.translation.description_vi) || dj.description || title;
   const images = (ctx.images || []).filter(Boolean).slice(0, 4);
+  if (images.length === 0) {
+    throw new Error(`buildProductDoc requires at least one image in ctx.images (sku=${dj.sku || '?'})`);
+  }
   const sizes = sizesForType(tax.productType, tax.parent);
   return {
     importId: ctx.importId,

@@ -36,4 +36,11 @@ describe('buildProductDoc', () => {
     expect(doc.imageURLs[0].sizes).toEqual(['S', 'M', 'L']);
     expect(doc.featured).toBe(false);
   });
+
+  it('throws when ctx.images is empty (top-level img is required by schema)', () => {
+    const ctx = { importId: 'i', categoryId: 'c', brandName: 'Apple', brandId: 'b', translation: null, images: [] };
+    expect(() => buildProductDoc({ ...phone }, ctx)).toThrow(/at least one image/i);
+    const ctxAllFalsy = { ...ctx, images: [null, undefined, ''] };
+    expect(() => buildProductDoc({ ...phone }, ctxAllFalsy)).toThrow(/at least one image/i);
+  });
 });
