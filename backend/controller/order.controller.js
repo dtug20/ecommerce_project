@@ -135,6 +135,18 @@ exports.addOrder = async (req, res, next) => {
       exchangeRate,
     });
 
+    // Resolve {orderId} placeholder in bank transfer content using actual invoice
+    if (
+      paymentMethod === 'bank-transfer' &&
+      paymentResult.bankDetails?.transferContentTemplate
+    ) {
+      paymentResult.bankDetails.transferContent =
+        paymentResult.bankDetails.transferContentTemplate.replace(
+          '{orderId}',
+          String(orderItems.invoice)
+        );
+    }
+
     // Deduct stock for each cart item
     for (const item of cart) {
       const quantityToDeduct = item.orderQuantity || 1;
