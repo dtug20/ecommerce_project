@@ -104,6 +104,7 @@ const shippingSchema = new mongoose.Schema(
 const bankTransferSchema = new mongoose.Schema(
   {
     bankName: { type: String, default: '' },
+    vietqrBankBin: { type: String, default: '' },
     accountNumber: { type: String, default: '' },
     accountName: { type: String, default: '' },
     branch: { type: String, default: '' },

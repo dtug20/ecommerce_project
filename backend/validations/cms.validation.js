@@ -112,6 +112,7 @@ const updateBlogPost = createBlogPost.fork(['title'], (f) => f.optional());
 
 const bankTransfer = Joi.object({
   bankName: Joi.string().allow('').max(100),
+  vietqrBankBin: Joi.string().allow('').max(20),
   accountNumber: Joi.string().allow('').max(50),
   accountName: Joi.string().allow('').max(100),
   branch: Joi.string().allow('').max(100),

@@ -11,6 +11,7 @@ import PrdDetailsLoader from "@/components/loader/prd-details-loader";
 import ShopBreadcrumb from "@/components/breadcrumb/shop-breadcrumb";
 import { useGetUserOrderByIdQuery } from "@/redux/features/order/orderApi";
 import { useGetSettingsQuery } from "@/redux/features/cmsApi";
+import { resolveBankQrSrc } from "@/utils/vietqr";
 import formatOrderAmount from "@/utils/formatOrderAmount";
 import { OrderStatusStepper } from "@/components/clicon/composites";
 import { useKeycloak } from "@/components/providers/keycloak-provider";
@@ -468,12 +469,19 @@ const SingleOrder = ({ params }) => {
                     {bt.branch && (
                       <p><strong>{t('checkout.branchLabel')}</strong> {bt.branch}</p>
                     )}
-                    {bt.qrImageUrl && (
-                      <div className="cl-checkout__bank-qr">
-                        <p><strong>{t('checkout.scanQrLabel')}</strong></p>
-                        <img src={bt.qrImageUrl} alt="VietQR" width={180} height={180} />
-                      </div>
-                    )}
+                    {(() => {
+                      const qrSrc = resolveBankQrSrc(bt, {
+                        amount: totalAmount,
+                        addInfo: resolvedContent,
+                      });
+                      if (!qrSrc) return null;
+                      return (
+                        <div className="cl-checkout__bank-qr">
+                          <p><strong>{t('checkout.scanQrLabel')}</strong></p>
+                          <img src={qrSrc} alt="VietQR" width={260} height={340} />
+                        </div>
+                      );
+                    })()}
                     {resolvedContent && (
                       <p>
                         <strong>{t('checkout.transferContentLabel')}</strong>{' '}

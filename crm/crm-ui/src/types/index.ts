@@ -356,6 +356,7 @@ export interface SiteSettings {
     enabledGateways: string[];
     bankTransfer?: {
       bankName: string;
+      vietqrBankBin: string;
       accountNumber: string;
       accountName: string;
       branch: string;

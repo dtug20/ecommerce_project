@@ -9,6 +9,8 @@ import {
   Spin,
   Tag,
   Input,
+  Select,
+  Alert,
 } from 'antd';
 import {
   SaveOutlined,
@@ -23,6 +25,7 @@ import toast from 'react-hot-toast';
 import { settingsApi } from '@/services/api';
 import PageHeader from '@/components/commons/PageHeader';
 import ImageUpload from '@/components/commons/ImageUpload';
+import { VN_BANKS } from './vnBanks';
 
 const { Title, Text } = Typography;
 
@@ -76,6 +79,7 @@ export default function PaymentSettingsPage() {
         enabledGateways: s.payment?.enabledGateways ?? ['stripe', 'cod'],
         bankTransfer: s.payment?.bankTransfer ?? {
           bankName: '',
+          vietqrBankBin: '',
           accountNumber: '',
           accountName: '',
           branch: '',
@@ -184,12 +188,43 @@ export default function PaymentSettingsPage() {
                 title="Bank Transfer Details"
                 style={{ marginTop: 16 }}
               >
+                <Alert
+                  type="info"
+                  showIcon
+                  style={{ marginBottom: 16 }}
+                  message="VietQR will be auto-generated for the selected bank"
+                  description="The customer's banking app will pre-fill bank, account number, amount, and transfer note from the QR. You only need to upload a custom QR if your bank is not in the list."
+                />
+
                 <Form.Item
-                  label="Bank Name"
+                  label="Bank"
                   name={['bankTransfer', 'bankName']}
-                  rules={[{ required: true, message: 'Bank name is required' }]}
+                  rules={[{ required: true, message: 'Bank is required' }]}
                 >
-                  <Input placeholder="e.g. Vietcombank" />
+                  <Select
+                    showSearch
+                    placeholder="Select your bank"
+                    optionFilterProp="label"
+                    options={VN_BANKS.map((b) => ({
+                      value: b.shortName,
+                      label: `${b.shortName} — ${b.fullName}`,
+                      bin: b.bin,
+                    }))}
+                    onChange={(_value, option) => {
+                      const opt = Array.isArray(option) ? option[0] : option;
+                      form.setFieldValue(
+                        ['bankTransfer', 'vietqrBankBin'],
+                        (opt as { bin?: string })?.bin ?? ''
+                      );
+                    }}
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  name={['bankTransfer', 'vietqrBankBin']}
+                  hidden
+                >
+                  <Input />
                 </Form.Item>
 
                 <Form.Item
@@ -216,18 +251,19 @@ export default function PaymentSettingsPage() {
                 </Form.Item>
 
                 <Form.Item
-                  label="QR Code (optional)"
-                  name={['bankTransfer', 'qrImageUrl']}
-                >
-                  <ImageUpload />
-                </Form.Item>
-
-                <Form.Item
                   label="Transfer Content Template (optional)"
                   name={['bankTransfer', 'transferContentTemplate']}
                   extra="Use {orderId} as a placeholder. e.g. SHOFY-{orderId}"
                 >
                   <Input placeholder="SHOFY-{orderId}" />
+                </Form.Item>
+
+                <Form.Item
+                  label="Custom QR override (optional)"
+                  name={['bankTransfer', 'qrImageUrl']}
+                  extra="Only upload if your bank is not in the list above. Otherwise the storefront auto-generates a VietQR."
+                >
+                  <ImageUpload />
                 </Form.Item>
               </Card>
             );

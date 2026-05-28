@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useGetSettingsQuery } from '@/redux/features/cmsApi';
+import { resolveBankQrSrc } from '@/utils/vietqr';
 
 const PAYMENT_ICONS = {
   cod: (
@@ -163,12 +164,16 @@ const CheckoutPaymentMethods = ({ selectedMethod, onMethodChange, bankDetails })
               {effectiveBankDetails.branch && (
                 <p><strong>{t('checkout.branchLabel')}</strong> {effectiveBankDetails.branch}</p>
               )}
-              {effectiveBankDetails.qrImageUrl && (
-                <div className="cl-checkout__bank-qr">
-                  <p><strong>{t('checkout.scanQrLabel')}</strong></p>
-                  <img src={effectiveBankDetails.qrImageUrl} alt="VietQR" width={180} height={180} />
-                </div>
-              )}
+              {(() => {
+                const qrSrc = resolveBankQrSrc(effectiveBankDetails);
+                if (!qrSrc) return null;
+                return (
+                  <div className="cl-checkout__bank-qr">
+                    <p><strong>{t('checkout.scanQrLabel')}</strong></p>
+                    <img src={qrSrc} alt="VietQR" width={220} height={290} />
+                  </div>
+                );
+              })()}
               {effectiveBankDetails.transferContentTemplate && (
                 <p className="cl-checkout__bank-content">
                   <strong>{t('checkout.transferContentLabel')}</strong>{' '}
