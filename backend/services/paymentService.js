@@ -72,7 +72,7 @@ class PaymentService {
     try {
       const settings = await SiteSetting.findOne().lean();
       if (settings?.payment?.bankTransfer) {
-        bankDetails = settings.payment.bankTransfer;
+        bankDetails = { ...settings.payment.bankTransfer };
       }
     } catch (err) {
       console.warn('[PaymentService] Could not load bank details from SiteSetting:', err.message);
