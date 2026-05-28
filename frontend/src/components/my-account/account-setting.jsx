@@ -204,7 +204,7 @@ const AccountSetting = () => {
   const keycloak = useKeycloak();
   const { data: addressData } = useGetAddressesQuery(undefined, { skip: !user });
 
-  const addresses = addressData?.addresses || [];
+  const addresses = addressData?.data || [];
   const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0];
 
   const handleChangePassword = () => {

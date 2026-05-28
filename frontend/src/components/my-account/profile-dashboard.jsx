@@ -8,7 +8,7 @@ const ProfileDashboard = ({ orderData, setActiveTab }) => {
   const { t } = useTranslation();
   const { data: addressData } = useGetAddressesQuery(undefined, { skip: !user });
 
-  const defaultAddress = addressData?.addresses?.find((a) => a.isDefault) || addressData?.addresses?.[0];
+  const defaultAddress = addressData?.data?.find((a) => a.isDefault) || addressData?.data?.[0];
 
   const totalOrders = orderData?.totalDoc ?? 0;
   const pendingOrders = orderData?.pending ?? 0;

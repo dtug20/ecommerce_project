@@ -276,8 +276,8 @@ router.post('/wishlist/:productId/move-to-cart',      wishlistCtrl.moveToCart);
  */
 router.get('/addresses',               ctrl.getAddresses);
 router.post('/addresses',              ctrl.addAddress);
-router.put('/addresses/:id',           ctrl.updateAddress);
 router.patch('/addresses/:id/default', ctrl.setDefaultAddress);
+router.patch('/addresses/:id',         ctrl.updateAddress);
 router.delete('/addresses/:id',        ctrl.deleteAddress);
 
 // ---------------------------------------------------------------------------

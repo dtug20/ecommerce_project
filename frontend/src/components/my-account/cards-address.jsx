@@ -219,7 +219,7 @@ const CardsAddress = ({ setActiveTab }) => {
     setShowModal(true);
   };
 
-  const addresses = addressData?.addresses || [];
+  const addresses = addressData?.data || [];
   const billingAddr = addresses.find((a) => a.isDefault) || addresses[0];
   const shippingAddr = addresses[1] || null;
 
