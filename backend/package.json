@@ -11,7 +11,13 @@
     "build": "echo 'No build step for backend'",
     "start-dev": "nodemon index.js",
     "data:import": "node seed.js",
-    "test": "jest"
+    "test": "jest",
+    "catalog:backup": "node scripts/backup.js",
+    "catalog:dry": "node scripts/migrate.js",
+    "catalog:commit": "node scripts/migrate.js --commit",
+    "catalog:verify": "node scripts/verify.js",
+    "catalog:rollback": "node scripts/rollback.js",
+    "catalog:selection": "node scripts/data/build-selection.js"
   },
   "keywords": [],
   "author": "",
