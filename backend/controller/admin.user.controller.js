@@ -197,6 +197,20 @@ exports.updateUser = async (req, res, next) => {
   try {
     const body = { ...req.body };
 
+    // Normalize address object {street, city, state, zipCode, country} to the
+    // single string field on the User model. Frontend CRM form sends it nested.
+    if (body.address && typeof body.address === 'object') {
+      const { street, city, state, zipCode, country } = body.address;
+      const parts = [street, city, state, zipCode, country].filter((p) => p && String(p).trim());
+      body.address = parts.join(', ');
+    }
+
+    // CRM form uses `avatar`; model field is `imageURL`.
+    if (body.avatar !== undefined && body.imageURL === undefined) {
+      body.imageURL = body.avatar;
+    }
+    delete body.avatar;
+
     // Check email uniqueness if changing
     if (body.email) {
       const existing = await User.findOne({ email: body.email.toLowerCase(), _id: { $ne: req.params.id } });

@@ -40,6 +40,38 @@ const updateUser = Joi.object({
 }).options({ stripUnknown: true });
 
 // ---------------------------------------------------------------------------
+// Admin — update user (full)
+// Accepts address as either a string or an object with optional
+// {street, city, state, zipCode, country}; the controller flattens to string.
+// `avatar` is a UI alias for the model field `imageURL`.
+// ---------------------------------------------------------------------------
+const adminAddressObject = Joi.object({
+  street:  Joi.string().allow('', null).optional(),
+  city:    Joi.string().allow('', null).optional(),
+  state:   Joi.string().allow('', null).optional(),
+  zipCode: Joi.string().allow('', null).optional(),
+  country: Joi.string().allow('', null).optional(),
+}).options({ stripUnknown: true });
+
+const adminUpdateUser = Joi.object({
+  name:          Joi.string().min(1).max(100).optional(),
+  email:         Joi.string().email({ tlds: { allow: false } }).optional(),
+  phone:         Joi.string().allow('', null).optional(),
+  password:      passwordSchema.optional(),
+  role:          Joi.string().valid('user', 'admin', 'vendor').optional(),
+  status:        Joi.string().valid('active', 'inactive', 'blocked').optional(),
+  gender:        Joi.string().valid('male', 'female', 'other').allow('', null).optional(),
+  avatar:        Joi.string().allow('', null).optional(),
+  imageURL:      Joi.string().allow('', null).optional(),
+  dateOfBirth:   Joi.alternatives().try(Joi.date(), Joi.string()).allow('', null).optional(),
+  emailVerified: Joi.boolean().optional(),
+  bio:           Joi.string().max(500).allow('', null).optional(),
+  address: Joi.alternatives()
+    .try(Joi.string().allow('', null), adminAddressObject)
+    .optional(),
+}).options({ stripUnknown: true });
+
+// ---------------------------------------------------------------------------
 // Admin — update user status
 // ---------------------------------------------------------------------------
 const updateUserStatus = Joi.object({
@@ -92,4 +124,4 @@ const updatePreferences = Joi.object({
   language: Joi.string().valid('vi', 'en'),
 }).min(1).options({ stripUnknown: true });
 
-module.exports = { updateUser, updateUserStatus, vendorApplication, createUser, addStaff, passwordSchema, updatePreferences };
+module.exports = { updateUser, adminUpdateUser, updateUserStatus, vendorApplication, createUser, addStaff, passwordSchema, updatePreferences };

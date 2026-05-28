@@ -171,6 +171,7 @@ exports.addOrder = async (req, res, next) => {
     }).catch((err) => console.error('[email] order-confirmation send error:', err.message));
 
     let paymentUrl = null;
+    let paymentError = null;
     if (paymentMethod === 'vnpay' || paymentMethod === 'vnp' || paymentMethod === 'online-gateway') {
       const ipAddr =
         req.headers['x-forwarded-for'] ||
@@ -179,12 +180,17 @@ exports.addOrder = async (req, res, next) => {
         req.ip ||
         '127.0.0.1';
 
-      paymentUrl = buildPaymentUrl({
-        order: orderItems,
-        ipAddr,
-        bankCode: req.body.paymentData?.bankCode,
-        locale: req.body.paymentData?.locale || 'vn',
-      });
+      try {
+        paymentUrl = buildPaymentUrl({
+          order: orderItems,
+          ipAddr,
+          bankCode: req.body.paymentData?.bankCode,
+          locale: req.body.paymentData?.locale || 'vn',
+        });
+      } catch (err) {
+        console.error('[addOrder] buildPaymentUrl failed:', err.message);
+        paymentError = err.message;
+      }
     }
 
     res.status(200).json({
@@ -192,6 +198,7 @@ exports.addOrder = async (req, res, next) => {
       message: "Order added successfully",
       order: orderItems,
       ...(paymentUrl && { paymentUrl }),
+      ...(paymentError && { paymentError }),
       ...(paymentResult.bankDetails && { bankDetails: paymentResult.bankDetails }),
       ...(appliedCoupon && { appliedCoupon }),
     });

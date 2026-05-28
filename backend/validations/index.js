@@ -27,6 +27,7 @@ module.exports = {
 
   // User
   updateUser:         user.updateUser,
+  adminUpdateUser:    user.adminUpdateUser,
   updateUserStatus:   user.updateUserStatus,
   vendorApplication:  user.vendorApplication,
   createUser:         user.createUser,

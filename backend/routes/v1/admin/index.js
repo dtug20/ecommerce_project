@@ -436,7 +436,7 @@ router.get('/users/:id',            ctrl.getUserById);
 router.get('/users',                ctrl.getAllUsers);
 router.post('/users',               authorization('admin', 'manager'), validate(v.createUser), logActivity('create', 'user'), ctrl.createUser);
 router.patch('/users/:id/status',   authorization('admin', 'manager'), validate(v.updateUserStatus), logActivity('status-change', 'user'), ctrl.updateUserStatus);
-router.patch('/users/:id',          authorization('admin', 'manager'), validate(v.updateUser), logActivity('update', 'user'), ctrl.updateUser);
+router.patch('/users/:id',          authorization('admin', 'manager'), validate(v.adminUpdateUser), logActivity('update', 'user'), ctrl.updateUser);
 router.delete('/users/:id',         authorization('admin', 'manager'), logActivity('delete', 'user'), ctrl.deleteUser);
 
 // ---------------------------------------------------------------------------

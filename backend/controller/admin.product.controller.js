@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Product = require('../model/Products');
 const Category = require('../model/Category');
 const Brand = require('../model/Brand');
@@ -28,7 +29,15 @@ exports.getAllProducts = async (req, res, next) => {
     } = req.query;
 
     const filter = {};
-    if (category) filter['category.name'] = category;
+    if (category) {
+      // CRM filter dropdown sends Category._id (ObjectId string); legacy callers
+      // may send the parent name. Accept either.
+      if (mongoose.Types.ObjectId.isValid(category)) {
+        filter['category.id'] = new mongoose.Types.ObjectId(category);
+      } else {
+        filter['category.name'] = category;
+      }
+    }
     if (status) filter.status = status;
     if (featured !== undefined) filter.featured = featured === 'true';
     if (search) filter.title = { $regex: search, $options: 'i' };

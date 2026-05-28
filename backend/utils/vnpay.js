@@ -2,7 +2,7 @@
 
 const crypto = require('crypto');
 const qs = require('qs');
-const dateFormat = require('dateformat').default;
+const dayjs = require('dayjs');
 const { secret } = require('../config/secret');
 
 function sortObject(obj) {
@@ -41,13 +41,13 @@ function verifyVnpaySignature(query) {
 }
 
 function buildPaymentUrl({ order, ipAddr, bankCode, locale = 'vn' }) {
-    const now = new Date();
-    const createDate = dateFormat(now, 'yyyymmddHHMMss');
+    if (!secret.vnpay_tmn_code || !secret.vnpay_hash_secret || !secret.vnpay_url) {
+        throw new Error('VNPay is not configured (missing VNPAY_TMN_CODE, VNPAY_HASH_SECRET, or VNPAY_URL)');
+    }
 
-    const expireDate = dateFormat(
-        new Date(now.getTime() + 15 * 60 * 1000),
-        'yyyymmddHHMMss'
-    );
+    const now = dayjs();
+    const createDate = now.format('YYYYMMDDHHmmss');
+    const expireDate = now.add(15, 'minute').format('YYYYMMDDHHmmss');
 
     const EXCHANGE_RATE = 25000;
     const vnpParams = {

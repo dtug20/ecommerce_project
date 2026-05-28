@@ -956,12 +956,17 @@ function ProductDrawer({ open, editingProduct, categories, onClose }: ProductDra
         const prodType = categoryVal[0];
         const parentName = categoryVal[1] || '';
         const childName = categoryVal[2] || '';
+        // productType is required by the backend — always set it from level 1.
+        (payload as any).productType = prodType;
+        (payload as any).parent = parentName;
+        (payload as any).children = childName;
         const catObj = categories.find(c => c.parent === parentName && c.productType === prodType);
         if (catObj) {
-          (payload as any).productType = prodType;
-          (payload as any).parent = parentName;
-          (payload as any).children = childName;
           (payload as any).category = { id: catObj._id, name: parentName };
+        } else if (parentName) {
+          // Cascader resolved a parent name but no Category doc — still send
+          // the name so admin filter `category.name` can match.
+          (payload as any).category = { name: parentName };
         }
       }
 
@@ -1048,7 +1053,19 @@ function ProductDrawer({ open, editingProduct, categories, onClose }: ProductDra
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="category" label="Category">
+              <Form.Item
+                name="category"
+                label="Category"
+                rules={[
+                  {
+                    required: true,
+                    validator: (_, value) =>
+                      Array.isArray(value) && value.length > 0
+                        ? Promise.resolve()
+                        : Promise.reject(new Error('Category is required')),
+                  },
+                ]}
+              >
                 <Cascader
                   placeholder="Select category"
                   allowClear
