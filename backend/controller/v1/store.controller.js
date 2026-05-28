@@ -478,6 +478,15 @@ exports.getAllCoupons = async (req, res, next) => {
     // Only return active coupons to storefront
     filter.status = 'active';
 
+    // Exclude expired coupons and coupons that haven't started yet
+    const now = new Date();
+    filter.endTime = { $gte: now };
+    filter.$or = [
+      { startTime: { $exists: false } },
+      { startTime: null },
+      { startTime: { $lte: now } },
+    ];
+
     const data = await Coupon.find(filter).sort({ _id: -1 });
     return respond.success(res, data, 'Coupons retrieved successfully');
   } catch (err) {

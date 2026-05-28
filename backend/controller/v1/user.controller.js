@@ -169,11 +169,11 @@ exports.getAddresses = async (req, res, next) => {
 
 /**
  * POST /api/v1/user/addresses
- * Body: { label, fullName, phone, address, city, state, country, zipCode, isDefault }
+ * Body: { label, fullName, lastName, company, email, phone, address, city, state, country, zipCode, isDefault }
  */
 exports.addAddress = async (req, res, next) => {
   try {
-    const { label, fullName, phone, address, city, state, country, zipCode, isDefault } = req.body;
+    const { label, fullName, lastName, company, email, phone, address, city, state, country, zipCode, isDefault } = req.body;
 
     if (!fullName || !phone || !address || !city || !country || !zipCode) {
       return respond.error(
@@ -196,7 +196,7 @@ exports.addAddress = async (req, res, next) => {
       });
     }
 
-    user.addresses.push({ label, fullName, phone, address, city, state, country, zipCode, isDefault: Boolean(isDefault) });
+    user.addresses.push({ label, fullName, lastName, company, email, phone, address, city, state, country, zipCode, isDefault: Boolean(isDefault) });
     await user.save();
 
     return respond.created(res, user.addresses, 'Address added successfully');
@@ -211,7 +211,7 @@ exports.addAddress = async (req, res, next) => {
 exports.updateAddress = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { label, fullName, phone, address, city, state, country, zipCode, isDefault } = req.body;
+    const { label, fullName, lastName, company, email, phone, address, city, state, country, zipCode, isDefault } = req.body;
 
     const user = await User.findById(req.user._id);
     if (!user) {
@@ -233,6 +233,9 @@ exports.updateAddress = async (req, res, next) => {
     const addr = user.addresses[addrIndex];
     if (label !== undefined) addr.label = label;
     if (fullName !== undefined) addr.fullName = fullName;
+    if (lastName !== undefined) addr.lastName = lastName;
+    if (company !== undefined) addr.company = company;
+    if (email !== undefined) addr.email = email;
     if (phone !== undefined) addr.phone = phone;
     if (address !== undefined) addr.address = address;
     if (city !== undefined) addr.city = city;

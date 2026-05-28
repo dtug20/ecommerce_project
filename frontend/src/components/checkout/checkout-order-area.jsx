@@ -12,6 +12,10 @@ const CheckoutOrderArea = ({ checkoutData }) => {
     isCheckoutSubmit,
     shippingCost,
     discountAmount,
+    taxAmount = 0,
+    taxRate = 0,
+    taxLabel = 'VAT',
+    taxEnabled = false,
   } = checkoutData;
   const { cart_products } = useSelector((state) => state.cart);
   const { total } = useCartInfo();
@@ -73,10 +77,15 @@ const CheckoutOrderArea = ({ checkoutData }) => {
           <span className="value">{formatPrice(discountAmount)}</span>
         </div>
 
-        <div className="cl-checkout__summary-row">
-          <span className="label">{t('checkout.tax')}</span>
-          <span className="value">{formatPrice(0)}</span>
-        </div>
+        {taxEnabled && (
+          <div className="cl-checkout__summary-row">
+            <span className="label">
+              {taxLabel}
+              {taxRate > 0 ? ` (${taxRate}%)` : ''}
+            </span>
+            <span className="value">{formatPrice(taxAmount)}</span>
+          </div>
+        )}
 
         {/* Total */}
         <div className="cl-checkout__summary-total">

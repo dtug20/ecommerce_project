@@ -151,8 +151,8 @@ exports.getBlogPostBySlug = async (req, res, next) => {
 /**
  * GET /api/v1/store/settings
  * Returns only the public-safe fields from SiteSetting.
- * Includes: payment.enabledGateways (no secrets).
- * Excludes: maintenance config, shipping internals.
+ * Includes: payment.enabledGateways (no secrets), shipping rates (publicly displayed at checkout).
+ * Excludes: maintenance config.
  */
 exports.getPublicSettings = async (req, res, next) => {
   try {
@@ -168,6 +168,8 @@ exports.getPublicSettings = async (req, res, next) => {
         contact: 1,
         seo: 1,
         payment: 1,
+        shipping: 1,
+        tax: 1,
       }
     );
 
@@ -185,6 +187,19 @@ exports.getPublicSettings = async (req, res, next) => {
           contact: {},
           seo: {},
           payment: { enabledGateways: ['stripe', 'cod'] },
+          shipping: {
+            freeShippingThreshold: 0,
+            defaultShippingCost: 0,
+            enabledMethods: [],
+            methods: [],
+          },
+          tax: {
+            enabled: false,
+            rate: 0,
+            label: 'VAT',
+            labelVi: 'Thuế',
+            applyToShipping: true,
+          },
         },
         'Settings retrieved successfully'
       );

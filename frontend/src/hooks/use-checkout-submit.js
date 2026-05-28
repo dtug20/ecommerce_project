@@ -11,10 +11,10 @@ import { set_coupon } from "@/redux/features/coupon/couponSlice";
 import { notifyError, notifySuccess } from "@/utils/toast";
 import { useSaveOrderMutation } from "@/redux/features/order/orderApi";
 import { useGetOfferCouponsQuery } from "@/redux/features/coupon/couponApi";
-import { useValidateCouponMutation } from "@/redux/features/cmsApi";
+import { useValidateCouponMutation, useGetSettingsQuery } from "@/redux/features/cmsApi";
 
 const useCheckoutSubmit = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   // offerCoupons (client-side fallback)
   const { data: offerCoupons, isError, isLoading } = useGetOfferCouponsQuery();
   // Server-side coupon validation (Task 18.2)
@@ -26,7 +26,9 @@ const useCheckoutSubmit = () => {
   // user
   const { user } = useSelector((state) => state.auth);
   // shipping_info
-  const { shipping_info } = useSelector((state) => state.order);
+  const { shipping_info, shipping_method_id } = useSelector((state) => state.order);
+  // site settings (shipping methods + free shipping threshold)
+  const { data: settingsData } = useGetSettingsQuery();
   // total amount
   const { total, setTotal } = useCartInfo();
   // couponInfo
@@ -35,8 +37,26 @@ const useCheckoutSubmit = () => {
   const [cartTotal, setCartTotal] = useState("");
   // minimumAmount
   const [minimumAmount, setMinimumAmount] = useState(0);
-  // shippingCost
-  const [shippingCost, setShippingCost] = useState(0);
+  // shippingCost — derived from settings.shipping.methods + selected method id.
+  // Threshold is informational only (banner hint on cart) — user's explicit
+  // method choice is always honored, even when total >= freeShippingThreshold.
+  const shippingMethods = Array.isArray(settingsData?.data?.shipping?.methods)
+    ? settingsData.data.shipping.methods.filter((m) => m && m.enabled !== false)
+    : [];
+  const selectedMethod =
+    shippingMethods.find((m) => m.id === shipping_method_id) || shippingMethods[0];
+  const shippingCost = Number(selectedMethod?.cost ?? 0);
+  // legacy setter kept as no-op for back-compat (was unused outside the hook)
+  const setShippingCost = () => {};
+  // tax — derived from settings.tax. Applied to (subtotal - discount [+ shipping])
+  // depending on applyToShipping flag. Storefront prices are tax-EXCLUSIVE.
+  const taxConfig = settingsData?.data?.tax || {};
+  const taxEnabled = !!taxConfig.enabled;
+  const taxRate = Number(taxConfig.rate ?? 0);
+  const taxLabel = (i18n.language === 'vi'
+    ? (taxConfig.labelVi || 'Thuế')
+    : (taxConfig.label || 'VAT'));
+  const taxApplyShipping = taxConfig.applyToShipping !== false;
   // discountAmount
   const [discountAmount, setDiscountAmount] = useState(0);
   // discountPercentage
@@ -82,7 +102,10 @@ const useCheckoutSubmit = () => {
     }
   }, [minimumAmount, total, discountAmount, cart_products]);
 
-  //calculate total and discount value
+  // taxAmount kept as state so the displayed value follows the cartTotal effect.
+  const [taxAmount, setTaxAmount] = useState(0);
+
+  //calculate total, discount and tax
   useEffect(() => {
     const result = cart_products?.filter(
       (p) => p.productType === discountProductType
@@ -92,13 +115,17 @@ const useCheckoutSubmit = () => {
         preValue + currentValue.price * currentValue.orderQuantity,
       0
     );
-    let totalValue = "";
-    let subTotal = Number((total + shippingCost).toFixed(2));
     let discountTotal = Number(
       discountProductTotal * (discountPercentage / 100)
     );
-    totalValue = Number(subTotal - discountTotal);
+    const goodsAfterDiscount = Math.max(0, total - discountTotal);
+    const taxBase = taxApplyShipping ? goodsAfterDiscount + shippingCost : goodsAfterDiscount;
+    const taxValue = taxEnabled && taxRate > 0
+      ? Number((taxBase * (taxRate / 100)).toFixed(2))
+      : 0;
+    const totalValue = Number((goodsAfterDiscount + shippingCost + taxValue).toFixed(2));
     setDiscountAmount(discountTotal);
+    setTaxAmount(taxValue);
     setCartTotal(totalValue);
   }, [
     total,
@@ -106,13 +133,18 @@ const useCheckoutSubmit = () => {
     discountPercentage,
     cart_products,
     discountProductType,
+    taxEnabled,
+    taxRate,
+    taxApplyShipping,
   ]);
 
-  // handleCouponCode — tries server validation first, falls back to client-side
-  const handleCouponCode = async (e) => {
-    e.preventDefault();
+  // handleCouponCode — tries server validation first, falls back to client-side.
+  // Accepts an optional codeOverride so callers (e.g. the suggested-coupons list)
+  // can apply without the manual-entry input being mounted.
+  const handleCouponCode = async (e, codeOverride) => {
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
 
-    const couponCode = couponRef.current?.value;
+    const couponCode = (codeOverride ?? couponRef.current?.value ?? "").trim();
     if (!couponCode) {
       notifyError(t("toast.couponEmpty"));
       return;
@@ -244,6 +276,7 @@ const useCheckoutSubmit = () => {
       subTotal: total,
       shippingCost: shippingCost,
       discount: discountAmount,
+      tax: taxAmount,
       totalAmount: cartTotal,
       orderNote: data.orderNote,
       user: `${user?._id}`,
@@ -300,6 +333,10 @@ const useCheckoutSubmit = () => {
     paymentMethod,
     setPaymentMethod,
     bankDetails,
+    taxAmount,
+    taxRate,
+    taxLabel,
+    taxEnabled,
   };
 };
 

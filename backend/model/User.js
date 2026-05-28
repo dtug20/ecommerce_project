@@ -83,6 +83,9 @@ const userSchema = mongoose.Schema(
       {
         label: { type: String, default: "home" },
         fullName: { type: String, required: true },
+        lastName: { type: String },
+        company: { type: String },
+        email: { type: String, trim: true, lowercase: true },
         phone: { type: String, required: true },
         address: { type: String, required: true },
         city: { type: String, required: true },

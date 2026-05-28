@@ -49,7 +49,8 @@ function buildPaymentUrl({ order, ipAddr, bankCode, locale = 'vn' }) {
     const createDate = now.format('YYYYMMDDHHmmss');
     const expireDate = now.add(15, 'minute').format('YYYYMMDDHHmmss');
 
-    const EXCHANGE_RATE = 25000;
+    // order.totalAmount is stored in VND (storefront base currency).
+    // VNPay expects amount in the smallest VND unit, which is VND * 100.
     const vnpParams = {
         vnp_Version: '2.1.0',
         vnp_Command: 'pay',
@@ -59,7 +60,7 @@ function buildPaymentUrl({ order, ipAddr, bankCode, locale = 'vn' }) {
         vnp_TxnRef: String(order._id),
         vnp_OrderInfo: `Thanh toan don hang ${order.invoice || order._id}`,
         vnp_OrderType: 'other',
-        vnp_Amount: Math.round(order.totalAmount * EXCHANGE_RATE) * 100,
+        vnp_Amount: Math.round(order.totalAmount) * 100,
         vnp_ReturnUrl: secret.vnpay_return_url,
         vnp_IpAddr: ipAddr,
         vnp_CreateDate: createDate,

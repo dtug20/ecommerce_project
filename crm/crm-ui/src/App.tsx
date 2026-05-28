@@ -35,6 +35,7 @@ const BannersPage = lazy(() => import('@/features/cms/banners/BannersPage'));
 const GeneralSettingsPage = lazy(() => import('@/features/settings/GeneralSettingsPage'));
 const PaymentSettingsPage = lazy(() => import('@/features/settings/PaymentSettingsPage'));
 const ShippingSettingsPage = lazy(() => import('@/features/settings/ShippingSettingsPage'));
+const TaxSettingsPage = lazy(() => import('@/features/settings/TaxSettingsPage'));
 
 // No-access landing page (authenticated user without CRM role)
 const NoAccessPage = lazy(() => import('@/features/no-access/NoAccessPage'));
@@ -107,6 +108,7 @@ export default function App() {
           <Route path="/settings/general" element={<SuspenseRoute><GeneralSettingsPage /></SuspenseRoute>} />
           <Route path="/settings/payment" element={<SuspenseRoute><PaymentSettingsPage /></SuspenseRoute>} />
           <Route path="/settings/shipping" element={<SuspenseRoute><ShippingSettingsPage /></SuspenseRoute>} />
+          <Route path="/settings/tax" element={<SuspenseRoute><TaxSettingsPage /></SuspenseRoute>} />
         </Route>
       </Routes>
     </ConfigProvider>

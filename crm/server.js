@@ -89,9 +89,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan(':method :url :status :response-time ms'));
 
 // Serve static assets (JS/CSS/images) but NOT index.html
-// index.html is served by the protected SPA routes below
+// index.html is served by the protected SPA routes below.
+// Mount at both `/` and `/admin/` so the same build works:
+//   - behind nginx (strips `/admin/` → requests arrive as `/assets/...`)
+//   - direct local access (browser fetches `/admin/assets/...` from index.html)
 const reactBuildPath = path.join(__dirname, 'crm-ui', 'dist');
 app.use(express.static(reactBuildPath, { index: false }));
+app.use('/admin', express.static(reactBuildPath, { index: false }));
 
 // ─── Role-based protection ─────────────────────────────────────
 // Only admin, manager, staff, shipper can access CRM

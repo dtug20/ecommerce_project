@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { add_cart_product } from '@/redux/features/cartSlice';
 import { handleProductModal } from '@/redux/features/productModalSlice';
 import { StarRating, PriceDisplay } from '@/components/clicon/ui';
+import { notifyError } from '@/utils/toast';
 
 const CliconDealFeaturedCard = ({ product }) => {
   const dispatch = useDispatch();
@@ -37,9 +38,11 @@ const CliconDealFeaturedCard = ({ product }) => {
 
   const handleAddToCart = (e) => {
     e.preventDefault();
-    if (!isOutOfStock) {
-      dispatch(add_cart_product(product));
+    if (isOutOfStock) {
+      notifyError(t('cart.outOfStockError'));
+      return;
     }
+    dispatch(add_cart_product(product));
   };
 
   const handleQuickView = (e) => {
@@ -85,10 +88,10 @@ const CliconDealFeaturedCard = ({ product }) => {
         <div className="cl-deal-featured__actions">
           <button
             type="button"
-            className="cl-deal-featured__cart-btn"
+            className={`cl-deal-featured__cart-btn${isOutOfStock ? ' cl-deal-featured__cart-btn--disabled' : ''}`}
             onClick={handleAddToCart}
-            disabled={isOutOfStock}
-            aria-label={t('product.addToCart')}
+            aria-label={isOutOfStock ? t('product.outOfStock') : t('product.addToCart')}
+            aria-disabled={isOutOfStock}
             data-testid="deal-featured-cart-btn"
           >
             <i className="fa-solid fa-cart-shopping me-2" aria-hidden="true" />

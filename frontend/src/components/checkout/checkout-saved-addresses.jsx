@@ -24,16 +24,31 @@ const CheckoutSavedAddresses = ({ setValue, onAddressSelected }) => {
   const handleSelect = (addr) => {
     setSelectedId(addr._id);
     setShowManual(false);
-    const nameParts = (addr.fullName || '').split(' ');
-    const firstName = nameParts[0] || '';
-    const lastName = nameParts.slice(1).join(' ') || '';
-    setValue('firstName', firstName);
-    setValue('lastName', lastName);
-    setValue('address', addr.address || '');
-    setValue('city', addr.city || '');
-    setValue('zipCode', addr.zipCode || '');
-    setValue('country', addr.country || '');
-    setValue('contactNo', addr.phone || '');
+
+    // Prefer the explicit lastName field when present. Otherwise split fullName
+    // on whitespace; if the name is a single token (common for Vietnamese
+    // first-name-only entries like "Tài"), keep the whole thing as firstName
+    // and leave lastName empty — the form must not block these users.
+    const explicitLast = (addr.lastName || '').trim();
+    const fullName = (addr.fullName || '').trim();
+    let firstName = fullName;
+    let lastName = explicitLast;
+    if (!explicitLast && fullName.includes(' ')) {
+      const parts = fullName.split(/\s+/);
+      firstName = parts[0];
+      lastName = parts.slice(1).join(' ');
+    }
+
+    setValue('firstName', firstName, { shouldValidate: true });
+    setValue('lastName', lastName, { shouldValidate: true });
+    setValue('companyName', addr.company || '', { shouldValidate: true });
+    setValue('address', addr.address || '', { shouldValidate: true });
+    setValue('city', addr.city || '', { shouldValidate: true });
+    setValue('state', addr.state || '', { shouldValidate: true });
+    setValue('zipCode', addr.zipCode || '', { shouldValidate: true });
+    setValue('country', addr.country || '', { shouldValidate: true });
+    setValue('contactNo', addr.phone || '', { shouldValidate: true });
+    if (addr.email) setValue('email', addr.email, { shouldValidate: true });
     if (onAddressSelected) onAddressSelected(addr);
   };
 
@@ -42,8 +57,10 @@ const CheckoutSavedAddresses = ({ setValue, onAddressSelected }) => {
     setShowManual(true);
     setValue('firstName', '');
     setValue('lastName', '');
+    setValue('companyName', '');
     setValue('address', '');
     setValue('city', '');
+    setValue('state', '');
     setValue('zipCode', '');
     setValue('country', '');
     setValue('contactNo', '');

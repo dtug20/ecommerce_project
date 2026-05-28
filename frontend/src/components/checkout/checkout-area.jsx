@@ -30,12 +30,14 @@ const CheckoutArea = () => {
   } = checkoutData;
   const { cart_products } = useSelector((state) => state.cart);
 
-  // Allow coupon suggestions to auto-apply a coupon code
+  // Allow coupon suggestions to auto-apply a coupon code. The manual-entry
+  // input may not be mounted, so pass the code directly to handleCouponCode
+  // and only mirror it into the input when it exists.
   const handleApplySuggestedCoupon = (code) => {
     if (couponRef?.current) {
       couponRef.current.value = code;
-      handleCouponCode({ preventDefault: () => {} });
     }
+    handleCouponCode(null, code);
   };
 
   return (

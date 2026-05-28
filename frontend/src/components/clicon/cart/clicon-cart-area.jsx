@@ -7,9 +7,10 @@ import { CliconCartItem } from '@/components/clicon/composites';
 import { ClButton, ClProgressBar } from '@/components/clicon/ui';
 import useCartInfo from '@/hooks/use-cart-info';
 import useCurrency from '@/hooks/use-currency';
+import { useGetSettingsQuery } from '@/redux/features/cmsApi';
 import CliconCartCheckout from './clicon-cart-checkout';
 
-const FREE_SHIPPING_THRESHOLD = 200;
+const DEFAULT_FREE_SHIPPING_THRESHOLD = 5000000;
 
 const CliconCartArea = () => {
   const { t } = useTranslation();
@@ -17,9 +18,13 @@ const CliconCartArea = () => {
   const { cart_products } = useSelector((state) => state.cart);
   const { total } = useCartInfo();
   const dispatch = useDispatch();
+  const { data: settingsData } = useGetSettingsQuery();
 
-  const shippingProgress = Math.min(100, (total / FREE_SHIPPING_THRESHOLD) * 100);
-  const remaining = FREE_SHIPPING_THRESHOLD - total;
+  const freeShippingThreshold =
+    settingsData?.data?.shipping?.freeShippingThreshold ?? DEFAULT_FREE_SHIPPING_THRESHOLD;
+  const shippingProgress =
+    freeShippingThreshold > 0 ? Math.min(100, (total / freeShippingThreshold) * 100) : 100;
+  const remaining = Math.max(0, freeShippingThreshold - total);
 
   return (
     <section className="cl-cart" data-testid="cl-cart-area">

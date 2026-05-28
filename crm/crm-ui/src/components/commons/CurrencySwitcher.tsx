@@ -16,18 +16,29 @@ export default function CurrencySwitcher() {
   const currency = useCurrencyStore((s) => s.currency);
   const setCurrency = useCurrencyStore((s) => s.setCurrency);
   const { data: ratesData } = useExchangeRates();
-  const current = OPTIONS.find((o) => o.code === currency)!;
+  const current = OPTIONS.find((o) => o.code === currency) ?? OPTIONS[0];
 
   const items: MenuProps['items'] = OPTIONS.map((o) => ({
     key: o.code,
     label: `${o.code} ${o.symbol}  ${o.label}`,
-    onClick: () => setCurrency(o.code),
   }));
 
+  const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
+    setCurrency(key as CurrencyCode);
+  };
+
   return (
-    <Dropdown menu={{ items, selectedKeys: [currency] }}>
+    <Dropdown
+      trigger={['click']}
+      menu={{
+        items,
+        selectable: true,
+        selectedKeys: [currency],
+        onClick: handleMenuClick,
+      }}
+    >
       <Button type="text" size="small">
-        {currency} {current.symbol}
+        {current.code} {current.symbol}
         {ratesData?.stale && (
           <Tooltip title="Exchange rate may be outdated">
             <WarningOutlined style={{ color: '#faad14', marginLeft: 4 }} />

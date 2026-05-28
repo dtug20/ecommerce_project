@@ -343,10 +343,24 @@ export interface SiteSettings {
   shipping: {
     freeShippingThreshold: number;
     defaultShippingCost: number;
-    enabledMethods: string[];
+    enabledMethods?: string[];
+    methods?: Array<{
+      id: string;
+      label: string;
+      labelVi: string;
+      cost: number;
+      enabled: boolean;
+    }>;
   };
   payment: {
     enabledGateways: string[];
+  };
+  tax?: {
+    enabled: boolean;
+    rate: number;
+    label: string;
+    labelVi: string;
+    applyToShipping: boolean;
   };
   seo: {
     defaultTitle?: string;

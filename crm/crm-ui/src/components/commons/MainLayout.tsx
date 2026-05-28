@@ -19,6 +19,7 @@ import {
   AuditOutlined,
   MessageOutlined,
   DollarOutlined,
+  PercentageOutlined,
 } from '@ant-design/icons';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import useAppStore from '@/stores/appStore';
@@ -51,6 +52,7 @@ const FLAT_NAV: FlatNavItem[] = [
   { key: '/settings/general', label: 'General', path: '/settings/general' },
   { key: '/settings/payment', label: 'Payment', path: '/settings/payment' },
   { key: '/settings/shipping', label: 'Shipping', path: '/settings/shipping' },
+  { key: '/settings/tax', label: 'Tax', path: '/settings/tax' },
   { key: '/activity-log', label: 'Activity Log', path: '/activity-log' },
   { key: '/chatbot', label: 'AI Chatbot', path: '/chatbot' },
 ];
@@ -141,6 +143,7 @@ const MENU_ITEMS: ItemType[] = [
       { key: '/settings/general', icon: <InfoCircleOutlined />, label: 'General' },
       { key: '/settings/payment', icon: <CreditCardOutlined />, label: 'Payment' },
       { key: '/settings/shipping', icon: <CarOutlined />, label: 'Shipping' },
+      { key: '/settings/tax', icon: <PercentageOutlined />, label: 'Tax' },
     ],
   },
   {

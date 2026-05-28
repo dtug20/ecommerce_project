@@ -77,47 +77,41 @@ const AccountInfoForm = ({ user }) => {
 };
 
 // ── Address Form ─────────────────────────────────────────────────────
-const AddressForm = ({ title, existing }) => {
+// `slot` = "billing" | "shipping" — persisted as the address `label`.
+// Only the billing slot claims isDefault on creation.
+const AddressForm = ({ title, existing, slot }) => {
   const { t } = useTranslation();
+  const buildDefaults = (a) => ({
+    fullName: a?.fullName || "",
+    lastName: a?.lastName || "",
+    company: a?.company || "",
+    phone: a?.phone || "",
+    address: a?.address || "",
+    city: a?.city || "",
+    state: a?.state || "",
+    zipCode: a?.zipCode || "",
+    country: a?.country || "",
+    email: a?.email || "",
+  });
   const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm({
-    defaultValues: existing
-      ? {
-          fullName: existing.fullName || "",
-          phone: existing.phone || "",
-          address: existing.address || "",
-          city: existing.city || "",
-          state: existing.state || "",
-          zipCode: existing.zipCode || "",
-          country: existing.country || "",
-          email: existing.email || "",
-        }
-      : {},
+    defaultValues: existing ? buildDefaults(existing) : buildDefaults(null),
   });
 
   const [addAddress] = useAddAddressMutation();
   const [updateAddress] = useUpdateAddressMutation();
 
   useEffect(() => {
-    if (existing) {
-      reset({
-        fullName: existing.fullName || "",
-        phone: existing.phone || "",
-        address: existing.address || "",
-        city: existing.city || "",
-        state: existing.state || "",
-        zipCode: existing.zipCode || "",
-        country: existing.country || "",
-        email: existing.email || "",
-      });
-    }
+    reset(buildDefaults(existing));
   }, [existing, reset]);
 
   const onSubmit = async (data) => {
     try {
+      const payload = { ...data, label: slot };
       if (existing?._id) {
-        await updateAddress({ id: existing._id, ...data }).unwrap();
+        await updateAddress({ id: existing._id, ...payload }).unwrap();
       } else {
-        await addAddress({ ...data, isDefault: true }).unwrap();
+        // Only billing becomes the default; shipping must not flip it.
+        await addAddress({ ...payload, isDefault: slot === "billing" }).unwrap();
       }
       notifySuccess(`${title} saved!`);
     } catch {
@@ -137,13 +131,13 @@ const AddressForm = ({ title, existing }) => {
         <div className="col-md-6">
           <div className="cl-setting-field">
             <label>{t("profile.lastName")}</label>
-            <input placeholder={t("profile.lastName")} />
+            <input {...register("lastName")} placeholder={t("profile.lastName")} />
           </div>
         </div>
         <div className="col-12">
           <div className="cl-setting-field">
             <label className="optional">{t("profile.companyName")} <span>({t("profile.optional")})</span></label>
-            <input placeholder={t("profile.companyName")} />
+            <input {...register("company")} placeholder={t("profile.companyName")} />
           </div>
         </div>
         <div className="col-12">
@@ -205,7 +199,14 @@ const AccountSetting = () => {
   const { data: addressData } = useGetAddressesQuery(undefined, { skip: !user });
 
   const addresses = addressData?.data || [];
-  const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0];
+  // Find by label so billing/shipping bind to their own document,
+  // not to whatever happens to sit at addresses[0] / addresses[1].
+  const billingAddress =
+    addresses.find((a) => a.label === "billing") ||
+    addresses.find((a) => a.isDefault) ||
+    null;
+  const shippingAddress =
+    addresses.find((a) => a.label === "shipping") || null;
 
   const handleChangePassword = () => {
     if (keycloak?.authServerUrl && keycloak?.realm) {
@@ -235,13 +236,21 @@ const AccountSetting = () => {
       {/* Billing Address */}
       <div className="cl-setting-section">
         <div className="cl-setting-section__title">{t("profile.billingAddress")}</div>
-        <AddressForm title={t("profile.billingAddress")} existing={defaultAddress} />
+        <AddressForm
+          title={t("profile.billingAddress")}
+          existing={billingAddress}
+          slot="billing"
+        />
       </div>
 
       {/* Shipping Address */}
       <div className="cl-setting-section">
         <div className="cl-setting-section__title">{t("trackOrder.shippingAddress")}</div>
-        <AddressForm title={t("trackOrder.shippingAddress")} existing={addresses[1] || null} />
+        <AddressForm
+          title={t("trackOrder.shippingAddress")}
+          existing={shippingAddress}
+          slot="shipping"
+        />
       </div>
     </>
   );

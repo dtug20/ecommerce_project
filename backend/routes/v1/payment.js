@@ -33,8 +33,8 @@ router.get(['/vnpay/ipn', '/vnp/ipn'], async (req, res) => {
       });
     }
 
-    const EXCHANGE_RATE = 25000;
-    const expectedVND = Math.round(order.totalAmount * EXCHANGE_RATE);
+    // order.totalAmount is stored in VND, same unit VNPay sends back (vnp_Amount / 100).
+    const expectedVND = Math.round(order.totalAmount);
 
     if (Number(expectedVND) !== Number(vnpAmount)) {
       return res.status(200).json({

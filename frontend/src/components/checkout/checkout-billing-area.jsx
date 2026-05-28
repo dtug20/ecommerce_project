@@ -31,7 +31,7 @@ const CheckoutBillingArea = ({ register, errors }) => {
         <div className="cl-checkout__form-group">
           <label className="cl-checkout__label">&nbsp;</label>
           <input
-            {...register("lastName", { required: "Last name is required!" })}
+            {...register("lastName", { required: false })}
             name="lastName"
             id="lastName"
             type="text"

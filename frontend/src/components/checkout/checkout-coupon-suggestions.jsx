@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { useGetCheckoutCouponsQuery } from '@/redux/features/cmsApi';
 import useCurrency from '@/hooks/use-currency';
 import dayjs from 'dayjs';
@@ -8,15 +9,30 @@ const CheckoutCouponSuggestions = ({ onApplyCoupon }) => {
   const { t } = useTranslation();
   const { formatPrice } = useCurrency();
   const { data, isLoading, isError } = useGetCheckoutCouponsQuery();
+  const { cart_products } = useSelector((state) => state.cart);
 
   const raw = data?.data ?? data?.coupons ?? data;
   const coupons = Array.isArray(raw) ? raw : [];
   const now = dayjs();
 
+  // Product types present in the cart (lower-cased for case-insensitive match).
+  const cartProductTypes = new Set(
+    (cart_products || [])
+      .map((p) => (p?.productType || '').toString().trim().toLowerCase())
+      .filter(Boolean)
+  );
+
   const activeCoupons = coupons.filter((c) => {
     const notExpired = !c.endTime || now.isBefore(dayjs(c.endTime));
     const started = !c.startTime || now.isAfter(dayjs(c.startTime));
-    return notExpired && started && c.status !== 'inactive';
+    if (!notExpired || !started || c.status === 'inactive') return false;
+
+    // Coupons without a productType target apply to everything → always show.
+    const couponType = (c.productType || '').toString().trim().toLowerCase();
+    if (!couponType) return true;
+
+    // Otherwise only show when the cart contains a matching productType.
+    return cartProductTypes.has(couponType);
   });
 
   if (isLoading || isError || activeCoupons.length === 0) return null;

@@ -7,26 +7,25 @@
 
 .back-to-top-wrapper{
 	position: fixed;
-    right: 50px;
+    right: 32px;
     bottom: 0;
     height: 44px;
     width: 44px;
     cursor: pointer;
     display: block;
     border-radius: 50%;
-    z-index: 99;
+    z-index: 9997;
 	opacity: 0;
 	visibility: hidden;
 	@extend %tp-transition-common;
 
 	@media #{$xs}{
-		right: 20px;
-		bottom: 20px;
+		right: 32px;
 	}
 	&.back-to-top-btn-show{
 		visibility: visible;
 		opacity: 1;
-		bottom: 50px;
+		bottom: 100px;
 	}
 }
 

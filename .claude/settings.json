@@ -8,6 +8,9 @@
       "Bash(find /Users/mac/Downloads/ecommerce_website-main/frontend/src/components/checkout -type f \\\\\\(-name *.jsx -o -name *.js \\\\\\))",
       "Bash(ls -1 /Users/mac/Downloads/ecommerce_website-main/frontend/public/assets/scss/components/_cl-*.scss)",
       "Bash(xargs -I {} basename {})"
+    ],
+    "additionalDirectories": [
+      "/tmp"
     ]
   },
   "enabledPlugins": {
