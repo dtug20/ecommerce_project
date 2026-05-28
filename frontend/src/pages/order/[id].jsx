@@ -10,6 +10,7 @@ import ErrorMsg from "@/components/common/error-msg";
 import PrdDetailsLoader from "@/components/loader/prd-details-loader";
 import ShopBreadcrumb from "@/components/breadcrumb/shop-breadcrumb";
 import { useGetUserOrderByIdQuery } from "@/redux/features/order/orderApi";
+import { useGetSettingsQuery } from "@/redux/features/cmsApi";
 import formatOrderAmount from "@/utils/formatOrderAmount";
 import { OrderStatusStepper } from "@/components/clicon/composites";
 import { useKeycloak } from "@/components/providers/keycloak-provider";
@@ -108,6 +109,7 @@ const SingleOrder = ({ params }) => {
   const { data: orderData, isError, isLoading: orderLoading } = useGetUserOrderByIdQuery(orderId, {
     skip: !isAuthenticated,
   });
+  const { data: settingsData } = useGetSettingsQuery();
 
   const isLoading = !kc?.initialized || orderLoading;
 
@@ -177,12 +179,50 @@ const SingleOrder = ({ params }) => {
     invoice,
     createdAt,
     cart,
+    subTotal,
+    shippingCost,
+    discount,
+    tax,
     totalAmount,
     status,
     statusHistory = [],
     estimatedDelivery,
-    orderNotes,
+    orderNote,
+    paymentMethod,
+    paymentGateway,
+    paymentStatus,
+    transactionId,
   } = orderData.order;
+
+  // Resolve a friendly payment-method label from the stored enum value.
+  // Backend persists method via PaymentService.normalisedMethod
+  // ('COD' | 'bank-transfer' | 'online-gateway' | 'momo' | 'stripe').
+  const paymentMethodKey = (() => {
+    const m = String(paymentMethod || paymentGateway || '').toLowerCase();
+    if (m === 'cod') return 'methodCod';
+    if (m === 'bank-transfer') return 'methodBankTransfer';
+    if (m === 'online-gateway' || m === 'vnpay' || m === 'vnp') return 'methodVnpay';
+    if (m === 'momo') return 'methodMomo';
+    if (m === 'stripe' || m === 'card') return 'methodStripe';
+    return null;
+  })();
+  const paymentStatusKey = (() => {
+    const s = String(paymentStatus || '').toLowerCase();
+    if (s === 'paid') return 'payStatusPaid';
+    if (s === 'unpaid') return 'payStatusUnpaid';
+    if (s === 'pending') return 'payStatusPending';
+    if (s === 'failed') return 'payStatusFailed';
+    return null;
+  })();
+
+  const copyText = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      notifySuccess(t('checkout.copySuccess'));
+    } catch {
+      /* clipboard unavailable */
+    }
+  };
 
   const items = cart || [];
   const stepIndex = getStepIndex(status);
@@ -389,13 +429,118 @@ const SingleOrder = ({ params }) => {
 
             <div className="cl-od-address-card">
               <div className="cl-od-address-card__title">{t("trackOrder.orderNotes")}</div>
-              {orderNotes ? (
-                <div className="cl-od-address-card__notes">{orderNotes}</div>
+              {orderNote ? (
+                <div className="cl-od-address-card__notes">{orderNote}</div>
               ) : (
                 <div className="cl-od-address-card__notes" style={{ color: "#adb5bd", fontStyle: "italic" }}>
                   {t("trackOrder.noOrderNotes")}
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Payment Information + Price Details */}
+          <div className="cl-od-addresses" style={{ marginTop: 20 }}>
+            <div className="cl-od-address-card">
+              <div className="cl-od-address-card__title">{t("trackOrder.paymentInfo")}</div>
+              <div className="cl-od-address-card__line">
+                <strong>{t("trackOrder.paymentMethod")}:</strong>{" "}
+                {paymentMethodKey ? t(`trackOrder.${paymentMethodKey}`) : (paymentMethod || paymentGateway || "—")}
+              </div>
+              {paymentMethodKey === 'methodBankTransfer' && (() => {
+                const bt = settingsData?.data?.payment?.bankTransfer;
+                if (!bt?.bankName) return null;
+                const resolvedContent = bt.transferContentTemplate
+                  ? bt.transferContentTemplate.replace('{orderId}', String(invoice ?? ''))
+                  : '';
+                return (
+                  <div className="cl-order__bank-instructions" style={{ marginTop: 24, padding: 16, background: '#f8f9fa', borderRadius: 8 }}>
+                    <h5>{t('orderDetail.bankInstructionsTitle')}</h5>
+                    <p style={{ marginBottom: 12 }}>{t('orderDetail.bankInstructionsNote')}</p>
+                    <p><strong>{t('checkout.bankLabel')}</strong> {bt.bankName}</p>
+                    <p>
+                      <strong>{t('checkout.accountLabel')}</strong> {bt.accountNumber}{' '}
+                      <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => copyText(bt.accountNumber)}>
+                        {t('checkout.copyToClipboard')}
+                      </button>
+                    </p>
+                    <p><strong>{t('checkout.nameLabel')}</strong> {bt.accountName}</p>
+                    {bt.branch && (
+                      <p><strong>{t('checkout.branchLabel')}</strong> {bt.branch}</p>
+                    )}
+                    {bt.qrImageUrl && (
+                      <div className="cl-checkout__bank-qr">
+                        <p><strong>{t('checkout.scanQrLabel')}</strong></p>
+                        <img src={bt.qrImageUrl} alt="VietQR" width={180} height={180} />
+                      </div>
+                    )}
+                    {resolvedContent && (
+                      <p>
+                        <strong>{t('checkout.transferContentLabel')}</strong>{' '}
+                        <code>{resolvedContent}</code>{' '}
+                        <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => copyText(resolvedContent)}>
+                          {t('checkout.copyToClipboard')}
+                        </button>
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+              {paymentStatus && (
+                <div className="cl-od-address-card__line">
+                  <strong>{t("trackOrder.paymentStatus")}:</strong>{" "}
+                  {paymentStatusKey ? t(`trackOrder.${paymentStatusKey}`) : paymentStatus}
+                </div>
+              )}
+              {transactionId && (
+                <div className="cl-od-address-card__line">
+                  <strong>{t("trackOrder.transactionId")}:</strong> {transactionId}
+                </div>
+              )}
+              {invoice && (
+                <div className="cl-od-address-card__line">
+                  <strong>{t("trackOrder.invoice")}:</strong> #{invoice}
+                </div>
+              )}
+            </div>
+
+            <div className="cl-od-address-card" style={{ gridColumn: "span 2" }}>
+              <div className="cl-od-address-card__title">{t("trackOrder.priceDetails")}</div>
+              <div className="cl-od-address-card__line" style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>{t("trackOrder.subTotal")}</span>
+                <span>{formatOrderAmount(subTotal || 0, orderData?.order)}</span>
+              </div>
+              <div className="cl-od-address-card__line" style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>{t("trackOrder.shipping")}</span>
+                <span>{formatOrderAmount(shippingCost || 0, orderData?.order)}</span>
+              </div>
+              {discount > 0 && (
+                <div className="cl-od-address-card__line" style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span>{t("trackOrder.discount")}</span>
+                  <span>− {formatOrderAmount(discount, orderData?.order)}</span>
+                </div>
+              )}
+              {tax > 0 && (
+                <div className="cl-od-address-card__line" style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span>{t("trackOrder.vat")}</span>
+                  <span>{formatOrderAmount(tax, orderData?.order)}</span>
+                </div>
+              )}
+              <div
+                className="cl-od-address-card__line"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontWeight: 700,
+                  fontSize: 16,
+                  marginTop: 8,
+                  paddingTop: 8,
+                  borderTop: "1px solid #e9ecef",
+                }}
+              >
+                <span>{t("trackOrder.total")}</span>
+                <span>{formatOrderAmount(totalAmount || 0, orderData?.order)}</span>
+              </div>
             </div>
           </div>
 
