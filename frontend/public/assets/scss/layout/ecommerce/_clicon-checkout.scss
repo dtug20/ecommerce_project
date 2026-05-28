@@ -777,3 +777,39 @@
     min-width: 70px;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Bank transfer QR code
+// ---------------------------------------------------------------------------
+.cl-checkout__bank-qr {
+  margin: 16px 0;
+  text-align: center;
+
+  img {
+    max-width: 200px;
+    height: auto;
+    border: 1px solid var(--clicon-border, #e5e7eb);
+    border-radius: 8px;
+    padding: 8px;
+    background: #fff;
+  }
+}
+
+// Bank transfer content code styling
+.cl-checkout__bank-content {
+  code {
+    display: inline-block;
+    padding: 2px 8px;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.95em;
+  }
+}
+
+// Hint text styling
+.cl-checkout__hint {
+  font-style: italic;
+  color: var(--clicon-text-muted, #6b7280);
+  font-size: 0.85em;
+}
