@@ -354,6 +354,14 @@ export interface SiteSettings {
   };
   payment: {
     enabledGateways: string[];
+    bankTransfer?: {
+      bankName: string;
+      accountNumber: string;
+      accountName: string;
+      branch: string;
+      qrImageUrl: string;
+      transferContentTemplate: string;
+    };
   };
   tax?: {
     enabled: boolean;
