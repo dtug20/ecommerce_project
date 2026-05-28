@@ -64,6 +64,17 @@ const contactSchema = new mongoose.Schema(
  * Shipping config. All amounts are stored in the platform base currency (VND).
  * The frontend converts to the user's display currency via useCurrency().formatPrice().
  */
+const shippingMethodSchema = new mongoose.Schema(
+  {
+    id: { type: String, required: true },
+    label: { type: String, required: true },
+    labelVi: { type: String, default: "" },
+    cost: { type: Number, default: 0, min: 0 }, // VND
+    enabled: { type: Boolean, default: true },
+  },
+  { _id: false }
+);
+
 const shippingSchema = new mongoose.Schema(
   {
     freeShippingThreshold: {
@@ -78,6 +89,26 @@ const shippingSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    methods: {
+      type: [shippingMethodSchema],
+      default: [
+        { id: "free", label: "Free shipping", labelVi: "Miễn phí", cost: 0, enabled: true },
+        { id: "flat", label: "Flat rate", labelVi: "Phí cố định", cost: 20000, enabled: true },
+        { id: "pickup", label: "Local pickup", labelVi: "Nhận tại cửa hàng", cost: 25000, enabled: true },
+      ],
+    },
+  },
+  { _id: false }
+);
+
+const bankTransferSchema = new mongoose.Schema(
+  {
+    bankName: { type: String, default: '' },
+    accountNumber: { type: String, default: '' },
+    accountName: { type: String, default: '' },
+    branch: { type: String, default: '' },
+    qrImageUrl: { type: String, default: '' },
+    transferContentTemplate: { type: String, default: '' },
   },
   { _id: false }
 );
@@ -88,6 +119,25 @@ const paymentSchema = new mongoose.Schema(
       type: [String],
       default: ["stripe", "cod"],
     },
+    bankTransfer: {
+      type: bankTransferSchema,
+      default: () => ({}),
+    },
+  },
+  { _id: false }
+);
+
+/**
+ * Tax config. Flat-rate VAT applied to (subtotal - discount + shipping) at checkout.
+ * Prices throughout the storefront are tax-EXCLUSIVE — tax is added on top at checkout.
+ */
+const taxSchema = new mongoose.Schema(
+  {
+    enabled: { type: Boolean, default: false },
+    rate: { type: Number, default: 0, min: 0, max: 100 }, // percent
+    label: { type: String, default: "VAT" },
+    labelVi: { type: String, default: "Thuế" },
+    applyToShipping: { type: Boolean, default: true },
   },
   { _id: false }
 );
@@ -160,6 +210,10 @@ const siteSettingSchema = new mongoose.Schema(
     },
     payment: {
       type: paymentSchema,
+      default: () => ({}),
+    },
+    tax: {
+      type: taxSchema,
       default: () => ({}),
     },
     seo: {
