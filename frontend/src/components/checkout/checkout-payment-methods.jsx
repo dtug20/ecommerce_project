@@ -45,6 +45,8 @@ const CheckoutPaymentMethods = ({ selectedMethod, onMethodChange, bankDetails })
   const { t } = useTranslation();
   const { data: settingsData } = useGetSettingsQuery();
 
+  const effectiveBankDetails = bankDetails ?? settingsData?.data?.payment?.bankTransfer ?? null;
+
   const rawGateways = settingsData?.data?.payment?.enabledGateways;
   const enabledGatewaysRaw =
     Array.isArray(rawGateways) && rawGateways.length > 0
@@ -149,28 +151,28 @@ const CheckoutPaymentMethods = ({ selectedMethod, onMethodChange, bankDetails })
       {selectedMethod === 'bank-transfer' && (
         <div className="cl-checkout__bank-info">
           <h6>{t('checkout.bankTransferDetails')}</h6>
-          {bankDetails?.bankName ? (
+          {effectiveBankDetails?.bankName ? (
             <>
-              <p><strong>{t('checkout.bankLabel')}</strong> {bankDetails.bankName}</p>
-              {bankDetails.accountNumber && (
-                <p><strong>{t('checkout.accountLabel')}</strong> {bankDetails.accountNumber}</p>
+              <p><strong>{t('checkout.bankLabel')}</strong> {effectiveBankDetails.bankName}</p>
+              {effectiveBankDetails.accountNumber && (
+                <p><strong>{t('checkout.accountLabel')}</strong> {effectiveBankDetails.accountNumber}</p>
               )}
-              {bankDetails.accountName && (
-                <p><strong>{t('checkout.nameLabel')}</strong> {bankDetails.accountName}</p>
+              {effectiveBankDetails.accountName && (
+                <p><strong>{t('checkout.nameLabel')}</strong> {effectiveBankDetails.accountName}</p>
               )}
-              {bankDetails.branch && (
-                <p><strong>{t('checkout.branchLabel')}</strong> {bankDetails.branch}</p>
+              {effectiveBankDetails.branch && (
+                <p><strong>{t('checkout.branchLabel')}</strong> {effectiveBankDetails.branch}</p>
               )}
-              {bankDetails.qrImageUrl && (
+              {effectiveBankDetails.qrImageUrl && (
                 <div className="cl-checkout__bank-qr">
                   <p><strong>{t('checkout.scanQrLabel')}</strong></p>
-                  <img src={bankDetails.qrImageUrl} alt="VietQR" width={180} height={180} />
+                  <img src={effectiveBankDetails.qrImageUrl} alt="VietQR" width={180} height={180} />
                 </div>
               )}
-              {bankDetails.transferContentTemplate && (
+              {effectiveBankDetails.transferContentTemplate && (
                 <p className="cl-checkout__bank-content">
                   <strong>{t('checkout.transferContentLabel')}</strong>{' '}
-                  <code>{bankDetails.transferContentTemplate}</code>
+                  <code>{effectiveBankDetails.transferContentTemplate}</code>
                   <span className="cl-checkout__hint"> — {t('checkout.transferContentHint')}</span>
                 </p>
               )}
