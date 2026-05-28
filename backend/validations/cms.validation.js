@@ -107,12 +107,40 @@ const createBlogPost = Joi.object({
 const updateBlogPost = createBlogPost.fork(['title'], (f) => f.optional());
 
 // ---------------------------------------------------------------------------
-// Settings  (flexible — allow any key/value pairs)
+// Settings — nested validation for payment block, permissive for everything else
 // ---------------------------------------------------------------------------
 
-// Settings are a free-form object — any key/value pair is permitted.
-// stripUnknown is deliberately NOT set so the full payload passes through.
-const updateSettings = Joi.object().unknown(true);
+const bankTransfer = Joi.object({
+  bankName: Joi.string().allow('').max(100),
+  accountNumber: Joi.string().allow('').max(50),
+  accountName: Joi.string().allow('').max(100),
+  branch: Joi.string().allow('').max(100),
+  qrImageUrl: Joi.string().uri().allow(''),
+  transferContentTemplate: Joi.string().allow('').max(200),
+}).unknown(false);
+
+const payment = Joi.object({
+  enabledGateways: Joi.array().items(
+    Joi.string().valid('cod', 'bank-transfer', 'vnpay', 'momo', 'stripe')
+  ),
+  bankTransfer,
+})
+  .custom((value, helpers) => {
+    if (value.enabledGateways?.includes('bank-transfer')) {
+      const bt = value.bankTransfer || {};
+      if (!bt.bankName || !bt.accountNumber || !bt.accountName) {
+        return helpers.message(
+          'Bank Transfer enabled but missing required bank details (bankName, accountNumber, accountName)'
+        );
+      }
+    }
+    return value;
+  }, 'bank-transfer cross-field check')
+  .unknown(true);
+
+const updateSettings = Joi.object({
+  payment,
+}).unknown(true);
 
 module.exports = {
   createPage,
