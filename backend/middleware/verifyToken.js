@@ -203,10 +203,14 @@ module.exports = async (req, res, next) => {
       });
     }
     console.error("[Auth] Token verification failed:", error.name, error.message, error.code, error.stack?.split('\n')[1]);
-    res.status(403).json({
+    // 401 (not 403) so frontend auth interceptors know to re-login.
+    // Include error.name + message so the frontend can show a helpful reason
+    // and we can diagnose without SSH-ing into the server.
+    res.status(401).json({
       status: "fail",
       error: "Invalid token",
-      debug: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      reason: error.name || "AuthError",
+      message: error.message || undefined,
     });
   }
 };
