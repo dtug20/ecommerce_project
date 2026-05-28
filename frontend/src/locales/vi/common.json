@@ -129,7 +129,17 @@
     "proceedToCheckout": "Tiến hành thanh toán",
     "remove": "Xóa",
     "update": "Cập nhật giỏ hàng",
-    "clearCart": "Xóa giỏ hàng"
+    "clearCart": "Xóa giỏ hàng",
+    "outOfStockError": "Sản phẩm đã hết hàng, không thể thêm vào giỏ.",
+    "shoppingCart": "Giỏ hàng",
+    "cartTotal": "Tổng giỏ hàng",
+    "products": "Sản phẩm",
+    "quantity": "Số lượng",
+    "returnToShop": "Quay lại cửa hàng",
+    "freeShipping": "Đơn hàng đủ điều kiện miễn phí vận chuyển!",
+    "addMore": "Mua thêm {{amount}} để được miễn phí vận chuyển",
+    "flatRate": "Phí cố định",
+    "localPickup": "Nhận tại cửa hàng"
   },
   "checkout": {
     "title": "Thanh toán",
@@ -165,6 +175,12 @@
     "nameLabel": "Tên TK:",
     "bankContactUs": "Vui lòng liên hệ để biết thông tin chuyển khoản.",
     "bankNote": "Vui lòng chuyển đúng số tiền và ghi mã đơn hàng. Đơn hàng sẽ được xác nhận khi nhận được thanh toán.",
+    "branchLabel": "Chi nhánh:",
+    "scanQrLabel": "Quét mã QR để chuyển khoản:",
+    "transferContentLabel": "Nội dung chuyển khoản:",
+    "transferContentHint": "Mã đơn sẽ hiển thị sau khi đặt hàng",
+    "copyToClipboard": "Sao chép",
+    "copySuccess": "Đã sao chép",
     "comingSoon": "Sắp ra mắt.",
     "comingSoonMsg": "Phương thức thanh toán này chưa khả dụng. Vui lòng chọn Thanh toán khi nhận hàng hoặc Chuyển khoản.",
     "nameOnCard": "Tên trên thẻ",
@@ -451,7 +467,27 @@
     "emailLabel": "Email:",
     "orderNotFound": "Không tìm thấy đơn hàng.",
     "userAccount": "Tài khoản người dùng",
-    "dashboard": "Tổng quan"
+    "dashboard": "Tổng quan",
+    "paymentInfo": "Thông tin thanh toán",
+    "paymentMethod": "Phương thức thanh toán",
+    "paymentStatus": "Trạng thái thanh toán",
+    "transactionId": "Mã giao dịch",
+    "priceDetails": "Chi tiết giá",
+    "shipping": "Phí vận chuyển",
+    "discount": "Giảm giá",
+    "tax": "Thuế",
+    "vat": "VAT",
+    "total": "Tổng cộng",
+    "invoice": "Hóa đơn",
+    "methodCod": "Thanh toán khi nhận hàng",
+    "methodBankTransfer": "Chuyển khoản ngân hàng",
+    "methodVnpay": "VNPay",
+    "methodMomo": "MoMo",
+    "methodStripe": "Thẻ (Stripe)",
+    "payStatusPaid": "Đã thanh toán",
+    "payStatusUnpaid": "Chưa thanh toán",
+    "payStatusPending": "Đang xử lý",
+    "payStatusFailed": "Thất bại"
   },
   "breadcrumb": {
     "home": "Trang chủ",
@@ -617,6 +653,10 @@
   },
   "section": {
     "browseAll": "Xem tất cả sản phẩm"
+  },
+  "orderDetail": {
+    "bankInstructionsTitle": "Hướng dẫn chuyển khoản",
+    "bankInstructionsNote": "Vui lòng chuyển khoản theo thông tin bên dưới. Đơn hàng sẽ được xử lý sau khi chúng tôi nhận được thanh toán."
   },
   "chat": {
     "title": "Trợ lý mua sắm",

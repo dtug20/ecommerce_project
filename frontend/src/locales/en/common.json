@@ -129,7 +129,17 @@
     "proceedToCheckout": "Proceed to Checkout",
     "remove": "Remove",
     "update": "Update Cart",
-    "clearCart": "Clear Cart"
+    "clearCart": "Clear Cart",
+    "outOfStockError": "This product is sold out and cannot be added to the cart.",
+    "shoppingCart": "Shopping Cart",
+    "cartTotal": "Cart Total",
+    "products": "Products",
+    "quantity": "Quantity",
+    "returnToShop": "Return to Shop",
+    "freeShipping": "You qualify for free shipping!",
+    "addMore": "Add {{amount}} more for free shipping",
+    "flatRate": "Flat rate",
+    "localPickup": "Local pickup"
   },
   "checkout": {
     "title": "Checkout",
@@ -165,6 +175,12 @@
     "nameLabel": "Name:",
     "bankContactUs": "Please contact us for bank transfer details.",
     "bankNote": "Please transfer the exact order amount and use your order number as the payment reference. Your order will be confirmed once payment is received.",
+    "branchLabel": "Branch:",
+    "scanQrLabel": "Scan this QR to transfer:",
+    "transferContentLabel": "Transfer content:",
+    "transferContentHint": "Order ID will be filled in after you place the order",
+    "copyToClipboard": "Copy",
+    "copySuccess": "Copied to clipboard",
     "comingSoon": "Coming soon.",
     "comingSoonMsg": "This payment method is not yet available. Please select Cash on Delivery or Bank Transfer instead.",
     "nameOnCard": "Name on Card",
@@ -451,7 +467,27 @@
     "emailLabel": "Email:",
     "orderNotFound": "Order not found.",
     "userAccount": "User Account",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "paymentInfo": "Payment Information",
+    "paymentMethod": "Payment Method",
+    "paymentStatus": "Payment Status",
+    "transactionId": "Transaction ID",
+    "priceDetails": "Price Details",
+    "shipping": "Shipping",
+    "discount": "Discount",
+    "tax": "Tax",
+    "vat": "VAT",
+    "total": "Total",
+    "invoice": "Invoice",
+    "methodCod": "Cash on Delivery",
+    "methodBankTransfer": "Bank Transfer",
+    "methodVnpay": "VNPay",
+    "methodMomo": "MoMo",
+    "methodStripe": "Card (Stripe)",
+    "payStatusPaid": "Paid",
+    "payStatusUnpaid": "Unpaid",
+    "payStatusPending": "Pending",
+    "payStatusFailed": "Failed"
   },
   "breadcrumb": {
     "home": "Home",
@@ -617,6 +653,10 @@
   },
   "section": {
     "browseAll": "Browse All Product"
+  },
+  "orderDetail": {
+    "bankInstructionsTitle": "Bank Transfer Instructions",
+    "bankInstructionsNote": "Please make the transfer using the details below. Your order will be processed once payment is received."
   },
   "chat": {
     "title": "Shopping Assistant",
