@@ -110,6 +110,9 @@ const SOFT_DELETE_PARENTS = ['CPU Heat Pipes', 'Beauty of Skin', 'Facial Care'];
 
 // Brand-fix matrix for existing products. Each rule: { when:(p)=>bool, brand:string }.
 // First matching rule wins. `p` = { title, productType, brandName }.
+// Note: the beauty/home/sports/jewelry rules fire unconditionally per productType because the
+// existing 53 catalog rows in those verticals carry wrong/junk brand names across the board;
+// normalizing to a house brand is intended, not a bug. Electronics keeps a brand-specific guard.
 const _wrongBrands = new Set(['Logitech', 'Antec', 'Sony', 'Deepcool', 'Lenovo']);
 const BRAND_FIX_RULES = [
   { when: (p) => p.productType === 'fashion' && /ao dai|linen summer dress|silk scarf|tote|traveling bag/i.test(p.title), brand: 'Legendary Whitetails' },
@@ -134,6 +137,7 @@ const pickChildren = (djCategory, dj, parent) => {
   const brand = (dj.brand || '').toLowerCase();
   if (kids.includes('Apple') && (/apple|iphone|ipad|macbook/.test(title) || brand === 'apple')) return 'Apple';
   if (kids.includes('Samsung') && (/samsung|galaxy/.test(title) || brand === 'samsung')) return 'Samsung';
+  if (djCategory === 'tops') return kids.includes('Áo') ? 'Áo' : kids[0];
   if (djCategory === 'mens-shoes' || djCategory === 'mens-shirts' || djCategory === 'mens-watches') return kids.includes('Nam') ? 'Nam' : kids[0];
   if (djCategory === 'womens-shoes' || djCategory === 'womens-watches') return kids.includes('Nữ') ? 'Nữ' : kids[0];
   return kids[0] || 'Khác';

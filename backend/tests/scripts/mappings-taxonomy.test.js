@@ -32,6 +32,10 @@ describe('frozen taxonomy', () => {
     expect(typeof r.children).toBe('string');
     expect(r.children.length).toBeGreaterThan(0);
   });
+  it('routes womens tops to áo not đầm (women top should not be miscategorized as dress)', () => {
+    const r = mapDjToTaxonomy('tops', { title: 'Floral Blouse' });
+    expect(r).toMatchObject({ productType: 'fashion', parent: 'Thời trang nữ', children: 'Áo' });
+  });
   it('excludes groceries/motorcycle/vehicle', () => {
     expect(EXCLUDED_DJ).toEqual(expect.arrayContaining(['groceries','motorcycle','vehicle']));
     expect(DJ_CATEGORY_MAP['groceries']).toBeUndefined();
