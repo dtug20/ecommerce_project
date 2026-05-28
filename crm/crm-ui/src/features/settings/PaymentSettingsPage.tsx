@@ -8,6 +8,7 @@ import {
   Space,
   Spin,
   Tag,
+  Input,
 } from 'antd';
 import {
   SaveOutlined,
@@ -21,6 +22,7 @@ import toast from 'react-hot-toast';
 
 import { settingsApi } from '@/services/api';
 import PageHeader from '@/components/commons/PageHeader';
+import ImageUpload from '@/components/commons/ImageUpload';
 
 const { Title, Text } = Typography;
 
@@ -50,7 +52,7 @@ const GATEWAYS = [
     description: 'MoMo e-wallet (Vietnam)',
   },
   {
-    value: 'bank_transfer',
+    value: 'bank-transfer',
     label: 'Bank Transfer',
     icon: <BankOutlined />,
     description: 'Direct bank transfer',
@@ -72,6 +74,14 @@ export default function PaymentSettingsPage() {
       const s = data.data;
       form.setFieldsValue({
         enabledGateways: s.payment?.enabledGateways ?? ['stripe', 'cod'],
+        bankTransfer: s.payment?.bankTransfer ?? {
+          bankName: '',
+          accountNumber: '',
+          accountName: '',
+          branch: '',
+          qrImageUrl: '',
+          transferContentTemplate: '',
+        },
       });
     }
   }, [data, form]);
@@ -82,6 +92,7 @@ export default function PaymentSettingsPage() {
       return settingsApi.update({
         payment: {
           enabledGateways: values.enabledGateways ?? [],
+          bankTransfer: values.bankTransfer ?? {},
         },
       });
     },
@@ -158,6 +169,70 @@ export default function PaymentSettingsPage() {
             </Checkbox.Group>
           </Form.Item>
         </Card>
+
+        <Form.Item
+          noStyle
+          shouldUpdate={(prev, curr) =>
+            prev.enabledGateways !== curr.enabledGateways
+          }
+        >
+          {({ getFieldValue }) => {
+            const gateways: string[] = getFieldValue('enabledGateways') ?? [];
+            if (!gateways.includes('bank-transfer')) return null;
+            return (
+              <Card
+                title="Bank Transfer Details"
+                style={{ marginTop: 16 }}
+              >
+                <Form.Item
+                  label="Bank Name"
+                  name={['bankTransfer', 'bankName']}
+                  rules={[{ required: true, message: 'Bank name is required' }]}
+                >
+                  <Input placeholder="e.g. Vietcombank" />
+                </Form.Item>
+
+                <Form.Item
+                  label="Account Number"
+                  name={['bankTransfer', 'accountNumber']}
+                  rules={[{ required: true, message: 'Account number is required' }]}
+                >
+                  <Input placeholder="e.g. 0123456789" />
+                </Form.Item>
+
+                <Form.Item
+                  label="Account Holder"
+                  name={['bankTransfer', 'accountName']}
+                  rules={[{ required: true, message: 'Account holder is required' }]}
+                >
+                  <Input placeholder="e.g. SHOFY CO., LTD" />
+                </Form.Item>
+
+                <Form.Item
+                  label="Branch (optional)"
+                  name={['bankTransfer', 'branch']}
+                >
+                  <Input placeholder="e.g. Hanoi Branch" />
+                </Form.Item>
+
+                <Form.Item
+                  label="QR Code (optional)"
+                  name={['bankTransfer', 'qrImageUrl']}
+                >
+                  <ImageUpload />
+                </Form.Item>
+
+                <Form.Item
+                  label="Transfer Content Template (optional)"
+                  name={['bankTransfer', 'transferContentTemplate']}
+                  extra="Use {orderId} as a placeholder. e.g. SHOFY-{orderId}"
+                >
+                  <Input placeholder="SHOFY-{orderId}" />
+                </Form.Item>
+              </Card>
+            );
+          }}
+        </Form.Item>
 
       </Form>
     </div>
