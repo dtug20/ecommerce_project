@@ -1,0 +1,398 @@
+[
+ {
+  "id": 78,
+  "sku": "LAP-APP-APP-078",
+  "category": "laptops",
+  "productType": "electronics"
+ },
+ {
+  "id": 79,
+  "sku": "LAP-ASU-ASU-079",
+  "category": "laptops",
+  "productType": "electronics"
+ },
+ {
+  "id": 80,
+  "sku": "LAP-HUA-HUA-080",
+  "category": "laptops",
+  "productType": "electronics"
+ },
+ {
+  "id": 81,
+  "sku": "LAP-LEN-LEN-081",
+  "category": "laptops",
+  "productType": "electronics"
+ },
+ {
+  "id": 82,
+  "sku": "LAP-DEL-DEL-082",
+  "category": "laptops",
+  "productType": "electronics"
+ },
+ {
+  "id": 99,
+  "sku": "MOB-AMA-AMA-099",
+  "category": "mobile-accessories",
+  "productType": "electronics"
+ },
+ {
+  "id": 83,
+  "sku": "MEN-FAS-BLU-083",
+  "category": "mens-shirts",
+  "productType": "fashion"
+ },
+ {
+  "id": 84,
+  "sku": "MEN-GIG-GIG-084",
+  "category": "mens-shirts",
+  "productType": "fashion"
+ },
+ {
+  "id": 85,
+  "sku": "MEN-CLA-PLA-085",
+  "category": "mens-shirts",
+  "productType": "fashion"
+ },
+ {
+  "id": 86,
+  "sku": "MEN-CAS-SHO-086",
+  "category": "mens-shirts",
+  "productType": "fashion"
+ },
+ {
+  "id": 87,
+  "sku": "MEN-URB-CHE-087",
+  "category": "mens-shirts",
+  "productType": "fashion"
+ },
+ {
+  "id": 88,
+  "sku": "MEN-NIK-NIK-088",
+  "category": "mens-shoes",
+  "productType": "fashion"
+ },
+ {
+  "id": 89,
+  "sku": "MEN-NIK-NIK-089",
+  "category": "mens-shoes",
+  "productType": "fashion"
+ },
+ {
+  "id": 90,
+  "sku": "MEN-PUM-PUM-090",
+  "category": "mens-shoes",
+  "productType": "fashion"
+ },
+ {
+  "id": 91,
+  "sku": "MEN-OFF-SPO-091",
+  "category": "mens-shoes",
+  "productType": "fashion"
+ },
+ {
+  "id": 1,
+  "sku": "BEA-ESS-ESS-001",
+  "category": "beauty",
+  "productType": "beauty"
+ },
+ {
+  "id": 2,
+  "sku": "BEA-GLA-EYE-002",
+  "category": "beauty",
+  "productType": "beauty"
+ },
+ {
+  "id": 3,
+  "sku": "BEA-VEL-POW-003",
+  "category": "beauty",
+  "productType": "beauty"
+ },
+ {
+  "id": 4,
+  "sku": "BEA-CHI-LIP-004",
+  "category": "beauty",
+  "productType": "beauty"
+ },
+ {
+  "id": 5,
+  "sku": "BEA-NAI-NAI-005",
+  "category": "beauty",
+  "productType": "beauty"
+ },
+ {
+  "id": 6,
+  "sku": "FRA-CAL-CAL-006",
+  "category": "fragrances",
+  "productType": "beauty"
+ },
+ {
+  "id": 7,
+  "sku": "FRA-CHA-CHA-007",
+  "category": "fragrances",
+  "productType": "beauty"
+ },
+ {
+  "id": 8,
+  "sku": "FRA-DIO-DIO-008",
+  "category": "fragrances",
+  "productType": "beauty"
+ },
+ {
+  "id": 93,
+  "sku": "MEN-FAS-BRO-093",
+  "category": "mens-watches",
+  "productType": "jewelry"
+ },
+ {
+  "id": 94,
+  "sku": "MEN-LON-LON-094",
+  "category": "mens-watches",
+  "productType": "jewelry"
+ },
+ {
+  "id": 95,
+  "sku": "MEN-ROL-ROL-095",
+  "category": "mens-watches",
+  "productType": "jewelry"
+ },
+ {
+  "id": 96,
+  "sku": "MEN-ROL-ROL-096",
+  "category": "mens-watches",
+  "productType": "jewelry"
+ },
+ {
+  "id": 97,
+  "sku": "MEN-ROL-ROL-097",
+  "category": "mens-watches",
+  "productType": "jewelry"
+ },
+ {
+  "id": 98,
+  "sku": "MEN-ROL-ROL-098",
+  "category": "mens-watches",
+  "productType": "jewelry"
+ },
+ {
+  "id": 182,
+  "sku": "WOM-BRD-GRE-182",
+  "category": "womens-jewellery",
+  "productType": "jewelry"
+ },
+ {
+  "id": 183,
+  "sku": "WOM-BRD-GRE-183",
+  "category": "womens-jewellery",
+  "productType": "jewelry"
+ },
+ {
+  "id": 184,
+  "sku": "WOM-BRD-TRO-184",
+  "category": "womens-jewellery",
+  "productType": "jewelry"
+ },
+ {
+  "id": 190,
+  "sku": "WOM-IWC-ING-190",
+  "category": "womens-watches",
+  "productType": "jewelry"
+ },
+ {
+  "id": 11,
+  "sku": "FUR-ANN-ANN-011",
+  "category": "furniture",
+  "productType": "home"
+ },
+ {
+  "id": 12,
+  "sku": "FUR-ANN-ANN-012",
+  "category": "furniture",
+  "productType": "home"
+ },
+ {
+  "id": 13,
+  "sku": "FUR-FUR-BED-013",
+  "category": "furniture",
+  "productType": "home"
+ },
+ {
+  "id": 14,
+  "sku": "FUR-KNO-KNO-014",
+  "category": "furniture",
+  "productType": "home"
+ },
+ {
+  "id": 15,
+  "sku": "FUR-BAT-WOO-015",
+  "category": "furniture",
+  "productType": "home"
+ },
+ {
+  "id": 43,
+  "sku": "HOM-BRD-DEC-043",
+  "category": "home-decoration",
+  "productType": "home"
+ },
+ {
+  "id": 44,
+  "sku": "HOM-BRD-FAM-044",
+  "category": "home-decoration",
+  "productType": "home"
+ },
+ {
+  "id": 45,
+  "sku": "HOM-BRD-HOU-045",
+  "category": "home-decoration",
+  "productType": "home"
+ },
+ {
+  "id": 46,
+  "sku": "HOM-BRD-PLA-046",
+  "category": "home-decoration",
+  "productType": "home"
+ },
+ {
+  "id": 47,
+  "sku": "HOM-BRD-TAB-047",
+  "category": "home-decoration",
+  "productType": "home"
+ },
+ {
+  "id": 48,
+  "sku": "KIT-BRD-BAM-048",
+  "category": "kitchen-accessories",
+  "productType": "home"
+ },
+ {
+  "id": 49,
+  "sku": "KIT-BRD-BLA-049",
+  "category": "kitchen-accessories",
+  "productType": "home"
+ },
+ {
+  "id": 50,
+  "sku": "KIT-BRD-BLA-050",
+  "category": "kitchen-accessories",
+  "productType": "home"
+ },
+ {
+  "id": 51,
+  "sku": "KIT-BRD-BOX-051",
+  "category": "kitchen-accessories",
+  "productType": "home"
+ },
+ {
+  "id": 52,
+  "sku": "KIT-BRD-CAR-052",
+  "category": "kitchen-accessories",
+  "productType": "home"
+ },
+ {
+  "id": 53,
+  "sku": "KIT-BRD-CHO-053",
+  "category": "kitchen-accessories",
+  "productType": "home"
+ },
+ {
+  "id": 54,
+  "sku": "KIT-BRD-CIT-054",
+  "category": "kitchen-accessories",
+  "productType": "home"
+ },
+ {
+  "id": 137,
+  "sku": "SPO-BRD-AME-137",
+  "category": "sports-accessories",
+  "productType": "sports"
+ },
+ {
+  "id": 138,
+  "sku": "SPO-BRD-BAS-138",
+  "category": "sports-accessories",
+  "productType": "sports"
+ },
+ {
+  "id": 139,
+  "sku": "SPO-BRD-BAS-139",
+  "category": "sports-accessories",
+  "productType": "sports"
+ },
+ {
+  "id": 140,
+  "sku": "SPO-BRD-BAS-140",
+  "category": "sports-accessories",
+  "productType": "sports"
+ },
+ {
+  "id": 141,
+  "sku": "SPO-BRD-BAS-141",
+  "category": "sports-accessories",
+  "productType": "sports"
+ },
+ {
+  "id": 142,
+  "sku": "SPO-BRD-CRI-142",
+  "category": "sports-accessories",
+  "productType": "sports"
+ },
+ {
+  "id": 143,
+  "sku": "SPO-BRD-CRI-143",
+  "category": "sports-accessories",
+  "productType": "sports"
+ },
+ {
+  "id": 144,
+  "sku": "SPO-BRD-CRI-144",
+  "category": "sports-accessories",
+  "productType": "sports"
+ },
+ {
+  "id": 145,
+  "sku": "SPO-BRD-CRI-145",
+  "category": "sports-accessories",
+  "productType": "sports"
+ },
+ {
+  "id": 146,
+  "sku": "SPO-BRD-FEA-146",
+  "category": "sports-accessories",
+  "productType": "sports"
+ },
+ {
+  "id": 147,
+  "sku": "SPO-BRD-FOO-147",
+  "category": "sports-accessories",
+  "productType": "sports"
+ },
+ {
+  "id": 148,
+  "sku": "SPO-BRD-GOL-148",
+  "category": "sports-accessories",
+  "productType": "sports"
+ },
+ {
+  "id": 149,
+  "sku": "SPO-BRD-IRO-149",
+  "category": "sports-accessories",
+  "productType": "sports"
+ },
+ {
+  "id": 150,
+  "sku": "SPO-BRD-MET-150",
+  "category": "sports-accessories",
+  "productType": "sports"
+ },
+ {
+  "id": 151,
+  "sku": "SPO-BRD-TEN-151",
+  "category": "sports-accessories",
+  "productType": "sports"
+ },
+ {
+  "id": 152,
+  "sku": "SPO-BRD-TEN-152",
+  "category": "sports-accessories",
+  "productType": "sports"
+ }
+]
