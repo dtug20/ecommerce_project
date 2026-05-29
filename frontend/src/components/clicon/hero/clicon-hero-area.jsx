@@ -91,7 +91,6 @@ function bannerToPromo(banner) {
 function HeroSlide({ slide, t, isApi }) {
   const title = isApi ? slide.title : t(slide.titleKey);
   const subtitle = isApi ? slide.subtitle : t(slide.subtitleKey);
-  const desc = isApi ? slide.desc : t(slide.descKey);
 
   return (
     <div
@@ -99,42 +98,30 @@ function HeroSlide({ slide, t, isApi }) {
       style={{ backgroundColor: slide.bgColor }}
       data-testid={`clicon-hero-slide`}
     >
-      <div className="container-fluid px-0">
-        <div className="row g-0 align-items-center">
-          <div className="col-md-6 col-lg-7">
-            <div className="cl-hero-slide__content">
-              {subtitle && <p className="cl-hero-slide__subtitle">{subtitle}</p>}
-              <h2 className="cl-hero-slide__title">{title}</h2>
-              {desc && <p className="cl-hero-slide__desc">{desc}</p>}
-              <Link
-                href={slide.link || '/shop'}
-                className="cl-hero-slide__btn"
-                data-testid="clicon-hero-shop-btn"
-              >
-                {t('hero.shopNow')}
-                <i className="fa-solid fa-arrow-right ms-2" aria-hidden="true" />
-              </Link>
-            </div>
-          </div>
-          <div className="col-md-6 col-lg-5">
-            <div className="cl-hero-slide__image">
-              {slide.price && (
-                <span className="cl-hero-slide__price-circle">{slide.price}</span>
-              )}
-              {slide.image && (
-                <Image
-                  src={slide.image}
-                  alt={title}
-                  width={420}
-                  height={360}
-                  priority
-                  style={{ objectFit: 'contain', width: '100%', height: 'auto' }}
-                  unoptimized
-                />
-              )}
-            </div>
-          </div>
-        </div>
+      {slide.image && (
+        <Image
+          className="cl-hero-slide__bg"
+          src={slide.image}
+          alt={title || ''}
+          fill
+          priority
+          sizes="(max-width: 1200px) 100vw, 66vw"
+          style={{ objectFit: 'cover' }}
+          unoptimized
+        />
+      )}
+      <span className="cl-hero-slide__scrim" aria-hidden="true" />
+      <div className="cl-hero-slide__content">
+        {subtitle && <p className="cl-hero-slide__subtitle">{subtitle}</p>}
+        {title && <h2 className="cl-hero-slide__title">{title}</h2>}
+        <Link
+          href={slide.link || '/shop'}
+          className="cl-hero-slide__btn"
+          data-testid="clicon-hero-shop-btn"
+        >
+          {t('hero.shopNow')}
+          <i className="fa-solid fa-arrow-right ms-2" aria-hidden="true" />
+        </Link>
       </div>
     </div>
   );
@@ -168,8 +155,12 @@ const CliconHeroArea = () => {
           <div className="col-xl-8 d-flex">
             <div className="cl-hero-slider w-100">
               <Swiper
+                // Re-init Swiper khi tập slide đổi (fallback 3 -> API 4). Bật `loop`
+                // mà đổi số slide sau init sẽ làm slide active bị rỗng nếu không remount.
+                key={`hero-${useApi ? 'api' : 'fallback'}-${slides.length}`}
                 slidesPerView={1}
                 effect="fade"
+                fadeEffect={{ crossFade: true }}
                 loop
                 autoplay={{ delay: 4500, disableOnInteraction: false }}
                 pagination={{ el: '.cl-hero-dots', clickable: true }}

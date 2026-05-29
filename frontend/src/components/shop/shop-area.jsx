@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Pagination from "@/ui/Pagination";
+import EmptyState from "@/components/common/empty-state";
 import CliconDealProductCard from "@/components/clicon/deals/clicon-deal-product-card";
 import CategoryFilter from "./shop-filter/category-filter";
 import PriceFilter from "./shop-filter/price-filter";
@@ -11,6 +13,7 @@ import ShopTopRight from "./shop-top-right";
 import ShopActiveFilters from "./shop-active-filters";
 
 const ShopArea = ({ all_products, products, otherProps }) => {
+  const { t } = useTranslation();
   const { priceFilterValues, selectHandleFilter, currPage, setCurrPage, handleFilterChange, totalProducts } = otherProps;
   const [filteredRows, setFilteredRows] = useState(products);
   const [pageStart, setPageStart] = useState(0);
@@ -62,9 +65,11 @@ const ShopArea = ({ all_products, products, otherProps }) => {
 
             {/* Product grid */}
             {products.length === 0 && (
-              <div className="text-center py-5">
-                <h2 style={{ color: 'var(--cl-text-secondary)' }}>No products found</h2>
-              </div>
+              <EmptyState
+                illustration="no-products"
+                title={t('shop.noProductsTitle')}
+                description={t('shop.noProductsDesc')}
+              />
             )}
             {products.length > 0 && (
               <div className="cl-shop__grid">

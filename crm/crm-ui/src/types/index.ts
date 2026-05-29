@@ -128,19 +128,16 @@ export interface User {
   phone?: string;
   role: string;
   status: string;
-  avatar?: string;
+  // Backend model field is `imageURL` (not `avatar`).
+  imageURL?: string;
   gender?: string;
   dateOfBirth?: string;
   emailVerified?: boolean;
   lastLogin?: string;
   orders?: string[];
-  address?: {
-    street?: string;
-    city?: string;
-    state?: string;
-    zipCode?: string;
-    country?: string;
-  };
+  // Backend stores the profile address as a single string. The structured
+  // multi-address book lives separately on the `addresses[]` array.
+  address?: string;
   createdAt: string;
   updatedAt: string;
 }

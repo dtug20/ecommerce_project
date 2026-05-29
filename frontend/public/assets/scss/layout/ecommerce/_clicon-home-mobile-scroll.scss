@@ -1,0 +1,127 @@
+// ============================================================
+// Home page — mobile horizontal scroll for product grids
+// ------------------------------------------------------------
+// On phones + small tablets (< 768px) the home product grids
+// switch from a wrapping Bootstrap grid to a single-row,
+// horizontally-scrolling, snap-to-card carousel. Each card is
+// sized to leave a "peek" of the next one so users see there's
+// more to scroll.
+//
+// Scope (Categories already uses Swiper, so it's left as-is):
+//   - Featured Products   .cl-featured__grid > .row
+//   - Best Deals          .cl-deals .col-xl-8 > .row
+//   - Electronics/Promo   .cl-product-section .col-xl-9 > .row
+//   - Product Columns     .cl-product-columns .row
+//   - Blog                .cl-blog-area .row
+//
+// CSS-only — no JSX changes. Layout rows (promo/featured-deal
+// splits) are intentionally NOT matched by these selectors.
+// ============================================================
+
+@media (max-width: 767.98px) {
+  // --- pin product columns to full width ------------------------------
+  // Bootstrap columns that only declare `col-xl-*` get NO width below the
+  // xl breakpoint, so they become auto-width flex items that grow to fit
+  // their content. A nowrap child (the scrolling tab strip / card track)
+  // can then stretch them past the viewport and force the whole page to
+  // scroll sideways. Pin them to full width and allow inner scrollers to
+  // shrink (min-width: 0).
+  .cl-featured .col-xl-9,
+  .cl-deals .col-xl-4,
+  .cl-deals .col-xl-8,
+  .cl-product-section .col-xl-9 {
+    flex: 0 0 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  // --- shared scroll-track behaviour ----------------------------------
+  .cl-featured__grid > .row,
+  .cl-deals .col-xl-8 > .row,
+  .cl-product-section .col-xl-9 > .row,
+  .cl-product-columns .row,
+  .cl-blog-area .row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: var(--bs-gutter-x, 1rem);
+    -webkit-overflow-scrolling: touch;
+
+    // hide the scrollbar (Firefox + WebKit) — the card peek is the affordance
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    > [class*="col-"] {
+      flex: 0 0 auto;
+      scroll-snap-align: start;
+    }
+  }
+
+  // --- card-peek widths -----------------------------------------------
+  // ~2 product cards visible + a sliver of the next
+  .cl-featured__grid > .row > [class*="col-"],
+  .cl-deals .col-xl-8 > .row > [class*="col-"],
+  .cl-product-section .col-xl-9 > .row > [class*="col-"] {
+    width: 42%;
+    max-width: 42%;
+  }
+
+  // each column is a tall product list → wider peek (~1.25 columns)
+  .cl-product-columns .row > [class*="col-"] {
+    width: 80%;
+    max-width: 80%;
+  }
+
+  // blog article cards are wide (image + excerpt) → ~1.2 cards visible
+  .cl-blog-area .row > [class*="col-"] {
+    width: 85%;
+    max-width: 85%;
+  }
+
+  // --- tab headers ----------------------------------------------------
+  // The Featured & Electronics/Promo headers use flex-wrap, which on a
+  // narrow screen collapses the tab strip into a vertical stack with a
+  // big gap. Stack the header vertically and make the tab strip a single
+  // horizontally-scrolling row instead.
+  .cl-featured__header,
+  .cl-product-section__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .cl-featured__tabs,
+  .cl-product-section__tabs {
+    // cap to the header width so the strip scrolls internally instead of
+    // sizing to its content and stretching the column past the viewport
+    width: 100%;
+    min-width: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cl-featured__tab,
+    .cl-product-section__tab {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+  }
+
+  // align the section title / browse link left once the header stacks
+  .cl-product-section__title {
+    margin-right: 0;
+  }
+
+  .cl-featured__browse,
+  .cl-product-section__browse {
+    margin-left: 0;
+    align-self: flex-start;
+  }
+}

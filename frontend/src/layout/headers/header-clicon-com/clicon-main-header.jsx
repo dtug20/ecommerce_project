@@ -99,16 +99,16 @@ const CliconMainHeader = ({ setIsCanvasOpen }) => {
               {quantity > 0 && <span className="cl-header-icon__badge">{quantity}</span>}
             </Link>
 
-            {/* Wishlist */}
-            <Link href="/wishlist" className="cl-header-icon" aria-label="Wishlist">
+            {/* Wishlist — hidden on phones (available in the slide-out menu) */}
+            <Link href="/wishlist" className="cl-header-icon d-none d-md-flex" aria-label="Wishlist">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12.62 20.81c-.34.12-.9.12-1.24 0C8.48 19.82 2 15.69 2 8.69 2 5.6 4.49 3.1 7.56 3.1c1.82 0 3.43.88 4.44 2.24a5.53 5.53 0 0 1 4.44-2.24C19.51 3.1 22 5.6 22 8.69c0 7-6.48 11.13-9.38 12.12Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               {wishlist.length > 0 && <span className="cl-header-icon__badge">{wishlist.length}</span>}
             </Link>
 
-            {/* User / Profile dropdown */}
-            <div className="cl-profile-drop-wrap" ref={profileRef}>
+            {/* User / Profile dropdown — hidden on phones (available in the slide-out menu) */}
+            <div className="cl-profile-drop-wrap d-none d-md-block" ref={profileRef}>
               <button
                 type="button"
                 className="cl-header-icon cl-profile-drop-wrap__trigger"

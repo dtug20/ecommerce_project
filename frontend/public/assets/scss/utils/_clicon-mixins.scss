@@ -3,6 +3,8 @@
 // Reusable patterns for the Clicon homepage redesign
 // ============================================================
 
+@use 'breakpoints' as *; // $md, $sm, $xs for responsive mixins
+
 // --- Buttons ---
 @mixin cl-btn-primary {
   display: inline-flex;
@@ -150,6 +152,15 @@
 @mixin cl-section {
   padding: var(--cl-spacing-3xl) 0;
   font-family: var(--cl-ff-body);
+
+  // Tighter vertical rhythm on smaller screens — 72px top+bottom stacks
+  // up to a 144px gap between sections, which is excessive on mobile.
+  @media #{$md} {
+    padding: var(--cl-spacing-2xl) 0; // 48px on tablets
+  }
+  @media #{$sm, $xs} {
+    padding: var(--cl-spacing-xl) 0; // 32px on phones
+  }
 }
 
 @mixin cl-section-title {

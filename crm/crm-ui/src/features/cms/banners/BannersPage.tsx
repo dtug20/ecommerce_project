@@ -341,6 +341,9 @@ export default function BannersPage() {
   const [editing, setEditing] = useState<Banner | null>(null);
 
   const params = {
+    // Trang này quản lý priority bằng kéo-thả nên cần lấy TẤT CẢ banner trong 1 lần.
+    // Backend mặc định limit=10 (MAX_LIMIT=100) → nếu không truyền limit, banner thứ 11+ bị cắt mất.
+    limit: 100,
     ...(typeFilter ? { type: typeFilter } : {}),
     ...(statusFilter ? { status: statusFilter } : {}),
   };

@@ -7,6 +7,7 @@ import HeaderClicon from "@/layout/headers/header-clicon";
 import ShopBreadcrumb from "@/components/breadcrumb/shop-breadcrumb";
 import ShopArea from "@/components/shop/shop-area";
 import ErrorMsg from "@/components/common/error-msg";
+import EmptyState from "@/components/common/empty-state";
 import FooterClicon from "@/layout/footers/footer-clicon";
 import ShopFilterOffCanvas from "@/components/common/shop-filter-offcanvas";
 import ShopLoader from "@/components/loader/shop/shop-loader";
@@ -101,7 +102,17 @@ const ShopPage = ({ query }) => {
       </div>
     );
   } else if (!productsData?.data?.length) {
-    content = <ErrorMsg msg="No Products found!" />;
+    content = (
+      <div className="container">
+        <EmptyState
+          illustration="no-products"
+          title={t('shop.noProductsTitle')}
+          description={t('shop.noProductsDesc')}
+          actionText={t('shop.browseAll')}
+          onAction={() => router.push('/shop')}
+        />
+      </div>
+    );
   } else {
     content = (
       <>

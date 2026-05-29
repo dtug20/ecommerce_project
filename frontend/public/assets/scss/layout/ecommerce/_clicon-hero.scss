@@ -23,22 +23,13 @@
   border-radius: var(--cl-radius-md);
   overflow: hidden;
   height: 100%;
-  display: flex;
-  flex-direction: column;
 
+  // Let Swiper own its internal layout — overriding the root/wrapper display
+  // (flex-column) breaks Swiper's horizontal width calc (blows up to ~33M px).
   .cl-hero-swiper {
     border-radius: var(--cl-radius-md);
+    width: 100%;
     height: 100%;
-    display: flex;
-    flex-direction: column;
-
-    .swiper-wrapper {
-      flex: 1;
-    }
-
-    .swiper-slide {
-      height: auto;
-    }
   }
 }
 
@@ -46,25 +37,47 @@
 // Individual slide
 // ---------------------------------------------------------------------------
 .cl-hero-slide {
+  position: relative;
+  overflow: hidden;
   border-radius: var(--cl-radius-md);
-  padding: var(--cl-spacing-lg) var(--cl-spacing-xl) var(--cl-spacing-lg) var(--cl-spacing-2xl);
-  min-height: 280px;
+  min-height: 320px;
   height: 100%;
   display: flex;
   align-items: center;
 
   @media (min-width: 768px) {
-    min-height: 320px;
+    min-height: 400px;
   }
 
   @media (min-width: 1200px) {
-    min-height: unset;
+    min-height: 440px;
   }
 
-  // Text content column
+  // Full-bleed banner image (Next/Image fill)
+  &__bg {
+    object-fit: cover;
+    z-index: 0;
+  }
+
+  // Light scrim so dark CMS text stays readable over any banner image
+  &__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.92) 0%,
+      rgba(255, 255, 255, 0.6) 38%,
+      rgba(255, 255, 255, 0) 72%
+    );
+  }
+
+  // Overlaid text content
   &__content {
-    padding: var(--cl-spacing-sm) 0;
-    max-width: 340px;
+    position: relative;
+    z-index: 2;
+    padding: var(--cl-spacing-xl) var(--cl-spacing-2xl);
+    max-width: 460px;
   }
 
   &__subtitle {
@@ -93,53 +106,9 @@
     }
   }
 
-  &__desc {
-    font-size: var(--cl-fs-body);
-    color: var(--cl-text-body);
-    line-height: var(--cl-lh-relaxed);
-    margin-bottom: var(--cl-spacing-lg);
-  }
-
   &__btn {
     @include cl-btn-primary;
     text-decoration: none;
-  }
-
-  // Product image column
-  &__image {
-    text-align: center;
-    position: relative;
-
-    img {
-      max-height: 320px;
-      width: auto !important;
-    }
-  }
-
-  // Price circle badge (like Figma: blue circle with white price text)
-  &__price-circle {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background-color: #2DA5F3;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    font-weight: var(--cl-fw-bold);
-    font-family: var(--cl-ff-body);
-    z-index: 2;
-    box-shadow: 0 4px 12px rgba(45, 165, 243, 0.3);
-
-    @media (max-width: 767px) {
-      width: 60px;
-      height: 60px;
-      font-size: 16px;
-    }
   }
 }
 

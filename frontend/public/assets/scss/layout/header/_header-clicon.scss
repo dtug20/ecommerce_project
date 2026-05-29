@@ -226,10 +226,22 @@
   padding: 20px 0;
   font-family: var(--cl-ff-body);
 
+  @media #{$sm, $xs} {
+    padding: 12px 0;
+  }
+
   &__inner {
     display: flex;
     align-items: center;
     gap: 32px;
+
+    // On phones the header becomes two rows: logo + icons on top,
+    // a full-width search bar below.
+    @media #{$sm, $xs} {
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+    }
   }
 
   &__logo {
@@ -244,8 +256,11 @@
     flex: 1;
     min-width: 0;
 
+    // second row, full width (instead of being hidden)
     @media #{$sm, $xs} {
-      display: none;
+      order: 3;
+      flex: 0 0 100%;
+      width: 100%;
     }
   }
 
@@ -796,6 +811,12 @@
     align-items: center;
     gap: 20px;
     padding: 10px 0;
+
+    // search is hidden on phones — keep logo left, icons right
+    @media #{$sm, $xs} {
+      justify-content: space-between;
+      gap: 12px;
+    }
   }
 
   &__logo {

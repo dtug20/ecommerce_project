@@ -116,10 +116,10 @@ interface UserAvatarProps {
 }
 
 function UserAvatar({ user, size = 40 }: UserAvatarProps) {
-  if (user.avatar) {
+  if (user.imageURL) {
     return (
       <Avatar
-        src={user.avatar}
+        src={user.imageURL}
         size={size}
         alt={user.name}
         style={{ flexShrink: 0 }}
@@ -148,14 +148,10 @@ interface UserFormData {
   role: string;
   status: string;
   gender?: string;
-  avatar?: string;
+  imageURL?: string;
   dateOfBirth?: dayjs.Dayjs;
   emailVerified?: boolean;
-  street?: string;
-  city?: string;
-  state?: string;
-  zipCode?: string;
-  country?: string;
+  address?: string;
 }
 
 interface UserFormModalProps {
@@ -213,16 +209,12 @@ function UserFormModal({ open, editingUser, onClose }: UserFormModalProps) {
         role: editingUser.role,
         status: editingUser.status,
         gender: editingUser.gender ?? undefined,
-        avatar: editingUser.avatar ?? '',
+        imageURL: editingUser.imageURL ?? '',
         dateOfBirth: editingUser.dateOfBirth
           ? dayjs(editingUser.dateOfBirth)
           : undefined,
         emailVerified: editingUser.emailVerified ?? false,
-        street: editingUser.address?.street ?? '',
-        city: editingUser.address?.city ?? '',
-        state: editingUser.address?.state ?? '',
-        zipCode: editingUser.address?.zipCode ?? '',
-        country: editingUser.address?.country ?? '',
+        address: editingUser.address ?? '',
       });
     } else {
       form.resetFields();
@@ -237,18 +229,12 @@ function UserFormModal({ open, editingUser, onClose }: UserFormModalProps) {
       role: values.role,
       status: values.status,
       gender: values.gender || undefined,
-      avatar: values.avatar || undefined,
+      imageURL: values.imageURL || undefined,
       dateOfBirth: values.dateOfBirth
         ? values.dateOfBirth.toISOString()
         : undefined,
       emailVerified: values.emailVerified ?? false,
-      address: {
-        street: values.street || undefined,
-        city: values.city || undefined,
-        state: values.state || undefined,
-        zipCode: values.zipCode || undefined,
-        country: values.country || undefined,
-      },
+      address: values.address || undefined,
     };
 
     if (values.password) {
@@ -376,7 +362,7 @@ function UserFormModal({ open, editingUser, onClose }: UserFormModalProps) {
 
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item name="avatar" label="Avatar URL">
+            <Form.Item name="imageURL" label="Avatar URL">
               <Input placeholder="https://example.com/avatar.jpg" />
             </Form.Item>
           </Col>
@@ -401,34 +387,11 @@ function UserFormModal({ open, editingUser, onClose }: UserFormModalProps) {
 
         <Row gutter={16}>
           <Col span={24}>
-            <Form.Item name="street" label="Street">
-              <Input placeholder="Street address" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={8}>
-            <Form.Item name="city" label="City">
-              <Input placeholder="City" />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item name="state" label="State">
-              <Input placeholder="State" />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item name="zipCode" label="Zip Code">
-              <Input placeholder="Zip code" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item name="country" label="Country">
-              <Input placeholder="Country" />
+            <Form.Item name="address" label="Address">
+              <Input.TextArea
+                autoSize={{ minRows: 2, maxRows: 4 }}
+                placeholder="Full address (street, city, state, zip, country)"
+              />
             </Form.Item>
           </Col>
         </Row>
@@ -494,8 +457,7 @@ function UserDetailModal({ user, open, onClose }: UserDetailModalProps) {
   ];
 
   const hasAddress =
-    user.address &&
-    Object.values(user.address).some((v) => typeof v === 'string' && v.trim() !== '');
+    typeof user.address === 'string' && user.address.trim() !== '';
 
   return (
     <Modal
@@ -584,31 +546,9 @@ function UserDetailModal({ user, open, onClose }: UserDetailModalProps) {
                 Address
               </Divider>
               <Descriptions column={1} size="small" bordered>
-                {user.address?.street && (
-                  <Descriptions.Item label="Street">
-                    {user.address.street}
-                  </Descriptions.Item>
-                )}
-                {user.address?.city && (
-                  <Descriptions.Item label="City">
-                    {user.address.city}
-                  </Descriptions.Item>
-                )}
-                {user.address?.state && (
-                  <Descriptions.Item label="State">
-                    {user.address.state}
-                  </Descriptions.Item>
-                )}
-                {user.address?.zipCode && (
-                  <Descriptions.Item label="Zip Code">
-                    {user.address.zipCode}
-                  </Descriptions.Item>
-                )}
-                {user.address?.country && (
-                  <Descriptions.Item label="Country">
-                    {user.address.country}
-                  </Descriptions.Item>
-                )}
+                <Descriptions.Item label="Address">
+                  {user.address}
+                </Descriptions.Item>
               </Descriptions>
             </>
           )}
