@@ -23,7 +23,7 @@ async function fixExisting({ commit = true, translateFn, processImagesFn, manife
   const cats = await Category.find({}).lean();
   const catIdByParent = new Map(cats.map((c) => [c.parent, c._id]));
   const brandIdByName = await importBrands.idByName();
-  const originals = await Products.find({ importId: { $exists: false } }).lean();
+  const originals = await Products.find({ importId: null }).lean();
 
   const items = originals.map((p) => ({ sku: p.sku || String(p._id), title: p.title, description: p.description }));
   const tr = translateFn ? await translateFn(items) : await translateProducts(items, { cachePath: translationsPath });

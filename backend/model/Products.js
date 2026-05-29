@@ -181,6 +181,9 @@ const productsSchema = mongoose.Schema({
   embeddedAt: { type: Date, default: null },
 
   currencyReviewedAt: { type: Date, default: null },
+
+  // Catalog migration — tracks source record for idempotent re-runs
+  importId: { type: String, default: null, index: true, sparse: true },
 }, {
   timestamps: true,
 })
