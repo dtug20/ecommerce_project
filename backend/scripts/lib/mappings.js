@@ -149,8 +149,37 @@ const mapDjToTaxonomy = (djCategory, dj = {}) => {
   return { productType: m.productType, parent: m.parent, children: pickChildren(djCategory, dj, m.parent) };
 };
 
+const _catByParent = (parent) => CATEGORY_TREE.find((c) => c.parent === parent);
+
+const isVnSpecial = (title) => VN_SPECIAL.some((s) => String(title || '').toLowerCase().includes(s.toLowerCase()));
+
+// Reclassify an EXISTING product (not from DummyJSON). p = {title, parent, productType, brandName}.
+// Note: the watch regex is intentionally broad (/\bwatch\b|rolex|datejust|omega|casio|seiko/) to
+// capture luxury watch brand names that don't include "watch" literally (e.g. "Rolex Datejust Women").
+// This is a deliberate deviation from the plan's narrower /\bwatch\b/ to satisfy the test assertion
+// that "Rolex Datejust Women" → parent: 'Đồng hồ'. Plan inconsistency acknowledged.
+function reclassifyExisting(p) {
+  const t = String(p.title || '').toLowerCase();
+  const target = (parent) => {
+    const node = _catByParent(parent);
+    return { productType: node.productType, parent: node.parent, children: pickChildren(null, { title: p.title, brand: p.brandName }, node.parent) };
+  };
+  if (/tea set|bamboo/.test(t)) return target('Đồ bếp');
+  if (/pendant lamp|rattan|\blamp\b/.test(t)) return target('Trang trí nhà cửa');
+  if (/bedding|duvet|bed sheet/.test(t)) return target('Nội thất');
+  if (/yoga|resistance band|dumbbell|treadmill|gym/.test(t)) return target('Dụng cụ thể thao');
+  if (/(\bwatch\b|rolex|datejust|omega|casio|seiko)/.test(t) && !/smart\s*watch|apple watch/.test(t)) return target('Đồng hồ');
+  if (/(iphone|galaxy s\d|smartphone|\bphone\b)/.test(t) && !/case|cover|charger|cable|headphone/.test(t)) return target('Điện thoại');
+  const node = CATEGORY_TREE.find((c) => c.oldParent === p.parent);
+  if (node) return { productType: node.productType, parent: node.parent, children: pickChildren(null, { title: p.title, brand: p.brandName }, node.parent) };
+  const byType = CATEGORY_TREE.find((c) => c.productType === p.productType);
+  if (byType) return { productType: byType.productType, parent: byType.parent, children: byType.children[0] };
+  return null;
+}
+
 module.exports = {
   USD_TO_VND, usdToVnd, statusFromStock, slugify, sizesForType,
   PRODUCT_TYPES, CATEGORY_TREE, EXCLUDED_DJ, DJ_CATEGORY_MAP, HOUSE_BRANDS,
   VN_SPECIAL, SOFT_DELETE_PARENTS, brandFixFor, pickChildren, mapDjToTaxonomy,
+  reclassifyExisting, isVnSpecial,
 };
