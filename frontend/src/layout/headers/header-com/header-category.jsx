@@ -54,8 +54,16 @@ const HeaderCategory = ({ isCategoryActive }) => {
   if (!isLoading && !isError && categories?.result?.length > 0) {
     const category_items = categories.result;
 
-    // Use the exact 5 predefined default types
-    const defaultTypes = ["fashion", "electronics", "beauty", "jewelry", "other"];
+    // 6 store verticals with Vietnamese display labels
+    const defaultTypes = ["fashion", "electronics", "beauty", "jewelry", "home", "sports"];
+    const TYPE_LABELS = {
+      fashion: "Thời trang",
+      electronics: "Đồ điện tử",
+      beauty: "Làm đẹp",
+      jewelry: "Trang sức",
+      home: "Nhà cửa & Đời sống",
+      sports: "Thể thao",
+    };
 
     // Group categories by strictly the default productTypes
     const grouped = defaultTypes.reduce((acc, type) => {
@@ -71,7 +79,7 @@ const HeaderCategory = ({ isCategoryActive }) => {
           className="cursor-pointer"
           onClick={() => router.push(`/shop?categoryType=${type}`)}
         >
-          {type.charAt(0).toUpperCase() + type.slice(1)}
+          {TYPE_LABELS[type] || (type.charAt(0).toUpperCase() + type.slice(1))}
         </a>
 
         {cats.length > 0 && (
