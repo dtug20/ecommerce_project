@@ -4,6 +4,64 @@
     <#if section = "header">
     <#elseif section = "form">
 
+    <#-- Critical OTP layout CSS inlined so the 6-digit boxes render horizontally
+         and the shield circle shows even if the external crm-otp.css fails to link
+         (e.g. a stale cached theme.properties). Uses !important to defeat the
+         PatternFly form-grid/form-control rules from the parent keycloak.v2 theme. -->
+    <style>
+        .crm-otp-shield {
+            width: 88px; height: 88px; margin: 0 auto 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(164,44,72,0.08), rgba(164,44,72,0.16));
+            display: flex; align-items: center; justify-content: center;
+        }
+        #crm-otp-boxes, .crm-otp-boxes {
+            display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important;
+            align-items: center !important; justify-content: center !important;
+            gap: 10px !important; margin: 10px 0 6px !important; padding: 0 !important;
+            width: 100% !important; max-width: 100% !important;
+        }
+        #crm-otp-boxes .crm-otp-box, .crm-otp-boxes .crm-otp-box, input.crm-otp-box {
+            display: inline-block !important;
+            width: 44px !important; min-width: 44px !important; max-width: 44px !important;
+            height: 56px !important; flex: 0 0 44px !important; padding: 0 !important;
+            border: 1.5px solid #e5e7eb !important; border-radius: 10px !important;
+            background: #ffffff !important;
+            font-family: 'SF Mono','Menlo','Consolas',monospace !important;
+            font-size: 22px !important; font-weight: 600 !important; color: #111827 !important;
+            text-align: center !important; outline: none !important;
+            transition: border-color .18s, box-shadow .18s, transform .18s !important;
+            caret-color: #a42c48 !important; box-shadow: 0 1px 2px rgba(17,24,39,0.04) !important;
+            appearance: none !important; -webkit-appearance: none !important;
+        }
+        #crm-otp-boxes .crm-otp-box:hover, .crm-otp-boxes .crm-otp-box:hover { border-color: #d1d5db !important; }
+        #crm-otp-boxes .crm-otp-box:focus, .crm-otp-boxes .crm-otp-box:focus {
+            border-color: #a42c48 !important;
+            box-shadow: 0 0 0 3px rgba(164,44,72,0.15) !important; transform: translateY(-1px) !important;
+        }
+        #crm-otp-boxes .crm-otp-box[value]:not([value=""]) { border-color: #a42c48 !important; background: #fff8fa !important; }
+        .crm-otp-divider {
+            display: inline-flex !important; align-items: center; justify-content: center;
+            color: #d1d5db !important; font-size: 22px; font-weight: 700; user-select: none;
+            margin: 0 2px !important; width: 8px; flex: 0 0 8px;
+        }
+        @media (max-width: 480px) {
+            #crm-otp-boxes, .crm-otp-boxes { gap: 6px !important; }
+            #crm-otp-boxes .crm-otp-box, .crm-otp-boxes .crm-otp-box, input.crm-otp-box {
+                width: 38px !important; min-width: 38px !important; max-width: 38px !important;
+                height: 50px !important; flex: 0 0 38px !important; font-size: 20px !important;
+            }
+        }
+        @media (max-width: 360px) {
+            #crm-otp-boxes, .crm-otp-boxes { gap: 4px !important; }
+            #crm-otp-boxes .crm-otp-box, .crm-otp-boxes .crm-otp-box, input.crm-otp-box {
+                width: 34px !important; min-width: 34px !important; max-width: 34px !important;
+                height: 46px !important; flex: 0 0 34px !important; font-size: 18px !important;
+            }
+            .crm-otp-divider { margin: 0 1px !important; width: 6px; flex: 0 0 6px; }
+        }
+    </style>
+
     <div class="crm-page-wrapper">
         <!-- Left panel — branding -->
         <div class="crm-brand-panel">
