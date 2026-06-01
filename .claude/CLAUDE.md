@@ -51,24 +51,25 @@ EmailTemplate, ActivityLog
 
 Three MCP servers are active on top of the global rules in `~/.claude/CLAUDE.md`:
 
-### grapuco — code intelligence
+### gitnexus — code intelligence (local)
 
-HTTP MCP. For any "where / what / why" question about this repo's code structure, **try grapuco first**, fall back to grep/Read only if it returns nothing useful.
+Local stdio MCP (`npx -y gitnexus mcp`, declared in `.mcp.json`). Everything stays on this machine — no code is sent to a cloud service. The repo is indexed as **ecommerce_project**. For any "where / what / why" question about this repo's code structure, **try gitnexus first**, fall back to grep/Read only if it returns nothing useful.
 
 | Question | Use |
 |---|---|
-| Where is symbol X defined / used? | `get_symbol_context` (NOT grep) |
-| How is X structured / what depends on it? | `get_architecture`, `get_dependencies`, `get_data_flows` |
-| What breaks if I change X? | `blast_radius`, `get_impact_analysis`, `check_dependencies` |
-| Semantic code search ("find checkout flow") | `semantic_search` (NOT grep) |
-| Literal string/regex search | `search_code` (faster than Bash grep, returns ranked) |
-| ER diagram (Mongoose models) | `get_erd` |
-| Rename a symbol safely across the repo | `rename_symbol` (NOT manual Edit) |
-| Resume prior task context | `get_active_task_context` |
+| Full context on symbol X (callers/callees/flows) | `gitnexus_context({name})` (NOT grep) |
+| What breaks if I change X? (blast radius) | `gitnexus_impact({target, direction})` |
+| Semantic search ("find checkout flow") | `gitnexus_query({query})` (NOT grep) |
+| Which symbols/flows does my git diff touch? | `gitnexus_detect_changes()` (run before committing) |
+| Rename a symbol safely across the repo | `gitnexus_rename` (NOT manual find-and-replace) |
+| Raw graph query | `gitnexus_cypher({query})` |
+| Codebase overview / freshness, clusters, processes | resources `gitnexus://repo/ecommerce_project/{context,clusters,processes}` |
 
-Run `mcp__grapuco__bootstrap` **once** per repo before first use; re-run if `check_staleness` reports stale. Confirm with user before bootstrap — it indexes the whole codebase.
+Re-run `npx gitnexus analyze` if a tool warns the index is stale. See `.claude/skills/gitnexus/*` for deeper workflows (exploring, impact-analysis, debugging, refactoring).
 
-Do NOT use grapuco for: reading file contents you're about to Edit, running commands, fetching URLs.
+Do NOT use gitnexus for: reading file contents you're about to Edit, running commands, fetching URLs.
+
+> grapuco (cloud MCP) was removed from this project on 2026-06-01 in favour of gitnexus (local). grapuco is still configured for the MediaSoft repos. gitnexus has no ERD generator — if you need a Mongoose ER diagram, use `gitnexus_cypher` to query model relationships or fall back to reading the model files.
 
 ### context7 — live library documentation
 
@@ -88,7 +89,7 @@ Connects to `mongodb://187.124.3.207:27017/shofy` (public IP, no auth — **trea
 
 ### Priority when multiple MCPs could answer
 
-1. **grapuco** for code-structure questions about this repo
+1. **gitnexus** for code-structure questions about this repo
 2. **context7** for external library docs
 3. **mongodb** for database state
 4. **context-mode** wrappers (`ctx_*`) for anything that would dump >20 lines
@@ -96,4 +97,4 @@ Connects to `mongodb://187.124.3.207:27017/shofy` (public IP, no auth — **trea
 
 ### After enabling these MCPs
 
-Restart Claude Code in this directory once so `mcp__grapuco__*`, `mcp__context7__*`, and `mcp__mongodb__*` appear in the tool list. Verify with: a quick `mcp__grapuco__list_repositories` call, then `bootstrap` if this repo isn't indexed yet.
+Restart Claude Code in this directory once so `mcp__gitnexus__*`, `mcp__context7__*`, and `mcp__mongodb__*` appear in the tool list (approve the project-scoped gitnexus server when prompted). Verify with a quick `gitnexus_context` or `gitnexus_query` call; re-run `npx gitnexus analyze` if the index reports stale.

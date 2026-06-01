@@ -1,5 +1,13 @@
 {
   "mcpServers": {
+    "gitnexus": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "gitnexus",
+        "mcp"
+      ]
+    },
     "mongodb": {
       "command": "npx",
       "args": [
