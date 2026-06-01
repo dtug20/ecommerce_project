@@ -16,8 +16,13 @@ exports.addAllCategoryService = async (data) => {
 }
 
 // get all show category service
+// Honors the admin-controlled `sortOrder` (ascending, matching the CategorySchema
+// index and the CRM table sorter) so the storefront menu reflects the order set in
+// the CRM. createdAt is a stable tie-breaker for the default sortOrder: 0 rows.
 exports.getShowCategoryServices = async () => {
-  const category = await Category.find({status:'Show'}).populate('products');
+  const category = await Category.find({status:'Show'})
+    .sort({ sortOrder: 1, createdAt: 1 })
+    .populate('products');
   return category;
 }
 
@@ -29,7 +34,9 @@ exports.getAllCategoryServices = async () => {
 
 // get type of category service
 exports.getCategoryTypeService = async (param) => {
-  const categories = await Category.find({productType:param}).populate('products');
+  const categories = await Category.find({productType:param})
+    .sort({ sortOrder: 1, createdAt: 1 })
+    .populate('products');
   return categories;
 }
 

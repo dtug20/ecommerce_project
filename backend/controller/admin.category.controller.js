@@ -5,7 +5,7 @@ exports.getAllCategories = async (req, res, next) => {
   try {
     const {
       page = 1, limit = 10, status, productType,
-      search, sortBy = 'createdAt', sortOrder = 'desc'
+      search, sortBy = 'sortOrder', sortOrder = 'asc'
     } = req.query;
 
     const filter = {};
@@ -43,9 +43,11 @@ exports.getAllCategories = async (req, res, next) => {
 // GET /api/admin/categories/stats
 exports.getCategoryStats = async (req, res, next) => {
   try {
-    const [totalCategories, activeCategories, productTypeStats, topCategories] = await Promise.all([
+    const [totalCategories, activeCategories, hiddenCategories, featuredCategories, productTypeStats, topCategories] = await Promise.all([
       Category.countDocuments(),
       Category.countDocuments({ status: 'Show' }),
+      Category.countDocuments({ status: 'Hide' }),
+      Category.countDocuments({ featured: true }),
       Category.aggregate([
         { $group: { _id: '$productType', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
@@ -59,7 +61,7 @@ exports.getCategoryStats = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: { totalCategories, activeCategories, productTypeStats, topCategories },
+      data: { totalCategories, activeCategories, hiddenCategories, featuredCategories, productTypeStats, topCategories },
     });
   } catch (error) {
     next(error);

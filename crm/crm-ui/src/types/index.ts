@@ -207,6 +207,9 @@ export interface UserStats {
 
 export interface CategoryStats {
   totalCategories: number;
+  activeCategories?: number;
+  hiddenCategories?: number;
+  featuredCategories?: number;
   productTypeStats?: { _id: string; count: number }[];
 }
 

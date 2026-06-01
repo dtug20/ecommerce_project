@@ -232,18 +232,20 @@ function buildTreeData(
 // ---------------------------------------------------------------------------
 
 function StatsCards({
-  categories,
+  totalCategories,
+  visibleCount,
+  hiddenCount,
+  featuredCount,
   productTypeStats,
   loading,
 }: {
-  categories: Category[];
+  totalCategories: number;
+  visibleCount: number;
+  hiddenCount: number;
+  featuredCount: number;
   productTypeStats: { _id: string; count: number }[];
   loading: boolean;
 }) {
-  const totalCategories = categories.length;
-  const visibleCount = categories.filter((c) => c.status === 'Show').length;
-  const hiddenCount = categories.filter((c) => c.status === 'Hide').length;
-  const featuredCount = categories.filter((c) => c.featured).length;
 
   const cardStyle = {
     borderRadius: 12,
@@ -613,8 +615,15 @@ export default function CategoriesPage() {
   // Derived data
   // ---------------------------------------------------------------------------
 
-  const productTypeStats: { _id: string; count: number }[] =
-    (statsQuery.data?.data as CategoryStats | undefined)?.productTypeStats ?? [];
+  const stats = statsQuery.data?.data as CategoryStats | undefined;
+  const productTypeStats: { _id: string; count: number }[] = stats?.productTypeStats ?? [];
+
+  // Stat cards must reflect the WHOLE collection (from the stats endpoint), not the
+  // current paginated page — otherwise "Total Categories" shows the page size (10).
+  const statTotal = stats?.totalCategories ?? 0;
+  const statVisible = stats?.activeCategories ?? 0;
+  const statHidden = stats?.hiddenCategories ?? Math.max(statTotal - statVisible, 0);
+  const statFeatured = stats?.featuredCategories ?? 0;
 
   const categories: Category[] = categoriesQuery.data?.data ?? [];
   const allCategories: Category[] = allCategoriesQuery.data?.data ?? [];
@@ -808,7 +817,10 @@ export default function CategoriesPage() {
 
       {/* Stats cards */}
       <StatsCards
-        categories={viewMode === 'tree' ? allCategories : categories}
+        totalCategories={statTotal}
+        visibleCount={statVisible}
+        hiddenCount={statHidden}
+        featuredCount={statFeatured}
         productTypeStats={productTypeStats}
         loading={statsQuery.isLoading}
       />
