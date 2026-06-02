@@ -6,12 +6,19 @@ const ProductVariantSelector = ({ variants = [], onVariantSelected }) => {
   const [selectedMemory, setSelectedMemory] = useState(null);
   const [selectedStorage, setSelectedStorage] = useState(null);
 
+  // Variant color is a nested object ({ name, clrCode }) per the product schema
+  // and CRM, but older/legacy data may carry a flat string. Normalize both.
+  const colorNameOf = (v) =>
+    (v.color && typeof v.color === 'object' ? v.color.name : v.color) || v.colorName || '';
+  const colorCodeOf = (v) =>
+    (v.color && typeof v.color === 'object' ? v.color.clrCode : v.clrCode) || v.colorCode || '#ccc';
+
   // Derive unique colors
   const uniqueColors = [];
   const colorMap = {};
   variants.forEach((v) => {
-    const colorKey = v.color || v.colorName || '';
-    const colorCode = v.colorCode || v.clrCode || '#ccc';
+    const colorKey = colorNameOf(v);
+    const colorCode = colorCodeOf(v);
     if (colorKey && !colorMap[colorKey]) {
       colorMap[colorKey] = colorCode;
       uniqueColors.push({ name: colorKey, code: colorCode });
@@ -22,7 +29,7 @@ const ProductVariantSelector = ({ variants = [], onVariantSelected }) => {
   const availableSizes = [];
   const sizeSet = new Set();
   variants.forEach((v) => {
-    const colorKey = v.color || v.colorName || '';
+    const colorKey = colorNameOf(v);
     const size = v.size || '';
     if ((!selectedColor || colorKey === selectedColor) && size && !sizeSet.has(size)) {
       sizeSet.add(size);
@@ -40,7 +47,7 @@ const ProductVariantSelector = ({ variants = [], onVariantSelected }) => {
   useEffect(() => {
     if (selectedColor && selectedSize) {
       const match = variants.find((v) => {
-        const colorKey = v.color || v.colorName || '';
+        const colorKey = colorNameOf(v);
         const size = v.size || '';
         const memMatch = !uniqueMemory.length || !selectedMemory || v.memory === selectedMemory;
         const storMatch = !uniqueStorage.length || !selectedStorage || v.storage === selectedStorage;
@@ -49,8 +56,8 @@ const ProductVariantSelector = ({ variants = [], onVariantSelected }) => {
       if (match) {
         onVariantSelected({
           sku: match.sku,
-          color: match.color || match.colorName,
-          colorCode: match.colorCode || match.clrCode,
+          color: colorNameOf(match),
+          colorCode: colorCodeOf(match),
           size: match.size,
           price: match.price,
           stock: match.stock,
@@ -105,7 +112,7 @@ const ProductVariantSelector = ({ variants = [], onVariantSelected }) => {
             <option value="">Select Size</option>
             {availableSizes.map((size, i) => {
               const isAvailable = variants.some((v) => {
-                const colorKey = v.color || v.colorName || '';
+                const colorKey = colorNameOf(v);
                 return (!selectedColor || colorKey === selectedColor) && v.size === size && v.stock > 0;
               });
               return (
