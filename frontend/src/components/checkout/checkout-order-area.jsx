@@ -37,7 +37,7 @@ const CheckoutOrderArea = ({ checkoutData }) => {
         {/* Product list */}
         <div className="cl-checkout__summary-items">
           {cart_products.map((item) => (
-            <div key={item._id} className="cl-checkout__summary-item">
+            <div key={item._id + (item.selectedVariant?.sku || '')} className="cl-checkout__summary-item">
               <div className="cl-checkout__summary-thumb">
                 <Image
                   src={getThumb(item)}
@@ -50,6 +50,11 @@ const CheckoutOrderArea = ({ checkoutData }) => {
               </div>
               <div className="cl-checkout__summary-item-info">
                 <p className="item-title">{item.title}</p>
+                {item.selectedVariant && (
+                  <p className="item-variant">
+                    {[item.selectedVariant.color, item.selectedVariant.size].filter(Boolean).join(' / ')}
+                  </p>
+                )}
                 <p className="item-qty">
                   {item.orderQuantity} x{" "}
                   <span>{formatPrice(item.price)}</span>

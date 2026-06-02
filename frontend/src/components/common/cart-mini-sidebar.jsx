@@ -41,7 +41,7 @@ const handleCloseCartMini = () => {
             </div>
             {cart_products.length > 0 && <div className="cartmini__widget">
               {cart_products.map((item) => (
-                <div key={item._id} className="cartmini__widget-item">
+                <div key={item._id + (item.selectedVariant?.sku || '')} className="cartmini__widget-item">
                   <div className="cartmini__thumb">
                     <Link href={`/product-details/${item._id}`}>
                       <SafeImage src={item.img} width={70} height={60} alt={item.title || 'product img'} unoptimized />
@@ -51,12 +51,17 @@ const handleCloseCartMini = () => {
                     <h5 className="cartmini__title">
                       <Link href={`/product-details/${item._id}`}>{item.title}</Link>
                     </h5>
+                    {item.selectedVariant && (
+                      <span className="cartmini__variant">
+                        {[item.selectedVariant.color, item.selectedVariant.size].filter(Boolean).join(' / ')}
+                      </span>
+                    )}
                     <div className="cartmini__price-wrapper">
                       {item.discount > 0 ? <span className="cartmini__price">{formatPrice(Number(item.price) - (Number(item.price) * Number(item.discount)) / 100)}</span> : <span className="cartmini__price">{formatPrice(item.price)}</span>}
                       <span className="cartmini__quantity">{" "}x{item.orderQuantity}</span>
                     </div>
                   </div>
-                  <a onClick={() => handleRemovePrd({ title: item.title, id: item._id })} className="cartmini__del cursor-pointer"><i className="fa-regular fa-xmark"></i></a>
+                  <a onClick={() => handleRemovePrd({ title: item.title, id: item._id, sku: item.selectedVariant?.sku })} className="cartmini__del cursor-pointer"><i className="fa-regular fa-xmark"></i></a>
                 </div>
               ))}
             </div>}

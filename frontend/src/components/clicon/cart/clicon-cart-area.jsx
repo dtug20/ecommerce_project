@@ -85,7 +85,7 @@ const CliconCartArea = () => {
                     </thead>
                     <tbody>
                       {cart_products.map((item) => (
-                        <CliconCartItem key={item._id} item={item} variant="row" />
+                        <CliconCartItem key={item._id + (item.selectedVariant?.sku || '')} item={item} variant="row" />
                       ))}
                     </tbody>
                   </table>

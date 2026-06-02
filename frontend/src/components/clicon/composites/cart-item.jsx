@@ -22,12 +22,15 @@ const CliconCartItem = ({ item, variant = 'row', className = '' }) => {
 
   if (!item) return null;
 
-  const { _id, img, title, price = 0, discount = 0, orderQuantity = 1, quantity: maxStock } = item;
+  const { _id, img, title, price = 0, discount = 0, orderQuantity = 1, quantity: maxStock, selectedVariant } = item;
   const unitPrice = discount > 0 ? Number((price - (price * discount) / 100).toFixed(2)) : price;
   const lineTotal = unitPrice * orderQuantity;
+  const variantLabel = selectedVariant
+    ? [selectedVariant.color, selectedVariant.size].filter(Boolean).join(' / ')
+    : '';
 
   const handleRemove = () => {
-    dispatch(remove_product({ title, id: _id }));
+    dispatch(remove_product({ title, id: _id, sku: selectedVariant?.sku }));
   };
 
   // --- Compact variant (mini cart) ---
@@ -47,6 +50,7 @@ const CliconCartItem = ({ item, variant = 'row', className = '' }) => {
           <h5 className="cl-cart-item__title">
             <Link href={`/product-details/${_id}`}>{title}</Link>
           </h5>
+          {variantLabel && <span className="cl-cart-item__variant">{variantLabel}</span>}
           <div className="cl-cart-item__price-qty">
             <span className="cl-cart-item__unit-price">{formatPrice(unitPrice)}</span>
             <span className="cl-cart-item__qty-label"> x{orderQuantity}</span>
@@ -78,8 +82,8 @@ const CliconCartItem = ({ item, variant = 'row', className = '' }) => {
       </td>
       <td className="cl-cart-item__title-cell">
         <Link href={`/product-details/${_id}`}>{title}</Link>
-        {item.selectedVariant && (
-          <span className="cl-cart-item__variant">{item.selectedVariant}</span>
+        {variantLabel && (
+          <span className="cl-cart-item__variant">{variantLabel}</span>
         )}
       </td>
       <td className="cl-cart-item__price-cell">
@@ -90,7 +94,7 @@ const CliconCartItem = ({ item, variant = 'row', className = '' }) => {
           value={orderQuantity}
           min={1}
           max={maxStock || 99}
-          onChange={(qty) => dispatch(setCartItemQuantity({ _id, quantity: qty, maxStock: maxStock || 99 }))}
+          onChange={(qty) => dispatch(setCartItemQuantity({ _id, quantity: qty, maxStock: maxStock || 99, sku: selectedVariant?.sku }))}
         />
       </td>
       <td className="cl-cart-item__total-cell">
