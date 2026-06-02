@@ -43,6 +43,12 @@ jobs:
             # Restart with new images
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
 
+            # Keycloak uses the stock image with themes bind-mounted from the repo,
+            # so `up -d` never recreates it when only theme files change. In prod
+            # mode Keycloak caches themes in memory, so we must restart it to pick
+            # up theme edits (e.g. login-otp.ftl / theme.properties / css changes).
+            docker compose -f docker-compose.prod.yml restart keycloak
+
             # Cleanup old images
             docker image prune -f
 
