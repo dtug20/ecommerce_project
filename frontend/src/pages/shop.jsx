@@ -16,29 +16,34 @@ import { useGetFilteredProductsQuery } from "@/redux/features/cmsApi";
 const ShopPage = ({ query }) => {
   const { t } = useTranslation();
   const router = useRouter();
-  const [selectValue, setSelectValue] = useState(query.sort || "");
+  // Read filters from the LIVE router query (merged over the SSR `query` prop) so
+  // that shallow-routed filter changes (price/sort/brand/tag/category) actually
+  // re-key this RTK query and re-fetch. getServerSideProps only runs on the first
+  // load, so reading the prop alone left the list stale on every sidebar change.
+  const liveQuery = { ...query, ...router.query };
+  const [selectValue, setSelectValue] = useState(liveQuery.sort || "");
 
   // Build API params from URL query
   const apiParams = {
-    page: query.page || 1,
+    page: liveQuery.page || 1,
     limit: 20,
-    ...(query.subCategory
-      ? { subCategory: query.subCategory }
-      : query.category && { category: query.category }),
-    ...(query.brand && { brand: query.brand }),
-    ...(query.color && { color: query.color }),
-    ...(query.minPrice && { minPrice: query.minPrice }),
-    ...(query.maxPrice && { maxPrice: query.maxPrice }),
-    ...(query.productType && { productType: query.productType }),
-    ...(query.tag && { tag: query.tag }),
-    ...(query.search && { search: query.search }),
-    ...(query.sort && query.sort !== 'Default Sorting'
+    ...(liveQuery.subCategory
+      ? { subCategory: liveQuery.subCategory }
+      : liveQuery.category && { category: liveQuery.category }),
+    ...(liveQuery.brand && { brand: liveQuery.brand }),
+    ...(liveQuery.color && { color: liveQuery.color }),
+    ...(liveQuery.minPrice && { minPrice: liveQuery.minPrice }),
+    ...(liveQuery.maxPrice && { maxPrice: liveQuery.maxPrice }),
+    ...(liveQuery.productType && { productType: liveQuery.productType }),
+    ...(liveQuery.tag && { tag: liveQuery.tag }),
+    ...(liveQuery.search && { search: liveQuery.search }),
+    ...(liveQuery.sort && liveQuery.sort !== 'Default Sorting'
       ? {
           sortBy:
-            query.sort === 'Low to High' || query.sort === 'High to Low'
+            liveQuery.sort === 'Low to High' || liveQuery.sort === 'High to Low'
               ? 'price'
               : 'createdAt',
-          sortOrder: query.sort === 'Low to High' ? 'asc' : 'desc',
+          sortOrder: liveQuery.sort === 'Low to High' ? 'asc' : 'desc',
         }
       : {}),
   };
@@ -87,8 +92,10 @@ const ShopPage = ({ query }) => {
     { label: t('shop.title'), href: '/shop' },
     { label: t('breadcrumb.shopGrid'), href: '/shop' },
   ];
-  if (query.category) {
-    breadcrumbLinks.push({ label: query.category });
+  if (liveQuery.subCategory) {
+    breadcrumbLinks.push({ label: liveQuery.subCategory });
+  } else if (liveQuery.category) {
+    breadcrumbLinks.push({ label: liveQuery.category });
   }
 
   let content = null;

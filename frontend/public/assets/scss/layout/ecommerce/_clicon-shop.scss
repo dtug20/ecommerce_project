@@ -665,3 +665,91 @@
     display: none;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Category filter — multi-level accordion (parent rows + child sub-lists)
+// ---------------------------------------------------------------------------
+.cl-shop {
+  &__category-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__category-row-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cl-spacing-sm);
+  }
+
+  &__category-row {
+    flex: 1 1 auto;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 4px 0;
+    cursor: pointer;
+    font-size: var(--cl-fs-body);
+    color: var(--cl-text-body);
+    transition: color var(--cl-transition-fast);
+
+    &:hover {
+      color: var(--cl-text-heading);
+    }
+
+    &--active {
+      color: var(--cl-primary);
+      font-weight: var(--cl-fw-medium);
+    }
+  }
+
+  &__category-toggle {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--cl-text-muted, var(--cl-text-body));
+    font-size: 11px;
+    transition: color var(--cl-transition-fast);
+
+    &:hover {
+      color: var(--cl-primary);
+    }
+  }
+
+  &__subcategory-list {
+    list-style: none;
+    margin: 4px 0 4px;
+    padding: 0 0 0 var(--cl-spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-left: 1px solid var(--cl-border);
+  }
+
+  &__subcategory-item {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 3px 0 3px var(--cl-spacing-sm);
+    cursor: pointer;
+    font-size: calc(var(--cl-fs-body) - 1px);
+    color: var(--cl-text-body);
+    transition: color var(--cl-transition-fast);
+
+    &:hover {
+      color: var(--cl-text-heading);
+    }
+
+    &--active {
+      color: var(--cl-primary);
+      font-weight: var(--cl-fw-medium);
+    }
+  }
+}
