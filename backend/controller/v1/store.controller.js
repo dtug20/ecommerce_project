@@ -69,6 +69,26 @@ exports.getAllProducts = async (req, res, next) => {
       }
     }
 
+    // subCategory — slugified child name from the storefront menu
+    // (e.g. /shop?subCategory=bluetooth). Products store the subcategory in the
+    // `children` string field. Resolve the slug against the distinct children
+    // values so casing/spacing differences (e.g. "Sạc & Cáp") don't matter.
+    // normSlug collapses repeated hyphens so it tolerates either slug builder used
+    // on the frontend (buildSlug strips only the first '&', the category resolver
+    // uses /&/g + filter), then short-circuits to empty on an unknown slug.
+    if (q.subCategory) {
+      const normSlug = (s) =>
+        String(s).toLowerCase().replace(/&/g, '').split(/\s+/).filter(Boolean).join('-').replace(/-+/g, '-');
+      const want = normSlug(q.subCategory);
+      const childVals = await Product.distinct('children');
+      const matched = childVals.find((v) => normSlug(v) === want);
+      if (matched) {
+        filter.children = matched;
+      } else {
+        filter._id = null;
+      }
+    }
+
     // brand — try ObjectId match first, fall back to case-insensitive brand name
     if (q.brand) {
       if (mongoose.Types.ObjectId.isValid(q.brand)) {

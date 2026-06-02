@@ -23,7 +23,7 @@ const ShopPage = ({ query }) => {
     page: query.page || 1,
     limit: 20,
     ...(query.subCategory
-      ? { category: query.subCategory }
+      ? { subCategory: query.subCategory }
       : query.category && { category: query.category }),
     ...(query.brand && { brand: query.brand }),
     ...(query.color && { color: query.color }),
