@@ -50,7 +50,7 @@ import toast from 'react-hot-toast';
 
 import { productsApi, categoriesApi } from '@/services/api';
 import ImageUpload from '@/components/commons/ImageUpload';
-import type { Product, Category, ProductVariant, ProductSeo, ProductStats } from '@/types';
+import type { Product, Category, ProductVariant, ProductStats } from '@/types';
 import { useFormatters } from '@/hooks/useFormatters';
 import StatusBadge from '@/components/commons/StatusBadge';
 import PageHeader from '@/components/commons/PageHeader';
@@ -451,99 +451,6 @@ function VariantsTab({ variants, onChange }: VariantsTabProps) {
 }
 
 // ---------------------------------------------------------------------------
-// SeoTab
-// ---------------------------------------------------------------------------
-
-interface SeoTabProps {
-  form: ReturnType<typeof Form.useForm<ProductFormValues>>[0];
-  slug?: string;
-}
-
-function SeoTab({ form, slug }: SeoTabProps) {
-  const metaTitle = Form.useWatch('metaTitle', form) ?? '';
-  const metaDescription = Form.useWatch('metaDescription', form) ?? '';
-  const titleLen = metaTitle.length;
-  const descLen = metaDescription.length;
-
-  return (
-    <div>
-      {/* Google preview */}
-      <Card
-        size="small"
-        style={{ marginBottom: 16, borderRadius: 8, background: '#fafafa' }}
-        styles={{ body: { padding: 12 } }}
-      >
-        <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-          Search Preview
-        </Text>
-        <div style={{ marginTop: 8 }}>
-          <Text style={{ color: '#1a0dab', fontSize: 16 }}>
-            {metaTitle || 'Page Title'}
-          </Text>
-          <div style={{ color: '#006621', fontSize: 12, fontFamily: 'monospace' }}>
-            example.com/products/{slug || 'product-slug'}
-          </div>
-          <Text type="secondary" style={{ fontSize: 13 }}>
-            {metaDescription || 'Meta description will appear here...'}
-          </Text>
-        </div>
-      </Card>
-
-      <Form.Item
-        name="metaTitle"
-        label={
-          <Flex justify="space-between" style={{ width: '100%' }}>
-            <span>Meta Title</span>
-            <Text type={titleLen > 70 ? 'danger' : 'secondary'} style={{ fontSize: 12 }}>
-              {titleLen}/70
-            </Text>
-          </Flex>
-        }
-      >
-        <Input placeholder="SEO page title (recommended: 50-70 chars)" maxLength={120} />
-      </Form.Item>
-
-      <Form.Item
-        name="metaDescription"
-        label={
-          <Flex justify="space-between" style={{ width: '100%' }}>
-            <span>Meta Description</span>
-            <Text type={descLen > 160 ? 'danger' : 'secondary'} style={{ fontSize: 12 }}>
-              {descLen}/160
-            </Text>
-          </Flex>
-        }
-      >
-        <Input.TextArea rows={3} placeholder="SEO description (recommended: under 160 chars)" maxLength={320} />
-      </Form.Item>
-
-      <Form.Item name="metaKeywords" label="Meta Keywords">
-        <Select
-          mode="tags"
-          placeholder="Add keywords and press Enter"
-          tokenSeparators={[',']}
-          style={{ width: '100%' }}
-        />
-      </Form.Item>
-
-      <Form.Item name="ogImage" label="OG Image URL">
-        <Input placeholder="https://example.com/og-image.jpg" />
-      </Form.Item>
-
-      {slug && (
-        <Form.Item label="Canonical URL">
-          <Input
-            readOnly
-            value={`/products/${slug}`}
-            style={{ background: '#fafafa', color: '#8c8c8c', fontFamily: 'monospace', fontSize: 12 }}
-          />
-        </Form.Item>
-      )}
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
 // Product detail drawer
 // ---------------------------------------------------------------------------
 
@@ -922,12 +829,6 @@ function ProductDrawer({ open, editingProduct, categories, onClose }: ProductDra
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      const seo: ProductSeo = {
-        metaTitle: values.metaTitle,
-        metaDescription: values.metaDescription,
-        metaKeywords: values.metaKeywords ?? [],
-        ogImage: values.ogImage,
-      };
       const payload: Partial<Product> = {
         title: values.title,
         description: values.description,
@@ -942,7 +843,6 @@ function ProductDrawer({ open, editingProduct, categories, onClose }: ProductDra
         sizes: splitComma(values.sizes),
         tags: splitComma(values.tags),
         variants,
-        seo,
         weight: values.weight,
         dimensions: {
           length: values.dimLength,
@@ -1168,11 +1068,6 @@ function ProductDrawer({ open, editingProduct, categories, onClose }: ProductDra
       key: 'variants',
       label: `Variants${variants.length > 0 ? ` (${variants.length})` : ''}`,
       children: <VariantsTab variants={variants} onChange={setVariants} />,
-    },
-    {
-      key: 'seo',
-      label: 'SEO',
-      children: <SeoTab form={form} slug={editingProduct?.slug} />,
     },
   ];
 

@@ -34,6 +34,7 @@ import { couponsApi } from '@/services/api';
 import type { Coupon } from '@/types';
 import PageHeader from '@/components/commons/PageHeader';
 import StatusBadge from '@/components/commons/StatusBadge';
+import { useFormatters } from '@/hooks/useFormatters';
 
 const { Text } = Typography;
 
@@ -213,9 +214,10 @@ function CouponModal({ open, editing, onClose }: CouponModalProps) {
             <Form.Item
               name="minimumAmount"
               label="Minimum Order Amount"
+              tooltip="Stored as VND. CRM/storefront displays it in the user's chosen currency."
               rules={[{ required: true, message: 'Minimum amount is required' }]}
             >
-              <InputNumber min={0} precision={2} style={{ width: '100%' }} prefix="$" />
+              <InputNumber min={0} precision={0} style={{ width: '100%' }} prefix="₫" />
             </Form.Item>
           </Col>
         </Row>
@@ -277,6 +279,7 @@ export default function CouponsPage() {
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Coupon | null>(null);
+  const { formatCurrency } = useFormatters();
 
   const queryParams = {
     page,
@@ -353,7 +356,7 @@ export default function CouponsPage() {
       dataIndex: 'minimumAmount',
       key: 'minAmount',
       width: 130,
-      render: (v: number) => `$${v.toFixed(2)}`,
+      render: (v: number) => formatCurrency(v),
     },
     {
       title: 'Product Type',

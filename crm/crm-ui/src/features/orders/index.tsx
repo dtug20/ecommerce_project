@@ -98,6 +98,18 @@ function getCartItems(order: Order): OrderItem[] {
   return order.cart ?? order.products ?? [];
 }
 
+// VNPay sends vnp_PayDate as a 'YYYYMMDDHHmmss' string. Parse it manually (no
+// dayjs customParseFormat plugin is loaded) into a readable datetime; fall back
+// to the raw value if it doesn't match the expected 14-digit shape.
+function formatVnpayPayDate(raw?: string): string {
+  if (!raw) return 'N/A';
+  const m = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/.exec(raw);
+  if (!m) return raw;
+  const [, y, mo, d, h, mi, s] = m;
+  const parsed = dayjs(`${y}-${mo}-${d}T${h}:${mi}:${s}`);
+  return parsed.isValid() ? parsed.format('HH:mm DD MMM, YYYY') : raw;
+}
+
 // ---------------------------------------------------------------------------
 // Order Detail Modal
 // ---------------------------------------------------------------------------
@@ -262,6 +274,28 @@ function OrderDetailModal({
               <StatusBadge status={order.paymentStatus ?? 'pending'} type="payment" />
             </Descriptions.Item>
             <Descriptions.Item label="Payment Method">{order.paymentMethod}</Descriptions.Item>
+            {order.paymentGateway && order.paymentGateway !== order.paymentMethod && (
+              <Descriptions.Item label="Payment Gateway">{order.paymentGateway}</Descriptions.Item>
+            )}
+            {(order.vnpayTransactionNo || order.transactionId) && (
+              <Descriptions.Item label="Transaction No.">
+                <Text copyable>{order.vnpayTransactionNo ?? order.transactionId}</Text>
+              </Descriptions.Item>
+            )}
+            {order.vnpayBankCode && (
+              <Descriptions.Item label="Bank">{order.vnpayBankCode}</Descriptions.Item>
+            )}
+            {(order.paidAt || order.vnpayPayDate) && (
+              <Descriptions.Item label="Paid At">
+                {order.paidAt ? formatDate(order.paidAt) : formatVnpayPayDate(order.vnpayPayDate)}
+              </Descriptions.Item>
+            )}
+            {order.refundAmount != null && order.refundAmount > 0 && (
+              <Descriptions.Item label="Refunded">
+                {formatCurrency(order.refundAmount)}
+                {order.refundedAt ? ` (${formatDate(order.refundedAt)})` : ''}
+              </Descriptions.Item>
+            )}
             <Descriptions.Item label="Order Date">{formatDate(order.createdAt)}</Descriptions.Item>
             {order.trackingNumber && (
               <Descriptions.Item label="Tracking">{order.trackingNumber}</Descriptions.Item>

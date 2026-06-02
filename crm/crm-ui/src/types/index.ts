@@ -91,6 +91,14 @@ export interface Order {
   tax?: number;
   paymentMethod: string;
   paymentStatus?: string;
+  paymentGateway?: string;
+  transactionId?: string;
+  vnpayTransactionNo?: string;
+  vnpayBankCode?: string;
+  vnpayPayDate?: string;
+  paidAt?: string;
+  refundedAt?: string;
+  refundAmount?: number;
   orderStatus?: string;
   status?: string;
   trackingNumber?: string;
