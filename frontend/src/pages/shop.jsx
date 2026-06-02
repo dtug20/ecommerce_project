@@ -7,7 +7,6 @@ import HeaderClicon from "@/layout/headers/header-clicon";
 import ShopBreadcrumb from "@/components/breadcrumb/shop-breadcrumb";
 import ShopArea from "@/components/shop/shop-area";
 import ErrorMsg from "@/components/common/error-msg";
-import EmptyState from "@/components/common/empty-state";
 import FooterClicon from "@/layout/footers/footer-clicon";
 import ShopFilterOffCanvas from "@/components/common/shop-filter-offcanvas";
 import ShopLoader from "@/components/loader/shop/shop-loader";
@@ -108,28 +107,20 @@ const ShopPage = ({ query }) => {
         <ErrorMsg msg="There was an error" />
       </div>
     );
-  } else if (!productsData?.data?.length) {
-    content = (
-      <div className="container">
-        <EmptyState
-          illustration="no-products"
-          title={t('shop.noProductsTitle')}
-          description={t('shop.noProductsDesc')}
-          actionText={t('shop.browseAll')}
-          onAction={() => router.push('/shop')}
-        />
-      </div>
-    );
   } else {
+    // Always render ShopArea — even with zero results — so the sidebar filters
+    // stay visible and the user can adjust/clear them. ShopArea shows its own
+    // empty state inside the product column when products is empty.
+    const shopProducts = productsData?.data || [];
     content = (
       <>
         <ShopArea
-          all_products={productsData.data}
-          products={productsData.data}
+          all_products={shopProducts}
+          products={shopProducts}
           otherProps={otherProps}
         />
         <ShopFilterOffCanvas
-          all_products={productsData.data}
+          all_products={shopProducts}
           otherProps={otherProps}
         />
       </>
