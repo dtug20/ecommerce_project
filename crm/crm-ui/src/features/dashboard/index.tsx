@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import dayjs, { type Dayjs } from 'dayjs';
 import {
   Row,
   Col,
@@ -10,6 +11,7 @@ import {
   Typography,
   Button,
   Space,
+  DatePicker,
 } from 'antd';
 import {
   ShoppingOutlined,
@@ -184,6 +186,14 @@ const PERIOD_CONFIG: Record<RevenuePeriod, PeriodConfig> = {
   '12m': { label: '12 Months', groupBy: 'month' },
 };
 
+// Pick a sensible bucket size for a custom date range so the chart stays readable.
+function rangeGroupBy(start: Dayjs, end: Dayjs): 'day' | 'week' | 'month' {
+  const days = end.diff(start, 'day');
+  if (days <= 45) return 'day';
+  if (days <= 180) return 'week';
+  return 'month';
+}
+
 // ---------------------------------------------------------------------------
 // Main Dashboard component
 // ---------------------------------------------------------------------------
@@ -191,6 +201,7 @@ const PERIOD_CONFIG: Record<RevenuePeriod, PeriodConfig> = {
 export default function Dashboard() {
   const navigate = useNavigate();
   const [revenuePeriod, setRevenuePeriod] = useState<RevenuePeriod>('30d');
+  const [customRange, setCustomRange] = useState<[Dayjs, Dayjs] | null>(null);
   const { formatCurrency, formatDate } = useFormatters();
 
   const recentOrderColumns = useMemo<ColumnsType<Order>>(() => [
@@ -241,10 +252,22 @@ export default function Dashboard() {
 
   // ----- Revenue chart query -----
 
+  const revenueParams = customRange
+    ? {
+        groupBy: rangeGroupBy(customRange[0], customRange[1]),
+        startDate: customRange[0].format('YYYY-MM-DD'),
+        endDate: customRange[1].format('YYYY-MM-DD'),
+      }
+    : { groupBy: PERIOD_CONFIG[revenuePeriod].groupBy };
+
   const { data: revenueData, isLoading: loadingRevenue } = useQuery({
-    queryKey: ['analyticsRevenue', revenuePeriod],
-    queryFn: () =>
-      analyticsApi.getRevenue({ groupBy: PERIOD_CONFIG[revenuePeriod].groupBy }),
+    queryKey: [
+      'analyticsRevenue',
+      customRange
+        ? `${customRange[0].format('YYYY-MM-DD')}_${customRange[1].format('YYYY-MM-DD')}`
+        : revenuePeriod,
+    ],
+    queryFn: () => analyticsApi.getRevenue(revenueParams),
     staleTime: 1000 * 60 * 5,
   });
 
@@ -440,17 +463,34 @@ export default function Dashboard() {
             title="Revenue Overview"
             loading={loadingRevenue}
             extra={
-              <Space size={4}>
-                {(['7d', '30d', '12m'] as RevenuePeriod[]).map((period) => (
-                  <Button
-                    key={period}
-                    size="small"
-                    type={revenuePeriod === period ? 'primary' : 'default'}
-                    onClick={() => setRevenuePeriod(period)}
-                  >
-                    {PERIOD_CONFIG[period].label}
-                  </Button>
-                ))}
+              <Space size={8} wrap>
+                <Space size={4}>
+                  {(['7d', '30d', '12m'] as RevenuePeriod[]).map((period) => (
+                    <Button
+                      key={period}
+                      size="small"
+                      type={!customRange && revenuePeriod === period ? 'primary' : 'default'}
+                      onClick={() => {
+                        setCustomRange(null);
+                        setRevenuePeriod(period);
+                      }}
+                    >
+                      {PERIOD_CONFIG[period].label}
+                    </Button>
+                  ))}
+                </Space>
+                <DatePicker.RangePicker
+                  size="small"
+                  value={customRange}
+                  format="DD/MM/YYYY"
+                  allowClear
+                  disabledDate={(current) => current && current > dayjs().endOf('day')}
+                  onChange={(dates) =>
+                    setCustomRange(
+                      dates && dates[0] && dates[1] ? [dates[0], dates[1]] : null
+                    )
+                  }
+                />
               </Space>
             }
           >
