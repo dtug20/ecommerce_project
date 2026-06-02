@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import DetailsThumbWrapper from "./details-thumb-wrapper";
 import DetailsWrapper from "./details-wrapper";
 import DetailsTabNav from "./details-tab-nav";
@@ -13,18 +13,21 @@ const ProductDetailsArea = ({ productItem, relatedProducts }) => {
     setActiveImg(img);
   }, [img]);
 
-  const handleVariantSelected = (variant) => {
+  // Memoized so its identity is stable — ProductVariantSelector's effect lists
+  // onVariantSelected in its deps; an unstable callback re-runs that effect
+  // every render and creates an infinite setState/re-render (and image refetch) loop.
+  const handleVariantSelected = useCallback((variant) => {
     setSelectedVariant(variant);
     if (variant?.image) {
       setActiveImg(variant.image);
     } else if (!variant) {
       setActiveImg(img);
     }
-  };
+  }, [img]);
 
-  const handleImageActive = (item) => {
+  const handleImageActive = useCallback((item) => {
     setActiveImg(item.img);
-  };
+  }, []);
 
   return (
     <section className="cl-pd">
