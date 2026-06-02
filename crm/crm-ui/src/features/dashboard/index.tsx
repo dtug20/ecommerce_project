@@ -5,7 +5,6 @@ import {
   Row,
   Col,
   Card,
-  Statistic,
   Table,
   Tag,
   Typography,
@@ -52,11 +51,66 @@ import type { Order, Product, MonthlyStats, RevenueDataPoint, RevenueResponse, C
 const { Title, Text } = Typography;
 
 // ---------------------------------------------------------------------------
+// Reusable KPI card — tinted icon badge + consistent typography & height
+// ---------------------------------------------------------------------------
+
+interface StatCardProps {
+  icon: React.ReactNode;
+  title: string;
+  value: React.ReactNode;
+  color: string;
+  delta?: React.ReactNode;
+  onClick?: () => void;
+  loading?: boolean;
+}
+
+function StatCard({ icon, title, value, color, delta, onClick, loading }: StatCardProps) {
+  return (
+    <Card
+      loading={loading}
+      hoverable
+      onClick={onClick}
+      style={{ height: '100%', cursor: onClick ? 'pointer' : 'default' }}
+      styles={{ body: { padding: 20 } }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 12,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: `${color}1a`,
+            color,
+            fontSize: 22,
+            flexShrink: 0,
+          }}
+        >
+          {icon}
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <Text type="secondary" style={{ fontSize: 13, display: 'block', marginBottom: 2 }}>
+            {title}
+          </Text>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 22, fontWeight: 600, color, lineHeight: 1.2 }}>{value}</span>
+            {delta}
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
 const PIE_COLORS: Record<string, string> = {
   pending: '#ffc107',
+  confirmed: '#6f42c1',
   processing: '#007bff',
   shipped: '#17a2b8',
   delivered: '#28a745',
@@ -220,7 +274,7 @@ export default function Dashboard() {
 
   // ----- Fallback: order stats from legacy endpoint for pie chart -----
 
-  const { data: orderStatsData, isLoading: loadingOrderStats } = useQuery({
+  const { data: orderStatsData } = useQuery({
     queryKey: ['orderStats'],
     queryFn: () => ordersApi.getStats(),
   });
@@ -272,14 +326,17 @@ export default function Dashboard() {
   const recentOrders: Order[] = Array.isArray(recentOrdersAnalyticsData?.data) ? recentOrdersAnalyticsData.data : [];
   const lowStockProducts: Product[] = Array.isArray(lowStockData?.data) ? lowStockData.data : [];
 
-  // Pie chart data from order stats
+  // Pie chart data — prefer the analytics endpoint (status breakdown), fall back to legacy orderStats
   const pieData = [
-    { name: 'Pending', value: orderStats?.pendingOrders ?? 0, color: PIE_COLORS.pending },
-    { name: 'Processing', value: orderStats?.processingOrders ?? 0, color: PIE_COLORS.processing },
-    { name: 'Shipped', value: orderStats?.shippedOrders ?? 0, color: PIE_COLORS.shipped },
-    { name: 'Delivered', value: orderStats?.deliveredOrders ?? 0, color: PIE_COLORS.delivered },
-    { name: 'Cancelled', value: orderStats?.cancelledOrders ?? 0, color: PIE_COLORS.cancelled },
+    { name: 'Pending', value: analytics?.pendingOrders ?? orderStats?.pendingOrders ?? 0, color: PIE_COLORS.pending },
+    { name: 'Confirmed', value: analytics?.confirmedOrders ?? 0, color: PIE_COLORS.confirmed },
+    { name: 'Processing', value: analytics?.processingOrders ?? orderStats?.processingOrders ?? 0, color: PIE_COLORS.processing },
+    { name: 'Shipped', value: analytics?.shippedOrders ?? orderStats?.shippedOrders ?? 0, color: PIE_COLORS.shipped },
+    { name: 'Delivered', value: analytics?.deliveredOrders ?? orderStats?.deliveredOrders ?? 0, color: PIE_COLORS.delivered },
+    { name: 'Cancelled', value: analytics?.cancelledOrders ?? orderStats?.cancelledOrders ?? 0, color: PIE_COLORS.cancelled },
   ].filter((entry) => entry.value > 0);
+
+  const totalStatusOrders = pieData.reduce((sum, entry) => sum + entry.value, 0);
 
   // Revenue change indicator
   const revenueChange = analytics?.revenueChange ?? 0;
@@ -298,100 +355,79 @@ export default function Dashboard() {
       {/* ------------------------------------------------------------------ */}
       {/* 1. Stats Cards Row (6 cards)                                         */}
       {/* ------------------------------------------------------------------ */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }} align="stretch">
         {/* Total Products */}
-        <Col xs={24} sm={12} xl={4}>
-          <Card loading={loadingAnalytics} hoverable>
-            <Statistic
-              title="Total Products"
-              value={analytics?.totalProducts ?? 0}
-              prefix={<ShoppingOutlined style={{ color: '#a42c48' }} />}
-              valueStyle={{ color: '#a42c48', fontSize: 22 }}
-            />
-          </Card>
+        <Col xs={24} sm={12} lg={8} xxl={4}>
+          <StatCard
+            loading={loadingAnalytics}
+            title="Total Products"
+            value={analytics?.totalProducts ?? 0}
+            icon={<ShoppingOutlined />}
+            color="#a42c48"
+          />
         </Col>
 
         {/* Total Orders */}
-        <Col xs={24} sm={12} xl={4}>
-          <Card loading={loadingAnalytics} hoverable>
-            <Statistic
-              title="Total Orders"
-              value={analytics?.todayOrders ?? orderStats?.totalOrders ?? 0}
-              prefix={<ShoppingCartOutlined style={{ color: '#007bff' }} />}
-              valueStyle={{ color: '#007bff', fontSize: 22 }}
-            />
-          </Card>
+        <Col xs={24} sm={12} lg={8} xxl={4}>
+          <StatCard
+            loading={loadingAnalytics}
+            title="Total Orders"
+            value={analytics?.totalOrders ?? orderStats?.totalOrders ?? 0}
+            icon={<ShoppingCartOutlined />}
+            color="#007bff"
+          />
         </Col>
 
         {/* Monthly Revenue */}
-        <Col xs={24} sm={12} xl={4}>
-          <Card loading={loadingAnalytics} hoverable>
-            <Statistic
-              title="Monthly Revenue"
-              value={analytics?.monthRevenue ?? 0}
-              formatter={(val) => formatCurrency(Number(val))}
-              prefix={<DollarOutlined style={{ color: '#28a745' }} />}
-              valueStyle={{ color: '#28a745', fontSize: 22 }}
-              suffix={
-                <Text
-                  style={{
-                    fontSize: 12,
-                    color: revenueUp ? '#52c41a' : '#ff4d4f',
-                    marginLeft: 4,
-                  }}
-                >
-                  {revenueUp ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
-                  {Math.abs(revenueChange).toFixed(1)}%
-                </Text>
-              }
-            />
-          </Card>
+        <Col xs={24} sm={12} lg={8} xxl={4}>
+          <StatCard
+            loading={loadingAnalytics}
+            title="Monthly Revenue"
+            value={formatCurrency(analytics?.monthRevenue ?? 0)}
+            icon={<DollarOutlined />}
+            color="#28a745"
+            delta={
+              <Text style={{ fontSize: 12, color: revenueUp ? '#52c41a' : '#ff4d4f' }}>
+                {revenueUp ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
+                {Math.abs(revenueChange).toFixed(1)}%
+              </Text>
+            }
+          />
         </Col>
 
         {/* Total Users */}
-        <Col xs={24} sm={12} xl={4}>
-          <Card loading={loadingAnalytics} hoverable>
-            <Statistic
-              title="Total Users"
-              value={analytics?.totalUsers ?? 0}
-              prefix={<TeamOutlined style={{ color: '#28a745' }} />}
-              valueStyle={{ color: '#28a745', fontSize: 22 }}
-            />
-          </Card>
+        <Col xs={24} sm={12} lg={8} xxl={4}>
+          <StatCard
+            loading={loadingAnalytics}
+            title="Total Users"
+            value={analytics?.totalUsers ?? 0}
+            icon={<TeamOutlined />}
+            color="#722ed1"
+          />
         </Col>
 
         {/* Pending Orders */}
-        <Col xs={24} sm={12} xl={4}>
-          <Card
+        <Col xs={24} sm={12} lg={8} xxl={4}>
+          <StatCard
             loading={loadingAnalytics}
-            hoverable
+            title="Pending Orders"
+            value={analytics?.pendingOrders ?? orderStats?.pendingOrders ?? 0}
+            icon={<ClockCircleOutlined />}
+            color="#fa8c16"
             onClick={() => navigate('/orders?status=pending')}
-            style={{ cursor: 'pointer' }}
-          >
-            <Statistic
-              title="Pending Orders"
-              value={analytics?.pendingOrders ?? orderStats?.pendingOrders ?? 0}
-              prefix={<ClockCircleOutlined style={{ color: '#ffc107' }} />}
-              valueStyle={{ color: '#ffc107', fontSize: 22 }}
-            />
-          </Card>
+          />
         </Col>
 
         {/* Out of Stock */}
-        <Col xs={24} sm={12} xl={4}>
-          <Card
+        <Col xs={24} sm={12} lg={8} xxl={4}>
+          <StatCard
             loading={loadingAnalytics}
-            hoverable
+            title="Out of Stock"
+            value={analytics?.outOfStockCount ?? 0}
+            icon={<WarningOutlined />}
+            color="#dc3545"
             onClick={() => navigate('/products?status=out-of-stock')}
-            style={{ cursor: 'pointer' }}
-          >
-            <Statistic
-              title="Out of Stock"
-              value={analytics?.outOfStockCount ?? 0}
-              prefix={<WarningOutlined style={{ color: '#dc3545' }} />}
-              valueStyle={{ color: '#dc3545', fontSize: 22 }}
-            />
-          </Card>
+          />
         </Col>
       </Row>
 
@@ -493,7 +529,7 @@ export default function Dashboard() {
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         {/* Order Status Pie Chart */}
         <Col xs={24} lg={12}>
-          <Card title="Order Status Distribution" loading={loadingOrderStats}>
+          <Card title="Order Status Distribution" loading={loadingAnalytics}>
             {pieData.length === 0 ? (
               <div
                 style={{
@@ -506,32 +542,61 @@ export default function Dashboard() {
                 <Text type="secondary">No order data available</Text>
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={110}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value) => [Number(value), '']}
-                    labelStyle={{ fontWeight: 600 }}
-                  />
-                  <Legend
-                    formatter={(value: string) => (
-                      <span style={{ fontSize: 12 }}>{value}</span>
-                    )}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+              <div style={{ position: 'relative' }}>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={70}
+                      outerRadius={110}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} stroke="#fff" strokeWidth={2} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value, name) => [
+                        `${Number(value)} (${totalStatusOrders ? Math.round((Number(value) / totalStatusOrders) * 100) : 0}%)`,
+                        name,
+                      ]}
+                      labelStyle={{ fontWeight: 600 }}
+                    />
+                    <Legend
+                      formatter={(value: string, entry) => {
+                        const count = (entry?.payload as { value?: number } | undefined)?.value ?? 0;
+                        return (
+                          <span style={{ fontSize: 12 }}>
+                            {value} <Text strong>{count}</Text>
+                          </span>
+                        );
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                {/* Donut center total */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '42%',
+                    left: 0,
+                    right: 0,
+                    textAlign: 'center',
+                    transform: 'translateY(-50%)',
+                    pointerEvents: 'none',
+                  }}
+                >
+                  <div style={{ fontSize: 26, fontWeight: 700, color: '#a42c48', lineHeight: 1.1 }}>
+                    {totalStatusOrders}
+                  </div>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    Total Orders
+                  </Text>
+                </div>
+              </div>
             )}
           </Card>
         </Col>

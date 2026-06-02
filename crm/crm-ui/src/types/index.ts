@@ -491,7 +491,13 @@ export interface DashboardAnalytics {
   monthRevenue: number;
   totalRevenue: number;
   todayOrders: number;
+  totalOrders: number;
   pendingOrders: number;
+  processingOrders: number;
+  confirmedOrders: number;
+  shippedOrders: number;
+  deliveredOrders: number;
+  cancelledOrders: number;
   totalProducts: number;
   outOfStockCount: number;
   lowStockCount: number;

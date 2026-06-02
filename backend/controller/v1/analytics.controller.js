@@ -85,6 +85,9 @@ exports.getDashboard = async (req, res, next) => {
               { $match: { createdAt: { $gte: todayStart, $lte: todayEnd } } },
               { $count: 'count' },
             ],
+            statusBreakdown: [
+              { $group: { _id: '$status', count: { $sum: 1 } } },
+            ],
           },
         },
       ]).option({ maxTimeMS: 10000 }),
@@ -107,6 +110,20 @@ exports.getDashboard = async (req, res, next) => {
     const pendingOrders = agg.pending[0]?.count || 0;
     const todayOrders = agg.todayOrderCount[0]?.count || 0;
 
+    // Per-status counts for the "Order Status Distribution" chart + total order count.
+    const statusMap = {};
+    let totalOrders = 0;
+    (agg.statusBreakdown || []).forEach((s) => {
+      const key = s._id || 'unknown';
+      statusMap[key] = (statusMap[key] || 0) + s.count;
+      totalOrders += s.count;
+    });
+    const processingOrders = statusMap.processing || 0;
+    const shippedOrders = statusMap.shipped || 0;
+    const deliveredOrders = statusMap.delivered || 0;
+    const confirmedOrders = statusMap.confirmed || 0;
+    const cancelledOrders = (statusMap.cancelled || 0) + (statusMap.cancel || 0);
+
     const revenueChange =
       lastMonthRevenue > 0
         ? parseFloat(
@@ -122,7 +139,13 @@ exports.getDashboard = async (req, res, next) => {
         monthRevenue,
         totalRevenue,
         todayOrders,
+        totalOrders,
         pendingOrders,
+        processingOrders,
+        confirmedOrders,
+        shippedOrders,
+        deliveredOrders,
+        cancelledOrders,
         totalProducts: productCounts[0],
         outOfStockCount: productCounts[1],
         lowStockCount: productCounts[2],
