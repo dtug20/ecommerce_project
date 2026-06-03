@@ -42,6 +42,23 @@ exports.getAllProducts = async (req, res, next) => {
     const q = req.query;
     const filter = {};
 
+    // Slugify helper used to resolve category/subCategory slugs back to the
+    // stored (NFC) names. CRITICAL: normalize to Unicode NFC first. The
+    // storefront sends Vietnamese slugs in NFD (decomposed) form, while the DB
+    // stores names in NFC. Without normalizing, every diacritic slug
+    // (e.g. "phụ-kiện-điện-tử", "sạc-cáp") fails the `===` match and the query
+    // short-circuits to zero rows — pure-ASCII slugs like "loa" worked only
+    // because NFC ≡ NFD for ASCII. Applied to BOTH the slug and the candidate.
+    const normSlug = (s) =>
+      String(s)
+        .normalize('NFC')
+        .toLowerCase()
+        .replace(/&/g, '')
+        .split(/\s+/)
+        .filter(Boolean)
+        .join('-')
+        .replace(/-+/g, '-');
+
     // category — accept ObjectId or slugified parent name.
     // Frontend slugifies parent as: lowercase, '&' stripped, spaces → '-'.
     // Reverse it by resolving against Category.parent.
@@ -56,10 +73,9 @@ exports.getAllProducts = async (req, res, next) => {
       if (mongoose.Types.ObjectId.isValid(q.category)) {
         filter['category.id'] = new mongoose.Types.ObjectId(q.category);
       } else {
-        const slugify = (s) =>
-          String(s).toLowerCase().replace(/&/g, '').split(' ').filter(Boolean).join('-');
+        const want = normSlug(q.category);
         const cats = await Category.find({}, { _id: 1, parent: 1 }).lean();
-        const matched = cats.find((c) => slugify(c.parent) === q.category);
+        const matched = cats.find((c) => normSlug(c.parent) === want);
         if (matched) {
           filter['category.id'] = matched._id;
         } else {
@@ -77,8 +93,6 @@ exports.getAllProducts = async (req, res, next) => {
     // on the frontend (buildSlug strips only the first '&', the category resolver
     // uses /&/g + filter), then short-circuits to empty on an unknown slug.
     if (q.subCategory) {
-      const normSlug = (s) =>
-        String(s).toLowerCase().replace(/&/g, '').split(/\s+/).filter(Boolean).join('-').replace(/-+/g, '-');
       const want = normSlug(q.subCategory);
       const childVals = await Product.distinct('children');
       const matched = childVals.find((v) => normSlug(v) === want);
