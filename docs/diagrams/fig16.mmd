@@ -1,0 +1,22 @@
+sequenceDiagram
+    actor U as Khách hàng
+    participant FE as Widget Chat
+    participant BE as Backend (chatbot service)
+    participant DB as MongoDB
+    participant GM as Google Gemini
+
+    U->>FE: Gửi câu hỏi
+    FE->>BE: POST /chatbot (sessionId, message, context)
+    BE->>DB: Lấy/khởi tạo ChatSession
+    BE->>GM: Nhúng câu hỏi (embedding)
+    BE->>DB: Truy hồi sản phẩm/bài viết tương tự (RAG)
+    BE->>GM: Gọi LLM kèm context + tools
+    loop Tool-calling
+        GM-->>BE: Yêu cầu gọi tool (searchProducts, validateCoupon...)
+        BE->>DB: Thực thi tool, trả dữ liệu
+        BE-->>GM: Kết quả tool
+    end
+    GM-->>BE: Phản hồi + gợi ý thao tác
+    BE-->>FE: Truyền luồng token qua Socket.io
+    BE->>DB: Lưu hội thoại vào ChatSession
+    FE-->>U: Trả lời + nút "Thêm giỏ / Áp mã"

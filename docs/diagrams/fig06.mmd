@@ -1,0 +1,27 @@
+sequenceDiagram
+    actor U as Người dùng
+    participant FE as Storefront (Next.js)
+    participant KC as Keycloak
+    participant BE as Backend API
+    participant DB as MongoDB
+    participant ML as SMTP Email
+
+    U->>FE: Nhập thông tin đăng ký
+    FE->>KC: Tạo tài khoản (OIDC)
+    KC->>ML: Gửi email xác thực
+    KC-->>FE: Yêu cầu xác thực email
+    U->>ML: Mở email, bấm xác thực
+    ML-->>KC: Kích hoạt tài khoản
+    U->>FE: Đăng nhập lần đầu
+    FE->>KC: Yêu cầu token
+    KC-->>FE: JWT (RS256)
+    FE->>BE: Gọi API kèm Bearer token
+    BE->>KC: Lấy khóa công khai (JWKS)
+    BE->>BE: Xác minh chữ ký & issuer
+    BE->>DB: Tìm user theo keycloakId
+    alt Chưa tồn tại
+        BE->>DB: Tạo user mới (role=user)
+    end
+    DB-->>BE: Hồ sơ user
+    BE-->>FE: Thông tin tài khoản
+    FE-->>U: Đăng nhập thành công

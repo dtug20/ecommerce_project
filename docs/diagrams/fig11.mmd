@@ -1,0 +1,23 @@
+sequenceDiagram
+    actor U as Khách hàng
+    participant FE as Storefront
+    participant BE as Backend API
+    participant DB as MongoDB
+    actor AD as Quản trị viên
+
+    U->>FE: Gửi đánh giá (rating, comment)
+    FE->>BE: POST /user/reviews (Bearer token)
+    BE->>DB: Kiểm tra đã mua sản phẩm?
+    alt Chưa mua
+        BE-->>FE: 400 - không thể đánh giá
+    else Đã mua
+        BE->>DB: Kiểm tra trùng đánh giá
+        alt Đã đánh giá
+            BE-->>FE: 409 - đã đánh giá rồi
+        else Hợp lệ
+            BE->>DB: Tạo Review (status=pending, verified=true)
+            BE-->>FE: Đã gửi, chờ duyệt
+        end
+    end
+    AD->>BE: Duyệt/từ chối đánh giá (CRM)
+    BE->>DB: status=approved -> hiển thị công khai

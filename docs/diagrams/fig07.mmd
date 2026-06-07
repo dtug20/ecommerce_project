@@ -1,0 +1,24 @@
+sequenceDiagram
+    actor U as Người dùng
+    participant FE as Storefront / CRM
+    participant KC as Keycloak
+    participant BE as Backend API
+    participant DB as MongoDB
+
+    U->>FE: Nhập email & mật khẩu
+    FE->>KC: Xác thực OIDC
+    alt Sai thông tin
+        KC-->>FE: Lỗi xác thực
+        FE-->>U: Thông báo sai email/mật khẩu
+    else Hợp lệ
+        KC-->>FE: Access token (JWT) + roles
+        FE->>BE: GET hồ sơ (Bearer token)
+        BE->>KC: Xác minh qua JWKS
+        BE->>DB: Đồng bộ user, cập nhật lastLogin
+        alt status = blocked / inactive
+            BE-->>FE: 403 Tài khoản bị khóa/chưa kích hoạt
+        else active
+            BE-->>FE: Hồ sơ + vai trò chính
+            FE-->>U: Điều hướng theo vai trò (mua hàng / vendor / admin)
+        end
+    end

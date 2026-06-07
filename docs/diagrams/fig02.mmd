@@ -1,0 +1,19 @@
+flowchart LR
+    KH([Khách / Người mua])
+    VD([Nhà bán hàng])
+    AD([Quản trị viên / Nhân viên])
+    KC([Keycloak])
+    VNP([VNPay])
+    GM([Gemini / Cloudinary / SMTP])
+
+    SYS{{HỆ THỐNG TMĐT SHOFY}}
+
+    KH -- "Đăng ký, đăng nhập, duyệt SP, đặt hàng, đánh giá" --> SYS
+    SYS -- "Kết quả, đơn hàng, gợi ý chatbot" --> KH
+    VD -- "Quản lý sản phẩm / đơn / payout" --> SYS
+    SYS -- "Báo cáo doanh thu" --> VD
+    AD -- "Quản trị sản phẩm, đơn, nội dung" --> SYS
+    SYS -- "Dashboard, thống kê" --> AD
+    KC -- "Token định danh (OIDC/JWT)" --> SYS
+    VNP -- "Webhook IPN, kết quả thanh toán" --> SYS
+    SYS -- "Yêu cầu thanh toán / AI / email / ảnh" --> GM

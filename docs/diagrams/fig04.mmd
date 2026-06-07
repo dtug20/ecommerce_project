@@ -1,0 +1,29 @@
+flowchart TB
+    subgraph Client[Phía người dùng]
+        FE[Storefront - Next.js 13<br/>Redux Toolkit, Bootstrap]
+        CRM[CRM/Admin - React + Vite<br/>Ant Design, React Query]
+    end
+
+    BE[Backend API - Node.js/Express<br/>Mongoose, Socket.io, Joi, Helmet]
+
+    subgraph Infra[Hạ tầng & Dịch vụ]
+        DB[(MongoDB)]
+        KC[Keycloak + PostgreSQL<br/>OIDC / RBAC]
+        VNP[VNPay]
+        GM[Google Gemini]
+        CLD[Cloudinary]
+        SMTP[SMTP Email]
+        RATE[Dịch vụ tỷ giá]
+    end
+
+    FE -->|REST + WebSocket| BE
+    CRM -->|REST| BE
+    FE -->|OIDC| KC
+    CRM -->|OIDC| KC
+    BE -->|Xác minh JWKS| KC
+    BE --> DB
+    BE -->|Thanh toán + IPN| VNP
+    BE -->|Chatbot RAG| GM
+    BE -->|Upload ảnh| CLD
+    BE -->|Gửi email| SMTP
+    BE -->|Cron cập nhật| RATE

@@ -1,0 +1,24 @@
+sequenceDiagram
+    actor U as Khách hàng
+    participant FE as Storefront
+    participant BE as Backend API
+    participant DB as MongoDB
+
+    U->>FE: Nhập thông tin giao hàng, chọn COD
+    FE->>BE: POST /user/orders (giỏ, địa chỉ, coupon)
+    BE->>BE: Xác thực token + kiểm tra dữ liệu (Joi)
+    loop Mỗi sản phẩm
+        BE->>DB: Đọc Product, kiểm tra tồn kho
+    end
+    alt Có SP hết hàng
+        BE-->>FE: Lỗi: sản phẩm đã hết hàng
+        FE-->>U: Hiển thị lỗi
+    else Đủ hàng
+        opt Có mã giảm giá
+            BE->>DB: Kiểm tra & tính coupon
+        end
+        BE->>BE: Sinh invoice (auto từ 1000)
+        BE->>DB: Trừ tồn kho + tạo Order (status=pending, unpaid)
+        BE-->>FE: Tạo đơn thành công (mã đơn)
+        FE-->>U: Trang xác nhận đặt hàng
+    end

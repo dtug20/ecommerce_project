@@ -1,0 +1,19 @@
+sequenceDiagram
+    actor V as Người dùng/Vendor
+    participant FE as Storefront
+    participant BE as Backend API
+    participant DB as MongoDB
+    actor AD as Admin
+
+    V->>FE: Nộp đơn mở gian hàng
+    FE->>BE: POST /user/vendor/apply
+    BE->>DB: vendorProfile.verificationStatus=pending
+    AD->>BE: Duyệt gian hàng
+    BE->>DB: role=vendor, verificationStatus=approved
+    V->>BE: Tạo sản phẩm (POST /vendor/products)
+    BE->>DB: Product.vendor = vendorId
+    Note over BE,DB: Khi khách đặt đơn nhiều vendor -> tách Order theo vendor
+    V->>BE: Cập nhật fulfillment + yêu cầu payout
+    BE->>DB: Tạo Payout (pending)
+    AD->>BE: Xử lý payout
+    BE->>DB: Payout.status=paid

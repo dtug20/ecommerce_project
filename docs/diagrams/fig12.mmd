@@ -1,0 +1,12 @@
+sequenceDiagram
+    actor U as Khách hàng
+    participant FE as Storefront
+    participant BE as Backend API
+    participant DB as MongoDB
+
+    U->>FE: Nhập từ khóa / chọn bộ lọc (giá, danh mục, thương hiệu)
+    FE->>BE: GET /store/products/search?query&filters&page
+    BE->>DB: Truy vấn text-index + điều kiện lọc + phân trang
+    DB-->>BE: Danh sách sản phẩm phù hợp
+    BE-->>FE: Kết quả + tổng số trang
+    FE-->>U: Hiển thị lưới sản phẩm / gợi ý

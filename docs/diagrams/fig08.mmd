@@ -1,0 +1,15 @@
+sequenceDiagram
+    actor U as Khách hàng
+    participant FE as Storefront (Redux)
+    participant LS as localStorage
+    participant BE as Backend API
+
+    U->>FE: Bấm "Thêm vào giỏ" (chọn biến thể, số lượng)
+    FE->>FE: Kiểm tra tồn kho hiển thị
+    FE->>LS: Lưu/cập nhật cart_products
+    FE-->>U: Cập nhật icon giỏ + thông báo
+    opt Đã đăng nhập & thêm vào Yêu thích
+        U->>FE: Bấm "Yêu thích"
+        FE->>BE: POST /user/wishlist (Bearer token)
+        BE-->>FE: Wishlist đã cập nhật
+    end

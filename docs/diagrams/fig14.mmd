@@ -1,0 +1,17 @@
+sequenceDiagram
+    actor AD as Admin/Manager
+    participant CRM as CRM
+    participant BE as Backend API
+    participant DB as MongoDB
+    actor SH as Shipper
+
+    AD->>CRM: Mở danh sách đơn + lọc
+    CRM->>BE: GET /admin/orders?filters
+    BE->>DB: Truy vấn đơn
+    BE-->>CRM: Danh sách + thống kê
+    AD->>CRM: Cập nhật trạng thái / gán shipper
+    CRM->>BE: PATCH /admin/orders/:id/status | /take
+    BE->>DB: Cập nhật status + statusHistory + shipper
+    BE-->>CRM: Kết quả + phát Socket.io order:updated
+    SH->>BE: Cập nhật giao hàng (đơn được gán)
+    BE->>DB: status=shipped/delivered

@@ -1,0 +1,17 @@
+sequenceDiagram
+    actor U as Khách hàng
+    participant FE as Storefront
+    participant BE as Backend API
+    participant DB as MongoDB
+
+    U->>FE: Nhập mã giảm giá ở giỏ/checkout
+    FE->>BE: POST /store/coupons/validate (code, cartTotal)
+    BE->>DB: Tìm coupon theo code
+    BE->>BE: Kiểm tra thời gian, đơn tối thiểu, lượt dùng, phạm vi áp dụng
+    alt Không hợp lệ
+        BE-->>FE: Mã không hợp lệ / hết hạn
+    else Hợp lệ
+        BE->>BE: Tính số tiền giảm (% hoặc cố định, có trần)
+        BE-->>FE: discountAmount + tổng mới
+        FE-->>U: Hiển thị số tiền được giảm
+    end

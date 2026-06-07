@@ -1,0 +1,20 @@
+sequenceDiagram
+    actor AD as Admin/Manager
+    participant CRM as CRM (React/AntD)
+    participant BE as Backend API
+    participant CLD as Cloudinary
+    participant DB as MongoDB
+
+    AD->>CRM: Mở form sản phẩm, tải ảnh
+    CRM->>BE: POST /admin/media/upload (Bearer token)
+    BE->>CLD: Lưu ảnh
+    CLD-->>BE: URL ảnh
+    CRM->>BE: POST/PATCH /admin/products (kèm dữ liệu)
+    BE->>BE: Xác thực vai trò admin/manager + kiểm tra dữ liệu
+    BE->>DB: Tạo/cập nhật Product (+ đẩy id vào Brand/Category)
+    BE->>DB: Ghi ActivityLog
+    BE-->>CRM: Kết quả
+    AD->>CRM: Bấm "Xóa"
+    CRM->>BE: DELETE /admin/products/:id
+    BE->>DB: Đặt status (xóa mềm) - giữ lịch sử đơn
+    BE-->>CRM: Đã xóa

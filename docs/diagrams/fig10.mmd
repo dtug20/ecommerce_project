@@ -1,0 +1,23 @@
+sequenceDiagram
+    actor U as Khách hàng
+    participant FE as Storefront
+    participant BE as Backend API
+    participant DB as MongoDB
+    participant VNP as Cổng VNPay
+
+    U->>FE: Chọn thanh toán VNPay
+    FE->>BE: POST /user/orders (paymentMethod=vnpay)
+    BE->>DB: Tạo Order (pending, unpaid)
+    BE->>BE: Tạo URL thanh toán (ký HMAC-SHA512)
+    BE-->>FE: Trả về redirectUrl
+    FE->>VNP: Chuyển hướng khách sang VNPay
+    U->>VNP: Thực hiện thanh toán
+    VNP-->>BE: Webhook IPN (vnp_TxnRef, vnp_Amount, vnp_SecureHash)
+    BE->>BE: Xác minh chữ ký + đối chiếu số tiền
+    alt Hợp lệ & thành công (code=00)
+        BE->>DB: paymentStatus=paid, status=confirmed, lưu transactionId
+        BE-->>VNP: RspCode 00 (Confirm Success)
+    else Không hợp lệ
+        BE-->>VNP: RspCode lỗi (sai chữ ký/số tiền)
+    end
+    VNP-->>U: Chuyển về trang kết quả đơn hàng

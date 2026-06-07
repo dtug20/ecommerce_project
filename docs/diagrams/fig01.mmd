@@ -1,0 +1,41 @@
+flowchart TD
+    A[Hệ thống TMĐT Shofy]
+
+    A --- B[1. Quản lý người dùng]
+    A --- C[2. Quản lý sản phẩm]
+    A --- D[3. Mua sắm & Giỏ hàng]
+    A --- E[4. Đơn hàng & Thanh toán]
+    A --- F[5. Khuyến mãi & Đánh giá]
+    A --- G[6. Quản trị & Vận hành]
+    A --- H[7. Tính năng nâng cao]
+
+    B --- B1[Đăng ký / Xác thực email]
+    B --- B2[Đăng nhập SSO Keycloak]
+    B --- B3[Hồ sơ & Sổ địa chỉ]
+    B --- B4[Tùy chọn ngôn ngữ / tiền tệ]
+
+    C --- C1[Danh mục & Thương hiệu]
+    C --- C2[Sản phẩm & Biến thể]
+    C --- C3[Tìm kiếm & Lọc]
+    C --- C4[Gợi ý / Nổi bật / Bán chạy]
+
+    D --- D1[Giỏ hàng]
+    D --- D2[Yêu thích]
+    D --- D3[So sánh]
+
+    E --- E1[Tạo đơn & Kiểm tồn kho]
+    E --- E2[Thanh toán COD]
+    E --- E3[Thanh toán VNPay]
+    E --- E4[Theo dõi & Tra cứu đơn]
+
+    F --- F1[Mã giảm giá Coupon]
+    F --- F2[Đánh giá sản phẩm]
+
+    G --- G1[Dashboard thống kê]
+    G --- G2[Quản lý đơn / người dùng]
+    G --- G3[CMS: banner / blog / menu]
+    G --- G4[Nhật ký hoạt động]
+
+    H --- H1[Chatbot AI - RAG]
+    H --- H2[Đa nhà bán hàng & Payout]
+    H --- H3[Đa ngôn ngữ / đa tiền tệ]

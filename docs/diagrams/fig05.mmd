@@ -1,0 +1,108 @@
+erDiagram
+    USER ||--o{ ORDER : "đặt"
+    USER ||--o| WISHLIST : "sở hữu"
+    USER ||--o{ REVIEW : "viết"
+    USER ||--o{ PAYOUT : "nhận (vendor)"
+    USER ||--o{ PRODUCT : "bán (vendor)"
+
+    CATEGORY ||--o{ PRODUCT : "phân loại"
+    CATEGORY ||--o{ CATEGORY : "danh mục con"
+    BRAND ||--o{ PRODUCT : "gắn nhãn"
+
+    PRODUCT ||--o{ REVIEW : "được đánh giá"
+    PRODUCT ||--o{ ORDER_ITEM : "xuất hiện trong"
+    PRODUCT ||--o{ WISHLIST_ITEM : "được lưu"
+
+    ORDER ||--|{ ORDER_ITEM : "gồm"
+    ORDER ||--o{ ORDER : "tách đơn (split)"
+    COUPON ||--o{ ORDER : "áp dụng cho"
+
+    WISHLIST ||--o{ WISHLIST_ITEM : "chứa"
+
+    USER {
+        ObjectId _id PK
+        string keycloakId UK
+        string email UK
+        string role "user|admin|vendor"
+        string status "active|inactive|blocked"
+        object vendorProfile
+        array addresses
+        object preferences "currency,language"
+    }
+    PRODUCT {
+        ObjectId _id PK
+        string title
+        string slug
+        number price
+        number quantity "tồn kho"
+        string status "in-stock|out-of-stock|discontinued"
+        object brand FK
+        object category FK
+        ObjectId vendor FK
+        array variants
+        array embedding "vector RAG"
+    }
+    CATEGORY {
+        ObjectId _id PK
+        string productType
+        string slug UK
+        ObjectId parentCategory FK
+        number level
+        string status "Show|Hide"
+    }
+    BRAND {
+        ObjectId _id PK
+        string name UK
+        string slug UK
+        string status "active|inactive"
+    }
+    ORDER {
+        ObjectId _id PK
+        number invoice UK "tự tăng từ 1000"
+        ObjectId user FK
+        string status "pending..delivered|cancelled"
+        string paymentStatus "unpaid|paid|refunded"
+        string paymentGateway "COD|vnpay|bank-transfer"
+        string couponCode
+        number totalAmount
+        array statusHistory
+    }
+    ORDER_ITEM {
+        ObjectId product FK
+        ObjectId vendor FK
+        string title
+        number price
+        number quantity
+        string fulfillmentStatus
+    }
+    REVIEW {
+        ObjectId _id PK
+        ObjectId userId FK
+        ObjectId productId FK
+        number rating "1..5"
+        string status "pending|approved|rejected"
+        boolean isVerifiedPurchase
+    }
+    COUPON {
+        ObjectId _id PK
+        string couponCode
+        number discountPercentage
+        number minimumAmount
+        date endTime
+        number usageLimit
+        string status "active|inactive"
+    }
+    WISHLIST {
+        ObjectId _id PK
+        ObjectId user FK
+    }
+    WISHLIST_ITEM {
+        ObjectId product FK
+        date addedAt
+    }
+    PAYOUT {
+        ObjectId _id PK
+        ObjectId vendor FK
+        number amount
+        string status "pending|processing|paid|rejected"
+    }

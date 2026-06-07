@@ -1,0 +1,32 @@
+flowchart TD
+    KH([Khách hàng])
+    AD([Admin / Vendor / Shipper])
+
+    P1[1.0 Tài khoản & Phân quyền]
+    P2[2.0 Sản phẩm & Tìm kiếm]
+    P3[3.0 Giỏ hàng / Yêu thích]
+    P4[4.0 Đặt hàng & Tồn kho]
+    P5[5.0 Thanh toán VNPay/COD]
+    P6[6.0 Giao hàng & Đánh giá]
+    P7[7.0 Quản trị & CMS]
+
+    D1[(D1 Users / Admins)]
+    D2[(D2 Products / Categories / Brands)]
+    D3[(D3 Wishlist / Cart-localStorage)]
+    D4[(D4 Orders)]
+    D5[(D5 Coupons / Reviews / Payouts)]
+    D6[(D6 CMS / SiteSetting / ActivityLog)]
+
+    KH --> P1 --> D1
+    KH --> P2 --> D2
+    KH --> P3 --> D3
+    KH --> P4 --> D4
+    P4 --> D2
+    P4 --> P5 --> D4
+    P4 --> D5
+    P6 --> D4
+    P6 --> D5
+    AD --> P7 --> D6
+    AD --> P2
+    AD --> P4
+    AD --> P6
